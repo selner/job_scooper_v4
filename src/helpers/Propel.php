@@ -108,7 +108,7 @@ function updateOrCreateJobPosting($arrJobItem)
  * @return \JobScooper\DataAccess\UserJobMatch[]
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets=null, $excludeNonJobMatches=false, $arrGeoLocIds=null)
+function getAllMatchesForUserNotification($jobsiteKey=null, $excludeNonJobMatches=false, $arrGeoLocIds=null)
 {
     $user= \JobScooper\DataAccess\User::getCurrentUser();
 
@@ -144,120 +144,11 @@ function getAllMatchesForUserNotification($jobsiteKey=null, $usrTitleKeywordSets
 		    ->endUse();
     }
 
-    if(!empty($usrTitleKeywordSets)) {
-	    $nCount = 0;
-	    foreach ($usrTitleKeywordSets as $kwd_set) {
-
-	    	if(is_string($kwd_set))
-	    		$arrKwdSetTokens = preg_split("/[\s|\|]/", $kwd_set, null, PREG_SPLIT_NO_EMPTY);
-	    	else
-	    		$arrKwdSetTokens = $kwd_set;
-		    $jpquery  = $query->useJobPostingFromUJMQuery();
-		    $jpquery->filterByTitleTokenList($arrKwdSetTokens, \Propel\Runtime\ActiveQuery\Criteria::CONTAINS_ALL);
-		    $jpquery->endUse();
-		    if($nCount < (count($usrTitleKeywordSets)-1))
-			    $query->_or();
-		    $nCount += 1;
-	    }
-    }
-
     $results =  $query->find();
     return $results->getData();
 }
 
 
-/******************************************************************************
- *
- *  JobPostings <-> JSON Helper Functions
- *
- ******************************************************************************/
-
-
-/**
- * Writes JSON encoded file of an array of JobPosting records named "jobslist"
- *
- * @param String $filepath The output json file to save to
- * @param array $arrJobRecords The array of JobPosting objects to export
- *
- * @returns String Returns filepath of exported file if successful
- * @throws \Exception
- */
-function writeJobRecordsToJson($filepath, $arrJobRecords)
-{
-	if (is_null($arrJobRecords))
-		$arrJobRecords = array();
-
-
-	$arrOfJobs = array();
-	foreach($arrJobRecords as $jobRecord)
-	{
-		$arrOfJobs[$jobRecord->getJobPostingId()] = $jobRecord->getJobPostingFromUJM()->toArray();
-	}
-
-	$data = array('jobs_count' => count($arrJobRecords), 'jobslist' => $arrOfJobs);
-	return writeJSON($data, $filepath);
-}
-
-/**
- * Writes JSON encoded file of an array of JobPosting records named "jobslist"
- *
- * @param String $filepath The output json file to save to
- * @param array $arrJobRecords The array of JobPosting objects to export
- *
- * @returns String Returns filepath of exported file if successful
- */
-function writeJobRecordsToJsonForTokenizing($filepath, $arrJobRecords)
-{
-	if (is_null($arrJobRecords))
-		$arrJobRecords = array();
-
-	$arrOfJobs = array();
-	foreach($arrJobRecords as $jobRecord)
-	{
-		$arrOfJobs[$jobRecord->getJobPostingId()] = $jobRecord->getJobPostingFromUJM()->toArray();
-	}
-	$keysToExport = array("JobPostingId" , "Title" , "TitleTokens");
-	$arrJobsToTokenize = array_map(function ($v) use ($keysToExport) {return array_subset($v, $keysToExport);} , $arrOfJobs);
-
-
-	$data = array('jobs_count' => count($arrJobsToTokenize), 'jobslist' => $arrJobsToTokenize);
-	return writeJSON($data, $filepath);
-}
-
-/**
- * Reads JSON encoded file with an array of JobPosting records named "jobslist"
- * and updates the database with the values for each job
- *
- * @param String $filepath The input json file to load
- *
- * @returns array Returns array of JobPostings if successful; empty array if not.
- */
-function updateJobRecordsFromJson($filepath)
-{
-    $arrJobRecs = array();
-
-    if (stripos($filepath, ".json") === false)
-        $filepath = $filepath . "-" . strtolower(getTodayAsString("")) . ".json";
-
-    if (is_file($filepath)) {
-        LogMessage("Loading and updating JobPostings from json file '" . $filepath ."'");
-        $data = loadJSON($filepath);
-
-        $arrJobsArray = $data['jobslist'];
-
-        if(!is_null($arrJobsArray) && is_array($arrJobsArray))
-        {
-            foreach(array_keys($arrJobsArray) as $jobkey)
-            {
-                $item = $arrJobsArray[$jobkey];
-                $jobRec = updateOrCreateJobPosting($item);
-                $arrJobRecs[$jobkey] = $jobRec;
-            }
-        }
-    }
-
-    return $arrJobRecs;
-}
 
 
 /**

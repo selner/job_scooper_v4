@@ -54,7 +54,8 @@ class SetEncoder(json.JSONEncoder):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
 
-class matchJobsToKeywords():
+
+class MatchJobsToKeywordsTask():
     inputfile = None
     keywords = {}
     negative_keywords = {}
@@ -62,32 +63,29 @@ class matchJobsToKeywords():
     user_id = None
     df_job_tokens = None
 
-    def __init__(self, inputFile, outputFile):
+    def __init__(self, inputfile, outputfile):
 
-        if inputFile:
-            self.inputFile = inputFile
-
-        if outputFile:
-            self.outputFile = outputFile
+        self.inputFile = inputfile
+        self.outputfile = outputfile
 
         print "Processing job title matching with input file {}".format(self.inputFile)
 
         print "Loading user keywords for matching..."
-        self.loadKeywords()
+        self.load_keywords()
 
         print "Loading job list to match..."
         self.loadJobs()
 
         print "Matching job list titles vs. user search keywords ..."
-        self.markPosKeywordMatches()
+        self.mark_positive_matches()
 
         print "Matching job list titles vs. user negative keyword matches..."
-        self.markNegKeywordMatches()
+        self.mark_negative_matches()
 
         self.exportResultsData()
         print "Matching completed."
 
-    def getOutData(self):
+    def get_output_data(self):
         return {
             JSON_KEY_JOBMATCHES: self.jobs,
             JSON_KEY_POS_KEYWORDS: self.keywords,
@@ -95,28 +93,28 @@ class matchJobsToKeywords():
         }
 
     def exportResultsData(self):
-        print "Exporting final match results to {}".format(self.outputFile)
+        print "Exporting final match results to {}".format(self.outputfile)
 
-        outf = open(self.outputFile, "w")
-        outData = self.getOutData()
+        outf = open(self.outputfile, "w")
+        outData = self.get_output_data()
         json.dump(outData, outf, indent=4, encoding='utf-8', cls=SetEncoder)
         outf.close()
-        return self.outputFile
+        return self.outputfile
 
     def loadJobs(self):
         inf = open(self.inputFile, "rU")
         inputData = json.load(inf)
         if inputData:
-            if (isinstance(inputData, dict)):
+            if isinstance(inputData, dict):
                 if (JSON_KEY_JOBMATCHES in inputData and isinstance(inputData[JSON_KEY_JOBMATCHES], dict) and len(
                         inputData[JSON_KEY_JOBMATCHES]) > 0):
                     self.jobs = inputData[JSON_KEY_JOBMATCHES]
                     self.jobs = tokenizeStrings(self.jobs, u'Title', u'TitleTokens', u'set')
 
-    def matchKeywords(self, dataKeywords):
+    def match_keywords(self, data_keywords):
         dictKeywords = {}
-        for kwdset in dataKeywords:
-            toksstring = dataKeywords[kwdset]['tokens']
+        for kwdset in data_keywords:
+            toksstring = data_keywords[kwdset]['tokens']
             toks = toksstring.split("|")
             l = [t for t in toks if t != ""]
             dictKeywords[toksstring] = l
@@ -134,10 +132,10 @@ class matchJobsToKeywords():
 
         return matched_groups
 
-    def markPosKeywordMatches(self):
+    def mark_positive_matches(self):
         print "Marking jobs that match {} positive title keywords...".format(len(self.keywords))
 
-        matched_groups = self.matchKeywords(self.keywords)
+        matched_groups = self.match_keywords(self.keywords)
         group_keys = matched_groups.keys()
         #
         # Since we re-matched all the records, we need to update
@@ -172,11 +170,10 @@ class matchJobsToKeywords():
 
         print "Positive Search Keywords: {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids))
 
-
-    def markNegKeywordMatches(self):
+    def mark_negative_matches(self):
 
         print "Marking jobs that match {} negative title keywords...".format(len(self.negative_keywords))
-        matched_groups = self.matchKeywords(self.negative_keywords)
+        matched_groups = self.match_keywords(self.negative_keywords)
         group_keys = matched_groups.keys()
         #
         # Since we re-matched all the records, we need to update
@@ -215,7 +212,7 @@ class matchJobsToKeywords():
 
         print "Negative Title Keywords:  {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids))
 
-    def loadKeywords(self):
+    def load_keywords(self):
         fp = open(self.inputFile, "rU")
         data = json.load(fp, encoding="utf-8")
 
@@ -250,8 +247,7 @@ class matchJobsToKeywords():
         print "Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords), len(self.negative_keywords))
 
 
-
 if __name__ == '__main__':
     arguments = docopt(cli_usage, version='0.1.1rc')
 
-    matcher = matchJobsToKeywords(arguments["--input"].replace("'", ""), arguments["--output"].replace("'", ""))
+    matcher = MatchJobsToKeywordsTask(arguments["--input"].replace("'", ""), arguments["--output"].replace("'", ""))

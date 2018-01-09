@@ -59,7 +59,7 @@ class UserKeywordSetTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 5;
+    const NUM_COLUMNS = 4;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserKeywordSetTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 5;
+    const NUM_HYDRATE_COLUMNS = 4;
 
     /**
      * the column name for the user_id field
@@ -92,11 +92,6 @@ class UserKeywordSetTableMap extends TableMap
     const COL_KEYWORDS = 'user_keyword_set.keywords';
 
     /**
-     * the column name for the keyword_tokens field
-     */
-    const COL_KEYWORD_TOKENS = 'user_keyword_set.keyword_tokens';
-
-    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -108,11 +103,11 @@ class UserKeywordSetTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserId', 'UserKeywordSetKey', 'SearchKeyFromConfig', 'Keywords', 'KeywordTokens', ),
-        self::TYPE_CAMELNAME     => array('userId', 'userKeywordSetKey', 'searchKeyFromConfig', 'keywords', 'keywordTokens', ),
-        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG, UserKeywordSetTableMap::COL_KEYWORDS, UserKeywordSetTableMap::COL_KEYWORD_TOKENS, ),
-        self::TYPE_FIELDNAME     => array('user_id', 'user_keyword_set_key', 'search_key_from_config', 'keywords', 'keyword_tokens', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
+        self::TYPE_PHPNAME       => array('UserId', 'UserKeywordSetKey', 'SearchKeyFromConfig', 'Keywords', ),
+        self::TYPE_CAMELNAME     => array('userId', 'userKeywordSetKey', 'searchKeyFromConfig', 'keywords', ),
+        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG, UserKeywordSetTableMap::COL_KEYWORDS, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'user_keyword_set_key', 'search_key_from_config', 'keywords', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
 
     /**
@@ -122,11 +117,11 @@ class UserKeywordSetTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserKeywordSetKey' => 1, 'SearchKeyFromConfig' => 2, 'Keywords' => 3, 'KeywordTokens' => 4, ),
-        self::TYPE_CAMELNAME     => array('userId' => 0, 'userKeywordSetKey' => 1, 'searchKeyFromConfig' => 2, 'keywords' => 3, 'keywordTokens' => 4, ),
-        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID => 0, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY => 1, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG => 2, UserKeywordSetTableMap::COL_KEYWORDS => 3, UserKeywordSetTableMap::COL_KEYWORD_TOKENS => 4, ),
-        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_keyword_set_key' => 1, 'search_key_from_config' => 2, 'keywords' => 3, 'keyword_tokens' => 4, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserKeywordSetKey' => 1, 'SearchKeyFromConfig' => 2, 'Keywords' => 3, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'userKeywordSetKey' => 1, 'searchKeyFromConfig' => 2, 'keywords' => 3, ),
+        self::TYPE_COLNAME       => array(UserKeywordSetTableMap::COL_USER_ID => 0, UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY => 1, UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG => 2, UserKeywordSetTableMap::COL_KEYWORDS => 3, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_keyword_set_key' => 1, 'search_key_from_config' => 2, 'keywords' => 3, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
 
     /**
@@ -151,7 +146,6 @@ class UserKeywordSetTableMap extends TableMap
         $this->addPrimaryKey('user_keyword_set_key', 'UserKeywordSetKey', 'VARCHAR', true, 100, null);
         $this->addColumn('search_key_from_config', 'SearchKeyFromConfig', 'VARCHAR', true, 50, null);
         $this->addColumn('keywords', 'Keywords', 'ARRAY', true, null, null);
-        $this->addColumn('keyword_tokens', 'KeywordTokens', 'ARRAY', false, null, null);
     } // initialize()
 
     /**
@@ -402,13 +396,11 @@ class UserKeywordSetTableMap extends TableMap
             $criteria->addSelectColumn(UserKeywordSetTableMap::COL_USER_KEYWORD_SET_KEY);
             $criteria->addSelectColumn(UserKeywordSetTableMap::COL_SEARCH_KEY_FROM_CONFIG);
             $criteria->addSelectColumn(UserKeywordSetTableMap::COL_KEYWORDS);
-            $criteria->addSelectColumn(UserKeywordSetTableMap::COL_KEYWORD_TOKENS);
         } else {
             $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.user_keyword_set_key');
             $criteria->addSelectColumn($alias . '.search_key_from_config');
             $criteria->addSelectColumn($alias . '.keywords');
-            $criteria->addSelectColumn($alias . '.keyword_tokens');
         }
     }
 

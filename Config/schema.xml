@@ -116,8 +116,6 @@
             Job posting facts
         -->
         <column name="title" phpName="Title" type="varchar" size="255" required="true"/>
-        <column name="title_tokens" phpName="TitleTokens" type="varchar" size="255"/>
-        <column name="title_token_list" phpName="TitleTokenList" type="array"/>
         <column name="url" phpName="Url" type="varchar" size="2500" required="true"/>
         <column name="employment_type" phpName="EmploymentType" type="varchar" size="100"/>
         <column name="pay_range" phpName="PayRange" type="varchar" size="100"/>
@@ -240,9 +238,6 @@
         <column name="search_key_from_config" phpName="SearchKeyFromConfig" type="varchar" size="50" required="true"/>
 
         <column name="keywords" phpName="Keywords" type="array" required="true"/>
-
-        <column name="keyword_tokens" phpName="KeywordTokens" type="array"/>
-
     </table>
 
     <!--

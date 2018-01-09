@@ -282,43 +282,6 @@ def getScrubbedStringTokens(inputstring):
 
     return lStemmedTokens
 
-
-
-def tokenizeJSONFile(inputFile, outputFile, dataKey=None, indexKey=None):
-    """
-
-    Args:
-        inputFile:
-        outputFile:
-        dataKey:
-        indexKey:
-
-    Returns:
-
-    """
-    if indexKey is None:
-        indexKey = 0
-    if dataKey is None:
-        dataKey = 0
-
-    import json
-    inf = open(inputFile, "r")
-    inputData = json.load(inf)
-    if inputData:
-        print "Processing file " + inputFile
-        if(isinstance(inputData, dict)):
-            if('jobslist' in inputData and isinstance(inputData['jobslist'], dict) and len(inputData['jobslist']) > 0):
-                outData = tokenizeStrings(inputData['jobslist'], dataKey, str(dataKey) + "Tokens")
-                inputData[u'jobslist'] = outData
-                outf = open(outputFile, "w")
-                json.dump(inputData, outf, indent=4, encoding='utf-8')
-                outf.close()
-                print "Tokenized results written to " + outputFile
-                return outputFile
-    else:
-            print "Error:  No job listings found in " + inputFile
-    return None
-
 def tokenizeFile(inputFile, outputFile, dataKey=None, indexKey=None):
     """
 
@@ -352,33 +315,3 @@ def tokenizeFile(inputFile, outputFile, dataKey=None, indexKey=None):
     writedicttocsv(outputFile, outData, fields)
 
     return outData
-
-#
-# def addMatchesToList(source, new_links, itemlist, out_folder, kind):
-#     """
-#
-#     :rtype : object
-#     """
-#     if new_links is None:
-#         new_links = []
-#
-#     for link in new_links:
-#         item = dict(link.attrs.copy())
-#         item['text'] = link.text.encode('ascii', 'ignore').lower()
-#         item['words'] = removeStopWords(item['text'])
-#         l = []
-#         for w in item['words']:
-#             l.append(w.encode('ascii', 'ignore'))
-#         item['words'] = l
-#         item['words_stemmed'] = getStemmedWords(item['words'])
-#         item['source'] = source.lower()
-#
-#         itemlist.append(item)
-#
-#     writelisttocsv(os.path.join(out_folder, (source + "-" + kind +"titles.tsv")), itemlist)
-#
-#     countWords(itemlist, "words", out_folder, source, kind)
-#     countWords(itemlist, "words_stemmed", out_folder, source, kind)
-#
-#     return itemlist
-#

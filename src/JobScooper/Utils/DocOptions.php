@@ -33,7 +33,7 @@ Usage:
 Options:
   -h --help                 Show this screen.
   --version                 Show version.
-  --stages=<stage_numbers>  Comma-separated list of stage numbers to run. [default: 1,2,3,4]
+  --stages=<stage_numbers>  Comma-separated list of stage numbers to run. [default: 1,2,3]
   --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey. [default: all]
   --debug                   Show debug output. [default: false]
   --disable-notifications   Do not send email alerts for new jobs. [default: false]

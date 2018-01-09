@@ -63,11 +63,10 @@ class StageManager
                 $this->doStage1();
                 $this->doStage2();
                 $this->doStage3();
-                $this->doStage4();
             }
         } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        }
+	        handleException($ex, null, true);
+		}
         finally
         {
         	try
@@ -78,27 +77,6 @@ class StageManager
 		    }
         }
     }
-
-	/**
-	 * @param $path
-	 *
-	 * @throws \Exception
-	 */
-	public function insertJobsFromJSON($path)
-    {
-        $data = loadJSON($path);
-        $jobs = $data['jobslist'];
-
-        foreach($jobs as $job) {
-            $newJob = new \JobScooper\DataAccess\JobPosting();
-            $newJob->fromArray($job);
-            $newJob->save();
-            LogMessage("Saved " . $job->getJobPostingId() . " to database.");
-        }
-
-        LogMessage("Stored " . countAssociativeArrayValues($jobs) . " to database from file '".$path."''.");
-    }
-
 
 	/**
 	 * @throws \Exception
@@ -183,62 +161,14 @@ class StageManager
         endLogSection("Stage 1");
     }
 
-
 	/**
 	 * @throws \Exception
 	 */
 	public function doStage2()
     {
-        try {
-            startLogSection("Stage 2:  Tokenizing Job Titles... ");
-            $arrJobsList = getAllMatchesForUserNotification();
-
-            if(is_null($arrJobsList) || count($arrJobsList) <= 0) {
-                LogMessage("No new jobs found to tokenize");
-            }
-            else
-            {
-                $jfilefullpath = generateOutputFileName("alljobmatches", "json");
-                $outjfilefullpath = generateOutputFileName("alljobmatches_tokenized", "json");
-	            writeJobRecordsToJsonForTokenizing($jfilefullpath, $arrJobsList);
-
-                LogMessage(PHP_EOL . "Processing " . $jfilefullpath);
-
-                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                //
-                // Tokenize the job listings found in the stage 2 prefix on S3
-                //
-                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-                LogMessage(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL);
-                $PYTHONPATH = realpath(__ROOT__. "/python/pyJobNormalizer/normalizeJobListingFile.py");
-
-                $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($jfilefullpath) . " --outfile " . escapeshellarg($outjfilefullpath) ." --column Title --index KeySiteAndPostId";
-                LogMessage(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL);
-
-                doExec($cmd);
-
-                updateJobRecordsFromJson($outjfilefullpath);
-            }
-
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        }
-        finally
-        {
-	        endLogSection("End of stage 2 (tokenizing titles)");
-        }
-
-    }
-
-	/**
-	 * @throws \Exception
-	 */
-	public function doStage3()
-    {
         
         try {
-	        startLogSection("Stage 3:  Auto-marking all user job matches...");
+	        startLogSection("Stage 2:  Auto-marking all user job matches...");
             $marker = new JobsAutoMarker();
             $marker->markJobs();
         } catch (\Exception $ex) {
@@ -246,26 +176,25 @@ class StageManager
         }
         finally
         {
-            endLogSection("End of stage 3 (auto-marking)");
+            endLogSection("End of stage 2 (auto-marking)");
         }
     }
 
 	/**
 	 * @throws \Exception
-	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	public function doStage4()
+	public function doStage3()
     {
         try {
-            startLogSection("Stage 4: Notifying User");
+            startLogSection("Stage 3: Notifying User");
             $notifier = new NotifierJobAlerts();
             $notifier->processNotifications();
         } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        }
+	        handleException($ex, null, true);
+		}
         finally
         {
-        	endLogSection("End of stage 4 (notifying user)");
+        	endLogSection("End of stage 3 (notifying user)");
         }
     }
 

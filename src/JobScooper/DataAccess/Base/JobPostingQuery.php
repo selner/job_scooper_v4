@@ -24,8 +24,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery orderByJobSiteKey($order = Criteria::ASC) Order by the jobsite_key column
  * @method     ChildJobPostingQuery orderByJobSitePostId($order = Criteria::ASC) Order by the jobsite_post_id column
  * @method     ChildJobPostingQuery orderByTitle($order = Criteria::ASC) Order by the title column
- * @method     ChildJobPostingQuery orderByTitleTokens($order = Criteria::ASC) Order by the title_tokens column
- * @method     ChildJobPostingQuery orderByTitleTokenList($order = Criteria::ASC) Order by the title_token_list column
  * @method     ChildJobPostingQuery orderByUrl($order = Criteria::ASC) Order by the url column
  * @method     ChildJobPostingQuery orderByEmploymentType($order = Criteria::ASC) Order by the employment_type column
  * @method     ChildJobPostingQuery orderByPayRange($order = Criteria::ASC) Order by the pay_range column
@@ -46,8 +44,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery groupByJobSiteKey() Group by the jobsite_key column
  * @method     ChildJobPostingQuery groupByJobSitePostId() Group by the jobsite_post_id column
  * @method     ChildJobPostingQuery groupByTitle() Group by the title column
- * @method     ChildJobPostingQuery groupByTitleTokens() Group by the title_tokens column
- * @method     ChildJobPostingQuery groupByTitleTokenList() Group by the title_token_list column
  * @method     ChildJobPostingQuery groupByUrl() Group by the url column
  * @method     ChildJobPostingQuery groupByEmploymentType() Group by the employment_type column
  * @method     ChildJobPostingQuery groupByPayRange() Group by the pay_range column
@@ -131,8 +127,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting findOneByJobSiteKey(string $jobsite_key) Return the first ChildJobPosting filtered by the jobsite_key column
  * @method     ChildJobPosting findOneByJobSitePostId(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column
  * @method     ChildJobPosting findOneByTitle(string $title) Return the first ChildJobPosting filtered by the title column
- * @method     ChildJobPosting findOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column
- * @method     ChildJobPosting findOneByTitleTokenList(array $title_token_list) Return the first ChildJobPosting filtered by the title_token_list column
  * @method     ChildJobPosting findOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column
  * @method     ChildJobPosting findOneByEmploymentType(string $employment_type) Return the first ChildJobPosting filtered by the employment_type column
  * @method     ChildJobPosting findOneByPayRange(string $pay_range) Return the first ChildJobPosting filtered by the pay_range column
@@ -156,8 +150,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting requireOneByJobSiteKey(string $jobsite_key) Return the first ChildJobPosting filtered by the jobsite_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByJobSitePostId(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByTitle(string $title) Return the first ChildJobPosting filtered by the title column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobPosting requireOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobPosting requireOneByTitleTokenList(array $title_token_list) Return the first ChildJobPosting filtered by the title_token_list column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByEmploymentType(string $employment_type) Return the first ChildJobPosting filtered by the employment_type column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByPayRange(string $pay_range) Return the first ChildJobPosting filtered by the pay_range column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -179,8 +171,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting[]|ObjectCollection findByJobSiteKey(string $jobsite_key) Return ChildJobPosting objects filtered by the jobsite_key column
  * @method     ChildJobPosting[]|ObjectCollection findByJobSitePostId(string $jobsite_post_id) Return ChildJobPosting objects filtered by the jobsite_post_id column
  * @method     ChildJobPosting[]|ObjectCollection findByTitle(string $title) Return ChildJobPosting objects filtered by the title column
- * @method     ChildJobPosting[]|ObjectCollection findByTitleTokens(string $title_tokens) Return ChildJobPosting objects filtered by the title_tokens column
- * @method     ChildJobPosting[]|ObjectCollection findByTitleTokenList(array $title_token_list) Return ChildJobPosting objects filtered by the title_token_list column
  * @method     ChildJobPosting[]|ObjectCollection findByUrl(string $url) Return ChildJobPosting objects filtered by the url column
  * @method     ChildJobPosting[]|ObjectCollection findByEmploymentType(string $employment_type) Return ChildJobPosting objects filtered by the employment_type column
  * @method     ChildJobPosting[]|ObjectCollection findByPayRange(string $pay_range) Return ChildJobPosting objects filtered by the pay_range column
@@ -294,7 +284,7 @@ abstract class JobPostingQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT jobposting_id, jobsite_key, jobsite_post_id, title, title_tokens, title_token_list, url, employment_type, pay_range, company, location, department, category, last_updated_at, job_posted_date, first_seen_at, post_removed_at, location_display_value, geolocation_id, duplicates_posting_id, key_company_and_title FROM jobposting WHERE jobposting_id = :p0';
+        $sql = 'SELECT jobposting_id, jobsite_key, jobsite_post_id, title, url, employment_type, pay_range, company, location, department, category, last_updated_at, job_posted_date, first_seen_at, post_removed_at, location_display_value, geolocation_id, duplicates_posting_id, key_company_and_title FROM jobposting WHERE jobposting_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -498,81 +488,6 @@ abstract class JobPostingQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(JobPostingTableMap::COL_TITLE, $title, $comparison);
-    }
-
-    /**
-     * Filter the query on the title_tokens column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByTitleTokens('fooValue');   // WHERE title_tokens = 'fooValue'
-     * $query->filterByTitleTokens('%fooValue%', Criteria::LIKE); // WHERE title_tokens LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $titleTokens The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobPostingQuery The current query, for fluid interface
-     */
-    public function filterByTitleTokens($titleTokens = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($titleTokens)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobPostingTableMap::COL_TITLE_TOKENS, $titleTokens, $comparison);
-    }
-
-    /**
-     * Filter the query on the title_token_list column
-     *
-     * @param     array $titleTokenList The values to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobPostingQuery The current query, for fluid interface
-     */
-    public function filterByTitleTokenList($titleTokenList = null, $comparison = null)
-    {
-        $key = $this->getAliasedColName(JobPostingTableMap::COL_TITLE_TOKEN_LIST);
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            foreach ($titleTokenList as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_SOME) {
-            foreach ($titleTokenList as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addOr($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            foreach ($titleTokenList as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::NOT_LIKE);
-                }
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(JobPostingTableMap::COL_TITLE_TOKEN_LIST, $titleTokenList, $comparison);
     }
 
     /**

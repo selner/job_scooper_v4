@@ -59,7 +59,7 @@ class JobsAutoMarker
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         LogMessage(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL);
-	    $arrJobs_AutoUpdatable = getAllMatchesForUserNotification(null, null, false);
+	    $arrJobs_AutoUpdatable = getAllMatchesForUserNotification(null, false);
 
 	    if(empty($arrJobs_AutoUpdatable))
 	    {
@@ -277,7 +277,7 @@ class JobsAutoMarker
 	        }
 
 	        LogMessage("Marking job postings in the " . count($arrNearbyIds) . " matching areas ...");
-		    $arrJobsInArea = getAllMatchesForUserNotification(null, null, null, $arrNearbyIds);
+		    $arrJobsInArea = getAllMatchesForUserNotification(null, null, $arrNearbyIds);
 		    $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array("UserJobMatchId")));
 		    $arrInAreaIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsInArea, array("UserJobMatchId")));
 		    foreach(array_chunk($arrInAreaIds, 50) as $chunk) {
@@ -365,79 +365,6 @@ class JobsAutoMarker
         	endLogSection("Company exclusion by name finished.");
         }
     }
-
-//
-//	/**
-//	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
-//	 * @throws \Exception
-//	 */
-//	private function _markJobsList_UserExcludedKeywords_(&$arrJobsList)
-//	{
-//		//
-//		// Load the exclusion filter and other user data from files
-//		//
-//		$negkwds = $this->_loadUserNegativeTitleKeywords();
-//		$this->_tokenizeNegativeTitles($negkwds);
-//
-//		$nJobsMarkedAutoExcluded = 0;
-//		$nJobsNotMarked = 0;
-//
-//		try
-//		{
-//			if(count($arrJobsList) == 0 || is_null($this->title_negative_keyword_tokens) || count($this->title_negative_keyword_tokens) == 0) return;
-//
-//			LogMessage("Excluding Jobs by Negative Title Keyword Token Matches");
-//			LogMessage("Checking ".count($arrJobsList) ." roles against ". count($this->title_negative_keyword_tokens) ." negative title keywords to be excluded.");
-//
-//			try {
-//				$nCounter = 1;
-//				$nCounterEnd = $nCounter + 9;
-//				foreach(array_chunk($this->title_negative_keyword_tokens, 10) as $subsetNegKwds)
-//				{
-//					LogMessage("Checking negative keywords {$nCounter}-{$nCounterEnd}...");
-//					$arrJobsWithTokenMatches = getAllMatchesForUserNotification(null, $subsetNegKwds);
-//					foreach($arrJobsWithTokenMatches as $jobMatch)
-//					{
-//						$jobMatch->setMatchedNegativeTitleKeywords($subsetNegKwds);
-//						$jobMatch->setIsExcluded(true);
-//						$jobMatch->save();
-//						$arrJobsMarkedNegMatch[$jobMatch->getJobPostingId()] = $jobMatch->getJobPostingFromUJM()->getTitleTokens();
-//					}
-//					$nCounter = $nCounterEnd;
-//					$nCounterEnd = $nCounterEnd + count($subsetNegKwds);
-//				}
-//				$nJobsMarkedAutoExcluded = countAssociativeArrayValues($arrJobsMarkedNegMatch);
-//				$nJobsNotMarked = countAssociativeArrayValues($arrJobsList) - countAssociativeArrayValues($arrJobsMarkedNegMatch);
-//			} catch (Exception $ex) {
-//				handleException($ex, 'ERROR:  Failed to verify titles against negative keywords due to error: %s', isDebug());
-//			}
-//			LogMessage("Processed " . countAssociativeArrayValues($arrJobsList) . " titles for auto-marking against negative title keywords: ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) . " marked excluded; " . $nJobsNotMarked. "/" . countAssociativeArrayValues($arrJobsList) . " not marked.");
-//		}
-//		catch (Exception $ex)
-//		{
-//			handleException($ex, "Error in SearchKeywordsNotFound: %s", true);
-//		}
-//
-//	}
-//
-////
-////	/**
-////	 * @return array
-////	 */
-////	private function _getUserSearchTitleKeywords()
-////	{
-////		$keywordTokens = array();
-////		$keywordSets = getConfigurationSetting("user_keyword_sets");
-////		if(empty($keywordSets))
-////			return null;
-////
-////		foreach($keywordSets as $kwdset)
-////		{
-////			$setKwdTokens = $kwdset->getKeywordTokens();
-////			$keywordTokens = array_merge($keywordTokens, $setKwdTokens);
-////		}
-////		return $keywordTokens;
-////	}
 
 	/**
 	 * @param string $basefile
@@ -540,10 +467,16 @@ class JobsAutoMarker
 								"MatchedNegativeTitleKeywords",
 								"MatchedUserKeywords"
 							));
-							if (!empty($arrJobMatchFacts['MatchedUserKeywords']))
-								$arrJobMatchFacts['MatchedUserKeywords'] = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
-							if (!empty($arrJobMatchFacts['MatchedNegativeTitleKeywords']))
-								$arrJobMatchFacts['MatchedNegativeTitleKeywords'] = preg_split("/\|/", $arrJobMatchFacts['MatchedNegativeTitleKeywords'], -1, PREG_SPLIT_NO_EMPTY);
+							if (!empty($arrJobMatchFacts['MatchedUserKeywords'])) {
+								$split = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
+								if(!empty($split))
+									$arrJobMatchFacts['MatchedUserKeywords'] = $split;
+							}
+							if (!empty($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
+								$split = preg_split("/\|/", $arrJobMatchFacts['MatchedNegativeTitleKeywords'], -1, PREG_SPLIT_NO_EMPTY);
+								if(!empty($split))
+									$arrJobMatchFacts['MatchedNegativeTitleKeywords'] = $split;
+							}
 							$dbMatch->fromArray($arrJobMatchFacts);
 							$dbMatch->save();
 							$retUJMIds[] = $id;
@@ -611,56 +544,6 @@ class JobsAutoMarker
 
 
 	}
-//
-//	/**
-//	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
-//	 */
-//	private function _markJobsList_SearchKeywordsFound_(&$arrJobsList)
-//	{
-//		$nJobsMarkedInclude = 0;
-//		$nJobsNotMarked = 0;
-//
-//		try {
-//			$usrSearchKeywords = $this->_getUserSearchTitleKeywords();
-//			if (count($arrJobsList) == 0 || is_null($usrSearchKeywords)) return null;
-//			LogMessage("Checking " . count($arrJobsList) . " roles against " . count($usrSearchKeywords) . " keyword phrases in titles...");
-//
-//			try {
-//
-////	            $arrJobsWithTokenMatches = getAllMatchesForUserNotification(null, $usrSearchKeywords);
-////	            $arrMatchedIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsWithTokenMatches, array("UserJobMatchId")));
-////	            foreach(array_chunk($arrMatchedIds, 50) as $chunk) {
-////		            $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-////		            UserJobMatchQuery::create()
-////			            ->filterByUserJobMatchId($chunk)
-////			            ->update(array("IsJobMatch" => true, "MatchedUserKeywords" => $usrSearchKeywords), $con, true);
-////	            }
-////
-////				$arrNotMatchedJobs = array_diff_key($arrJobsList,$arrJobsWithTokenMatches);
-////				$arrNotMatchedIds = array_from_orm_object_list_by_array_keys($arrNotMatchedJobs, array("UserJobMatchId"));
-////				foreach(array_chunk($arrNotMatchedIds, 50) as $chunk)
-////				{
-////					$con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-////					UserJobMatchQuery::create()
-////						->filterByUserJobMatchId($chunk)
-////						->update(array("IsJobMatch" => false), $con);
-////				}
-////
-////	            $nJobsMarkedInclude = countAssociativeArrayValues($arrJobsWithTokenMatches);
-////	            $nJobsNotMarked = countAssociativeArrayValues($arrNotMatchedJobs);
-//			} catch (Exception $ex) {
-//				handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
-//			}
-//			LogMessage("Completed matching user keyword phrases against job titles.");
-//		}
-//		catch (Exception $ex)
-//		{
-//			handleException($ex, "Error in SearchKeywordsNotFound: %s", true);
-//		}
-//
-//
-//	}
-
 
 	/**
 	 * @throws \Exception
@@ -692,38 +575,6 @@ class JobsAutoMarker
 
 		return $negKwdForTokens;
 	}
-
-	//	private function _tokenizeNegativeTitles($negKwds)
-//        $arrTitlesTemp = tokenizeSingleDimensionArray($negKwds, 'userNegKwds', 'negative_keywords', 'negative_keywords');
-//
-//        if(count($arrTitlesTemp) <= 0)
-//        {
-//            LogWarning("Warning: No title negative keywords were found in the input source files to be filtered from job listings." );
-//        }
-//        else
-//        {
-//	        //
-//            // Add each title we found in the file to our list in this class, setting the key for
-//            // each record to be equal to the job title so we can do a fast lookup later
-//            //
-//	        $negKeywords = array();
-//	        foreach($arrTitlesTemp as $titleRecord)
-//            {
-//                $tokens = explode("|", $titleRecord['negative_keywordstokenized']);
-//                $negKeywords[] = $tokens;
-//            }
-//
-//	        //
-//	        // override the negativity of any keywords that are actually also our specific search terms
-//	        //
-//	        $usrSearchKeywords = $this->_getUserSearchTitleKeywords();
-//	        $this->title_negative_keyword_tokens = array_diff(array_values($negKeywords), array_values($usrSearchKeywords) );
-//
-//            LogMessage("Loaded " . countAssociativeArrayValues($this->title_negative_keyword_tokens) . " tokens to use for filtering titles from '" . getArrayValuesAsString($inputfiles) . "'." );
-//
-//        }
-//    }
-//
 
 	/**
 	 * @param $pattern

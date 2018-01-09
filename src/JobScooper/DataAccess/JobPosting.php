@@ -94,23 +94,10 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	}
 
 	/**
-	 * @param $jobPosting
-	 */
-	public function setPostingAsDuplicateOf($jobPosting)
-	{
-
-	}
-
-	/**
 	 *
 	 */
 	protected function updateAutoColumns()
 	{
-		if ($this->isColumnModified(JobPostingTableMap::COL_TITLE_TOKENS)) {
-			$tokens = $this->getTitleTokens();
-			$this->updateTitleTokenList($tokens);
-		}
-
 		$this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
 	}
 
@@ -445,19 +432,6 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		parent::setPostedAt($newV);
 	}
 
-
-	/**
-	 * @return null|string
-	 */
-	public function getJobTitleLinked()
-	{
-		if(!empty($this->getTitle()) && !empty($this->getUrl()))
-			return sprintf("<a href=\"%s\">%s<\a>", $this->getUrl() ,$this->getTitle());
-
-		return null;
-	}
-
-
 	/**
 	 * @return null|string
 	 */
@@ -469,15 +443,6 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		return null;
 	}
 
-
-	public function updateTitleTokenList($v)
-	{
-		$arrTokens = preg_split("/[\s|\|]/", $v, null, PREG_SPLIT_NO_EMPTY);
-		if($arrTokens !== false)
-			$this->setTitleTokenList($arrTokens);
-		else
-			$this->setTitleTokenList(null);
-	}
 
 	/**
 	 * JobPosting constructor.
@@ -508,7 +473,6 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	{
 		$ret = parent::toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, $includeForeignObjects);
 		if(!empty($ret) && is_array($ret)) {
-			$ret['JobTitleLinked'] = $this->getJobTitleLinked();
 			$ret['KeySiteAndPostId'] = $this->getKeySiteAndPostId();
 
 		}

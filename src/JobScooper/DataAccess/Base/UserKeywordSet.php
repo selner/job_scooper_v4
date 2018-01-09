@@ -104,20 +104,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
     protected $keywords_unserialized;
 
     /**
-     * The value for the keyword_tokens field.
-     *
-     * @var        array
-     */
-    protected $keyword_tokens;
-
-    /**
-     * The unserialized $keyword_tokens value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
-     * @var object
-     */
-    protected $keyword_tokens_unserialized;
-
-    /**
      * @var        ChildUser
      */
     protected $aUserFromUKS;
@@ -462,35 +448,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
     } // hasKeyword()
 
     /**
-     * Get the [keyword_tokens] column value.
-     *
-     * @return array
-     */
-    public function getKeywordTokens()
-    {
-        if (null === $this->keyword_tokens_unserialized) {
-            $this->keyword_tokens_unserialized = array();
-        }
-        if (!$this->keyword_tokens_unserialized && null !== $this->keyword_tokens) {
-            $keyword_tokens_unserialized = substr($this->keyword_tokens, 2, -2);
-            $this->keyword_tokens_unserialized = '' !== $keyword_tokens_unserialized ? explode(' | ', $keyword_tokens_unserialized) : array();
-        }
-
-        return $this->keyword_tokens_unserialized;
-    }
-
-    /**
-     * Test the presence of a value in the [keyword_tokens] array column value.
-     * @param      mixed $value
-     *
-     * @return boolean
-     */
-    public function hasKeywordToken($value)
-    {
-        return in_array($value, $this->getKeywordTokens());
-    } // hasKeywordToken()
-
-    /**
      * Set the value of [user_id] column.
      *
      * @param int $v new value
@@ -606,57 +563,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
     } // removeKeyword()
 
     /**
-     * Set the value of [keyword_tokens] column.
-     *
-     * @param array $v new value
-     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
-     */
-    public function setKeywordTokens($v)
-    {
-        if ($this->keyword_tokens_unserialized !== $v) {
-            $this->keyword_tokens_unserialized = $v;
-            $this->keyword_tokens = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[UserKeywordSetTableMap::COL_KEYWORD_TOKENS] = true;
-        }
-
-        return $this;
-    } // setKeywordTokens()
-
-    /**
-     * Adds a value to the [keyword_tokens] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
-     */
-    public function addKeywordToken($value)
-    {
-        $currentArray = $this->getKeywordTokens();
-        $currentArray []= $value;
-        $this->setKeywordTokens($currentArray);
-
-        return $this;
-    } // addKeywordToken()
-
-    /**
-     * Removes a value from the [keyword_tokens] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserKeywordSet The current object (for fluent API support)
-     */
-    public function removeKeywordToken($value)
-    {
-        $targetArray = array();
-        foreach ($this->getKeywordTokens() as $element) {
-            if ($element != $value) {
-                $targetArray []= $element;
-            }
-        }
-        $this->setKeywordTokens($targetArray);
-
-        return $this;
-    } // removeKeywordToken()
-
-    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -704,10 +610,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserKeywordSetTableMap::translateFieldName('Keywords', TableMap::TYPE_PHPNAME, $indexType)];
             $this->keywords = $col;
             $this->keywords_unserialized = null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserKeywordSetTableMap::translateFieldName('KeywordTokens', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->keyword_tokens = $col;
-            $this->keyword_tokens_unserialized = null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -716,7 +618,7 @@ abstract class UserKeywordSet implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 5; // 5 = UserKeywordSetTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 4; // 4 = UserKeywordSetTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserKeywordSet'), 0, $e);
@@ -1008,9 +910,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
         if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORDS)) {
             $modifiedColumns[':p' . $index++]  = 'keywords';
         }
-        if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORD_TOKENS)) {
-            $modifiedColumns[':p' . $index++]  = 'keyword_tokens';
-        }
 
         $sql = sprintf(
             'INSERT INTO user_keyword_set (%s) VALUES (%s)',
@@ -1033,9 +932,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
                         break;
                     case 'keywords':
                         $stmt->bindValue($identifier, $this->keywords, PDO::PARAM_STR);
-                        break;
-                    case 'keyword_tokens':
-                        $stmt->bindValue($identifier, $this->keyword_tokens, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1104,9 +1000,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
             case 3:
                 return $this->getKeywords();
                 break;
-            case 4:
-                return $this->getKeywordTokens();
-                break;
             default:
                 return null;
                 break;
@@ -1141,7 +1034,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
             $keys[1] => $this->getUserKeywordSetKey(),
             $keys[2] => $this->getSearchKeyFromConfig(),
             $keys[3] => $this->getKeywords(),
-            $keys[4] => $this->getKeywordTokens(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1229,13 +1121,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
                 }
                 $this->setKeywords($value);
                 break;
-            case 4:
-                if (!is_array($value)) {
-                    $v = trim(substr($value, 2, -2));
-                    $value = $v ? explode(' | ', $v) : array();
-                }
-                $this->setKeywordTokens($value);
-                break;
         } // switch()
 
         return $this;
@@ -1273,9 +1158,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
         }
         if (array_key_exists($keys[3], $arr)) {
             $this->setKeywords($arr[$keys[3]]);
-        }
-        if (array_key_exists($keys[4], $arr)) {
-            $this->setKeywordTokens($arr[$keys[4]]);
         }
     }
 
@@ -1329,9 +1211,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
         }
         if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORDS)) {
             $criteria->add(UserKeywordSetTableMap::COL_KEYWORDS, $this->keywords);
-        }
-        if ($this->isColumnModified(UserKeywordSetTableMap::COL_KEYWORD_TOKENS)) {
-            $criteria->add(UserKeywordSetTableMap::COL_KEYWORD_TOKENS, $this->keyword_tokens);
         }
 
         return $criteria;
@@ -1438,7 +1317,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
         $copyObj->setUserKeywordSetKey($this->getUserKeywordSetKey());
         $copyObj->setSearchKeyFromConfig($this->getSearchKeyFromConfig());
         $copyObj->setKeywords($this->getKeywords());
-        $copyObj->setKeywordTokens($this->getKeywordTokens());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -2168,8 +2046,6 @@ abstract class UserKeywordSet implements ActiveRecordInterface
         $this->search_key_from_config = null;
         $this->keywords = null;
         $this->keywords_unserialized = null;
-        $this->keyword_tokens = null;
-        $this->keyword_tokens_unserialized = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();
