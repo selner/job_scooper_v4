@@ -3,6 +3,7 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\User as BaseUser;
+use Propel\Runtime\Map\TableMap;
 
 /**
  * Skeleton subclass for representing a row from the 'user' table.
@@ -28,6 +29,27 @@ class User extends BaseUser
     static function setCurrentUser(User $user)
     {
         setConfigurationSetting('current_user', $user);
+    }
+
+    public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
+    {
+	    if (array_key_exists("email", $arr)) {
+		    $this->setEmailAddress($arr["email"]);
+		    unset($arr['email']);
+	    }
+
+	    if (array_key_exists("display_name", $arr)) {
+		    $this->setName($arr["display_name"]);
+		    unset($arr['display_name']);
+	    }
+
+	    foreach ($arr as $k => $v)
+	    {
+	    	unset($arr[$k]);
+	    	$arr[ucwords($k)] = $v;
+	    }
+
+	    parent::fromArray($arr, $keyType);
     }
 
 }
