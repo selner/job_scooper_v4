@@ -3,7 +3,9 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\UserQuery as BaseUserQuery;
+use JobScooper\DataAccess\Map\UserTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Map\TableMap;
 
 /**
  * Skeleton subclass for performing query and update operations on the 'user' table.
@@ -23,9 +25,9 @@ class UserQuery extends BaseUserQuery
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	static function findOrCreateUserByConfigPath($config_file, $arrUserFactsToSet=array())
+	static function findOrCreateUserByConfigPath($config_file, $arrUserFactsToSet = array(), $overwriteFacts = false)
 	{
-		if(empty($config_file))
+		if (empty($config_file))
 			throw new \Exception("Unable to search for user by config file.  Missing required config file path parameter.");
 
 		$user = UserQuery::create()
@@ -34,19 +36,26 @@ class UserQuery extends BaseUserQuery
 
 		$user->setConfigFilePath($config_file);
 
-		if(!empty($arrUserFactsToSet) && is_array($arrUserFactsToSet))
-			$user->fromArray($arrUserFactsToSet);
-
+		if($user->isNew() || $overwriteFacts === true)
+		{
+			UserQuery::updateUserFacts($user, $arrUserFactsToSet);
+		}
 		$user->save();
 
 		return $user;
 	}
 
-	static function findUserByEmailAddress($email_address, $arrUserFactsToSet=array())
+	/**
+	 * @param       $email_address
+	 * @param array $arrUserFactsToSet
+	 * @param bool  $overwriteFacts
+	 *
+	 * @return null
+	 */
+	static function findUserByEmailAddress($email_address, $arrUserFactsToSet = array(), $overwriteFacts = false)
 	{
 		$retUser = null;
-		try
-		{
+		try {
 			// Search for this email address in the database
 			// sort by the last created record first so that
 			// we return the most recent match if multiple exist
@@ -56,30 +65,48 @@ class UserQuery extends BaseUserQuery
 				->find()
 				->getData();
 
-			if(empty($data))
+			if (empty($data))
 				return null;
 
-			if(countAssociativeArrayValues($data) > 1)
-			{
+			if (countAssociativeArrayValues($data) > 1) {
 				$retUser = $data[count($data) - 1];
-			}
-			else
-			{
+			} else {
 				$retUser = $data[0];
 			}
 
-			if(!empty($arrUserFactsToSet) && is_array($arrUserFactsToSet))
-				$retUser->fromArray($arrUserFactsToSet);
+			if($retUser->isNew() || $overwriteFacts === true)
+			{
+				UserQuery::updateUserFacts($retUser, $arrUserFactsToSet);
+			}
 
 			$retUser->save();
 
 			return $retUser;
 
-		}
-		catch (\Exception $ex)
-		{
+		} catch (\Exception $ex) {
 			// No user found
 			return null;
 		}
+	}
+
+	/**
+	 * @param \JobScooper\DataAccess\User $user
+	 * @param                             $arrUserFactsToSet
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	static function updateUserFacts(User $user, $arrUserFactsToSet)
+	{
+		if(!empty($arrUserFactsToSet) && is_array($arrUserFactsToSet)) {
+			$user->fromArray($arrUserFactsToSet);
+		} else {
+			$thisKeys = UserTableMap::getFieldNames(TableMap::TYPE_PHPNAME);
+			foreach ($arrUserFactsToSet as $keyNew => $valNew) {
+				if (array_key_exists($keyNew, $thisKeys) && !empty(call_user_func_array([$user, "get" . $keyNew], null))) {
+					call_user_func_array([$user, "set" . $keyNew], $valNew);
+				}
+			}
+		}
+
 	}
 }

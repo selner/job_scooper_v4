@@ -172,8 +172,8 @@ class ConfigBuilder
 	    // First load the user email information.  We set this first because it is used
 	    // to send error email if something goes wrong anywhere further along our run
 	    //
-	    $this->_parseUsers();
-
+	    $this->_parseUser();
+		$this->_parseAlertReceipients();
 
 	    //
 	    // Validate each of the inputfiles that the user passed
@@ -471,60 +471,97 @@ class ConfigBuilder
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _parseUsers()
-    {
-     LogMessage("Configuring users and alerts...");
+	private function _parseUser()
+	{
+		LogMessage("Configuring users and alerts...");
 
-        setConfigurationSetting('alerts.configuration.smtp', $this->_getSetting("alerts.configuration.smtp"));
-	    $userList = array();
+		setConfigurationSetting('alerts.configuration.smtp', $this->_getSetting("alerts.configuration.smtp"));
+		$userList = array();
 
-	    //
-        // Configure the primary user for the config file and set it
-	    //
-        $arrUserResultsTo = $this->_getSetting("alerts.results.to");
-        $cfgpath = getConfigurationSetting('command_line_args.configfile');
+		//
+		// Configure the primary user for the config file and set it
+		//
+		$arrUserResultsTo = $this->_getSetting("alerts.results.to");
+		$cfgpath = getConfigurationSetting('command_line_args.configfile');
 
-	    $currentUser = UserQuery::findOrCreateUserByConfigPath($cfgpath, $arrUserResultsTo);
-	    if(empty($currentUser))
-		    throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
-	    $currentUser->setCurrentUser($currentUser);
-	    $userList[$currentUser->getEmailAddress()] = $currentUser;
-	    setConfigurationSetting("alerts.results.to", $currentUser);
+		$currentUser = UserQuery::findOrCreateUserByConfigPath($cfgpath, $arrUserResultsTo);
+		if(empty($currentUser))
+			throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
+		$currentUser->setCurrentUser($currentUser);
+		$userList[$currentUser->getEmailAddress()] = $currentUser;
+		setConfigurationSetting("alerts.results.to", $currentUser);
 
-	    $otherAlertsUsers = $this->_getSetting(array("alerts.errors.to", "alerts.errors.from", "alerts.results.from"));
-        if(empty($otherAlertsUsers))
-        	return;
+		$otherAlertsUsers = $this->_getSetting(array("alerts.errors.to", "alerts.errors.from", "alerts.results.from"));
+		if(empty($otherAlertsUsers))
+			return;
 
-	    //
-        // Find or create all the other users who will receive notifications as well
-	    //
-	    $otherUsers = array_unique(array_values($otherAlertsUsers));
-        foreach($otherUsers as $arrUser)
-        {
-        	if(empty($arrUser) || !array_key_exists('email', $arrUser))
-		        throw new \Exception("Missing the email address for " . getArrayDebugOutput($arrUser).  "user notifications. Aborting.");
+		//
+		// Find or create all the other users who will receive notifications as well
+		//
+		$otherUsers = array_unique(array_values($otherAlertsUsers));
+		foreach($otherUsers as $arrUser)
+		{
+			if(empty($arrUser) || !array_key_exists('email', $arrUser))
+				throw new \Exception("Missing the email address for " . getArrayDebugOutput($arrUser).  "user notifications. Aborting.");
 
-        	$otherUser = UserQuery::findUserByEmailAddress($arrUser['email'], $arrUser);
-        	if(empty($otherUser))
-	        {
-	        	$otherUser = UserQuery::findOrCreateUserByConfigPath("/dev/null", $arrUser);
-	        }
-	        $userList[$arrUser['email']] = $otherUser;
-        }
+			$otherUser = UserQuery::findUserByEmailAddress($arrUser['email'], $arrUser);
+			if(empty($otherUser))
+			{
+				$otherUser = UserQuery::findOrCreateUserByConfigPath("/dev/null", $arrUser);
+			}
+			$userList[$arrUser['email']] = $otherUser;
+		}
 
-        //
-	    // set the user each alert type accordingly
-	    //
-	    foreach($otherAlertsUsers as $alertKind => $arrAlertUser) {
-        	if(array_key_exists($arrAlertUser['email'], $userList))
-			    setConfigurationSetting($alertKind, $userList[$arrAlertUser['email']]);
-	    }
+		//
+		// set the user each alert type accordingly
+		//
+		foreach($otherAlertsUsers as $alertKind => $arrAlertUser) {
+			if(array_key_exists($arrAlertUser['email'], $userList))
+				setConfigurationSetting($alertKind, $userList[$arrAlertUser['email']]);
+		}
 
 
-	    $curuser = User::getCurrentUser();
-        if (empty($curuser))
-            throw new \ErrorException("No email address or user has been set in the configuration files for this run.  Aborting.");
-    }
+		$curuser = User::getCurrentUser();
+		if (empty($curuser))
+			throw new \ErrorException("No email address or user has been set in the configuration files for this run.  Aborting.");
+	}
+
+	/**
+	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _parseAlertReceipients()
+	{
+		LogMessage("Configuring contacts for alerts...");
+
+		setConfigurationSetting('alerts.configuration.smtp', $this->_getSetting("alerts.configuration.smtp"));
+
+
+		$keysAlertsTypes = array("alerts.errors.to", "alerts.errors.from", "alerts.results.from");
+		foreach($keysAlertsTypes as $alertKey) {
+			$arrOtherUserFacts = $this->_getSetting($alertKey);
+			if (empty($arrOtherUserFacts))
+				continue;
+
+			$nextUser = array();
+			$otherUser = UserQuery::findUserByEmailAddress($arrOtherUserFacts['email'], $arrOtherUserFacts, false);
+			if (!empty($otherUser))
+			{
+				$nextUser = $otherUser->toArray();
+				$nextUser["User"] = $otherUser;
+			}
+			else
+			{
+				$nextUser = $arrOtherUserFacts;
+				$nextUser['User'] = null;
+			}
+			setConfigurationSetting($alertKey, $nextUser);
+		}
+
+		$currentUser = User::getCurrentUser()->toArray();
+		$currentUser["User"] = User::getCurrentUser();
+		setConfigurationSetting("alerts.results.to", $currentUser);
+	}
 
 
 	/**

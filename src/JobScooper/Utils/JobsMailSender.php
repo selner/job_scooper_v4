@@ -104,14 +104,22 @@ class JobsMailSender extends PHPMailer
 	        }
 	        else {
 		        foreach ($alerts_users as $kind => $user) {
-			        switch ($kind) {
-				        case "from":
-					        $this->setFrom($user->getEmailAddress(), $user->getName());
+			        $email = (!empty($user['Email'])) ? $user['Email'] : $user['EmailAddress'];
+			        $name = (!empty($user['Name'])) ? $user['Name'] : $user['EmailAddress'];
 
+			        if(array_key_exists("User", $user) && !empty($user['User']))
+			        {
+			        	$email = $user['User']->getEmailAddress();
+			        	if(empty($name)) $user['User']->getName();
+			        }
+			        switch ($kind) {
+
+				        case "from":
+					        $this->setFrom($email, $name);
 					        break;
 
 				        default:
-					        $this->addAnAddress($kind, $user->getEmailAddress(), $user->getName());
+					        $this->addAnAddress($kind, $email, $name);
 
 			        }
 		        }
@@ -153,14 +161,11 @@ class JobsMailSender extends PHPMailer
 	        {
 	            try
 		        {
-		            $alertsConfig = array();
-			        foreach ($alerts_users as $kind => $user)
-			            $alertsConfig[$kind] = $user->toArray();
 
 		            $errorInfo = array(
 		                "phpmailer_error" => $this->ErrorInfo,
 				        "phpmail_settings" => objectToArray($this),
-				        "alerts_users" => $alertsConfig
+				        "alerts_users" => $alerts_users
 			        );
 		            $jsonErrorInfo = encodeJSON($errorInfo);
 
