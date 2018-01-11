@@ -16,7 +16,9 @@
  */
 namespace JobScooper\StageProcessor;
 
+use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\GeoLocationQuery;
+use JobScooper\DataAccess\JobPostingQuery;
 use JobScooper\DataAccess\Map\GeoLocationTableMap;
 use Exception;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
@@ -91,7 +93,7 @@ class JobsAutoMarker
 
 	        $this->_markJobsList_KeywordMatches_($arrJobs_AutoUpdatable);
 
-	        $this->_markJobsList_SetLikelyDuplicatePosts_($arrJobs_AutoUpdatable);
+	        $this->_findAndMarkRecentDuplicatePostings();
 
 	        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
@@ -114,52 +116,55 @@ class JobsAutoMarker
     }
 
 	/**
-	 * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
-	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 * @throws \Exception
 	 */
-	function _markJobsList_SetLikelyDuplicatePosts_(&$arrJobsList)
-    {
-	    if(count($arrJobsList) == 0) return;
-	    startLogSection("Automarker: marking duplicate jobs by company/role pairs...");
-        try
-        {
+	private function _findAndMarkRecentDuplicatePostings()
+	{
+		startLogSection("Finding new duplicate company / job title pairs in the past 7 days to mark as dupe...");
+		try {
 
-            $nJobDupes= 0;
-            $nNonDupes = 0;
+			$sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string('7 days ago'));
+			$included_sites = JobSitePluginBuilder::getIncludedJobSites();
+			$duplicatePostings = JobPostingQuery::create()
+				->filterByDuplicatesJobPostingId(null)
+				->filterByJobSiteKey($included_sites, Criteria::IN)
+				->filterByFirstSeenAt(array('max' => $sinceWhen))
+				->withColumn('COUNT(jobposting_id)', "DupeCount")
+				->withColumn('MIN(jobposting_id)', "PrimaryJobPostingId")
+				->select(array("PrimaryJobPostingId", "Company", "Title", "KeyCompanyAndTitle", "DupeCount"))
+				->groupBy(array("KeyCompanyAndTitle", "Company", "Title"))
+				->having('DupeCount >= ?', 2, \PDO::PARAM_INT)
+				->find()
+				->getData();
 
-            LogMessage("Gathering job postings that are already marked as duplicate...");
-            $arrDupeMatches = array_filter($arrJobsList, function(UserJobMatch $v) {
-                $posting = $v->getJobPostingFromUJM();
-                return (!is_null($posting->getDuplicatesJobPostingId()));
-            });
+			$totalMarked = 0;
+			if (!empty($duplicatePostings) && is_array($duplicatePostings)) {
+				LogMessage("Found " . countAssociativeArrayValues($duplicatePostings) . " company/title pairs that are new duplicates within the past 7 days.  Marking the duplicates now...");
+				$chunks = array_chunk($duplicatePostings, 25);
+				$nCounter = 1;
+				foreach ($chunks as $dupesChunk) {
+					LogMessage("... marking duplicate company title pairs " . strval($nCounter) . "-" . strval($nCounter + 25));
+					foreach ($dupesChunk as $dupeSet) {
+						$nNewlyMarked= JobPostingQuery::create()
+							->filterByJobPostingId($dupeSet['PrimaryJobPostingId'], Criteria::NOT_EQUAL)
+							->filterByKeyCompanyAndTitle($dupeSet['KeyCompanyAndTitle'], Criteria::EQUAL)
+							->update(array("DuplicatesJobPostingId" => $dupeSet['PrimaryJobPostingId']));
+						$totalMarked = $totalMarked + $nNewlyMarked;
+					}
+					$nCounter += 25;
+				}
+			}
+			LogMessage("Marked {$totalMarked} job listings as duplicate of an earlier job posting with the same company and job title.");
+		} catch (\Exception $ex)
+		{
+			handleException($ex, null, false);
+		}
+		finally
+		{
+			endLogSection("Finished processing job posting duplicates.");
+		}
 
-            $nJobDupes = count($arrDupeMatches);
-            $arrRemainingJobs = array_diff_assoc($arrJobsList, $arrDupeMatches);
-            LogMessage("Finding and Marking Duplicate Job Roles" );
-            foreach($arrRemainingJobs as &$jobMatch)
-            {
-                $posting = $jobMatch->getJobPostingFromUJM();
-                $dupeId = $posting->checkAndMarkDuplicatePosting();
-                if(!is_null($dupeId) && $dupeId !== false)
-                {
-                    $nJobDupes += 1;
-                    $posting->save();
-                }
-                else
-                    $nNonDupes += 1;
-            }
-
-            LogMessage($nJobDupes. "/" . countAssociativeArrayValues($arrJobsList) . " jobs have been marked as duplicate based on company/role pairing. " );
-        }
-        catch (Exception $ex)
-        {
-            handleException($ex, "Error in SetLikelyDuplicatePosts: %s", true);
-        }
-        finally
-        {
-        	endLogSection("Marking job postings as duplicate finished.");
-        }
     }
 
 	/**
