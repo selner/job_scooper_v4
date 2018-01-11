@@ -97,8 +97,6 @@ class JobsAutoMarker
 
 	        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
-            $this->_markJobsList_UserExcludedKeywords_($arrJobs_AutoUpdatable);
-
 	        $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
 	        // If we got to the end, we successfully marked all the job matches for the user
