@@ -105,7 +105,7 @@ function remove_postfix($text, $postfix) {
 function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
 {
     if(empty($v)|| !is_string($v))
-        return null;
+        return $v;
 
     if(!empty($prefixRemove))
         $v = remove_prefix($v, $prefixRemove);

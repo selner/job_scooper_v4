@@ -1276,12 +1276,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		{
 			LogWarning($ex->getMessage());
 		}
-        if (is_null($arrItem['JobSitePostId']) || strlen($arrItem['JobSitePostId']) <= 0)
-            $arrItem['JobSitePostId'] = $arrItem['Url'];
+        if (empty($arrItem['JobSitePostId'])) {
+	        $arrItem['JobSitePostId'] = $arrItem['Url'];
+        }
 
         $arrItem['JobSitePostId'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['JobSitePostId']);
         $arrItem ['JobSitePostId'] = strScrub($arrItem['JobSitePostId'], FOR_LOOKUP_VALUE_MATCHING);
-        if (is_null($arrItem['JobSitePostId']) || strlen($arrItem['JobSitePostId']) == 0) {
+        if (empty($arrItem['JobSitePostId'])) {
             if (isset($this->regex_link_job_id)) {
                 $arrItem['JobSitePostId'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['Url']);
             }
