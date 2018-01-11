@@ -161,7 +161,8 @@ function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 	$statusInt = array_search($strNewStatus, $valueSet);
 	$nChunkCounter = 1;
 	foreach (array_chunk($arrUserJobMatchIds, 50) as $chunk) {
-		LogMessage("Marking user job matches " . $nChunkCounter . " - " . ($nChunkCounter+50) . " as {$strNewStatus}...");
+		$nMax = ($nChunkCounter+50);
+		LogMessage("Marking user job matches " . $nChunkCounter . " - " . ($nMax >= count($arrUserJobMatchIds) ? count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
 		\JobScooper\DataAccess\UserJobMatchQuery::create()
 			->filterByUserJobMatchId($chunk)
 			->update(array("UserNotificationState" => $statusInt), $con);
