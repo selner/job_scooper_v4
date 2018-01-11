@@ -114,7 +114,6 @@ class JobsAutoMarker
     }
 
 	/**
-	 * @throws \Propel\Runtime\Exception\PropelException
 	 * @throws \Exception
 	 */
 	private function _findAndMarkRecentDuplicatePostings()
