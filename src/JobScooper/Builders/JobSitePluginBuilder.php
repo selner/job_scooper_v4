@@ -288,7 +288,7 @@ class JobSitePluginBuilder
 
 	                    $success = eval($evalStmt);
 	                    if ($success === false)
-	                        throw new \Exception("Failed to initialize the plugin eval code for " . $agentkey . ": " . error_get_last()['message']);
+	                        throw new \Exception("Failed to initialize the plugin eval code for " . $agentkey . ": " . error_get_last()['message'] . " Plugin Eval Statement = " . PHP_EOL . $evalStmt);
 	                }
                 } catch (\Exception $ex) {
                     handleException($ex);
