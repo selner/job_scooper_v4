@@ -147,9 +147,22 @@ class UserJobMatch extends BaseUserJobMatch
 		$this->setIsExcluded(null);
 		$this->setIsJobMatch(null);
 		$this->setOutOfUserArea(null);
-		$this->setMatchedNegativeTitleKeywords(null);
-		$this->setMatchedNegativeCompanyKeywords(null);
-		$this->setMatchedUserKeywords(null);
+
+		$kwds = $this->getMatchedNegativeCompanyKeywords();
+		if(!empty($kwds))
+			foreach($kwds as $k)
+				$this->removeMatchedNegativeCompanyKeyword($k);
+
+		$kwds = $this->getMatchedNegativeTitleKeywords();
+		if(!empty($kwds))
+			foreach($kwds as $k)
+				$this->removeMatchedNegativeTitleKeyword($k);
+
+		$kwds = $this->getMatchedUserKeywords();
+		if(!empty($kwds))
+			foreach($kwds as $k)
+				$this->removeMatchedUserKeyword($k);
+
 		$this->applyDefaultValues();
 	}
 
