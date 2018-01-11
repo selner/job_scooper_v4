@@ -17,26 +17,43 @@
  */
 use JobScooper\DataAccess\UserSearchSiteRun;
 
+/**
+ * Class AbstractMadgexATS
+ */
 abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
 
-    function __construct()
+	/**
+	 * AbstractMadgexATS constructor.
+	 * @throws \Exception
+	 */
+	function __construct()
     {
         $this->prevURL = $this->childSiteURLBase;
         $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
 
         $this->JobPostingBaseUrl = $this->childSiteURLBase;
         $this->SearchUrlFormat = $this->childSiteURLBase . $this->SearchUrlFormat;
+        $this->additionalBitFlags[] = C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER;
         parent::__construct();
     }
 
     protected $JobSiteName = 'madgexats';
-    protected $SearchUrlFormat = '?Keywords=***KEYWORDS***&radialtown=***LOCATION***&LocationId=&RadialLocation=50&NearFacetsShown=true&countrycode=***COUNTRYCODE***&Page=***PAGE_NUMBER***';
+    protected $SearchUrlFormat = '?Keywords=***KEYWORDS***&radialtown=***LOCATION***&LocationId=&RadialLocation=50&NearFacetsShown=true&countrycode=***COUNTRYCODE***&sort=Date&Page=***PAGE_NUMBER***';
     protected $locationid = null;
 
     protected $LocationType = 'location-city-comma-state';
 
-    protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 * @param null                                     $nPage
+	 * @param null                                     $nItem
+	 *
+	 * @return mixed|null|string|string[]
+	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
     {
         $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
         $location = $searchDetails->getGeoLocation();
@@ -48,31 +65,46 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
         if (!empty($this->locationid))
             $strURL = $strURL . "&LocationID=" . $this->locationid;
 
-        $strURL = preg_replace('/[Ppage]{4}=\d+/', 'Page=***PAGE_NUMBER***', $strURL);
+        $page = $nPage == 1 ? "" : "&Page=" . $this->getPageURLValue($nPage);
+        $strURL = preg_replace('/&[Pp]age=\d+/', $page, $strURL);
         return $strURL;
 
     }
 
-    static function checkNoJobResults($var)
+	/**
+	 * @param $var
+	 *
+	 * @return int|null
+	 * @throws \Exception
+	 */
+	static function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "Found 0 jobs");
     }
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_callback' => 'checkNoJobResults'),
+        'NoPostsFound'          => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_callback' => 'checkNoJobResults'),
         'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b(\d+)\b/i'),
-        'JobPostItem'      => array('selector' => 'li.lister__item'),
-        'Title'                 => array('selector' => 'h3 a.js-clickable-area-link span[itemprop="title"]', 'return_attribute' => 'text'),
-        'Url'                  => array('selector' => 'h3 a.js-clickable-area-link ', 'return_attribute' => 'href'),
-        'Company'               => array('selector' => 'li[itemprop="hiringOrganization"]', 'return_attribute' => 'text'),
-        'Location'              => array('selector' => 'li[itemprop="location"]', 'return_attribute' => 'text'),
-        'JobSitePostId'                =>  array('selector' => 'li.lister__item', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i'),
-        'job_posted_date'       => array('selector' => 'li.job-actions__action pipe', 'index=0'),
+        'JobPostItem'           => array('selector' => 'li.lister__item'),
+        'Title'                 => array('selector' => 'h3.lister__header a span', 'return_attribute' => 'text'),
+        'Url'                   => array('selector' => 'h3.lister__header a', 'return_attribute' => 'href'),
+        'Company'               => array('selector' => 'ul li.lister__meta-item--recruiter', 'return_attribute' => 'text'),
+        'PageRange'             => array('selector' => 'ul li.lister__meta-item--salary', 'return_attribute' => 'text'),
+        'Location'              => array('selector' => 'ul li.lister__meta-item--location', 'return_attribute' => 'text'),
+        'JobSitePostId'         => array('selector' => 'li.lister__item', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i'),
+        'PostedAt'              => array('selector' => 'li.job-actions__action', 'index' =>0),
         'company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src'),
-        'NextButton'           => array('selector' => 'li.paginator__item a[rel="next"]')
+        'NextButton'            => array('selector' => 'li.paginator__item a[rel="next"]')
     );
 
-    protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails)
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @return null|string
+	 * @throws \ErrorException
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails)
     {
         $ret = parent::getGeoLocationURLValue($searchDetails);
         if (stristr($ret, "%2C+washington") !== false)
@@ -80,7 +112,12 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
         return $ret;
     }
 
-    function parseAndRedirectToLocation(&$objSimpHTML)
+	/**
+	 * @param $objSimpHTML
+	 *
+	 * @throws \Exception
+	 */
+	function parseAndRedirectToLocation(&$objSimpHTML)
     {
         $locationSelectNode = $objSimpHTML->find("h2");
         if (!is_null($locationSelectNode) && count($locationSelectNode) == 1)
@@ -117,7 +154,13 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
         }
     }
 
-    function parseTotalResultsCount($objSimpHTML)
+	/**
+	 * @param $objSimpHTML
+	 *
+	 * @return null|string
+	 * @throws \Exception
+	 */
+	function parseTotalResultsCount($objSimpHTML)
     {
 
         $this->parseAndRedirectToLocation($objSimpHTML);
@@ -126,6 +169,9 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
     }
 }
 
+/**
+ * Class PluginTheGuardian
+ */
 class PluginTheGuardian extends AbstractMadgexATS
 {
     protected $JobSiteName = 'theguardian';
@@ -143,23 +189,37 @@ class PluginLocalworkCA extends AbstractMadgexATS
 }
 
 
+/**
+ * Class PluginMediaBistro
+ */
 class PluginMediaBistro extends AbstractMadgexATS
 {
     protected $JobSiteName = 'mediabistro';
     protected $childSiteURLBase = 'https://www.mediabistro.com/jobs/search';
 }
+
+/**
+ * Class PluginWashingtonPost
+ */
 class PluginWashingtonPost extends AbstractMadgexATS
 {
     protected $JobSiteName = 'washingtonpost';
     protected $childSiteURLBase = 'https://jobs.washingtonpost.com/searchjobs';
 }
 
+/**
+ * Class PluginJobfinderUSA
+ */
 class PluginJobfinderUSA extends AbstractMadgexATS
 {
     protected $JobSiteName = 'jobfinderusa';
     protected $childSiteURLBase = "https://www.jobfinderusa.com/searchjobs/";
+//	https://www.jobfinderusa.com/searchjobs/?LocationId=5865100&keywords=Experience&radiallocation=50&countrycode=US&sort=Date&Page=2
 }
 
+/**
+ * Class PluginGreatJobSpot
+ */
 class PluginGreatJobSpot extends AbstractMadgexATS
 {
     protected $JobSiteName = 'greatjobspot';
@@ -167,18 +227,27 @@ class PluginGreatJobSpot extends AbstractMadgexATS
 }
 
 
+/**
+ * Class PluginExecAppointments
+ */
 class PluginExecAppointments extends AbstractMadgexATS
 {
     protected $JobSiteName = 'execappointments';
     protected $childSiteURLBase = "https://www.exec-appointments.com/searchjobs/";
 }
 
+/**
+ * Class PluginEconomist
+ */
 class PluginEconomist extends AbstractMadgexATS
 {
     protected $JobSiteName = 'economist';
     protected $childSiteURLBase = "http://jobs.economist.com/searchjobs";
 }
 
+/**
+ * Class PluginStarTribune
+ */
 class PluginStarTribune extends AbstractMadgexATS
 {
     protected $JobSiteName = 'startribune';
