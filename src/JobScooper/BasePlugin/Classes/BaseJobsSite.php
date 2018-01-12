@@ -762,6 +762,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	protected function goToEndOfResultsSetViaLoadMore($nTotalItems)
     {
+    	if(empty($this->selectorMoreListings))
+    		throw new Exception("Plugin set to paginate via Load More but no selector was set for the load more control on the page.");
         $this->moveDownOnePageInBrowser();
         $secs = $this->additionalLoadDelaySeconds * 1000;
         if ($secs <= 0)
