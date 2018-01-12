@@ -1459,10 +1459,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
         try {
             $nItemCount = 1;
             $nPageCount = 1;
+	        LogMessage("Starting first page load for " . $this->JobSiteName . " job search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
 
-            LogMessage("Getting count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
 
-            if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+	        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                 try {
                     if (is_null($this->selenium)) {
                         $this->selenium = new SeleniumManager($this->additionalLoadDelaySeconds);
@@ -1508,7 +1508,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 }
             }
 
-            if (!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
+	        LogMessage("Getting count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
+
+	        if (!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
                 $nTotalListings = intval(str_replace(",", "", $strTotalResults));
                 if ($nTotalListings == 0) {
