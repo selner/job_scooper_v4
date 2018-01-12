@@ -62,7 +62,7 @@ abstract class AbstractGreenhouseATS  extends \JobScooper\BasePlugin\Classes\Aja
 	}
 
 
-	function parseTotalResultsCount($objSimpHTML)
+	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
 	{
 		try {
 			$retData = $this->getJsonResultsPage(0);

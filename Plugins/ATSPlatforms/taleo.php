@@ -62,7 +62,7 @@ abstract class AbstractTaleo extends \JobScooper\BasePlugin\Classes\ServerHtmlPl
 	 *
 	 * @return array|null|string|void
 	 */
-	function parseTotalResultsCount($objSimpHTML)
+	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         if($this->use1ToTDForCount)
             return $this->parseTotalResultsCountFrom1ToTD($objSimpHTML);
@@ -138,7 +138,7 @@ abstract class AbstractTaleo extends \JobScooper\BasePlugin\Classes\ServerHtmlPl
 	 *
 	 * @return null
 	 */
-	function parseTotalResultsCountFrom1ToTD($objSimpHTML) {
+	function parseTotalResultsCountFrom1ToTD(SimpleHTMLHelper $objSimpHTML) {
         $nodes = $objSimpHTML->find('td[class="nowrapRegular"] b');
         if($nodes && count($nodes)>=2)
         {

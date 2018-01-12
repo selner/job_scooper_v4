@@ -653,7 +653,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return int|string|null
 	 *
 	*/
-	function parseTotalResultsCount($objSimpHTML)
+	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__));
     }

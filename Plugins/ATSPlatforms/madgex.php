@@ -160,7 +160,7 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	 * @return null|string
 	 * @throws \Exception
 	 */
-	function parseTotalResultsCount($objSimpHTML)
+	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
 
         $this->parseAndRedirectToLocation($objSimpHTML);

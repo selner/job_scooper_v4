@@ -54,7 +54,7 @@ class PluginExpedia extends \JobScooper\BasePlugin\Classes\AjaxHtmlPlugin
     }
 
 
-    function parseTotalResultsCount($objSimpHTML)
+    function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $resultsSection= $objSimpHTML->find("span[class='GF34SVYCIUH'] span");
         $totalItemsText = $resultsSection[0]->text();

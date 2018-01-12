@@ -56,12 +56,12 @@ class PluginZipRecruiter extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePl
     }
 
 	/**
-	 * @param $objSimpl
+	 * @param $objSimpHTML
 	 *
 	 * @return null|string
 	 * @throws \Exception
 	 */
-	function parseTotalResultsCount($objSimpl)
+	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         sleep($this->additionalLoadDelaySeconds + 1);
 
@@ -83,7 +83,7 @@ class PluginZipRecruiter extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePl
 
         $this->runJavaScriptSnippet($dismissPopup, true);
 
-        return parent::parseTotalResultsCount($objSimpl);
+        return parent::parseTotalResultsCount($objSimpHTML);
     }
 
 	/**

@@ -201,7 +201,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 * @return string|null
 	 * @throws \Exception
 	 */
-	function parseTotalResultsCount($objSimpHTML)
+	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
 	{
 		if(!is_null($this->nTotalJobs))
 			return $this->nTotalJobs;

@@ -143,7 +143,7 @@ class PluginSimplyHired extends \JobScooper\BasePlugin\Classes\ServerHtmlPlugin
     }
 
 
-    function parseTotalResultsCount($objSimpHTML)
+    function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $node = $objSimpHTML->find("div[class='result-headline'] div[class='hidden-sm-down'] div");
         if($node && isset($node) && is_array($node))

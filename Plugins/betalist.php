@@ -38,7 +38,7 @@ class PluginBetalist extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
         return ($nPage - 1);
     }
 
-    function parseTotalResultsCount($objSimpHTML)
+    function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
 

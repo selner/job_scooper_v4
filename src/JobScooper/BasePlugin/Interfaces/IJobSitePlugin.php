@@ -35,7 +35,7 @@ interface IJobSitePlugin
      * @param $objSimpHTML
      * @return string|null
      */
-    function parseTotalResultsCount($objSimpHTML);
+    function parseTotalResultsCount(SimpleHTMLHelper $objSimpHTML);
 
     /**
      * /**

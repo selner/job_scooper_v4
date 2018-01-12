@@ -143,7 +143,7 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 	 * @return string|null
 	 * @throws \Exception
 	 */
-	function parseTotalResultsCount($objSimpHTML)
+	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
 	{
 		try {
 			$retData = $this->getJsonResultsPage(0);

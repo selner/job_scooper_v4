@@ -153,7 +153,7 @@ class SimplePlugin extends BaseJobsSite
      * @return string|null
      * @throws \Exception
      */
-    function parseTotalResultsCount($objSimpHTML)
+    function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['NoPostsFound']) && count($this->arrListingTagSetup['NoPostsFound']) > 0) {
             try
