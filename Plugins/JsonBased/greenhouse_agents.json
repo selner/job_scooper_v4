@@ -25,12 +25,6 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "xogroupinc",
-            "SiteReferenceKey" : "xogroupinc",
-            "SourceURL": "https://xogroupinc.com/xo-group-careers/",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "cloudreach",
             "SiteReferenceKey" : "cloudreach",
             "SourceURL": "https://www.cloudreach.com/careers",
