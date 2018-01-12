@@ -37,9 +37,10 @@ class JobSiteRecord extends BaseJobSiteRecord
 		    try {
 			    $class = $this->getPluginClassName();
 			    if (!in_array($class, get_declared_classes())) {
-				    LogError("Unable to find declared class " . $this->getPluginClassName() . "] for plugin " . $this->getJobSiteKey());
+				    LogWarning("Unable to find declared class " . $this->getPluginClassName() . "] for plugin " . $this->getJobSiteKey() .".  Disabling JobSite for future runs.");
 				    $this->_pluginObject = null;
 				    $this->setisDisabled(true);
+				    $this->save();
 			    }
 			    else
 			    {
