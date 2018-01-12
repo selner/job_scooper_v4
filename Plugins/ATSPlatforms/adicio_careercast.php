@@ -37,6 +37,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	protected $LocationType = 'location-city-comma-statecode';
 	protected $nTotalJobs = null;
 	protected $lastResponseData = null;
+	protected $currentJsonSearchDetails = null;
 
 	protected $arrBaseListingTagSetupNationalSearch = array(
 		'TotalPostCount' => array('selector' => 'span#retCount span'),  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
@@ -98,7 +99,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		if (isDebug()) $curl->setDebug(true);
 
 		$lastCookies = $this->getActiveWebdriver()->manage()->getCookies();
-
+		LogMessage("Downloading JSON listing data from {$url} for " . $this->getJobSiteKey() . "...");
 		$retObj = $curl->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = $lastCookies);
 		if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
 //			$respdata = json_decode($retObj['output'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK;);
@@ -137,7 +138,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		{
 			$ret[$job->Id] = array(
 				'JobSiteKey' => $jobsite,
-				'JobSitePostId' => $job->Id,
+				'JobSitePostId' => "{$job->AdId}-{$job->Id}",
 				'Company' => $job->Company,
 				'Title' =>  $job->JobTitle,
 				'Url' => $job->Url,
@@ -149,11 +150,18 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		return $ret;
 	}
 
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 * @param null                                     $nOffset
+	 *
+	 * @return string
+	 */
 	private function _getJsonSearchUrl(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nOffset=null)
 	{
-		$jsonUrl = $searchDetails->getSearchStartUrl() . "&format=json";
-		if(!empty($nOffset))
-			$jsonUrl = $jsonUrl. "";
+		if(!empty($this->nextResultsPageUrl))
+			$jsonUrl = $this->nextResultsPageUrl. "&format=json";
+		else
+			$jsonUrl = $searchDetails->getSearchStartUrl() . "&format=json";
 		return $jsonUrl;
 	}
 	/**
@@ -164,6 +172,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 */
 	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
 	{
+		$this->currentJsonSearchDetails = $searchDetails;
 		$jsonUrl = $this->_getJsonSearchUrl($searchDetails);
 		$retData = null;
 		try {
@@ -176,14 +185,22 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 
 		if(is_null($this->nTotalJobs))
 		{
-			if (!empty($this->LastKnownSiteLayout)) {
-				$this->setAdicioPageLayout($this->LastKnownSiteLayout);
-			} else {
-				$template = $this->_determinePageLayout();
+			$this->setLayoutIfNeeded();
+		}
+	}
 
-				$this->setAdicioPageLayout($template);
-				LogDebug("Adicio Template for " . get_class($this) . " with url '{$this->SearchUrlFormat}: " . PHP_EOL . "$template = {$template}," . PHP_EOL . "layout = {$this->_layout},  " . PHP_EOL . "template = {$template},  " . PHP_EOL . "id = {$id}, " . PHP_EOL . "matches = " . getArrayDebugOutput($matches));
-			}
+	/**
+	 * @throws \Exception
+	 */
+	protected function setLayoutIfNeeded()
+	{
+		if (!empty($this->LastKnownSiteLayout)) {
+			$this->setAdicioPageLayout($this->LastKnownSiteLayout);
+		} else {
+			$template = $this->_determinePageLayout();
+
+			$this->setAdicioPageLayout($template);
+			LogDebug("Adicio Template for " . get_class($this) . " with url '{$this->SearchUrlFormat}: " . PHP_EOL . "$template = {$template}," . PHP_EOL . "layout = {$this->_layout},  " . PHP_EOL . "template = {$template},  " . PHP_EOL . "id = {$id}, " . PHP_EOL . "matches = " . getArrayDebugOutput($matches));
 		}
 	}
 
@@ -206,6 +223,9 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		if(!is_null($this->nTotalJobs))
 			return $this->nTotalJobs;
 
+		if(empty($this->arrListingTagSetup))
+			$this->setLayoutIfNeeded();
+
 		return parent::parseTotalResultsCount($objSimpHTML);
 	}
 
@@ -215,38 +235,60 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 * @return array|null
 	 * @throws \Exception
 	 */
+	function getLayoutAndParseJobs(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+	{
+		if(empty($this->arrListingTagSetup))
+			$this->setLayoutIfNeeded();
+
+		return $this->parseJobsListForPage($objSimpHTML);
+
+	}
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null
+	 * @throws \Exception
+	 */
 	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
 	{
-		if (!empty($this->lastResponseData))
+
+		if (!empty($this->lastResponseData) || !empty($this->currentJsonSearchDetails))
 		{
 			try {
 				$ret = array();
 				$nOffset = 0;
 				if (!empty($this->lastResponseData) && !empty($this->lastResponseData->Jobs) && count($this->lastResponseData->Jobs) > 0) {
 					$jobs = $this->lastResponseData->Jobs;
-					while (!empty($jobs)) {
-						$curPageJobs = $this->_parseJsonJobs($jobs);
-						$ret = array_merge($ret, $curPageJobs);
-						$nOffset = $nOffset + count($jobs);
-						if ($nOffset < $this->nTotalJobs) {
-							$searchDetails = getConfigurationSetting('current_user_search_details');
-							$jsonUrl = $this->_getJsonSearchUrl($searchDetails, $nOffset);
-							$retData = $this->getJsonResultsPage($jsonUrl);
-							$jobs = $retData['jobs'];
-						} else
-							$jobs = null;
-					}
+					$this->lastResponseData = null;
 				}
-
-				return $ret;
+				else {
+					$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
+					$respData = $this->getJsonResultsPage($jsonUrl);
+					$jobs = $respData['jobs'];
+					$this->nTotalJobs = $respData['count'];
+				}
+				return $this->_parseJsonJobs($jobs);
+//
+//				while (!empty($jobs) && $nOffset < $this->nTotalJobs) {
+//					$curPageJobs = $this->_parseJsonJobs($jobs);
+//					$jobs = null;
+//					$ret = array_merge($ret, $curPageJobs);
+//					$nOffset = $nOffset + count($curPageJobs);
+//					if ($nOffset < $this->nTotalJobs) {
+//						$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
+//						$retData = $this->getJsonResultsPage($jsonUrl);
+//						$jobs = $retData['jobs'];
+//					}
+//				}
+//				return $ret;
 			} catch (Exception $ex) {
 				LogWarning("Failed to download " . $this->getJobSiteKey() . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
 
-				return parent::parseJobsListForPage($objSimpHTML);
+				return $this->getLayoutAndParseJobs($objSimpHTML);
 			}
-		} else {
-			return parent::parseJobsListForPage($objSimpHTML);
 		}
+
+		return $this->getLayoutAndParseJobs($objSimpHTML);
 	}
 
 	/**

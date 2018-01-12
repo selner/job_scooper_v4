@@ -368,7 +368,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
     protected $CountryCodes = array("US");
     private $_curlWrapper = null;
-
+    protected $nextResultsPageUrl = null;
 
 	/**
 	 * @param \JobScooper\DataAccess\GeoLocation|null $location
@@ -1107,6 +1107,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
     {
         try {
+        	if(!empty($strURL))
+        		$this->nextResultsPageUrl = $strURL;
+
             $objSimpleHTML = null;
 
             if (isDebug() == true) {
@@ -1430,7 +1433,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
         $objSimpleHTML = null;
         try {
             if(!empty($url))
+            {
+	            $this->nextResultsPageUrl = $url;
                 $this->getActiveWebdriver()->get($url);
+            }
 
             LogMessage("... sleeping " . $this->additionalLoadDelaySeconds . " seconds while the page results load for " . $this->JobSiteName);
             sleep($this>$this->additionalLoadDelaySeconds);
@@ -1534,6 +1540,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                 LogMessage("Querying " . $this->JobSiteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails->getSearchStartUrl());
 
                 $strURL = $searchDetails->getSearchStartUrl();
+                $this->nextResultsPageUrl = $strURL;
                 while ($nPageCount <= $totalPagesCount) {
 
                     $arrPageJobsList = null;
@@ -1610,7 +1617,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
                             handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true, $extraData=$searchDetails->toLoggedContext());
                         }
                     } else {
-                        $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
+                        $strURL = $this->setResultPageUrl($searchDetails, $nPageCount, $nItemCount);
                         if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
                             return null;
 
@@ -1732,9 +1739,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
                         try {
                             switch (strtoupper($this->PaginationType)) {
                                 case C__PAGINATION_PAGE_VIA_URL:
-                                    $strURL = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
-                                    if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
-                                        return null;
+                                    $strURL = $this->setResultPageUrl($searchDetails, $nPageCount, $nItemCount);
+                                    if (empty($strURL))
+                                        return $strURL;
                                     $this->selenium->loadPage($strURL);
                                     break;
 
@@ -1798,6 +1805,24 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	protected function getSearchJobsFromAPI($searchDetails)
     {
         throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__));
+    }
+
+	/**
+	 * @param $searchDetails
+	 * @param $nPageCount
+	 * @param $nItemCount
+	 *
+	 * @return null|string
+	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	protected function setResultPageUrl($searchDetails, $nPageCount, $nItemCount)
+    {
+	    $this->nextResultsPageUrl = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
+	    if ($this->_checkInvalidURL_($searchDetails, $this->nextResultsPageUrl) == VALUE_NOT_SUPPORTED)
+		    return $this->nextResultsPageUrl;
+
+	    return $this->nextResultsPageUrl;
     }
 }
 
