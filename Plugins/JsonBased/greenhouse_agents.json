@@ -31,12 +31,6 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "cision",
-            "SiteReferenceKey" : "cision",
-            "SourceURL": "https://www.cision.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "cloudreach",
             "SiteReferenceKey" : "cloudreach",
             "SourceURL": "https://www.cloudreach.com/careers",
@@ -97,36 +91,6 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "abarca",
-            "SiteReferenceKey" : "abarca",
-            "SourceURL": "https://www.abarca.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "myfitnesspal",
-            "SiteReferenceKey" : "myfitnesspal",
-            "SourceURL": "https://www.myfitnesspal.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "vital",
-            "SiteReferenceKey" : "vital",
-            "SourceURL": "https://www.vital.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "aver",
-            "SiteReferenceKey" : "aver",
-            "SourceURL": "https://www.aver.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "cohealo",
-            "SiteReferenceKey" : "cohealo",
-            "SourceURL": "https://www.cohealo.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "quartzy",
             "SiteReferenceKey" : "quartzy",
             "SourceURL": "https://www.quartzy.com/careers",
@@ -148,12 +112,6 @@
             "JobSiteName": "practicefusion",
             "SiteReferenceKey" : "practicefusion",
             "SourceURL": "https://www.practicefusion.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "propeller",
-            "SiteReferenceKey" : "propeller",
-            "SourceURL": "https://www.propeller.com/careers",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
@@ -187,12 +145,6 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "brightroll",
-            "SiteReferenceKey" : "brightroll",
-            "SourceURL": "https://www.brightroll.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "tumblr",
             "SiteReferenceKey" : "tumblr",
             "SourceURL": "https://www.tumblr.com/careers",
@@ -223,21 +175,9 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "tower",
-            "SiteReferenceKey" : "tower",
-            "SourceURL": "https://www.tower.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "jumptrading",
             "SiteReferenceKey" : "jumptrading",
             "SourceURL": "https://www.jumptrading.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "onezero",
-            "SiteReferenceKey" : "onezero",
-            "SourceURL": "https://www.onezero.com/careers",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
@@ -271,21 +211,9 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "akuna",
-            "SiteReferenceKey" : "akuna",
-            "SourceURL": "https://www.akuna.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "betterment",
             "SiteReferenceKey" : "betterment",
             "SourceURL": "https://www.betterment.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "wealthfront",
-            "SiteReferenceKey" : "wealthfront",
-            "SourceURL": "https://www.wealthfront.com/careers",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
@@ -295,33 +223,15 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "gawker",
-            "SiteReferenceKey" : "gawker",
-            "SourceURL": "https://www.gawker.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "popsugar",
             "SiteReferenceKey" : "popsugar",
             "SourceURL": "https://www.popsugar.com/careers",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "sfchronicle",
-            "SiteReferenceKey" : "sfchronicle",
-            "SourceURL": "https://www.sfchronicle.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "thrillist",
             "SiteReferenceKey" : "thrillist",
             "SourceURL": "https://www.thrillist.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "xogroup",
-            "SiteReferenceKey" : "xogroup",
-            "SourceURL": "https://www.xogroup.com/careers",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
@@ -370,12 +280,6 @@
             "JobSiteName": "warbyparker",
             "SiteReferenceKey" : "warbyparker",
             "SourceURL": "https://www.warbyparker.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "ragandbone",
-            "SiteReferenceKey" : "ragandbone",
-            "SourceURL": "https://www.ragandbone.com/careers",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         }
     ]
