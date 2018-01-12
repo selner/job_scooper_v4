@@ -140,14 +140,6 @@ class ConfigBuilder
 	        $arrOututDirs[$d] = realpath($details->getPathname());
         }
 
-        $userWorkingDirs = ["notifications"];
-        foreach ($userWorkingDirs as $d) {
-            $prefix = $GLOBALS['user_unique_key'];
-            $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d, $prefix));
-            $details = parsePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-	        $arrOututDirs[$d] = realpath($details->getPathname());
-        }
-
 		setConfigurationSetting('output_directories', $arrOututDirs);
 
 	    if (!isset($GLOBALS['logger']))

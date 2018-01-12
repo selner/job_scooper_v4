@@ -138,7 +138,7 @@ class NotifierJobAlerts extends JobsMailSender
 
 			$writer = IOFactory::createWriter($spreadsheet, "Xlsx");
 
-			$pathExcelResults = getDefaultJobsOutputFileName("", "JobMatches", "XLSX", "_", 'notifications');
+			$pathExcelResults = getDefaultJobsOutputFileName("", "JobMatches", "XLSX", "_", 'debug');
 			$writer->save($pathExcelResults);
 			$arrFilesToAttach[] = $pathExcelResults;
 
