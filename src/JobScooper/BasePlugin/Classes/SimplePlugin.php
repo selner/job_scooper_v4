@@ -436,8 +436,9 @@ class SimplePlugin extends BaseJobsSite
 
                 if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
                     $match = array();
-                    $propertyRegEx = str_replace("\\\\", "\\", $propertyRegEx);
-                    if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
+	                $propertyRegEx = str_replace("\\\\", "\\", $propertyRegEx);
+	                $retTemp = str_replace("\n", " ", $ret);
+                    if (preg_match($propertyRegEx, $retTemp, $match) !== false && count($match) >= 1)
                     {
                         $ret = $match[1];
                     }
