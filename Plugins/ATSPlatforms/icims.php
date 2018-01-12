@@ -16,98 +16,127 @@
  */
 
 
-
-
-class AbstractIcims extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
+class AbstractIcimsATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
-    protected $additionalBitFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
-    protected $JobListingsPerPage = 20;
-    protected $strInitialReferer = null;
-    protected $arrResultsRowTDIndex = null;
-
-    function __construct($strBaseDir = null)
-    {
-        $this->strInitialReferer = $this->JobPostingBaseUrl . "/jobs/search?pr=0";
-#        $this->SearchUrlFormat = $this->JobPostingBaseUrl . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1&searchKeyword=***KEYWORDS***";
-        $this->SearchUrlFormat = $this->JobPostingBaseUrl . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1";
-        $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
-
-        if(is_null($this->arrResultsRowTDIndex))
-            throw new InvalidArgumentException("Error in iCIMS plugin:  you must map the columns in the results table to the correct indexes for HTML tag matching. Aborting.");
-
-        foreach(array_keys($this->arrResultsRowTDIndex) as $tagKey)
-        {
-            if(array_key_exists($tagKey, $this->arrResultsRowTDIndex) === true && is_null($this->arrResultsRowTDIndex[$tagKey]) !== true &&
-                array_key_exists($tagKey, $this->arrListingTagSetup))
-            {
-                if(array_key_exists(0, $this->arrListingTagSetup[$tagKey]) && is_array($this->arrListingTagSetup[$tagKey]) === true)
-                    $this->arrListingTagSetup[$tagKey][0]['index'] = $this->arrResultsRowTDIndex[$tagKey];
-                else
-                    $this->arrListingTagSetup[$tagKey]['index'] = $this->arrResultsRowTDIndex[$tagKey];
-            }
-        }
-
-        parent::__construct();
-
-    }
-
-    protected $arrListingTagSetup = array(
-#        'NoPostsFound' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'iCIMS_ListingsPage', 'return_attribute' => 'text', 'return_value_regex' => '/\s*Job Listings\s*(Sorry)/'),
-        'TotalResultPageCount' => array('selector' => '#iCIMS_Paginator', 'return_attribute' => 'text', 'return_value_regex' => '/.*?\s+(\d+)\s*$/'),
-        'JobPostItem' => array(array('tag' => 'table', 'attribute'=>'class', 'attribute_value' => 'iCIMS_JobsTable iCIMS_Table'), array('tag' => 'tr')),
-        'Title' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'text'),
-        'Url' =>  array(array('tag' => 'td', 'index' =>null), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
-        'JobSitePostId' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'href', 'return_value_regex' => '/.*?([\d\-]+).*?$/'),
-        'Location' =>  array('tag' => 'td', 'index' =>null, 'return_attribute' => 'text',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s[:punct:]]+)?$/'),
-//        'Title' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'text'),
-//        'Url' =>  array(array('tag' => 'td', 'index' =>1), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' => '/(.*?)\?.*/'),
-//        'JobSitePostId' =>  array('tag' => 'td', 'index' =>1), 'return_attribute' => 'text', 'return_value_regex' => '/.*?(\d+\-\d+).*?/'),
-//        'Location' =>  array('tag' => 'td', 'index' =>2, 'return_attribute' => 'text',  'return_value_regex' => '/.*?Loc[\w]+:&nbsp;\s*([\w\s\-]+)?$/')
-    );
-    protected function getPageURLValue($nPage) { return ($nPage - 1); }
-
-}
-
-class PluginHibbettSports extends AbstractIcims
-{
-    protected $JobSiteName = 'HibbettSports';
-    protected $JobPostingBaseUrl = "https://retailcareers-hibbett.icims.com";
-    protected $regex_link_job_id = '/.*?([\d\-]+).*?$/';
-    protected $additionalLoadDelaySeconds = 3;
-
-    protected $arrResultsRowTDIndex = array('Title' => 0, 'Url' => 0, 'JobSitePostId' => null, 'Department' => 1, 'Location' => 2, 'PostedAt' => null  );
-    function __construct($strBaseDir = null)
-    {
-        $this->arrListingTagSetup['TotalResultPageCount'] = array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'iCIMS_Paginator_Bottom'), array('tag' => 'div') , array('tag' => 'div') , array('tag' => 'div'), 'index' => 1, 'return_attribute' => 'text', 'return_value_regex' => '/.*?of\s+(\d+).*/');
-        parent::__construct();
-        $this->SearchUrlFormat = $this->JobPostingBaseUrl . "/jobs/search?pr=***PAGE_NUMBER***&in_iframe=1";
-    }
-}
+	protected $additionalBitFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
+	protected $JobListingsPerPage = 20;
+	protected $strInitialReferer = null;
+	protected $TagIndexes = null;
+	protected $SiteReferenceKey = null;
 
 
-class PluginFredHutch extends AbstractIcims
-{
-    protected $JobSiteName = 'FredHutch';
-    protected $JobPostingBaseUrl = "https://hub-fhcrc.icims.com";
-    protected $JobListingsPerPage = 167;
+	/**
+	 * AbstractIcimsATS constructor.
+	 *
+	 * @param null $strBaseDir
+	 *
+	 * @throws \Exception
+	 */
+	function __construct($strBaseDir = null)
+	{
+		$this->JobPostingBaseUrl = "http://{$this->SiteReferenceKey}.icims.com";
+		$this->strInitialReferer = $this->JobPostingBaseUrl . "/jobs/search?pr=0";
+		$this->SearchUrlFormat = $this->JobPostingBaseUrl . "/jobs/search?mobile=true&width=1170&height=500&bga=true&needsRedirect=false&jan1offset=-480&jun1offset=-420&needsRedirect=false&in_iframe=1&pr=***PAGE_NUMBER***";
+		$this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
 
-    // Results Columns:  "Posting date", "Job ID", "Job title", "Department", "Location", "Remote base"
-    protected $arrResultsRowTDIndex = array('PostedAt' => null, 'JobSitePostId' => 0, 'Title' => 1, 'Url' => 1, 'Department' => null, 'Location' => 2 );
-}
+		foreach (array_keys($this->TagIndexes) as $tagKey) {
+			if (array_key_exists($tagKey, $this->TagIndexes) === true && is_null($this->TagIndexes[$tagKey]) !== true &&
+				array_key_exists($tagKey, $this->arrListingTagSetup)) {
+				if (array_key_exists(0, $this->arrListingTagSetup[$tagKey]) && is_array($this->arrListingTagSetup[$tagKey]) === true)
+					$this->arrListingTagSetup[$tagKey][0]['index'] = $this->TagIndexes[$tagKey];
+				else
+					$this->arrListingTagSetup[$tagKey]['index'] = $this->TagIndexes[$tagKey];
+			}
+		}
 
-class PluginRedHat extends AbstractIcims
-{
-    protected $JobSiteName = 'RedHat';
-    protected $JobListingsPerPage = 10;
-    protected $JobPostingBaseUrl = "https://careers-redhat.icims.com";
+		parent::__construct();
+	}
 
-    // Results Columns:  "Posting date", "Job ID", "Job title", "Department", "Location", "Remote base"
-    protected $arrResultsRowTDIndex = array('PostedAt' => 0, 'JobSitePostId' => 1, 'Title' => 2, 'Url' => 2, 'Department' => 3, 'Location' => 4 );
-}
+	protected $arrListingTagSetup = array(
 
-class PluginParivedaSolutions extends AbstractIcims
-{
-    protected $JobSiteName = 'ParivedaSolutions';
-    protected $JobPostingBaseUrl = "https://careers-parivedasolutions.icims.com";
-    protected $arrResultsRowTDIndex = array('PostedAt' => null, 'JobSitePostId' => 0, 'Title' => 1, 'Url' => 1, 'Department' => null, 'Location' => 2 );
+		'JobPostItem'          => array('selector' => 'div.iCIMS_JobsTable div.row'),
+		'Title'                => array('selector' => 'div.title a span'),
+		'Url'                  => array('selector' => 'div.title a', 'return_attribute' => 'href'),
+		'JobSitePostId'        => array('selector' => 'div.title a', 'return_attribute' => 'title', 'return_value_regex' => '/(\d+)/'),
+		'Location'             => array('selector' => 'div span', 'index' => 0),
+		'PostedAt'             => array('selector' => 'span.sr-only'),
+		// TotalResultPageCount tag is a placeholder needed to trigger the right code paths, but is overridden by the
+		// custom parseTotalResultsCount() method below
+		'TotalResultPageCount' => array('selector' => 'a', 'return_value_regex' => '/pr=(\d+)/', 'type' => 'XPATH')
+	);
+
+	/**
+	 * @param $nPage
+	 *
+	 * @return int|string
+	 * @throws \Exception
+	 */
+	protected function getPageURLValue($nPage)
+	{
+		return ($nPage - 1);
+	}
+
+	/**
+	 * @param $objSimpHTML
+	 *
+	 * @return mixed|null|string
+	 * @throws \Exception
+	 */
+	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+	{
+		/*
+			ICIMS has two main layouts:
+		        - one with a dropdown listing all the page #s
+				- one with a "Last" link to the last page
+
+			We try each to find the last page of results for this search
+		    so we can estimate the total # of results & pages to load
+
+			if we fail both of those, we still try to get the value
+			from any tag override the site class does
+		*/
+
+		$xpathLastLink = "//a[contains(./span/text(), 'Last')]";
+		$lastLink = $objSimpHTML->findByXpath($xpathLastLink);
+		if (!empty($lastLink) && is_array($lastLink)) {
+			$lastLink = $lastLink[0];
+			$href = $lastLink->getAttribute("href");
+			$matches = array();
+			$matched = preg_match("/pr=(\d+)/", $href, $matches);
+			if ($matched) {
+				$lastPage = $matches[1];
+				$nLastPage = intval($lastPage);
+				$nTotalItemsMax = $nLastPage * $this->JobListingsPerPage;
+
+				return $nTotalItemsMax;
+			}
+		}
+
+		$nodeDropdownItem = $objSimpHTML->find("div.iCIMS_Paginator_Bottom select[paginator='true'] option:last-child");
+		if (!empty($nodeDropdownItem) && is_array($nodeDropdownItem)) {
+			$lastPage = $nodeDropdownItem[0]->text();
+			$nLastPage = intval($lastPage);
+			$nTotalItemsMax = $nLastPage * $this->JobListingsPerPage;
+
+			return $nTotalItemsMax;
+		}
+
+		return parent::parseTotalResultsCount($objSimpHTML);
+	}
+
+	/**
+	 * @param $arrItem
+	 *
+	 * @return array
+	 */
+	function cleanupJobItemFields($arrItem)
+	{
+		if (!empty($arrItem['PostedAt'])) {
+			// remove the parens around the date
+			$arrItem['PostedAt'] = remove_prefix($arrItem['PostedAt'], "(");
+			$arrItem['PostedAt'] = remove_postfix($arrItem['PostedAt'], ")");
+		}
+
+		return parent::cleanupJobItemFields($arrItem);
+	}
 }
