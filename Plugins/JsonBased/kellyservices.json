@@ -1,35 +1,23 @@
 {
   "JobSiteName": "KellyServices",
-  "SourceURL": "https://kelly.secure.force.com/CandidateExperience/CandExpJobSearch?advanced=false&jobCategoryList=null&location=***LOCATION***&radius=60",
-  "BaseURL": "https://kelly.secure.force.com",
+  "SourceURL": "https://careers.kellyservices.com/search-results?keywords=",
+  "BaseURL": "https://careers.kellyservices.com/",
   "AdditionalFlags" : [ "C__JOB_USE_SELENIUM"],
   "CountryCodes" : ["US"],
-  "PluginExtendsClassName" : "AbstractKellyServices",
-  "LocationType": "location-city-comma-state",
   "Collections": [
     {
       "Name": "PageFields",
       "Fields": [
         {
-          "Name": "NoPostsFound",
-          "Selector": "div.jobcount",
-          "Index" : 0,
-          "Callback" : "matchesNoResultsPattern",
-          "CallbackParameter": "0 Results",
-          "Attribute": "text",
-          "Type": "CSS"
-        },
-        {
           "Name": "TotalPostCount",
-          "Selector": "div.jobcount",
+          "Selector": "span.result-count",
           "Index" : 0,
-          "Pattern": "/([0-9,]+)\\s*Results/",
           "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
-          "Selector": "span div.row div.rowheader",
+          "Selector": "li.jobs-list-item",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -40,51 +28,51 @@
       "Fields": [
         {
           "Name": "Title",
-          "Selector": "div.job",
-          "Attribute": "text",
+          "Selector": "div",
+          "Attribute": "data-ph-at-job-title-text",
+          "Index": 0,
           "Type": "CSS"
         },
         {
           "Name": "Location",
-          "Selector": "div.loc",
+          "Selector": "div",
           "Index": 0,
-          "Attribute": "text",
+          "Attribute": "data-ph-at-job-location-text",
           "Type": "CSS"
         },
         {
           "Name": "Category",
-          "Selector": "div.type",
+          "Selector": "div",
           "Index": 0,
-          "Attribute": "text",
+          "Attribute": "data-ph-at-job-category-text",
           "Type": "CSS"
         },
         {
           "Name": "Url",
-          "Selector": "div.view a",
+          "Selector": "div a",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
         },
         {
           "Name": "JobSitePostId",
-          "Selector": "div.share",
-          "Attribute" : "id",
-          "Index": 0,
-          "Type": "CSS"
+          "Pattern": "/\\/job\\/([\\w]+)\\//i",
+          "Type": "SOURCEFIELD",
+          "Field": "Url"
         },
-
         {
           "Name": "PostedAt",
-          "Selector": "div.date",
+          "Selector": "div",
           "Index": 0,
-          "Attribute": "text",
+          "Attribute": "data-ph-at-job-post-date-text",
           "Type": "CSS"
         }
       ]
     }
   ],
   "Pagination": {
-    "Type": "PAGE-CALLBACK",
+    "Type": "NEXT-BUTTON",
+    "Selector" : "a[aria-label='Next']",
     "PageLimit": 50
   }
 }
