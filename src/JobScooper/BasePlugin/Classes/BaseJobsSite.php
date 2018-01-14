@@ -19,6 +19,8 @@ namespace JobScooper\BasePlugin\Classes;
 
 
 
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverExpectedCondition;
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
@@ -48,74 +50,70 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	function __construct()
-    {
-        $this->JobSiteKey = $this->getJobSiteKey();
+	{
+		$this->JobSiteKey = $this->getJobSiteKey();
 
-        if(is_null($this->JobSiteName) || strlen($this->JobSiteName) == 0) {
-            $classname = get_class($this);
-            if (preg_match('/^Plugin(\w+)/', $classname, $matches) > 0) {
-                $this->JobSiteName = $matches[1];
-            }
-        }
+		if (is_null($this->JobSiteName) || strlen($this->JobSiteName) == 0) {
+			$classname = get_class($this);
+			if (preg_match('/^Plugin(\w+)/', $classname, $matches) > 0) {
+				$this->JobSiteName = $matches[1];
+			}
+		}
 
-        $this->_otherPluginSettings = getConfigurationSetting('plugin_specific_settings.'.$this->JobSiteKey);
+		$this->_otherPluginSettings = getConfigurationSetting('plugin_specific_settings.' . $this->JobSiteKey);
 
-        //
-        // Set all the flag defaults to be not supported
-	    //
-	    $this->additionalBitFlags["LOCATION"] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
-	    $this->additionalBitFlags["KEYWORDS"] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
-	    $this->additionalBitFlags["NUMBER_DAYS"] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
+		//
+		// Set all the flag defaults to be not supported
+		//
+		$this->additionalBitFlags["LOCATION"] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+		$this->additionalBitFlags["KEYWORDS"] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
+		$this->additionalBitFlags["NUMBER_DAYS"] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
 
-	    //
-	    // Now based on what we find in the Search Format URL, unset the default
-	    // unsupported value (making them supported for this site)
-	    //
-        $tokenFmtStrings = $this->_getUrlTokenList($this->SearchUrlFormat);
-	    if(!empty($tokenFmtStrings))
-	    {
-		    foreach($tokenFmtStrings as $tok => $fmt)
-		    {
-			    switch(strtoupper($tok))
-			    {
-				    case "LOCATION":
-				    case "KEYWORDS":
-				    case "NUMBER_DAYS":
-					    unset($this->additionalBitFlags[strtoupper($tok)]);
-					    break;
+		//
+		// Now based on what we find in the Search Format URL, unset the default
+		// unsupported value (making them supported for this site)
+		//
+		$tokenFmtStrings = $this->_getUrlTokenList($this->SearchUrlFormat);
+		if (!empty($tokenFmtStrings)) {
+			foreach ($tokenFmtStrings as $token) {
+				switch (strtoupper($token['type'])) {
+					case "LOCATION":
+					case "KEYWORDS":
+					case "NUMBER_DAYS":
+						unset($this->additionalBitFlags[strtoupper($token['type'])]);
+						break;
 
-				    default:
-				    	break;
-			    }
-		    }
-	    }
+					default:
+						break;
+				}
+			}
+		}
 
-        if (is_array($this->additionalBitFlags)) {
-            foreach ($this->additionalBitFlags as $flag) {
-                // If the flag is already set, don't try to set it again or it will
-                // actually unset that flag incorrectly
-                if (!$this->isBitFlagSet($flag)) {
-                    $this->_flags_ = $this->_flags_ | $flag;
-                }
-            }
-        }
+		if (is_array($this->additionalBitFlags)) {
+			foreach ($this->additionalBitFlags as $flag) {
+				// If the flag is already set, don't try to set it again or it will
+				// actually unset that flag incorrectly
+				if (!$this->isBitFlagSet($flag)) {
+					$this->_flags_ = $this->_flags_ | $flag;
+				}
+			}
+		}
 
-        if(!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
-            $this->selectorMoreListings = preg_replace("/\\\?[\"']/", "'", $this->selectorMoreListings);
+		if (!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
+			$this->selectorMoreListings = preg_replace("/\\\?[\"']/", "'", $this->selectorMoreListings);
 
-        if(substr($this->JobPostingBaseUrl, strlen($this->JobPostingBaseUrl)-1, strlen($this->JobPostingBaseUrl)) === "/")
-            $this->JobPostingBaseUrl = substr($this->JobPostingBaseUrl, 0, strlen($this->JobPostingBaseUrl) - 1);
+		if (substr($this->JobPostingBaseUrl, strlen($this->JobPostingBaseUrl) - 1, strlen($this->JobPostingBaseUrl)) === "/")
+			$this->JobPostingBaseUrl = substr($this->JobPostingBaseUrl, 0, strlen($this->JobPostingBaseUrl) - 1);
 
-        if (empty($this->JobSiteName)) {
-            $this->JobSiteName = str_replace("Plugin", "", get_class($this));
-        }
+		if (empty($this->JobSiteName)) {
+			$this->JobSiteName = str_replace("Plugin", "", get_class($this));
+		}
 
-        if(empty($this->JobPostingBaseUrl))
-        {
-        	$urlparts = parse_url($this->SearchUrlFormat);
-        	$this->JobPostingBaseUrl = "{$urlparts['scheme']}://{$urlparts['host']}";
-        }
-    }
+		if (empty($this->JobPostingBaseUrl)) {
+			$urlparts = parse_url($this->SearchUrlFormat);
+			$this->JobPostingBaseUrl = "{$urlparts['scheme']}://{$urlparts['host']}";
+		}
+	}
 
 	/**
 	 * @return string
@@ -123,14 +121,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	function setResultsFilterType()
 	{
-		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED))
-		{
+		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
 			if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED))
 				$this->resultsFilterType = "all-only";
 			else
 				$this->resultsFilterType = "all-by-location";
-		}
-		else
+		} else
 			$this->resultsFilterType = "user-filtered";
 
 		$key = $this->getJobSiteKey();
@@ -147,26 +143,27 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	function getJobSiteKey()
 	{
-		if(empty($this->JobSiteKey)) {
+		if (empty($this->JobSiteKey)) {
 			$arrSiteList = JobSitePluginBuilder::getAllJobSites();
 			$className = get_class($this);
 			$siteKey = strtolower(str_ireplace("Plugin", "", $className));
 			if (array_key_exists($siteKey, $arrSiteList) === true)
 				$this->JobSiteKey = $siteKey;
 		}
+
 		return $this->JobSiteKey;
 	}
 
 
 	//************************************************************************
-    //
-    //
-    //
-    //  Adding search parameters & downloading new job functions
-    //
-    //
-    //
-    //************************************************************************
+	//
+	//
+	//
+	//  Adding search parameters & downloading new job functions
+	//
+	//
+	//
+	//************************************************************************
 
 	/**
 	 * @param $flagToCheck
@@ -174,13 +171,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return bool
 	 */
 	public function isBitFlagSet($flagToCheck)
-    {
-        $ret = isBitFlagSet($this->_flags_, $flagToCheck);
-        if ($ret == $flagToCheck) {
-            return true;
-        }
-        return false;
-    }
+	{
+		$ret = isBitFlagSet($this->_flags_, $flagToCheck);
+		if ($ret == $flagToCheck) {
+			return true;
+		}
+
+		return false;
+	}
 
 	/**
 	 * @param UserSearchSiteRun[] $arrSearches
@@ -188,146 +186,146 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	public function addSearches( $arrSearches)
-    {
-	    $this->setResultsFilterType();
+	public function addSearches($arrSearches)
+	{
+		$this->setResultsFilterType();
 
-        if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-            $searchToKeep = null;
+		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+			$searchToKeep = null;
             foreach (array_keys($arrSearches) as $searchkey)
             {
-                $search = $arrSearches[$searchkey];
-                if(empty($searchToKeep))
-                    $searchToKeep = $search;
-                else {
-                    $search->delete();
-                    unset($arrSearches[$searchkey]);
-                }
-            }
-            $arrSearches = array($searchToKeep);
-        }
+				$search = $arrSearches[$searchkey];
+				if (empty($searchToKeep))
+					$searchToKeep = $search;
+				else {
+					$search->delete();
+					unset($arrSearches[$searchkey]);
+				}
+			}
+			$arrSearches = array($searchToKeep);
+		}
 
-        foreach ($arrSearches as $searchDetails) {
-            $this->_addSearch_($searchDetails);
-        }
-    }
+		foreach ($arrSearches as $searchDetails) {
+			$this->_addSearch_($searchDetails);
+		}
+	}
 
 	/**
 	 * @throws \Exception
 	 */
 	public function downloadLatestJobsForAllSearches()
-    {
-    	$search = null;
-        $boolSearchSuccess = null;
+	{
+		$search = null;
+		$boolSearchSuccess = null;
 
-        if (count($this->arrSearchesToReturn) == 0) {
-            LogMessage($this->JobSiteName . ": no searches set. Skipping...");
-            return array();
-        }
+		if (count($this->arrSearchesToReturn) == 0) {
+			LogMessage($this->JobSiteName . ": no searches set. Skipping...");
+			return array();
+		}
 
         try
         {
-            /*
-                Check to see if we should pull new job listings now.  If we ran too recently, this will skip the run
-            */
+			/*
+				Check to see if we should pull new job listings now.  If we ran too recently, this will skip the run
+			*/
             foreach ($this->arrSearchesToReturn as $search)
             {
-	            $this->_curlWrapper = new CurlWrapper();
+				$this->_curlWrapper = new CurlWrapper();
 
-	            try {
-                    if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
+				try {
+					if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
                         try
                         {
-                            $this->selenium = new SeleniumManager();
-                        } catch (Exception $ex) {
-                            handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
-                        }
-                    }
+							$this->selenium = new SeleniumManager();
+						} catch (Exception $ex) {
+							handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+						}
+					}
 
-                    $this->_updateJobsDataForSearch_($search);
-                    $this->_addJobMatchesToUser($search);
-                    $this->_setSearchResult_($search, true);
-                } catch (Exception $ex) {
-                    $this->_setSearchResult_($search, false, new Exception("Unable to download jobs: " .strval($ex)));
-                    handleException($ex, null, true, $extraData=$search->toArray());
-                } finally {
-                    $search->save();
-                    setConfigurationSetting('current_user_search_details', null);
-                }
-            }
+					$this->_updateJobsDataForSearch_($search);
+					$this->_addJobMatchesToUser($search);
+					$this->_setSearchResult_($search, true);
+				} catch (Exception $ex) {
+					$this->_setSearchResult_($search, false, new Exception("Unable to download jobs: " . strval($ex)));
+					handleException($ex, null, true, $extraData = $search->toArray());
+				} finally {
+					$search->save();
+					setConfigurationSetting('current_user_search_details', null);
+				}
+			}
 
-            /*
-             *  If this plugin is not user-filterable (aka no keywords filter), then any jobs from it can be applied
-             *  to all users.  If that is the case, update user matches to assets any jobs that were loaded previously
-             *  but the user is currently missing from their potential job matches.
-             */
-            $user = User::getCurrentUser();
+			/*
+			 *  If this plugin is not user-filterable (aka no keywords filter), then any jobs from it can be applied
+			 *  to all users.  If that is the case, update user matches to assets any jobs that were loaded previously
+			 *  but the user is currently missing from their potential job matches.
+			 */
+			$user = User::getCurrentUser();
             if ((strcasecmp($this->resultsFilterType, "all-only") == 0) || (strcasecmp($this->resultsFilterType, "all-by-location") == 0))
             {
                 try
                 {
-                    LogMessage("Checking for missing " . $this->JobSiteKey . " jobs for user " . $user->getUserId() . ".");
-                    $dataExistingUserJobMatchIds = UserJobMatchQuery::create()
-                        ->select("JobPostingId")
-                        ->filterByUserId($user->getUserId())
-                        ->useJobPostingFromUJMQuery()
-                            ->filterByJobSiteKey($this->JobSiteKey)
-                        ->endUse()
-                        ->find()
-                        ->getData();
+					LogMessage("Checking for missing " . $this->JobSiteKey . " jobs for user " . $user->getUserId() . ".");
+					$dataExistingUserJobMatchIds = UserJobMatchQuery::create()
+						->select("JobPostingId")
+						->filterByUserId($user->getUserId())
+						->useJobPostingFromUJMQuery()
+						->filterByJobSiteKey($this->JobSiteKey)
+						->endUse()
+						->find()
+						->getData();
 
-                    $queryAllJobsFromJobSite = JobPostingQuery::create()
-                        ->filterByJobSiteKey($this->JobSiteKey)
-                        ->select("JobPostingId")
-                        ->find()
-                        ->getData();
+					$queryAllJobsFromJobSite = JobPostingQuery::create()
+						->filterByJobSiteKey($this->JobSiteKey)
+						->select("JobPostingId")
+						->find()
+						->getData();
 
-                    $jobIdsToAddToUser = array_diff($queryAllJobsFromJobSite, $dataExistingUserJobMatchIds);
+					$jobIdsToAddToUser = array_diff($queryAllJobsFromJobSite, $dataExistingUserJobMatchIds);
 
-                    if(!is_null($jobIdsToAddToUser) && count($jobIdsToAddToUser) > 0) {
-                        LogMessage("Found " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs not yet assigned to user " . $user->getUserSlug() . ".");
-                        $this->_addJobMatchIdsToUser($jobIdsToAddToUser, $search);
-                        LogMessage("Successfully added " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs to user " . $user->getUserSlug() . ".");
+					if (!is_null($jobIdsToAddToUser) && count($jobIdsToAddToUser) > 0) {
+						LogMessage("Found " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs not yet assigned to user " . $user->getUserSlug() . ".");
+						$this->_addJobMatchIdsToUser($jobIdsToAddToUser, $search);
+						LogMessage("Successfully added " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs to user " . $user->getUserSlug() . ".");
                     }
                     else
                     {
-                        LogMessage("User " . $user->getUserSlug() . " had no missing previously loaded listings from ". $this->JobSiteKey . ".");
-                    }
-                } catch (Exception $ex) {
-                    handleException($ex);
-                }
-            }
+						LogMessage("User " . $user->getUserSlug() . " had no missing previously loaded listings from " . $this->JobSiteKey . ".");
+					}
+				} catch (Exception $ex) {
+					handleException($ex);
+				}
+			}
 
-        } catch (Exception $ex) {
-            throw $ex;
-        } finally {
+		} catch (Exception $ex) {
+			throw $ex;
+		} finally {
             try
             {
-                if(!is_null($this->selenium)) {
-                    $this->selenium->done();
-                }
-            } catch (Exception $ex) {
-                LogWarning("Unable to shutdown Selenium server successfully while closing down downloads for {$this->JobSiteName}: " . $ex->getMessage());
+				if (!is_null($this->selenium)) {
+					$this->selenium->done();
+				}
+			} catch (Exception $ex) {
+				LogWarning("Unable to shutdown Selenium server successfully while closing down downloads for {$this->JobSiteName}: " . $ex->getMessage());
             }
             finally
             {
-                $this->selenium = null;
-            }
+				$this->selenium = null;
+			}
 
-	        setConfigurationSetting('current_user_search_details', null);
-        }
+			setConfigurationSetting('current_user_search_details', null);
+		}
 
-    }
+	}
 
-    //************************************************************************
-    //
-    //
-    //
-    //  Protected and Private Class Members
-    //
-    //
-    //
-    //************************************************************************
+	//************************************************************************
+	//
+	//
+	//
+	//  Protected and Private Class Members
+	//
+	//
+	//
+	//************************************************************************
 
 	/**
 	 * @var SeleniumManager|null
@@ -339,77 +337,77 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	protected $arrSearchesToReturn = null;
 
-    protected $JobListingsPerPage = 20;
-    protected $additionalBitFlags = array();
-    protected $PaginationType = null;
-    protected $secsPageTimeout = null;
-    protected $nextPageScript = null;
-    protected $selectorMoreListings = null;
-    protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
-    protected $arrSearchReturnedJobs = array();
-    protected $SearchUrlFormat = null;
-    protected $JobPostingBaseUrl = null;
-    protected $LocationType = null;
-    protected $JobSiteName = null;
-    protected $JobSiteKey = null;
-    protected $_otherPluginSettings = null;
+	protected $JobListingsPerPage = 20;
+	protected $additionalBitFlags = array();
+	protected $PaginationType = null;
+	protected $secsPageTimeout = null;
+	protected $nextPageScript = null;
+	protected $selectorMoreListings = null;
+	protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
+	protected $arrSearchReturnedJobs = array();
+	protected $SearchUrlFormat = null;
+	protected $JobPostingBaseUrl = null;
+	protected $LocationType = null;
+	protected $JobSiteName = null;
+	protected $JobSiteKey = null;
+	protected $_otherPluginSettings = null;
 
 
-    protected $detailsMyFileOut= "";
-    protected $regex_link_job_id = null;
-    protected $prevCookies = "";
-    protected $prevURL = null;
+	protected $detailsMyFileOut = "";
+	protected $regex_link_job_id = null;
+	protected $prevCookies = "";
+	protected $prevURL = null;
 
-    protected $resultsFilterType = "user-filtered";
-    protected $strKeywordDelimiter = null;
-    protected $additionalLoadDelaySeconds = 0;
-    protected $_flags_ = null;
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+	protected $resultsFilterType = "user-filtered";
+	protected $strKeywordDelimiter = null;
+	protected $additionalLoadDelaySeconds = 0;
+	protected $_flags_ = null;
+	protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 
-    protected $CountryCodes = array("US");
-    private $_curlWrapper = null;
-    protected $nextResultsPageUrl = null;
+	protected $CountryCodes = array("US");
+	private $_curlWrapper = null;
+	protected $nextResultsPageUrl = null;
 
 	/**
 	 * @param \JobScooper\DataAccess\GeoLocation|null $location
 	 *
 	 * @return null|string
 	 */
-	function getGeoLocationSettingType(GeoLocation $location=null)
-    {
-        return $this->LocationType;
-    }
+	function getGeoLocationSettingType(GeoLocation $location = null)
+	{
+		return $this->LocationType;
+	}
 
 	/**
 	 * @return string[]
 	 */
 	function getSupportedCountryCodes()
-    {
-	    if (empty($this->CountryCodes)) {
-		    $this->CountryCodes = array("US");
+	{
+		if (empty($this->CountryCodes)) {
+			$this->CountryCodes = array("US");
 	    }
 	    else
 	    {
-		    foreach($this->CountryCodes as $k => $code) {
-			    if (!empty($code) && array_key_exists(strtoupper($code), GeoLocation::$COUNTRY_CODE_REMAPPINGS))
-				    $this->CountryCodes[$k] = GeoLocation::$COUNTRY_CODE_REMAPPINGS[$code];
-		    }
-	    }
+			foreach ($this->CountryCodes as $k => $code) {
+				if (!empty($code) && array_key_exists(strtoupper($code), GeoLocation::$COUNTRY_CODE_REMAPPINGS))
+					$this->CountryCodes[$k] = GeoLocation::$COUNTRY_CODE_REMAPPINGS[$code];
+			}
+		}
 
-	    return $this->CountryCodes;
-    }
+		return $this->CountryCodes;
+	}
 
 	/**
 	 * @return \Facebook\WebDriver\Remote\RemoteWebDriver
 	 * @throws \Exception
 	 */
 	protected function getActiveWebdriver()
-    {
-        if (!is_null($this->selenium)) {
-            return $this->selenium->get_driver();
-        } else
-            throw new Exception("Error:  active webdriver for Selenium not found as expected.");
-    }
+	{
+		if (!is_null($this->selenium)) {
+			return $this->selenium->get_driver();
+		} else
+			throw new Exception("Error:  active webdriver for Selenium not found as expected.");
+	}
 
 	/**
 	 * @param $arrKeywordSet
@@ -417,25 +415,25 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return string[]
 	 */
 	protected function getCombinedKeywordString($arrKeywordSet)
-    {
-        $arrKeywords = array();
+	{
+		$arrKeywords = array();
 
-        if (!is_array($arrKeywordSet)) {
-            $arrKeywords[] = $arrKeywordSet[0];
-        } else {
-            $arrKeywords = $arrKeywordSet;
-        }
+		if (!is_array($arrKeywordSet)) {
+			$arrKeywords[] = $arrKeywordSet[0];
+		} else {
+			$arrKeywords = $arrKeywordSet;
+		}
 
-        if ($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS)) {
-            $arrKeywords = array_mapk(function ($k, $v) {
-                return "\"{$v}\"";
-            }, $arrKeywords);
-        }
+		if ($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS)) {
+			$arrKeywords = array_mapk(function ($k, $v) {
+				return "\"{$v}\"";
+			}, $arrKeywords);
+		}
 
-        $strRetCombinedKeywords = array_shift($arrKeywords);
+		$strRetCombinedKeywords = array_shift($arrKeywords);
 
-        return $strRetCombinedKeywords;
-    }
+		return $strRetCombinedKeywords;
+	}
 
 	/**
 	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
@@ -444,81 +442,90 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML)
-    {
-        throw new \BadMethodCallException(sprintf("Not implemented method  " . __METHOD__ . " called on class \"%s \".", __CLASS__));
+	{
+		throw new \BadMethodCallException(sprintf("Not implemented method  " . __METHOD__ . " called on class \"%s \".", __CLASS__));
 
-        return null;
-    }
+		return null;
+	}
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 * @param string $fmt
+	 * @param string                                   $fmt
 	 *
 	 * @return null|string
 	 * @throws \ErrorException
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails, $fmt=null)
-    {
+	protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails, $fmt = null)
+	{
 
-        if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
-            throw new \ErrorException($this->JobSiteName . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for " . $this->JobSiteName);
-        }
+		if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
+			throw new \ErrorException($this->JobSiteName . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for " . $this->JobSiteName);
+		}
 
-	    $loc = $searchDetails->getGeoLocationFromUSSR();
-	    if(empty($loc))
-	    {
-		    LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' is missing the search location.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
-		    return null;
-	    }
+		$loc = $searchDetails->getGeoLocationFromUSSR();
+		if (empty($loc)) {
+			LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' is missing the search location.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
 
-	    if(!empty($fmt)) {
-		    $strLocationValue = replaceTokensInString($fmt, $loc->toArray());
-	    }
-	    else {
-		    $locTypeNeeded = $this->getGeoLocationSettingType($loc);
-		    if (empty($locTypeNeeded)) {
-			    LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
+			return null;
+		}
 
-			    return null;
-		    }
+		if (!empty($fmt)) {
+			$strLocationValue = replaceTokensInString($fmt, $loc->toArray());
+		} else {
+			$locTypeNeeded = $this->getGeoLocationSettingType($loc);
+			if (empty($locTypeNeeded)) {
+				LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
 
-		    $strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
-		    if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
-			    LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
+				return null;
+			}
 
-			    return "";
-		    }
-	    }
+			$strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
+			if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
+				LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
 
-        if($this->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
-            $strLocationValue = strtolower($strLocationValue);
+				return "";
+			}
+		}
 
-        if (!isValueURLEncoded($strLocationValue)) {
-            $strLocationValue = urlencode($strLocationValue);
-        }
+		if ($this->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
+			$strLocationValue = strtolower($strLocationValue);
 
-        return $strLocationValue;
-    }
+		if (!isValueURLEncoded($strLocationValue)) {
+			$strLocationValue = urlencode($strLocationValue);
+		}
+
+		return $strLocationValue;
+	}
 
 	/**
 	 * @param string $strUrl
 	 *
-	 * @return string[]
+	 * @return array[]
 	 * @throws \Exception
 	 */
 
 	private function _getUrlTokenList($strUrl)
-    {
-	    $tokenFmtStrings = array();
+	{
+		$arrTokens = array();
+		preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strUrl, $tokenlist, PREG_SET_ORDER);
+		if (!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3) {
+			foreach($tokenlist as $item)
+			{
+				$tokenType = $item[1];
+				$srcValue = $item[0];
+				$tokFmt = $item[2];
+				$arrTokens[$srcValue] = array(
+					"type" => strtoupper($tokenType),
+					"source_string" => $srcValue,
+					"format_value" => $tokFmt
+				);
+			}
+		}
 
-	    preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strUrl, $tokenlist);
-	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3) {
-		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
-	    }
-	    return $tokenFmtStrings;
+		return $arrTokens;
 
-    }
+	}
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
@@ -530,58 +537,55 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
-    {
-        $strURL = $this->SearchUrlFormat;
+	{
+		$strURL = $this->SearchUrlFormat;
 
-        $tokenFmtStrings = $this->_getUrlTokenList($strURL);
+		$tokenFmtStrings = $this->_getUrlTokenList($strURL);
 //	    $count = preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strURL, $tokenlist);
 //	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3)
 //	    {
 //		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
-		if(!empty($tokenFmtStrings))
-		{
-	    	foreach($tokenFmtStrings as $tok => $fmt)
-		    {
-			    $replaceVal = "";
-				$replaceStr = "***" . $tok . (empty($fmt) ? "" : ":{$fmt}") . "***";
-		    	switch($tok)
-			    {
-				    case "LOCATION":
-					    $replaceVal = $this->getGeoLocationURLValue($searchDetails, $fmt);
-					    break;
-
-				    case "KEYWORDS":
-					    $replaceVal =  $this->getKeywordURLValue($searchDetails);
-
-				    break;
-
-				    case "PAGE_NUMBER":
-					    $replaceVal =  $this->getPageURLValue($nPage);
+		if (!empty($tokenFmtStrings)) {
+			foreach ($tokenFmtStrings as $tokFound) {
+				$replaceVal = "";
+				$replaceStr = $tokFound['source_string'];
+				switch ($tokFound['type']) {
+					case "LOCATION":
+						$replaceVal = $this->getGeoLocationURLValue($searchDetails, $tokFound['format_value']);
 						break;
 
-				    case "ITEM_NUMBER":
-					    $replaceVal =  $this->getItemURLValue($nItem);
-					    break;
-			    }
+					case "KEYWORDS":
+						$replaceVal = $this->getKeywordURLValue($searchDetails);
 
-			    $strURL = str_ireplace($replaceStr, $replaceVal, $strURL);
+						break;
 
-		    }
+					case "PAGE_NUMBER":
+						$replaceVal = $this->getPageURLValue($nPage);
+						break;
 
-	    }
+					case "ITEM_NUMBER":
+						$replaceVal = $this->getItemURLValue($nItem);
+						break;
+				}
 
-        return $strURL;
-    }
+				$strURL = str_ireplace($replaceStr, $replaceVal, $strURL);
 
-    //************************************************************************
-    //
-    //
-    //
-    //  Utility Functions
-    //
-    //
-    //
-    //************************************************************************
+			}
+
+		}
+
+		return $strURL;
+	}
+
+	//************************************************************************
+	//
+	//
+	//
+	//  Utility Functions
+	//
+	//
+	//
+	//************************************************************************
 	/**
 	 * @param $regex_link_job_id
 	 * @param $url
@@ -589,15 +593,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return string
 	 */
 	function getIDFromLink($regex_link_job_id, $url)
-    {
-        if (isset($regex_link_job_id)) {
-            $fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
-            if ($fMatchedID && count($idMatches) >= 1) {
-                return $idMatches[count($idMatches) - 1];
-            }
-        }
-        return "";
-    }
+	{
+		if (isset($regex_link_job_id)) {
+			$fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
+			if ($fMatchedID && count($idMatches) >= 1) {
+				return $idMatches[count($idMatches) - 1];
+			}
+		}
+
+		return "";
+	}
 
 
 	/**
@@ -607,10 +612,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 *
 	 * @return string
 	 */
-	protected function _getSearchUrlFormat_(UserSearchSiteRun  $searchDetails = null, $nPage = null, $nItem = null)
-    {
-        return $this->SearchUrlFormat;
-    }
+	protected function _getSearchUrlFormat_(UserSearchSiteRun $searchDetails = null, $nPage = null, $nItem = null)
+	{
+		return $this->SearchUrlFormat;
+	}
 
 	/**
 	 * @param null $nDays
@@ -618,9 +623,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return int
 	 */
 	protected function getDaysURLValue($nDays = null)
-    {
-        return ($nDays == null || $nDays == "") ? 1 : $nDays;
-    }
+	{
+		return ($nDays == null || $nDays == "") ? 1 : $nDays;
+	}
 
 	/**
 	 * @param $nPage
@@ -628,51 +633,51 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return string
 	 */
 	protected function getPageURLValue($nPage)
-    {
-        return ($nPage == null || $nPage == "") ? "" : $nPage;
-    }
+	{
+		return ($nPage == null || $nPage == "") ? "" : $nPage;
+	}
 
 	/**
 	 * @param $nItem
 	 *
 	 * @return int
 	 */
-	protected function getItemURLValue($nItem) {
+	protected function getItemURLValue($nItem)
+	{
 
-        if($this->isBitFlagSet(C__JOB_ITEMCOUNT_STARTSATZERO__) && $nItem > 0)
-        {
-            $nItem = $nItem - 1;
-        }
+		if ($this->isBitFlagSet(C__JOB_ITEMCOUNT_STARTSATZERO__) && $nItem > 0) {
+			$nItem = $nItem - 1;
+		}
 
-        return ($nItem == null || $nItem == "") ? 0 : $nItem;
-    }
+		return ($nItem == null || $nItem == "") ? 0 : $nItem;
+	}
 
 	/**
 	 * @param $objSimpHTML
 	 *
 	 * @return int|string|null
 	 *
-	*/
+	 */
 	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
-    {
-        throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__));
-    }
+	{
+		throw new \BadMethodCallException(sprintf("Not implemented method " . __METHOD__ . " called on class \"%s \".", __CLASS__));
+	}
 
 
 	/**
 	 * @throws \Exception
 	 */
 	protected function moveDownOnePageInBrowser()
-    {
+	{
 
-        // Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
-        $driver = $this->getActiveWebdriver();
+		// Neat trick written up by http://softwaretestutorials.blogspot.in/2016/09/how-to-perform-page-scrolling-with.html.
+		$driver = $this->getActiveWebdriver();
 
-        $driver->executeScript("window.scrollTo(0,document.body.scrollHeight);");
+		$driver->executeScript("window.scrollTo(0,document.body.scrollHeight);");
 
-        sleep($this->additionalLoadDelaySeconds + 1);
+		sleep($this->additionalLoadDelaySeconds + 1);
 
-    }
+	}
 
 
 	/**
@@ -681,12 +686,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return string
 	 */
 	protected function getKeywordURLValue(UserSearchSiteRun $searchDetails)
-    {
-        if (!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-            return $this->_getKeywordStringsForUrl_($searchDetails);
-        }
-        return "";
-    }
+	{
+		if (!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+			return $this->_getKeywordStringsForUrl_($searchDetails);
+		}
+
+		return "";
+	}
 
 	/**
 	 * @param null $nTotalItems
@@ -694,13 +700,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	protected function goToEndOfResultsSetViaPageDown($nTotalItems = null)
-    {
-        $this->moveDownOnePageInBrowser();
-        $secs = $this->additionalLoadDelaySeconds * 1000;
-        if ($secs <= 0)
-            $secs = 1000;
+	{
+		$this->moveDownOnePageInBrowser();
+		$secs = $this->additionalLoadDelaySeconds * 1000;
+		if ($secs <= 0)
+			$secs = 1000;
 
-        $js = "
+		$js = "
             localStorage.setItem('startTime', Date.now());
             localStorage.setItem('prevHeight', 0);
             scroll = setTimeout(gotoPageBottom, 250);
@@ -735,25 +741,25 @@ abstract class BaseJobsSite implements IJobSitePlugin
         ";
 
 
-        if (is_null($nTotalItems)) {
-            $nTotalItems = $this->nMaxJobsToReturn;
-        }
+		if (is_null($nTotalItems)) {
+			$nTotalItems = $this->nMaxJobsToReturn;
+		}
 
-        if ($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__) {
-            $nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
-        } else {
-            $nSleepTimeToLoad = ($nTotalItems / $this->JobListingsPerPage) * $this->additionalLoadDelaySeconds;
-        }
+		if ($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__) {
+			$nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
+		} else {
+			$nSleepTimeToLoad = ($nTotalItems / $this->JobListingsPerPage) * $this->additionalLoadDelaySeconds;
+		}
 
-        LogMessage("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results");
+		LogMessage("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results");
 
-        $this->runJavaScriptSnippet($js, false);
+		$this->runJavaScriptSnippet($js, false);
 
-        sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
+		sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
-        $this->moveDownOnePageInBrowser();
+		$this->moveDownOnePageInBrowser();
 
-    }
+	}
 
 	/**
 	 * @param $nTotalItems
@@ -761,15 +767,15 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	protected function goToEndOfResultsSetViaLoadMore($nTotalItems)
-    {
-    	if(empty($this->selectorMoreListings))
-    		throw new Exception("Plugin set to paginate via Load More but no selector was set for the load more control on the page.");
-        $this->moveDownOnePageInBrowser();
-        $secs = $this->additionalLoadDelaySeconds * 1000;
-        if ($secs <= 0)
-            $secs = 1000;
+	{
+		if (empty($this->selectorMoreListings))
+			throw new Exception("Plugin set to paginate via Load More but no selector was set for the load more control on the page.");
+		$this->moveDownOnePageInBrowser();
+		$secs = $this->additionalLoadDelaySeconds * 1000;
+		if ($secs <= 0)
+			$secs = 1000;
 
-        $js = "
+		$js = "
             scroll = setTimeout(doLoadMore, 250);
             function getRunTime()
             {
@@ -823,25 +829,25 @@ abstract class BaseJobsSite implements IJobSitePlugin
         ";
 
 
-        if (is_null($nTotalItems)) {
-            $nTotalItems = $this->nMaxJobsToReturn;
-        }
+		if (is_null($nTotalItems)) {
+			$nTotalItems = $this->nMaxJobsToReturn;
+		}
 
-        if ($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__) {
-            $nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
-        } else {
-            $nSleepTimeToLoad = ($nTotalItems / $this->JobListingsPerPage) * $this->additionalLoadDelaySeconds;
-        }
+		if ($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__) {
+			$nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
+		} else {
+			$nSleepTimeToLoad = ($nTotalItems / $this->JobListingsPerPage) * $this->additionalLoadDelaySeconds;
+		}
 
-        LogMessage("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results");
+		LogMessage("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results");
 
-        $this->runJavaScriptSnippet($js, false);
+		$this->runJavaScriptSnippet($js, false);
 
-        sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
+		sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
-        $this->moveDownOnePageInBrowser();
+		$this->moveDownOnePageInBrowser();
 
-    }
+	}
 
 
 	/**
@@ -849,14 +855,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	protected function goToNextPageOfResultsViaNextButton()
-    {
-        $secs = $this->additionalLoadDelaySeconds * 1000;
-        if ($secs <= 0)
-            $secs = 1000;
+	{
+		$secs = $this->additionalLoadDelaySeconds * 1000;
+		if ($secs <= 0)
+			$secs = 1000;
 
-        LogMessage("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...");
+		LogMessage("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...");
 
-        $js = "
+		$js = "
             scroll = setTimeout(doNextPage, " . $secs . ");
             function doNextPage() 
             {
@@ -873,23 +879,23 @@ abstract class BaseJobsSite implements IJobSitePlugin
             }  
         ";
 
-        $this->runJavaScriptSnippet($js, false);
+		$this->runJavaScriptSnippet($js, false);
 
-        sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
+		sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
 
-        return true;
-    }
+		return true;
+	}
 
 
-    //************************************************************************
-    //
-    //
-    //
-    //  Functions for Adding Searches to Plugin Instance
-    //
-    //
-    //
-    //************************************************************************
+	//************************************************************************
+	//
+	//
+	//
+	//  Functions for Adding Searches to Plugin Instance
+	//
+	//
+	//
+	//************************************************************************
 
 
 	/**
@@ -899,18 +905,18 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	private function _addSearch_(UserSearchSiteRun $searchDetails)
-    {
-        $this->_setStartingUrlForSearch_($searchDetails);
+	{
+		$this->_setStartingUrlForSearch_($searchDetails);
 
-        $searchDetails->save();
+		$searchDetails->save();
 
-        //
-        // Add the search to the list of ones to run
-        //
-        $this->arrSearchesToReturn[$searchDetails->getUserSearchSiteRunKey()] = $searchDetails;
-        LogMessage($this->JobSiteName . ": added search (" . $searchDetails->getUserSearchSiteRunKey() . ")");
+		//
+		// Add the search to the list of ones to run
+		//
+		$this->arrSearchesToReturn[$searchDetails->getUserSearchSiteRunKey()] = $searchDetails;
+		LogMessage($this->JobSiteName . ": added search (" . $searchDetails->getUserSearchSiteRunKey() . ")");
 
-    }
+	}
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
@@ -918,20 +924,18 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return string
 	 */
 	private function _getKeywordStringsForUrl_(UserSearchSiteRun $searchDetails)
-    {
-        // if we don't support keywords in the URL at all for this
-        // plugin or we don't have any keywords, return empty string
-        if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) ||
-            empty($searchDetails->getUserKeywordSet())) {
-            $ret = "";
-        }
-        else
-        {
-            $ret = $this->_getCombinedKeywordStringForURL_($searchDetails->getKeywords());
-        }
+	{
+		// if we don't support keywords in the URL at all for this
+		// plugin or we don't have any keywords, return empty string
+		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) ||
+			empty($searchDetails->getUserKeywordSet())) {
+			$ret = "";
+		} else {
+			$ret = $this->_getCombinedKeywordStringForURL_($searchDetails->getKeywords());
+		}
 
-        return $ret;
-    }
+		return $ret;
+	}
 
 	/**
 	 * @param $arrKeywordSet
@@ -939,32 +943,32 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return string
 	 */
 	private function _getCombinedKeywordStringForURL_($arrKeywordSet)
-    {
-        $arrKeywords = array();
+	{
+		$arrKeywords = array();
 
-        if (!is_array($arrKeywordSet)) {
-            $arrKeywords[] = $arrKeywordSet[0];
-        } else {
-            $arrKeywords = $arrKeywordSet;
-        }
+		if (!is_array($arrKeywordSet)) {
+			$arrKeywords[] = $arrKeywordSet[0];
+		} else {
+			$arrKeywords = $arrKeywordSet;
+		}
 
-        $strRetCombinedKeywords = $this->getCombinedKeywordString($arrKeywords);
+		$strRetCombinedKeywords = $this->getCombinedKeywordString($arrKeywords);
 
-        if (!isValueURLEncoded($strRetCombinedKeywords)) {
-            if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE))
-                $strRetCombinedKeywords = rawurlencode($strRetCombinedKeywords);
-            else
-                $strRetCombinedKeywords = urlencode($strRetCombinedKeywords);
+		if (!isValueURLEncoded($strRetCombinedKeywords)) {
+			if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE))
+				$strRetCombinedKeywords = rawurlencode($strRetCombinedKeywords);
+			else
+				$strRetCombinedKeywords = urlencode($strRetCombinedKeywords);
 
-        }
+		}
 
-        if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES)) {
-            $strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
-            $strRetCombinedKeywords = str_replace("+", "-", $strRetCombinedKeywords);
-        }
+		if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES)) {
+			$strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
+			$strRetCombinedKeywords = str_replace("+", "-", $strRetCombinedKeywords);
+		}
 
-        return $strRetCombinedKeywords;
-    }
+		return $strRetCombinedKeywords;
+	}
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
@@ -973,16 +977,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	private function _setStartingUrlForSearch_(UserSearchSiteRun $searchDetails)
-    {
+	{
 
-        $searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
-        if (is_null($searchStartURL) || strlen($searchStartURL) == 0)
-            $searchStartURL = $this->JobPostingBaseUrl;
+		$searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
+		if (is_null($searchStartURL) || strlen($searchStartURL) == 0)
+			$searchStartURL = $this->JobPostingBaseUrl;
 
-        $searchDetails->setSearchStartUrl($searchStartURL);
-        LogMessage("Setting start URL for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] to: " . PHP_EOL . $searchDetails->getSearchStartUrl());
+		$searchDetails->setSearchStartUrl($searchStartURL);
+		LogMessage("Setting start URL for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] to: " . PHP_EOL . $searchDetails->getSearchStartUrl());
 
-    }
+	}
 
 
 	/**
@@ -991,9 +995,9 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return string
 	 */
 	function combineTextAllNodes($var)
-    {
-        return combineTextAllNodes($var);
-    }
+	{
+		return combineTextAllNodes($var);
+	}
 
 	/**
 	 * @param $var
@@ -1001,20 +1005,20 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return string
 	 */
 	protected function combineTextAllChildren($var)
-    {
-        return combineTextAllChildren($var);
-    }
+	{
+		return combineTextAllChildren($var);
+	}
 
 
-    //************************************************************************
-    //
-    //
-    //
-    //  Job listing download methods
-    //
-    //
-    //
-    //************************************************************************
+	//************************************************************************
+	//
+	//
+	//
+	//  Job listing download methods
+	//
+	//
+	//
+	//************************************************************************
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
@@ -1022,37 +1026,37 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	private function _updateJobsDataForSearch_(UserSearchSiteRun $searchDetails)
-    {
-        $ex = null;
+	{
+		$ex = null;
 
-        try {
+		try {
 
-            // get the url for the first page/items in the results
-            if ($this->_checkInvalidURL_($searchDetails, $searchDetails->getSearchStartUrl()) == VALUE_NOT_SUPPORTED) return;
-	        startLogSection("Starting data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]");
+			// get the url for the first page/items in the results
+			if ($this->_checkInvalidURL_($searchDetails, $searchDetails->getSearchStartUrl()) == VALUE_NOT_SUPPORTED) return;
+			startLogSection("Starting data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]");
 
-            if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
-                $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
-            } elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__) {
-                $this->_getMyJobsForSearchFromWebpage_($searchDetails);
-            } elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__) {
-                $this->_getMyJobsForSearchFromWebpage_($searchDetails);
-            } else {
-                throw new \ErrorException("Class " . get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
-            }
-        } catch (Exception $ex) {
-            $strError = "Failed to download jobs from " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "[URL=" . $searchDetails->getSearchStartUrl() . "]. Exception Details: ";
-            $this->_setSearchResult_($searchDetails, false, new Exception($strError . strval($ex)));
-            handleException($ex, $strError, false);
-        } finally {
-            endLogSection("Finished data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]");
-        }
+			if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
+				$this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
+			} elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__) {
+				$this->_getMyJobsForSearchFromWebpage_($searchDetails);
+			} elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__) {
+				$this->_getMyJobsForSearchFromWebpage_($searchDetails);
+			} else {
+				throw new \ErrorException("Class " . get_class($this) . " does not have a valid setting for parser.  Cannot continue.");
+			}
+		} catch (Exception $ex) {
+			$strError = "Failed to download jobs from " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "[URL=" . $searchDetails->getSearchStartUrl() . "]. Exception Details: ";
+			$this->_setSearchResult_($searchDetails, false, new Exception($strError . strval($ex)));
+			handleException($ex, $strError, false);
+		} finally {
+			endLogSection("Finished data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]");
+		}
 
-        if (!is_null($ex)) {
-            throw $ex;
-        }
+		if (!is_null($ex)) {
+			throw $ex;
+		}
 
-    }
+	}
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $details
@@ -1062,10 +1066,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	private function _checkInvalidURL_(UserSearchSiteRun $details, $strURL)
-    {
-        if ($strURL == null) throw new \ErrorException("Skipping " . $this->JobSiteName . " search '" . $details->getUserSearchKey() . "' because a valid URL could not be set.");
-        return $strURL;
-    }
+	{
+		if ($strURL == null) throw new \ErrorException("Skipping " . $this->JobSiteName . " search '" . $details->getUserSearchKey() . "' because a valid URL could not be set.");
+
+		return $strURL;
+	}
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
@@ -1076,24 +1081,22 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _setSearchResult_(UserSearchSiteRun $searchDetails, $success = null, $except = null, $runWasSkipped=false, $objPageHtml=null)
-    {
-        if(!($searchDetails instanceof UserSearchSiteRun))
-            $searchDetails = getConfigurationSetting('current_user_search_details');
+	private function _setSearchResult_(UserSearchSiteRun $searchDetails, $success = null, $except = null, $runWasSkipped = false, $objPageHtml = null)
+	{
+		if (!($searchDetails instanceof UserSearchSiteRun))
+			$searchDetails = getConfigurationSetting('current_user_search_details');
 
-        if (!is_null($runWasSkipped) && is_bool($runWasSkipped) && $runWasSkipped === true)
-        {
-            $searchDetails->setRunResultCode("skipped");
-        }
-        elseif (!is_null($success) && is_bool($success)) {
-            if($success === true)
-                $searchDetails->setRunSucceeded();
-            else {
-                $searchDetails->failRunWithErrorMessage($except, $objPageHtml);
-            }
-        }
-        $searchDetails->save();
-    }
+		if (!is_null($runWasSkipped) && is_bool($runWasSkipped) && $runWasSkipped === true) {
+			$searchDetails->setRunResultCode("skipped");
+		} elseif (!is_null($success) && is_bool($success)) {
+			if ($success === true)
+				$searchDetails->setRunSucceeded();
+			else {
+				$searchDetails->failRunWithErrorMessage($except, $objPageHtml);
+			}
+		}
+		$searchDetails->save();
+	}
 
 
 	/**
@@ -1107,63 +1110,60 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
-    {
-        try {
-        	if(!empty($strURL))
-        		$this->nextResultsPageUrl = $strURL;
+	{
+		try {
+			if (!empty($strURL))
+				$this->nextResultsPageUrl = $strURL;
 
-            $objSimpleHTML = null;
+			$objSimpleHTML = null;
 
-            if (isDebug() == true) {
+			if (isDebug() == true) {
 
-                LogMessage("URL        = " . $strURL);
-                LogMessage("Referrer   = " . $referrer);
-                LogMessage("Cookies    = " . $cookies);
-            }
+				LogMessage("URL        = " . $strURL);
+				LogMessage("Referrer   = " . $referrer);
+				LogMessage("Cookies    = " . $cookies);
+			}
 
-            if (!$objSimpleHTML && ($filePath && strlen($filePath) > 0)) {
-                LogMessage("Loading ALTERNATE results from " . $filePath);
-                $objSimpleHTML = null;
-                LogMessage("Loading HTML from " . $filePath);
+			if (!$objSimpleHTML && ($filePath && strlen($filePath) > 0)) {
+				LogMessage("Loading ALTERNATE results from " . $filePath);
+				$objSimpleHTML = null;
+				LogMessage("Loading HTML from " . $filePath);
 
-                if (!file_exists($filePath) && !is_file($filePath)) return $objSimpleHTML;
-                $fp = fopen($filePath, 'r');
-                if (!$fp) return $objSimpleHTML;
+				if (!file_exists($filePath) && !is_file($filePath)) return $objSimpleHTML;
+				$fp = fopen($filePath, 'r');
+				if (!$fp) return $objSimpleHTML;
 
-                $strHTML = fread($fp, MAX_FILE_SIZE);
-                $objSimpleHTML = new SimpleHtmlHelper($strHTML);
-                $objSimpleHTML->setSource($filePath);
-                fclose($fp);
-            }
+				$strHTML = fread($fp, MAX_FILE_SIZE);
+				$objSimpleHTML = new SimpleHtmlHelper($strHTML);
+				$objSimpleHTML->setSource($filePath);
+				fclose($fp);
+			}
 
 
-            if (!$objSimpleHTML && $strURL && strlen($strURL) > 0) {
-                if (isDebug()) $this->_curlWrapper->setDebug(true);
+			if (!$objSimpleHTML && $strURL && strlen($strURL) > 0) {
+				if (isDebug()) $this->_curlWrapper->setDebug(true);
 
-                $retObj = $this->_curlWrapper->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
-                if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
-                    $objSimpleHTML = new SimpleHtmlHelper($retObj['output']);
-                    $objSimpleHTML->setSource($strURL);
-                    $this->prevCookies = $retObj['cookies'];
-                    $this->prevURL = $strURL;
-                } else {
-                    $objSimpleHTML = new SimpleHTMLHelper($strURL);
-                    $objSimpleHTML->setSource($strURL);
-                }
-            }
-            if(!$objSimpleHTML)
-            {
-                throw new \Exception("Unable to get SimpleHTMLDom object from " . strlen($filePath) > 0 ? $filePath : $strURL);
-            }
+				$retObj = $this->_curlWrapper->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
+				if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
+					$objSimpleHTML = new SimpleHtmlHelper($retObj['output']);
+					$objSimpleHTML->setSource($strURL);
+					$this->prevCookies = $retObj['cookies'];
+					$this->prevURL = $strURL;
+				} else {
+					$objSimpleHTML = new SimpleHTMLHelper($strURL);
+					$objSimpleHTML->setSource($strURL);
+				}
+			}
+			if (!$objSimpleHTML) {
+				throw new \Exception("Unable to get SimpleHTMLDom object from " . strlen($filePath) > 0 ? $filePath : $strURL);
+			}
 
-            return $objSimpleHTML;
-        }
-        catch (Exception $ex)
-        {
-            handleException($ex, null, true);
-        }
+			return $objSimpleHTML;
+		} catch (Exception $ex) {
+			handleException($ex, null, true);
+		}
 
-    }
+	}
 
 
 	/**
@@ -1173,51 +1173,52 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	protected function _getMyJobsForSearchFromJobsAPI_(UserSearchSiteRun $searchDetails)
-    {
-        $nItemCount = 0;
+	{
+		$nItemCount = 0;
 
-        LogMessage("Downloading count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "'");
+		LogMessage("Downloading count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "'");
 
-        $pageNumber = 1;
-        $noMoreJobs = false;
-        while ($noMoreJobs != true) {
-            $arrPageJobsList = [];
-            $apiJobs = $this->getSearchJobsFromAPI($searchDetails);
-            if (is_null($apiJobs)) {
-                LogWarning("Warning: " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] returned zero jobs from the API." . PHP_EOL);
-                return;
-            }
+		$pageNumber = 1;
+		$noMoreJobs = false;
+		while ($noMoreJobs != true) {
+			$arrPageJobsList = [];
+			$apiJobs = $this->getSearchJobsFromAPI($searchDetails);
+			if (is_null($apiJobs)) {
+				LogWarning("Warning: " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] returned zero jobs from the API." . PHP_EOL);
 
-            foreach ($apiJobs as $job) {
-                $item = getEmptyJobListingRecord();
-                $item['Title'] = $job->name;
-                $item['JobSitePostId'] = $job->sourceId;
-                if ($item['JobSitePostId'] == null)
-                    $item['JobSitePostId'] = $job->url;
+				return;
+			}
 
-                if (strlen(trim($item['Title'])) == 0 || strlen(trim($item['JobSitePostId'])) == 0) {
-                    continue;
-                }
-                $item['Location'] = $job->location;
-                $item['Company'] = $job->company;
-                if ($job->datePosted != null)
-                    $item['PostedAt'] = $job->datePosted->format('Y-m-d');
-                $item['Url'] = $job->url;
+			foreach ($apiJobs as $job) {
+				$item = getEmptyJobListingRecord();
+				$item['Title'] = $job->name;
+				$item['JobSitePostId'] = $job->sourceId;
+				if ($item['JobSitePostId'] == null)
+					$item['JobSitePostId'] = $job->url;
 
-                $strCurrentJobIndex = cleanupSlugPart($this->JobSiteName) . cleanupSlugPart($item['JobSitePostId']);
-                $arrPageJobsList[$strCurrentJobIndex] = $item;
-                $nItemCount += 1;
-            }
-            $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails);
-            if (count($arrPageJobsList) < $this->JobListingsPerPage) {
-                $noMoreJobs = true;
-            }
-            $pageNumber++;
-        }
+				if (strlen(trim($item['Title'])) == 0 || strlen(trim($item['JobSitePostId'])) == 0) {
+					continue;
+				}
+				$item['Location'] = $job->location;
+				$item['Company'] = $job->company;
+				if ($job->datePosted != null)
+					$item['PostedAt'] = $job->datePosted->format('Y-m-d');
+				$item['Url'] = $job->url;
 
-        LogMessage($this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL);
+				$strCurrentJobIndex = cleanupSlugPart($this->JobSiteName) . cleanupSlugPart($item['JobSitePostId']);
+				$arrPageJobsList[$strCurrentJobIndex] = $item;
+				$nItemCount += 1;
+			}
+			$this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails);
+			if (count($arrPageJobsList) < $this->JobListingsPerPage) {
+				$noMoreJobs = true;
+			}
+			$pageNumber++;
+		}
 
-    }
+		LogMessage($this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL);
+
+	}
 
 
 	/**
@@ -1228,21 +1229,21 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	protected function runJavaScriptSnippet($jscript = "", $wrap_in_func = true)
-    {
-        $driver = $this->getActiveWebdriver();
+	{
+		$driver = $this->getActiveWebdriver();
 
-        if ($wrap_in_func === true) {
-            $jscript = "function call_from_php() { " . $jscript . " }; call_from_php();";
-        }
+		if ($wrap_in_func === true) {
+			$jscript = "function call_from_php() { " . $jscript . " }; call_from_php();";
+		}
 
-        LogMessage("Executing JavaScript in browser:  " . $jscript);
+		LogMessage("Executing JavaScript in browser:  " . $jscript);
 
-        $ret = $driver->executeScript($jscript);
+		$ret = $driver->executeScript($jscript);
 
-        sleep(5);
+		sleep(5);
 
-        return $ret;
-    }
+		return $ret;
+	}
 
 	/**
 	 * @param $arrItem
@@ -1264,38 +1265,35 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		$arrItem ['Url'] = trim($arrItem['Url']); // DO NOT LOWER, BREAKS URLS
 
 		try {
-			if(empty($arrItem['Url']))
-			{
+			if (empty($arrItem['Url'])) {
 				$arrItem['Url'] = "[UNKNOWN]";
 			} else {
 				$urlParts = parse_url($arrItem['Url']);
-				if($urlParts == false || stristr($urlParts['scheme'], "http") == false)
-				{
+				if ($urlParts == false || stristr($urlParts['scheme'], "http") == false) {
 					$sep = "";
 					if (substr($arrItem['Url'], 0, 1) != "/")
 						$sep = "/";
 					$arrItem['Url'] = $this->JobPostingBaseUrl . $sep . $arrItem['Url'];
 				}
 			}
-		} catch (\Exception $ex)
-		{
+		} catch (\Exception $ex) {
 			LogWarning($ex->getMessage());
 		}
-        if (empty($arrItem['JobSitePostId'])) {
-	        $arrItem['JobSitePostId'] = $arrItem['Url'];
-        }
+		if (empty($arrItem['JobSitePostId'])) {
+			$arrItem['JobSitePostId'] = $arrItem['Url'];
+		}
 
-        $arrItem['JobSitePostId'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['JobSitePostId']);
-        $arrItem ['JobSitePostId'] = strScrub($arrItem['JobSitePostId'], FOR_LOOKUP_VALUE_MATCHING);
-        if (empty($arrItem['JobSitePostId'])) {
-            if (isset($this->regex_link_job_id)) {
-                $arrItem['JobSitePostId'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['Url']);
-            }
-        }
+		$arrItem['JobSitePostId'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['JobSitePostId']);
+		$arrItem ['JobSitePostId'] = strScrub($arrItem['JobSitePostId'], FOR_LOOKUP_VALUE_MATCHING);
+		if (empty($arrItem['JobSitePostId'])) {
+			if (isset($this->regex_link_job_id)) {
+				$arrItem['JobSitePostId'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['Url']);
+			}
+		}
 
-        return $arrItem;
+		return $arrItem;
 
-    }
+	}
 
 	/**
 	 * @param $arrItem
@@ -1304,20 +1302,18 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	function saveJob($arrItem)
-    {
-        $arrJob = $this->cleanupJobItemFields($arrItem);
-        try
-        {
-            $job = updateOrCreateJobPosting($arrJob);
-            return $job;
-        }
-        catch (Exception $ex)
-        {
-            handleException($ex, "Unable to save job to database due to error. Continuing to next job.  Error details: %S", false);
-        }
+	{
+		$arrJob = $this->cleanupJobItemFields($arrItem);
+		try {
+			$job = updateOrCreateJobPosting($arrJob);
+
+			return $job;
+		} catch (Exception $ex) {
+			handleException($ex, "Unable to save job to database due to error. Continuing to next job.  Error details: %S", false);
+		}
 
 
-    }
+	}
 
 	/**
 	 * @param                   $arrJobList
@@ -1326,32 +1322,29 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 *
 	 * @throws \Exception
 	 */
-    function saveSearchReturnedJobs($arrJobList, UserSearchSiteRun $searchDetails, &$nCountNewJobs=0)
-    {
-    	try {
-		    $nCountNewJobs = 0;
-		    if (!array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs))
-			    $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()] = array();
+	function saveSearchReturnedJobs($arrJobList, UserSearchSiteRun $searchDetails, &$nCountNewJobs = 0)
+	{
+		try {
+			$nCountNewJobs = 0;
+			if (!array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs))
+				$this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()] = array();
 
-		    foreach ($arrJobList as $jobitem) {
-			    $job = $this->saveJob($jobitem);
-			    if (!empty($job)) {
-				    $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()][$job->getJobPostingId()] = array('JobPostingId' => $job->getJobPostingId(), 'JobSitePostId' => $job->getJobSitePostId());
+			foreach ($arrJobList as $jobitem) {
+				$job = $this->saveJob($jobitem);
+				if (!empty($job)) {
+					$this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()][$job->getJobPostingId()] = array('JobPostingId' => $job->getJobPostingId(), 'JobSitePostId' => $job->getJobSitePostId());
 
-				    // if this posting was saved within the last hour , then assume it's a new post
-				    $hoursSince = date_diff($job->getFirstSeenAt(), new \DateTime());
-				    if ($hoursSince->h < 1)
-					    $nCountNewJobs += 1;
-			    }
-			    else
-			    	LogWarning("Failed to save job to database.  Job details = " . getArrayDebugOutput($jobitem));
-		    }
-	    }
-	    catch (Exception $ex)
-	    {
-	    	handleException($ex, "Unable to save job search results to database.", true);
-	    }
-    }
+					// if this posting was saved within the last hour , then assume it's a new post
+					$hoursSince = date_diff($job->getFirstSeenAt(), new \DateTime());
+					if ($hoursSince->h < 1)
+						$nCountNewJobs += 1;
+				} else
+					LogWarning("Failed to save job to database.  Job details = " . getArrayDebugOutput($jobitem));
+			}
+		} catch (Exception $ex) {
+			handleException($ex, "Unable to save job search results to database.", true);
+		}
+	}
 
 	/**
 	 * @param                                          $arrJobIds
@@ -1360,20 +1353,20 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	private function _addJobMatchIdsToUser($arrJobIds, UserSearchSiteRun $searchDetails)
-    {
-        $user = User::getCurrentUser();
-        foreach ($arrJobIds as $jobId) {
-            $newMatch = UserJobMatchQuery::create()
-                ->filterByUserId($user->getUserId())
-                ->filterByJobPostingId($jobId)
-                ->findOneOrCreate();
+	{
+		$user = User::getCurrentUser();
+		foreach ($arrJobIds as $jobId) {
+			$newMatch = UserJobMatchQuery::create()
+				->filterByUserId($user->getUserId())
+				->filterByJobPostingId($jobId)
+				->findOneOrCreate();
 
-            $newMatch->setUserId($user->getUserId());
-            if(!empty($searchDetails))
-	            $newMatch->setSetByUserSearchSiteRunKey($searchDetails->getUserSearchSiteRunKey());
-            $newMatch->save();
-        }
-    }
+			$newMatch->setUserId($user->getUserId());
+			if (!empty($searchDetails))
+				$newMatch->setSetByUserSearchSiteRunKey($searchDetails->getUserSearchSiteRunKey());
+			$newMatch->save();
+		}
+	}
 
 	/**
 	 * @param $searchDetails
@@ -1381,10 +1374,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	private function _addJobMatchesToUser(UserSearchSiteRun $searchDetails)
-    {
-        if(array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]))
-        $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]), $searchDetails);
-    }
+	{
+		if (array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]))
+			$this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]), $searchDetails);
+	}
 
 	/**
 	 * @param \JobScooper\DataAccess\JobPosting[] $arrJobs
@@ -1393,16 +1386,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 */
 	function saveJobList($arrJobs)
-    {
-        $addedJobIds = array();
-        foreach ($arrJobs as $job) {
-            $savedJob = $this->saveJob($job);
-            if(!is_null($savedJob))
-                $addedJobIds[] = $savedJob->getJobPostingId();
-        }
+	{
+		$addedJobIds = array();
+		foreach ($arrJobs as $job) {
+			$savedJob = $this->saveJob($job);
+			if (!is_null($savedJob))
+				$addedJobIds[] = $savedJob->getJobPostingId();
+		}
 
-        return $addedJobIds;
-    }
+		return $addedJobIds;
+	}
 
 	/**
 	 * @param \JobScooper\DataAccess\JobPosting[] $arrJobs
@@ -1411,17 +1404,17 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	protected function getJobsDbIds($arrJobs)
-    {
-        $arrIds = array_column($arrJobs, 'JobSitePostId', 'JobSitePostId');
-        $queryData = JobPostingQuery::create()
-            ->select(array("JobPostingId", "JobSitePostId", "JobSiteKey", "KeySiteAndPostId"))
-            ->filterByJobSiteKey($this->JobSiteName)
-            ->filterByJobSitePostId(array_values($arrIds))
-            ->find();
-        $jobResults = $queryData->toArray();
+	{
+		$arrIds = array_column($arrJobs, 'JobSitePostId', 'JobSitePostId');
+		$queryData = JobPostingQuery::create()
+			->select(array("JobPostingId", "JobSitePostId", "JobSiteKey", "KeySiteAndPostId"))
+			->filterByJobSiteKey($this->JobSiteName)
+			->filterByJobSitePostId(array_values($arrIds))
+			->find();
+		$jobResults = $queryData->toArray();
 
-        return $jobResults;
-    }
+		return $jobResults;
+	}
 
 
 	/**
