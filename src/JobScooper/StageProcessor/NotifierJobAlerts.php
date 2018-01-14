@@ -312,9 +312,9 @@ class NotifierJobAlerts extends JobsMailSender
 	{
 
 		foreach ($arrResults as $k => $v) {
+			unset($arrResults[$k]);
 			$rowOrder = array_fill_keys($keys, null);
-			$arrResults[$k] = array_replace($rowOrder, $v);
-
+			$arrResults[$k] = array_intersect_key(array_replace($rowOrder, $v), $rowOrder);
 		}
 
 		$spreadsheet->setActiveSheetIndexByName($sheetName);
@@ -323,13 +323,27 @@ class NotifierJobAlerts extends JobsMailSender
 
 		$nFirstDataRow = 3;
 		$startCell = "A" . strval($nFirstDataRow);
+		$lastCol = chr(ord("A") + (count($keys)));
+		$lastCellFirstRow = $lastCol . strval($nFirstDataRow);
+		$lastCellLastRow = $lastCol . strval($nFirstDataRow + countAssociativeArrayValues($arrResults));
 
+		//
+		// Place the results data on the worksheet
+		//
 		$dataSheet->fromArray(
 			$arrResults,    // The data to set
 			null,  // Array values with this value will not be set
 			$startCell      // Top left coordinate of the worksheet range where
-		//    we want to set these values (default is A1)
+							//    we want to set these values (default is A1)
 		);
+
+		//
+		// Clone the style formatting from the first line to each line of the results set
+		//
+		$dataSheet->duplicateStyle(
+				$dataSheet->getStyle("{$startCell}:{$lastCellFirstRow}"),
+			"{$startCell}:{$lastCellLastRow}"
+			);
 
 		//
 		// If we had a Url or Title array key, then we need to iterate over
