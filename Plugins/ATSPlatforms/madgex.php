@@ -95,9 +95,11 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	protected function getLocationIdFromPage(UserSearchSiteRun &$searchDetails)
     {
 	    $locValParam = $this->getGeoLocationURLValue($searchDetails, "{Place} {Region}");
-    	$locApi = parse_url($this->JobPostingBaseUrl, PHP_URL_SCHEME) . "://" . parse_url($this->JobPostingBaseUrl, PHP_URL_HOST) . "/location-lookup/?term={$locValParam}";
+//	    $locApi = parse_url($this->JobPostingBaseUrl, PHP_URL_SCHEME) . "://" . parse_url($this->JobPostingBaseUrl, PHP_URL_HOST) . "/location-lookup/?term={$locValParam}";
+	    $locApi = "http://" . parse_url($this->JobPostingBaseUrl, PHP_URL_HOST) . "/location-lookup/?term={$locValParam}";
+
 	    LogMessage("Determining LocationId value for {$locValParam}... from {$locApi} ..." );
-    	$objLocChoices = $this->getJsonApiResult($locApi, $searchDetails->getSearchStartUrl());
+	    $objLocChoices = $this->getJsonApiResult($locApi, $searchDetails->getSearchStartUrl());
 	    if(empty($objLocChoices))
 	    {
 	    	return null;

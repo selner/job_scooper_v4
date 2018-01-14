@@ -1435,80 +1435,105 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		try {
 			$driver = $this->getActiveWebdriver();
 			$driver->get($hostPageUri);
+			$apiNodeId = "jobs_api_data";
 
 			LogMessage("Downloading JSON data from {$apiUri} using page at {$hostPageUri} ...");
 
-			$js = "
-				document.body.dataset.apistatus= -1;
-		        fetch('{$apiUri}').then(function (response) {
-				    if (response.ok) {
-				        response.json().then(function (json) {
-				            console.log(json);
-				            if (json.length > 0) {
-				                console.log('API status = ' + response.status);
-								document.body.dataset.apistatus = response.status;
-				                document.body.dataset.api = JSON.stringify(json);
-				                console.log('API result = ' + document.body.dataset.api);
-				            }
-				            else {
-				                console.log('No data was returned from the API.');
-				                console.log('API status = ' + response.status);
-								document.body.dataset.apistatus = response.status;
-				                document.body.dataset.api = '';
-				                return '';
-				            }
-				        })
-				    }
-				    else
-				    {
-						document.body.dataset.apistatus = response.status;
-				        document.body.dataset.api.error = response.error();
-				        console.log('No location was found.');
-				    }
-				});
-	        ";
 
-			$driver = $this->getActiveWebdriver();
-			$driver->executeScript($js);
-			$objSimpHtml = $this->getSimpleHtmlDomFromSeleniumPage();
-			$body = $objSimpHtml->find("body");
-			if(!empty($body))
-			{
-				$dataJson = $body[0]->getAttribute("data-api");
-				if(!empty($dataJson))
-					return json_decode($dataJson);
+			$jsCode = /** @lang javascript */
+				<<<JSCODE
+            var callback = arguments[arguments.length - 1];
+			function setScriptDataObject(data) {
+				API_ELEM_ID = "jobs_api_data";
+
+				var myScriptTag = null;
+				try {
+					myScriptTag = document.getElementById(API_ELEM_ID);
+					myScriptTag.text = "";
+				}
+				catch (err) {
+				}
+
+				if (!myScriptTag) {
+					myScriptTag = document.createElement("script");
+					var bd = document.getElementsByTagName('body')[0];
+					bd.appendChild(myScriptTag);
+				}
+
+				myScriptTag.id = API_ELEM_ID;
+				var tagData = null;
+				try {
+					tagData = JSON.parse(data);
+				}
+				catch (err) {
+					tagData = data;
+				}
+				myScriptTag.text = JSON.stringify({
+    			    "api_data": tagData
+    			});
+
+			    return data;	
+			}
+	
+			function httpGet(url) {
+				return new Promise(
+					function (resolve, reject) {
+						const request = new XMLHttpRequest();
+						request.onload = function () {
+							if (this.status === 200) {
+								// Success
+								resolve(this.response);
+							} else {
+								// Something went wrong (404 etc.)
+								reject(new Error(this.statusText));
+							}
+						};
+						request.onerror = function () {
+							reject(new Error(
+								'XMLHttpRequest Error: ' + this.statusText));
+						};
+						request.open('GET', url);
+						request.send();
+					});
 			}
 
-			LogMessage("... waiting for updated status from API call...");
-			$driver->wait()->until(
-				function () use ($driver) {
-					$objSimpHtml = $this->getSimpleHtmlDomFromSeleniumPage();
-					$body = $objSimpHtml->find("body");
-					if(!empty($body)) {
-						$apival = $body[0]->getAttribute("data-apistatus");
-						$apidata = $body[0]->getAttribute("data-api");
-
-						LogDebug("JavaScript API status = {$apival} and data= {$apidata}");
-						if ($body[0]->getAttribute("data-apistatus") != -1)
-							return true;
-						else
-							return false;
-					}
-					return false;
+			httpGet('{$apiUri}')
+			.then(
+				function (value) {
+					console.log('Contents: ' + value);
+					setScriptDataObject(value);
+					callback(value);
 				},
-				'Error determining API status'
-			);
+				function (reason) {
+					console.error('Something went wrong', reason);
+					value = reason;
+					setScriptDataObject(value);
+					callback(value);
+	        });
 
-			LogMessage("... getting response value from api call ...");
-			$objSimpHtml = $this->getSimpleHtmlDomFromSeleniumPage();
-			$body = $objSimpHtml->find("body");
-			if(!empty($body))
-			{
-				$dataJson = $body[0]->getAttribute("data-api");
-				if(!empty($dataJson))
-					return json_decode($dataJson);
+JSCODE;
+
+			$driver->manage()->timeouts()->setScriptTimeout(30);
+			$response = $driver->executeAsyncScript($jsCode, array());
+			if (empty($response)) {
+				$simpHtml = $this->getSimpleHtmlDomFromSeleniumPage();
+				$node = $simpHtml->find("script#{$apiNodeId}");
+				if (!empty($node)) {
+					$val = $node[0]->text();
+
+				}
 			}
-			
+			try
+			{
+				$data= json_decode($response);
+
+			}
+			catch (\Exception $ex)
+			{
+				$data = $response;
+			}
+			return $data;
+
 		} catch (Exception $ex) {
 			LogError("Failed to download JSON data from API call {$apiUri}.  Error:  " . $ex->getMessage(), null, $ex);
 		}

@@ -87,43 +87,39 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	}
 
 	/**
-	 * @param $offset
+	 * @param $apiUri
+	 * @param $hostPageUri
 	 *
-	 * @throws \ErrorException
 	 * @throws \Exception
-	 * @return array
+	 * @return \stdClass
 	 */
-	private function getJsonResultsPage($url)
+	private function getJsonResultsPage($apiUri, $hostPageUri=null)
 	{
-		$curl = new \JobScooper\Utils\CurlWrapper();
-		if (isDebug()) $curl->setDebug(true);
+		LogMessage("Downloading JSON listing data from {$apiUri} for " . $this->getJobSiteKey() . "...");
+		if(empty($hostPageUri))
+			$hostPageUri = $this->getActiveWebdriver()->getCurrentURL();
+		if(empty($hostPageUri))
+			$hostPageUri = $this->nextResultsPageUrl;
 
-		$lastCookies = $this->getActiveWebdriver()->manage()->getCookies();
-		LogMessage("Downloading JSON listing data from {$url} for " . $this->getJobSiteKey() . "...");
-		$retObj = $curl->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = $lastCookies);
-		if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
-//			$respdata = json_decode($retObj['output'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK;);
-//			$respdata = json_decode($retObj['output'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK;);
-			$respdata = json_decode($retObj['output']);
-			if(!empty($respdata))
+		$ret = array();
+		$respdata = $this->getJsonApiResult($apiUri, $hostPageUri);
+		if(!empty($respdata))
+		{
+			$this->lastResponseData = $respdata;
+			try
 			{
-				$this->lastResponseData = $respdata;
-				try
-				{
-					$ret['count'] = $respdata->Total;
-					$ret['jobs'] = $respdata->Jobs;
+				$ret['count'] = $respdata->Total;
+				$ret['jobs'] = $respdata->Jobs;
 
-				}
-				catch(Exception $ex)
-				{
-					throw new Exception($respdata->error);
-				}
 			}
-
+			catch(Exception $ex)
+			{
+				throw new Exception($respdata->error);
+			}
 		}
-		return $ret;
-	}
 
+		return $respdata;
+	}
 
 	/**
 	 * @param $jobs
@@ -173,11 +169,13 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
 	{
 		$this->currentJsonSearchDetails = $searchDetails;
+		$hostPage = $searchDetails->getSearchStartUrl();
 		$jsonUrl = $this->_getJsonSearchUrl($searchDetails);
 		$retData = null;
 		try {
-			$retData = $this->getJsonResultsPage($jsonUrl);
-			$this->nTotalJobs = $retData['count'];
+			$retData = $this->getJsonResultsPage($jsonUrl, $hostPage);
+			$this->nTotalJobs = $retData->Total;
+			$this->lastResponseData = $retData;
 		}
 		catch (Exception $ex) {
 			//
@@ -264,23 +262,23 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 				else {
 					$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
 					$respData = $this->getJsonResultsPage($jsonUrl);
-					$jobs = $respData['jobs'];
-					$this->nTotalJobs = $respData['count'];
+					$jobs = $respData->Jobs;
+					$this->nTotalJobs = $respData->Total;
 				}
-				return $this->_parseJsonJobs($jobs);
+//				return $this->_parseJsonJobs($jobs);
 //
-//				while (!empty($jobs) && $nOffset < $this->nTotalJobs) {
-//					$curPageJobs = $this->_parseJsonJobs($jobs);
-//					$jobs = null;
-//					$ret = array_merge($ret, $curPageJobs);
-//					$nOffset = $nOffset + count($curPageJobs);
-//					if ($nOffset < $this->nTotalJobs) {
-//						$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
-//						$retData = $this->getJsonResultsPage($jsonUrl);
-//						$jobs = $retData['jobs'];
-//					}
-//				}
-//				return $ret;
+				while (!empty($jobs) && $nOffset < $this->nTotalJobs) {
+					$curPageJobs = $this->_parseJsonJobs($jobs);
+					$jobs = null;
+					$ret = array_merge($ret, $curPageJobs);
+					$nOffset = $nOffset + count($curPageJobs);
+					if ($nOffset < $this->nTotalJobs) {
+						$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
+						$respData = $this->getJsonResultsPage($jsonUrl);
+						$jobs = $respData->Jobs;
+					}
+				}
+				return $ret;
 			} catch (Exception $ex) {
 				LogWarning("Failed to download " . $this->getJobSiteKey() . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
 
