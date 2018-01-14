@@ -190,9 +190,6 @@ class MatchJobsToKeywordsTask():
         for jobid in not_matched_ids:
             self.jobs[jobid][u'MatchedNegativeTitleKeywords'] = None
 
-            # also clear isExcluded so we make sure to re-process it
-            self.jobs[jobid][u'IsExcluded'] = None
-
         #
         #  Now mark all the job title matches
         #
@@ -206,9 +203,6 @@ class MatchJobsToKeywordsTask():
                 else:
                     terms = " ".glue(list(grp[u'token_match']))
             self.jobs[jobid][u'MatchedNegativeTitleKeywords'] = terms
-
-            # also clear isExcluded so we make sure to re-process it
-            self.jobs[jobid][u'IsExcluded'] = None
 
         print "Negative Title Keywords:  {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids))
 

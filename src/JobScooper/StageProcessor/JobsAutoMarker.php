@@ -99,12 +99,23 @@ class JobsAutoMarker
 
 	        $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($arrJobs_AutoUpdatable);
 
-	        // If we got to the end, we successfully marked all the job matches for the user
-	        // Change them all over to be ready-to-send
 	        //
-	        $arrIds = array_keys($arrJobs_AutoUpdatable);
-	        updateUserJobMatchesStatus($arrIds, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND);
-
+	        // Since we did not require each update in the previous calls to call save()
+	        // for each UserJobMatch and take the perf hit that would generate, it is
+	        // probable that some of the rows are inconsistent between their facts for
+	        // match exclusion and the IsExcluded fact.  So let's grab them all fresh
+	        // from the DB with the updated data and re-save each of them, which will
+	        // cause IsExcluded to get updated and back in sync for each record.
+	        //
+	        // We'll use this same Save call to store that the record has been automarked
+	        // and is ready for sending.
+	        //
+	        $arrJobs_AutoUpdatable = $this->_getMatches();
+	        foreach ($arrJobs_AutoUpdatable as $jobMatch) {
+		        $jobMatch->setUserNotificationState(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND);
+		        $jobMatch->updateUserMatchStatus();
+		        $jobMatch->save();
+	        }
         }
         catch (Exception $ex)
         {
@@ -122,11 +133,12 @@ class JobsAutoMarker
 		try {
 
 			$sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string('7 days ago'));
-			$included_sites = JobSitePluginBuilder::getIncludedJobSites();
+			$included_sites = array_keys(JobSitePluginBuilder::getIncludedJobSites());
+
 			$duplicatePostings = JobPostingQuery::create()
 				->filterByDuplicatesJobPostingId(null)
 				->filterByJobSiteKey($included_sites, Criteria::IN)
-				->filterByFirstSeenAt(array('max' => $sinceWhen))
+				->filterByFirstSeenAt(array('min' => $sinceWhen))
 				->withColumn('COUNT(jobposting_id)', "DupeCount")
 				->withColumn('MIN(jobposting_id)', "PrimaryJobPostingId")
 				->select(array("PrimaryJobPostingId", "Company", "Title", "KeyCompanyAndTitle", "DupeCount"))
@@ -328,9 +340,8 @@ class JobsAutoMarker
 				    $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
 				    UserJobMatchQuery::create()
 					    ->filterByUserJobMatchId($chunk)
-					    ->update(array("OutOfUserArea" => true, "IsExcluded" => true), $con);
+					    ->update(array("OutOfUserArea" => true), $con);
 			    }
-
 
 	        $nJobsMarkedAutoExcluded = count($arrOutOfAreaIds);
 	        $nJobsNotMarked = count($arrJobsInArea);

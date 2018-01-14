@@ -40,14 +40,14 @@ class UserJobMatch extends BaseUserJobMatch
 
 	/**
 	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _setMatchStatus()
+	public function updateUserMatchStatus()
     {
         if(count($this->getMatchedUserKeywords()) > 0 )
             $this->setIsJobMatch(true);
         else
             $this->setIsJobMatch(false);
-
 
 	    $this->setIsExcluded(false);
         if(count($this->getMatchedNegativeTitleKeywords()) > 0 )
@@ -56,18 +56,23 @@ class UserJobMatch extends BaseUserJobMatch
         if(count($this->getMatchedNegativeCompanyKeywords()) > 0 )
             $this->setIsExcluded(true);
 
-        if($this->isOutOfUserArea() === true)
-            $this->setIsExcluded(true);
+	    if($this->isOutOfUserArea() === true)
+		    $this->setIsExcluded(true);
+
+	    $jp = $this->getJobPostingFromUJM();
+	    if(!empty($jp) && !empty($jp->getDuplicatesJobPostingId()))
+		    $this->setIsExcluded(true);
     }
 
     /**
      * Code to be run before persisting the object
      * @param  ConnectionInterface $con
      * @return boolean
+     * @throws \Propel\Runtime\Exception\PropelException
      */
     public function preSave(ConnectionInterface $con = null)
     {
-        $this->_setMatchStatus();
+        $this->updateUserMatchStatus();
 
         if (is_callable('parent::preSave')) {
             return parent::preSave($con);
@@ -124,6 +129,11 @@ class UserJobMatch extends BaseUserJobMatch
 	    return parent::setMatchedNegativeTitleKeywords($v);
     }
 
+	/**
+	 * @param array $v
+	 *
+	 * @return $this|\JobScooper\DataAccess\UserJobMatch
+	 */
 	public function setMatchedUserKeywords($v)
 	{
 		if(!empty($v) && is_array($v))
@@ -142,9 +152,11 @@ class UserJobMatch extends BaseUserJobMatch
 		return parent::setMatchedUserKeywords($v);
 	}
 
+	/**
+	 *
+	 */
 	public function clearUserMatchState()
 	{
-		$this->setIsExcluded(null);
 		$this->setIsJobMatch(null);
 		$this->setOutOfUserArea(null);
 
