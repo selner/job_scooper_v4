@@ -30,6 +30,8 @@
  ******************************************************************************/
 
 use \JobScooper\DataAccess\Map\UserJobMatchTableMap;
+use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
+use \Propel\Runtime\ActiveQuery\Criteria;
 
 /******************************************************************************
  *
@@ -113,7 +115,7 @@ function updateOrCreateJobPosting($arrJobItem)
  * @return \JobScooper\DataAccess\UserJobMatch[]
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null)
+function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null)
 {
     $user= \JobScooper\DataAccess\User::getCurrentUser();
 
@@ -127,6 +129,18 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
         ->filterByUserNotificationState($userStateCriteria[0], $userStateCriteria[1])
         ->filterByUserFromUJM($user)
         ->joinWithJobPostingFromUJM();
+
+	if(!empty($nNumDaysBack) && is_integer($nNumDaysBack))
+	{
+		$startDate = new \DateTime();
+		$strMod = "-{$nNumDaysBack} days";
+		$dateDaysAgo = $startDate->modify($strMod);
+		$strDateDaysAgo = $dateDaysAgo->format("Y-m-d");
+
+		$sql = UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY . " IN (SELECT user_search_site_run_key FROM user_search_site_run WHERE date_ended >= '{$strDateDaysAgo}') ";
+		$query->add(UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY, $sql, Criteria::CUSTOM);
+
+	}
 
     if(!empty($arrGeoLocIds) && is_array($arrGeoLocIds))
     {

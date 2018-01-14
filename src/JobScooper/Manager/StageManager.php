@@ -46,6 +46,9 @@ class StageManager
 
 	        $this->classConfig->initialize();
 
+	        /*
+	         * Run specific stages requested via command-line
+	         */
 
 	        $arrRunStages = getConfigurationSetting("command_line_args.stages");
             if (!empty($arrRunStages)) {
@@ -59,7 +62,9 @@ class StageManager
                     }
                 }
             } else {
-
+	            /*
+				 * If no stage was specifically requested, we default to running stages 1 - 3
+				 */
                 $this->doStage1();
                 $this->doStage2();
                 $this->doStage3();
@@ -184,19 +189,39 @@ class StageManager
 	 * @throws \Exception
 	 */
 	public function doStage3()
-    {
-        try {
-            startLogSection("Stage 3: Notifying User");
-            $notifier = new NotifierJobAlerts();
-            $notifier->processNotifications();
-        } catch (\Exception $ex) {
-	        handleException($ex, null, true);
+	{
+		try {
+			startLogSection("Stage 3: Notifying User");
+			$notifier = new NotifierJobAlerts();
+			$notifier->processRunResultsNotifications();
+		} catch (\Exception $ex) {
+			handleException($ex, null, true);
 		}
-        finally
-        {
-        	endLogSection("End of stage 3 (notifying user)");
-        }
-    }
+		finally
+		{
+			endLogSection("End of stage 3 (notifying user)");
+		}
+	}
+
+
+	/**
+	 * @throws \Exception
+	 */
+	public function doStage4()
+	{
+		try {
+			startLogSection("Stage 4: Send a Weekly Recap to User");
+			$notify = new NotifierJobAlerts();
+			$notify->processWeekRecapNotifications();
+		} catch (\Exception $ex) {
+			handleException($ex, null, true);
+		}
+		finally
+		{
+			endLogSection("End of stage 4 (send weekly recap)");
+		}
+	}
+
 
 	/**
 	 * @throws \Exception

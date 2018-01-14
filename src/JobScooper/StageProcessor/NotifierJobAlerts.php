@@ -20,6 +20,7 @@ namespace JobScooper\StageProcessor;
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\UserJobMatchQuery;
+use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\Utils\JobsMailSender;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -93,11 +94,9 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @throws \Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	function processNotifications()
+	function processRunResultsNotifications()
 	{
-
 		startLogSection("Processing user notification alerts");
-
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -105,15 +104,6 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		$class = null;
-
-
-		//
-		// Output the final files we'll send to the user
-		//
-
-		$detailsHTMLFile = null;
-		$pathExcelResults = null;
-		$arrFilesToAttach = array();
 
 		LogMessage("Building job match lists for notifications");
 		$matches = array();
@@ -132,6 +122,68 @@ class NotifierJobAlerts extends JobsMailSender
 			}
 		}
 		$matches["isUserJobMatchAndNotExcluded"] = array_filter($matches["all"], "isUserJobMatchAndNotExcluded");
+
+		if(countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]) == 0)
+			$subject = "No New Job Postings Found for " . getRunDateRange();
+		else
+			$subject = countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]) . " New Job Postings: " . getRunDateRange();
+
+		return $this->_sendResultsNotification($matches, $subject);
+	}
+
+
+	/**
+	 * @return bool
+	 * @throws \Exception
+	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
+	 */
+	function processWeekRecapNotifications()
+	{
+		startLogSection("Processing week recap notification...");
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//
+		// Output the full jobs list into a file and into files for different cuts at the jobs list data
+		//
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		$class = null;
+
+		$noteStatus = new Criteria();
+
+		LogMessage("Building job match lists for past week");
+		$matches = array();
+		$matches["all"] = getAllMatchesForUserNotification(
+			array([UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT], Criteria::IN),
+			null,
+			7
+		);
+
+		if(empty($matches["all"]))
+			$matches["all"] = array();
+		else {
+			LogMessage("Converting " . countAssociativeArrayValues($matches["all"]) . " UserJobMatch objects to array data for use in notifications...");
+			foreach ($matches["all"] as $userMatchId => $item) {
+				$item = $matches["all"][$userMatchId]->toFlatArrayForCSV();
+				$matches["all"][$userMatchId] = $item;
+			}
+		}
+		$matches["isUserJobMatchAndNotExcluded"] = array_filter($matches["all"], "isUserJobMatchAndNotExcluded");
+
+		$subject = "Weekly Roundup for " . getRunDateRange(7);
+		return $this->_sendResultsNotification($matches, $subject);
+	}
+
+	/**
+	 * @return bool
+	 * @throws \Exception
+	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
+	 */
+	private function _sendResultsNotification($matches, $resultsTitle)
+	{
+		//
+		// Output the final files we'll send to the user
+		//
+		$arrFilesToAttach = array();
 		startLogSection("Generating Excel file for user's job match results...");
 		try {
 			$spreadsheet = $this->_generateMatchResultsExcelFile($matches);
@@ -158,8 +210,7 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		startLogSection("Generating HTML & text email content for user ");
 
-		$messageHtml = $this->_generateHTMLEmailContent("JobScooper for " . getRunDateRange(), $matches);
-		$subject = "New Job Postings: " . getRunDateRange();
+		$messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches);
 
 		endLogSection("Email content ready to send.");
 
@@ -169,7 +220,7 @@ class NotifierJobAlerts extends JobsMailSender
 		startLogSection("Sending email to user...");
 
 		try {
-			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $subject, "results");
+			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results");
 			if ($ret !== false || $ret !== null) {
 				if (!isDebug()) {
 					if (!empty($matches['all'])) {
@@ -238,8 +289,7 @@ class NotifierJobAlerts extends JobsMailSender
 
 	/**
 	 * @param $subject
-	 * @param $searches
-	 * @param $arrMatchedJobs
+	 * @param $matches
 	 *
 	 * @return mixed
 	 * @throws \Exception
@@ -254,7 +304,7 @@ class NotifierJobAlerts extends JobsMailSender
 			"Email"      => array(
 				"Subject"            => $subject,
 				"BannerText"         => "JobScooper",
-				"Headline"           => "Jobs for " . getRunDateRange(),
+				"Headline"           => $subject,
 				"IntroText"          => "",
 				"PreHeaderText"      => "",
 				"TotalJobMatchCount" => countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]),
