@@ -163,6 +163,33 @@ class SeleniumManager extends PropertyObject
 	/**
 	 * @throws \Exception
 	 */
+	function waitForAjax($framework='jquery')
+	{
+		// javascript framework
+		switch($framework){
+			case 'jquery':
+				$code = "return jQuery.active;"; break;
+			case 'prototype':
+				$code = "return Ajax.activeRequestCount;"; break;
+			case 'dojo':
+				$code = "return dojo.io.XMLHTTPTransport.inFlight.length;"; break;
+			default:
+				throw new Exception('Not supported framework');
+		}
+
+		// wait for at most 30s, retry every 2000ms (2s)
+		$driver = $this->get_driver();
+		$driver->wait(30, 2000)->until(
+			function ($driver, $code) {
+				return !($driver->executeScript($code));
+			}
+		);
+	}
+
+
+	/**
+	 * @throws \Exception
+	 */
 	function killAllAndRestartSelenium()
     {
         try {
@@ -358,7 +385,7 @@ class SeleniumManager extends PropertyObject
      * Get the current webdriver or create a new one if needed.
      *
      * @throws \Exception
-     * @return \Facebook\WebDriver\Remote\RemoteWebDriver
+     * @return \Facebook\WebDriver\Remote\RemoteWebDriver|null
      *
      */
     function get_driver()

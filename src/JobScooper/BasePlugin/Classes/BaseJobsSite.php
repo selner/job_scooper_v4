@@ -1416,6 +1416,106 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		return $jobResults;
 	}
 
+	/**
+	 * @param string $apiUri
+	 * @param string $hostPageUri
+	 *
+	 * @return mixed|null
+	 * @throws \Exception
+	 */
+	protected function getJsonApiResult($apiUri, $hostPageUri)
+	{
+		if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
+			try {
+				$this->selenium = new SeleniumManager();
+			} catch (Exception $ex) {
+				handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+			}
+		}
+		try {
+			$driver = $this->getActiveWebdriver();
+			$driver->get($hostPageUri);
+
+			LogMessage("Downloading JSON data from {$apiUri} using page at {$hostPageUri} ...");
+
+			$js = "
+				document.body.dataset.apistatus= -1;
+		        fetch('{$apiUri}').then(function (response) {
+				    if (response.ok) {
+				        response.json().then(function (json) {
+				            console.log(json);
+				            if (json.length > 0) {
+				                console.log('API status = ' + response.status);
+								document.body.dataset.apistatus = response.status;
+				                document.body.dataset.api = JSON.stringify(json);
+				                console.log('API result = ' + document.body.dataset.api);
+				            }
+				            else {
+				                console.log('No data was returned from the API.');
+				                console.log('API status = ' + response.status);
+								document.body.dataset.apistatus = response.status;
+				                document.body.dataset.api = '';
+				                return '';
+				            }
+				        })
+				    }
+				    else
+				    {
+						document.body.dataset.apistatus = response.status;
+				        document.body.dataset.api.error = response.error();
+				        console.log('No location was found.');
+				    }
+				});
+	        ";
+
+			$driver = $this->getActiveWebdriver();
+			$driver->executeScript($js);
+			$objSimpHtml = $this->getSimpleHtmlDomFromSeleniumPage();
+			$body = $objSimpHtml->find("body");
+			if(!empty($body))
+			{
+				$dataJson = $body[0]->getAttribute("data-api");
+				if(!empty($dataJson))
+					return json_decode($dataJson);
+			}
+
+			LogMessage("... waiting for updated status from API call...");
+			$driver->wait()->until(
+				function () use ($driver) {
+					$objSimpHtml = $this->getSimpleHtmlDomFromSeleniumPage();
+					$body = $objSimpHtml->find("body");
+					if(!empty($body)) {
+						$apival = $body[0]->getAttribute("data-apistatus");
+						$apidata = $body[0]->getAttribute("data-api");
+
+						LogDebug("JavaScript API status = {$apival} and data= {$apidata}");
+						if ($body[0]->getAttribute("data-apistatus") != -1)
+							return true;
+						else
+							return false;
+					}
+					return false;
+				},
+				'Error determining API status'
+			);
+
+			LogMessage("... getting response value from api call ...");
+			$objSimpHtml = $this->getSimpleHtmlDomFromSeleniumPage();
+			$body = $objSimpHtml->find("body");
+			if(!empty($body))
+			{
+				$dataJson = $body[0]->getAttribute("data-api");
+				if(!empty($dataJson))
+					return json_decode($dataJson);
+			}
+			
+		} catch (Exception $ex) {
+			LogError("Failed to download JSON data from API call {$apiUri}.  Error:  " . $ex->getMessage(), null, $ex);
+		}
+
+		return null;
+	}
+
 
 	/**
 	 * @param null $url
