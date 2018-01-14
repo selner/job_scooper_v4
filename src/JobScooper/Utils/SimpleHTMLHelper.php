@@ -21,9 +21,18 @@ use DiDom\Query;
 use DiDom\Element;
 use DOMElement;
 
+/**
+ * Class ExtendedDiDomElement
+ * @package JobScooper\Utils
+ */
 class ExtendedDiDomElement extends Element
 {
-    function __get($name) {
+	/**
+	 * @param string $name
+	 *
+	 * @return null|string
+	 */
+	function __get($name) {
         switch ($name) {
             case 'text':
                 return $this->text();
@@ -36,7 +45,10 @@ class ExtendedDiDomElement extends Element
         }
     }
 
-    function isVisible()
+	/**
+	 * @return bool
+	 */
+	function isVisible()
     {
         $elemVisible = true;
         $style = $this->style;
@@ -78,7 +90,10 @@ class ExtendedDiDomElement extends Element
         return $elemVisible;
     }
 
-    function getDocument()
+	/**
+	 * @return \DiDom\Document|\JobScooper\Utils\ExtendedDiDomDocument|null
+	 */
+	function getDocument()
     {
         if ($this->node->ownerDocument === null) {
             return null;
@@ -128,11 +143,23 @@ class ExtendedDiDomElement extends Element
 
 }
 
+/**
+ * Class ExtendedDiDomDocument
+ * @package JobScooper\Utils
+ */
 class ExtendedDiDomDocument extends Document
 {
-    protected $_sourceUrl;
+	/**
+	 * @var
+	 */
+	protected $_sourceUrl;
 
-    function __get($name) {
+	/**
+	 * @param $name
+	 *
+	 * @return string
+	 */
+	function __get($name) {
         switch ($name) {
             case 'text':
                 return $this->text();
@@ -142,22 +169,43 @@ class ExtendedDiDomDocument extends Document
         }
     }
 
-    function setSource($strUrl)
+	/**
+	 * @param $strUrl
+	 */
+	function setSource($strUrl)
     {
         $this->_sourceUrl = $strUrl;
     }
 
-    function getSource()
+	/**
+	 * @return mixed
+	 */
+	function getSource()
     {
         return $this->_sourceUrl;
     }
 
-    function findByXpath($xpath)
+	/**
+	 * @param $xpath
+	 *
+	 * @return array|\DiDom\Element[]|\DOMElement[]|\JobScooper\Utils\ExtendedDiDomElement
+	 * @throws \Exception
+	 */
+	function findByXpath($xpath)
     {
         return $this->find($xpath, Query::TYPE_XPATH);
     }
 
-    function find($expression, $type = Query::TYPE_CSS, $wrapNode = true, $contextNode = null)
+	/**
+	 * @param string $expression
+	 * @param string $type
+	 * @param bool   $wrapNode
+	 * @param null   $contextNode
+	 *
+	 * @return array|\DiDom\Element[]|\DOMElement[]|\JobScooper\Utils\ExtendedDiDomElement
+	 * @throws \Exception
+	 */
+	function find($expression, $type = Query::TYPE_CSS, $wrapNode = true, $contextNode = null)
     {
         try {
             $ret = parent::find($expression, $type, $wrapNode, $contextNode);
@@ -188,7 +236,10 @@ class ExtendedDiDomDocument extends Document
         }
     }
 
-    function debug_dump_to_file()
+	/**
+	 * @return string
+	 */
+	function debug_dump_to_file()
     {
         $src = $this->getSource();
         if(empty($src))
@@ -204,9 +255,18 @@ class ExtendedDiDomDocument extends Document
 }
 
 
+/**
+ * Class SimpleHTMLHelper
+ * @package JobScooper\Utils
+ */
 class SimpleHTMLHelper extends ExtendedDiDomDocument
 {
-    function __construct($data)
+	/**
+	 * SimpleHTMLHelper constructor.
+	 *
+	 * @param $data
+	 */
+	function __construct($data)
     {
         $isFile = false;
         $string = $data;
