@@ -337,6 +337,12 @@
 
         <column name="date_ended" phpName="EndedAt" type="timestamp"/>
 
+        <index>
+            <index-column name="user_search_site_run_key" size="100"/>
+            <index-column name="date_ended"/>
+        </index>
+
+
         <column name="search_start_url" phpName="SearchStartUrl" type="varchar" size="1024"/>
 
         <column name="run_result_code" phpName="RunResultCode" type="enum"
