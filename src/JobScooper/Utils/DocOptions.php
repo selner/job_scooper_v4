@@ -25,7 +25,7 @@ private $doc = <<<DOC
 {APP_RUN_COMMAND}
 
 Usage:
-  {APP_RUN_COMMAND} <configfile> [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--debug] [--disable-notifications]
+  {APP_RUN_COMMAND} <configfile> [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--debug --debug-userid=<userid>] [--disable-notifications] 
   {APP_RUN_COMMAND} <configfile> [--debug] [--disable-notifications]
   {APP_RUN_COMMAND} (-h | --help)
   {APP_RUN_COMMAND} --version
@@ -37,6 +37,7 @@ Options:
   --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey. [default: all]
   --week-recap			    Just send a recap notifiction email for job matches from the past 7 days
   --debug                   Show debug output. [default: false]
+  --debug-userid=<userid>   Debug mode only.  Override the user configuration and instead use the UserID specified.  [Default: null]
   --disable-notifications   Do not send email alerts for new jobs. [default: false]
 
 DOC;

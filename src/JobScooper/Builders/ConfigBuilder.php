@@ -478,9 +478,21 @@ class ConfigBuilder
 		$arrUserResultsTo = $this->_getSetting("alerts.results.to");
 		$cfgpath = getConfigurationSetting('command_line_args.configfile');
 
-		$currentUser = UserQuery::findOrCreateUserByConfigPath($cfgpath, $arrUserResultsTo, $overwriteFacts=true);
-		if(empty($currentUser))
-			throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
+		$dbgUserId = getConfigurationSetting('command_line_args.debug-userid');
+		if(isDebug() && !empty($dbgUserId))
+		{
+
+			$currentUser = UserQuery::create()
+				->findOneByUserId($dbgUserId);
+			if(empty($currentUser))
+				throw new \Exception("Could not find debug-userid {$dbgUserId} in the database.  Aborting.");
+		}
+		else
+		{
+			$currentUser = UserQuery::findOrCreateUserByConfigPath($cfgpath, $arrUserResultsTo, $overwriteFacts=true);
+			if(empty($currentUser))
+				throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
+		}
 		$currentUser->setCurrentUser($currentUser);
 		$userList[$currentUser->getEmailAddress()] = $currentUser;
 		setConfigurationSetting("alerts.results.to", $currentUser);
