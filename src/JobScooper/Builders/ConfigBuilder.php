@@ -192,6 +192,9 @@ class ConfigBuilder
 
         LogMessage("Loaded all configuration settings from " . $this->arrFileDetails['config_ini']->getPathname());
 
+	    // Note:  this must happen before any of the job site plugins are instantiated
+	    $this->_parsePluginSettings();
+
 	    //
 	    // Load the global search data that will be used to create
 	    // and configure all searches
@@ -204,7 +207,6 @@ class ConfigBuilder
         //
         // Load Plugin Specific settings from the config
         //
-        $this->_parsePluginSettings();
 
         $this->_parseSearchLocations();
 
@@ -337,7 +339,7 @@ class ConfigBuilder
     {
         LogMessage("Loading plugin setup information from config file...");
 
-        setConfigurationSetting("plugin_specific_settings", $this->_getSetting("plugin_specific_settings"));
+        setConfigurationSetting("plugin_settings", $this->_getSetting("plugin_settings"));
     }
 
 	/**

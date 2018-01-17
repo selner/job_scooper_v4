@@ -60,7 +60,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			}
 		}
 
-		$this->_otherPluginSettings = getConfigurationSetting('plugin_specific_settings.' . $this->JobSiteKey);
+		$this->_otherPluginSettings = getConfigurationSetting('plugin_settings.' . $this->JobSiteKey);
 
 		//
 		// Set all the flag defaults to be not supported
@@ -509,17 +509,19 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	{
 		$arrTokens = array();
 		preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strUrl, $tokenlist, PREG_SET_ORDER);
-		if (!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3) {
+		if (!empty($tokenlist) && is_array($tokenlist)) {
 			foreach($tokenlist as $item)
 			{
-				$tokenType = $item[1];
-				$srcValue = $item[0];
-				$tokFmt = $item[2];
-				$arrTokens[$srcValue] = array(
-					"type" => strtoupper($tokenType),
-					"source_string" => $srcValue,
-					"format_value" => $tokFmt
-				);
+				if(count($item) >= 3) {
+					$tokenType = $item[1];
+					$srcValue = $item[0];
+					$tokFmt = $item[2];
+					$arrTokens[$srcValue] = array(
+						"type"          => strtoupper($tokenType),
+						"source_string" => $srcValue,
+						"format_value"  => $tokFmt
+					);
+				}
 			}
 		}
 
