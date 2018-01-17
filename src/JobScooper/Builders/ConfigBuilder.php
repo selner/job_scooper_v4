@@ -476,7 +476,7 @@ class ConfigBuilder
 		$arrUserResultsTo = $this->_getSetting("alerts.results.to");
 		$cfgpath = getConfigurationSetting('command_line_args.configfile');
 
-		$currentUser = UserQuery::findOrCreateUserByConfigPath($cfgpath, $arrUserResultsTo);
+		$currentUser = UserQuery::findOrCreateUserByConfigPath($cfgpath, $arrUserResultsTo, $overwriteFacts=true);
 		if(empty($currentUser))
 			throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
 		$currentUser->setCurrentUser($currentUser);
