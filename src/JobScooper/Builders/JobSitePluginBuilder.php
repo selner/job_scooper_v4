@@ -37,7 +37,7 @@ class JobSitePluginBuilder
 	 *
 	 * @return \JobScooper\DataAccess\JobSiteRecord[]|null
 	 */
-	static function getAllJobSites($requireEnabled=true)
+	static function getAllJobSites()
     {
 	    $sitesBySiteKey = getCacheAsArray("all_jobsites_and_plugins");
 		if(!empty($sitesBySiteKey))
@@ -46,11 +46,6 @@ class JobSitePluginBuilder
 		$plugins = new JobSitePluginBuilder();
 
         $query = JobSiteRecordQuery::create();
-
-        if($requireEnabled === true)
-        {
-            $query->filterByisDisabled(false);
-        }
 
         $sites = $query
 	        ->find()
@@ -120,7 +115,7 @@ class JobSitePluginBuilder
 	static function getJobSitesCmdLineIncludedInRun()
 	{
 		$cmdLineSites = getConfigurationSetting("command_line_args.jobsite");
-		$sites = self::getAllJobSites(true);
+		$sites = self::getAllJobSites();
 		if(in_array("all", $cmdLineSites))
 			return $sites;
 
