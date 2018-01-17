@@ -144,10 +144,13 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 
     if(!empty($arrGeoLocIds) && is_array($arrGeoLocIds))
     {
-	    $query->useJobPostingFromUJMQuery()
-		    ->filterByGeoLocationId($arrGeoLocIds)
-		    ->orderByKeyCompanyAndTitle()
-		    ->endUse();
+    	$locIdColumnName = $query->getAliasedColName(\JobScooper\DataAccess\Map\JobPostingTableMap::COL_GEOLOCATION_ID);
+        $query->useJobPostingFromUJMQuery()
+	       ->addCond('locIdsCond1', $locIdColumnName, $arrGeoLocIds, Criteria::IN)
+	       ->addCond('locIdsCond2', $locIdColumnName, null, Criteria::ISNULL)
+	       ->combine(array('locIdsCond1', 'locIdsCond2'), Criteria::LOGICAL_OR)
+	       ->orderByKeyCompanyAndTitle()
+	       ->endUse();
     }
     else
 	    $query->useJobPostingFromUJMQuery()
