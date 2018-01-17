@@ -60,7 +60,7 @@
                 },
                 {
                     "Name": "Location",
-                    "Selector": "div.Location",
+                    "Selector": "div.location",
                     "Index": 0,
                     "Attribute": "text",
                     "Type": "CSS"
