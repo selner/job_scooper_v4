@@ -17,14 +17,8 @@
 
 namespace JobScooper\Builders;
 
-
-use Composer\Autoload\AutoloadGenerator;
-use Composer\Autoload\ClassLoader;
-use Composer\Composer;
 use Exception;
-use Gnugat\NomoSpaco\File\FileRepository;
 use JobScooper\DataAccess\JobSiteRecordQuery;
-use JobScooper\Utils\ClassFinder;
 
 /**
  * Class JobSitePluginBuilder
@@ -69,6 +63,16 @@ class JobSitePluginBuilder
 	    if (is_null($sites))
 	    {
 	    	$sites = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
+
+		    $disabled = array_filter($sites, function ($v) {
+			    return $v->getisDisabled() === true;
+		    });
+		    if (!empty($disabled)) {
+			    LogMessage("Excluding " . join(", ", array_keys($disabled)) . " job site(s):  marked as disabled in the database.");
+			    $sites = array_diff_key($sites, $disabled);
+		    }
+
+
 		    JobSitePluginBuilder::setIncludedJobSites($sites);
 	    }
 
