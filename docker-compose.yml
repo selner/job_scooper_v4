@@ -11,19 +11,11 @@ services:
     environment:
       - SE_OPTS=-port 4448 -enablePassThrough false
       - JAVA_OPTS=-Xmx512m -Dwebdriver.enable.native.events=1
-      - BRANCH
       - JOBSCOOPER_OUTPUT
-      - REPONAME
-      - CONTAINER_TAG
-
 
   mysql_server:
     environment:
       - MYSQL_ROOT_PASSWORD
-      - BRANCH
-      - JOBSCOOPER_OUTPUT
-      - REPONAME
-      - CONTAINER_TAG
     image: mysql
     container_name: js4-mysql_server.$CONTAINER_TAG
     volumes:
@@ -35,16 +27,12 @@ services:
     ports:
       - 3901:3306
 
-
   js4:
 #    build:
 #        context: ./
 #        dockerfile: Dockerfile
     environment:
-      - BRANCH
       - JOBSCOOPER_OUTPUT
-      - REPONAME
-      - CONTAINER_TAG
       - NLTK_DATA
       - JOBSCOOPER_PROPEL_INI
     image: "${REPONAME}selner/js4-${BRANCH}:latest"
