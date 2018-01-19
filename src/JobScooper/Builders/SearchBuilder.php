@@ -18,6 +18,7 @@
 namespace JobScooper\Builders;
 
 use JobScooper\DataAccess\User;
+use JobScooper\DataAccess\UserSearchPairQuery;
 use JobScooper\DataAccess\UserSearchQuery;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\DataAccess\UserSearchSiteRun;
@@ -45,18 +46,16 @@ class SearchBuilder
 	public function initializeSearches()
     {
 
-	    $this->_setUserSearches();
+	    JobSitePluginBuilder::setSitesAsExcluded(getConfigurationSetting("config_excluded_sites"));
+
+	    JobSitePluginBuilder::filterJobSitesByCountryCodes();
+
+	    $this->_filterJobSitesThatAreExcluded();
 
 	    //
 	    // Create searches needed to run all the keyword sets
 	    //
 	    $this->_generateUserSearchSiteRuns();
-
-	    JobSitePluginBuilder::setSitesAsExcluded(getConfigurationSetting("config_excluded_sites"));
-
-	    JobSitePluginBuilder::filterJobSitesByCountryCodes(getConfigurationSetting("country_codes"));
-
-	    $this->_filterJobSitesThatAreExcluded();
 
 	    //
 	    // Filter out sites excluded in the user's config file
@@ -64,61 +63,6 @@ class SearchBuilder
 	    $this->_filterJobSitesThatShouldNotRunYet();
 
 	    $this->_filterUserSearchesThatShouldNotRunYet();
-    }
-
-	/**
-	 * @return null
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	private function _setUserSearches()
-    {
-
-	    $arrLocations = getConfigurationSetting('search_locations');
-	    if (empty($arrLocations)) {
-		    LogWarning("No search locations have been set. Unable to setup a user search run.");
-
-		    return null;
-	    }
-
-	    $keywordSets = getConfigurationSetting('user_keyword_sets');
-	    if (empty($keywordSets)) {
-		    LogWarning("No user keyword sets have been configured. Unable to setup a user search run.");
-
-		    return null;
-	    }
-
-	    $userSearches = array();
-	    foreach ($arrLocations as $lockey => $searchLoc) {
-		    LogMessage("Adding user searches in " . $searchLoc->getDisplayName() . " for user's keywords sets");
-
-		    foreach ($keywordSets as $setKey => $keywordSet) {
-
-			    $query = UserSearchQuery::create()
-				    ->filterByUserKeywordSetFromUS($keywordSet)
-				    ->filterByUserFromUS(User::getCurrentUser());
-
-				if(!empty($searchLoc))
-					$query->filterByGeoLocationId($searchLoc->getGeoLocationId());
-
-				    $user_search = $query->findOneOrCreate();
-
-			    $user_search->setUserKeywordSetFromUS($keywordSet);
-			    $user_search->setUserFromUS(User::getCurrentUser());
-			    $user_search->setGeoLocationFromUS($searchLoc);
-			    $user_search->save();
-
-			    $userSearches[$user_search->getUserSearchKey()] = $user_search;
-		    }
-	    }
-
-	    if (empty($userSearches)) {
-		    LogMessage("Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.");
-
-		    return null;
-	    }
-	    setConfigurationSetting("user_searches", $userSearches);
-	    LogMessage("Generated " . count($userSearches) . " user searches.");
-
     }
 
 	/**
@@ -145,7 +89,9 @@ class SearchBuilder
 			$sitesToSkip = array_merge($sitesToSkip, $completedSitesAllOnly);
 		}
 
-		$searchLocations = getConfigurationSetting('search_locations');
+		$user = User::getCurrentUser();
+		$searchLocations = $user->getSearchGeoLocations();
+
 		foreach ($searchLocations as $location) {
 			$sitesAllLocationOnly = UserSearchSiteRunQuery::create()
 				->useJobSiteFromUSSRQuery()
@@ -155,7 +101,9 @@ class SearchBuilder
 				->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
 				->select(array('JobSiteKey', 'ResultsFilterType', 'LastCompleted'))
 				->filterByRunResultCode("successful")
-				->filterByGeoLocationFromUSSR($location)
+				->useUserSearchPairFromUSSRQuery()
+				->filterByGeoLocationFromUS($location)
+				->endUse()
 				->groupBy(array("JobSiteKey", "ResultsFilterType"))
 				->find()
 				->getData();
@@ -237,11 +185,13 @@ class SearchBuilder
 
 	    $completedSearchesUserRecent = UserSearchSiteRunQuery::create()
 		    ->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
-		    ->addAsColumn('PartialUSSRKey', 'CONCAT(jobsite_key, user_search_key)')
+		    ->addAsColumn('PartialUSSRKey', 'CONCAT(jobsite_key, user_search_site_run.user_search_pair_id)')
 		    ->select(array('PartialUSSRKey', 'LastCompleted'))
 		    ->filterByRunResultCode("successful")
-		    ->groupBy(array("PartialUSSRKey", 'UserSearchKey'))
-		    ->filterByUserFromUSSR(User::getCurrentUser())
+		    ->groupBy(array("PartialUSSRKey", 'UserSearchPairId'))
+		    ->useUserSearchPairFromUSSRQuery()
+		    ->filterByUserFromUS(User::getCurrentUser())
+		    ->endUse()
 		    ->orderBy("LastCompleted", Criteria::ASC)
 		    ->find()
 		    ->getData();
@@ -265,7 +215,7 @@ class SearchBuilder
 	    	foreach($siteSearches as $ussrKey => $searchRun)
 		    {
 		    	$fKeepSearch = true;
-		    	$partialUSSRKey = $jobSiteKey . $searchRun->getUserSearchKey();
+		    	$partialUSSRKey = $jobSiteKey . $searchRun->getUserSearchPairId();
 		    	if(array_key_exists($partialUSSRKey, $completedSearchesUserRecent) && !empty($completedSearchesUserRecent[$partialUSSRKey]))
 			    {
 				    if (new \DateTime($completedSearchesUserRecent[$partialUSSRKey]) >= $this->_cacheCutOffTime)
@@ -301,12 +251,13 @@ class SearchBuilder
         //
         // let's start with the searches specified with the details in the the config.ini
         //
-        $userSearches = getConfigurationSetting('user_searches');
+	    $user = User::getCurrentUser();
+        $userSearchPairs = $user->getUserSearchPairs();
         $includedSites = JobSitePluginBuilder::getIncludedJobSites($fOptimizeBySiteRunOrder=true);
-	    if (empty($userSearches) || empty($includedSites))
+	    if (empty($userSearchPairs) || empty($includedSites))
 		    return;
 
-        LogMessage(" Creating search runs for " . strval(count($userSearches)) . " user searches across " . count($includedSites) . " jobsites.");
+        LogMessage(" Creating search runs for " . strval(count($userSearchPairs)) . " user searches across " . count($includedSites) . " jobsites.");
 
         $searchRuns = array();
 
@@ -314,11 +265,10 @@ class SearchBuilder
         {
         	$searchRuns[$jobsiteKey] = array();
 
-            foreach($userSearches as $search)
+            foreach($userSearchPairs as $searchPair)
             {
                 $searchrun = new UserSearchSiteRun();
-	            $searchrun->setUserFromUSSR(User::getCurrentUser());
-	            $searchrun->setUserSearchFromUSSR($search);
+	            $searchrun->setUserSearchPairFromUSSR($searchPair);
                 $searchrun->setJobSiteKey($site);
                 $searchrun->setAppRunId(getConfigurationSetting('app_run_id'));
                 $searchrun->setStartedAt(time());

@@ -82,20 +82,6 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 	}
 
-	function getUserKeywordSet(ConnectionInterface $con = null)
-	{
-		$user_search = $this->getUserSearch($con);
-		if (!empty($user_search))
-			return $user_search->getUserKeywordSetFromUS($con);
-
-	}
-
-
-	function getUserSearch(ConnectionInterface $con = null)
-	{
-		return $this->getUserSearchFromUSSR($con);
-	}
-
 
 	/**
 	 * Derived method to catches calls to undefined methods.
@@ -110,8 +96,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	{
 		$user_kwd_set = null;
 		$user = null;
-		$user_search = $this->getUserSearch();
-		$user_kwd_set = $this->getUserKeywordSet();
+		$user_search = $this->getUserSearchPairFromUSSR();
 
 		if(method_exists($this, $method)) {
 			return call_user_func(
@@ -147,12 +132,14 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 		$arrJobPosting = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
 		updateColumnsForCSVFlatArray($arrJobPosting, new UserSearchSiteRunTableMap());
 		if ($includeGeolocation === true) {
-			$jobloc = $this->getGeoLocationFromUSSR();
-			if (!is_null($jobloc))
-				$location = $jobloc->toFlatArrayForCSV();
+			$searchPair = $this->getUserSearchPairFromUSSR();
+			if(!empty($searchPair) && !empty($searchPair->getGeoLocationId())) {
+				$jobloc = $searchPair->getGeoLocationFromUS();
+				if (!is_null($jobloc))
+					$location = $jobloc->toFlatArrayForCSV();
 
-			$arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
-
+				$arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
+			}
 		} else
 			$arrItem = $arrJobPosting;
 

@@ -2,10 +2,10 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\UserSearchQuery as BaseUserSearchQuery;
+use JobScooper\DataAccess\Base\UserSearchPairQuery as BaseUserSearchPairQuery;
 
 /**
- * Skeleton subclass for performing query and update operations on the 'user_search' table.
+ * Skeleton subclass for performing query and update operations on the 'user_search_pair' table.
  *
  *
  *
@@ -14,7 +14,7 @@ use JobScooper\DataAccess\Base\UserSearchQuery as BaseUserSearchQuery;
  * long as it does not already exist in the output directory.
  *
  */
-class UserSearchQuery extends BaseUserSearchQuery
+class UserSearchPairQuery extends BaseUserSearchPairQuery
 {
 
 }

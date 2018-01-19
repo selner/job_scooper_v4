@@ -19,6 +19,7 @@ namespace JobScooper\StageProcessor;
 
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
+use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\Utils\JobsMailSender;
@@ -318,20 +319,13 @@ class NotifierJobAlerts extends JobsMailSender
 			"JobMatches" => $matches["isUserJobMatchAndNotExcluded"]
 		);
 
-		$keywordSets = getConfigurationSetting("user_keyword_sets");
-		$allKwds = array();
-		if(!empty($keywordSets)) {
-			foreach ($keywordSets as $set) {
-				$kwds = $set->getKeywords();
-				if (!is_array($set->getKeywords()))
-					$kwds = preg_split("/\s?,\s?/", $kwds);
-				$allKwds = array_merge($allKwds, $kwds);
+		$user = User::getCurrentUser();
+		$kwds = $user->getSearchKeywords();
+		$data['Search']['Keywords'] = join(", ", $kwds);
 
-			$data['Search']['Keywords'] = join(", ", $allKwds);
-			}
-		}
+		$user = User::getCurrentUser();
+		$locations = $user->getSearchGeoLocations();
 
-		$locations = getConfigurationSetting("search_locations");
 		$searchLocNames = array();
 		if(!empty($locations)) {
 			foreach ($locations as $loc)

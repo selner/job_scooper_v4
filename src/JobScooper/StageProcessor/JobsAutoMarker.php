@@ -235,7 +235,9 @@ class JobsAutoMarker
 	    try
 	    {
 		    startLogSection("Automarker: marking jobs as out of area using counties...");
-	        $searchLocations = getConfigurationSetting('search_locations');
+	        $user = User::getCurrentUser();
+		    $searchLocations = $user->getSearchGeoLocations();
+
 
 	        $arrIncludeCounties = array();
 
@@ -299,9 +301,10 @@ class JobsAutoMarker
     	try
 	    {
 	    	startLogSection("Automarker: marking jobs as out of area using geospatial data...");
-	        $searchLocations = getConfigurationSetting('search_locations');
+		    $user = User::getCurrentUser();
+		    $searchLocations = $user->getSearchGeoLocations();
 
-	        $arrNearbyIds = array();
+		    $arrNearbyIds = array();
 
 	        /* Find all locations that are within 50 miles of any of our search locations */
 
@@ -434,14 +437,10 @@ class JobsAutoMarker
 			$arrJobItems[$job->getUserJobMatchId()] = $job->toFlatArrayForCSV($jobMatchKeys);
 
 		$searchKeywords = array();
-		$keywordSets = getConfigurationSetting("user_keyword_sets");
-		if(empty($keywordSets))
+		$user = User::getCurrentUser();
+		$keywords = $user->getSearchKeywords();
+		if(empty($keywords))
 			return null;
-
-		foreach($keywordSets as $kwdset)
-		{
-			$searchKeywords[$kwdset->getSearchKeyFromConfig()] = $kwdset->getKeywords();
-		}
 
 		$neg_kwds = $this->_loadUserNegativeTitleKeywords();
 

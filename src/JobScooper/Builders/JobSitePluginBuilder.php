@@ -19,6 +19,7 @@ namespace JobScooper\Builders;
 
 use Exception;
 use JobScooper\DataAccess\JobSiteRecordQuery;
+use JobScooper\DataAccess\User;
 
 /**
  * Class JobSitePluginBuilder
@@ -148,9 +149,17 @@ class JobSitePluginBuilder
 	/**
 	 * @param $countryCodes
 	 */
-	static function filterJobSitesByCountryCodes($countryCodes)
+	static function filterJobSitesByCountryCodes()
 	{
-		$ccRun = join(", ", $countryCodes);
+		$countryCodes = array();
+		$user = User::getCurrentUser();
+		$searchLoc = $user->getSearchGeoLocations();
+		foreach($searchLoc as $loc)
+		{
+			$countryCodes[] = $loc->getCountryCode();
+		}
+
+		$ccRun = join(", ", array_unique($countryCodes));
 		$includedSites = JobSitePluginBuilder::getIncludedJobSites();
 		$sitesOutOfSearchArea = array();
 

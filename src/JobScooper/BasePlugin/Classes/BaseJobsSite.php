@@ -463,7 +463,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			throw new \ErrorException($this->JobSiteName . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for " . $this->JobSiteName);
 		}
 
-		$loc = $searchDetails->getGeoLocationFromUSSR();
+		$searchpair = $searchDetails->getUserSearchPairFromUSSR();
+		$loc = $searchpair->getGeoLocationFromUS();
 		if (empty($loc)) {
 			LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' is missing the search location.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
 
@@ -1069,7 +1070,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	private function _checkInvalidURL_(UserSearchSiteRun $details, $strURL)
 	{
-		if ($strURL == null) throw new \ErrorException("Skipping " . $this->JobSiteName . " search '" . $details->getUserSearchKey() . "' because a valid URL could not be set.");
+		if ($strURL == null) throw new \ErrorException("Skipping " . $this->JobSiteName . " search '" . $details->getUserSearchSiteRunKey() . "' because a valid URL could not be set.");
 
 		return $strURL;
 	}

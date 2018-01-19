@@ -59,7 +59,7 @@ class UserTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 5;
+    const NUM_COLUMNS = 6;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 5;
+    const NUM_HYDRATE_COLUMNS = 6;
 
     /**
      * the column name for the user_id field
@@ -92,9 +92,14 @@ class UserTableMap extends TableMap
     const COL_NAME = 'user.name';
 
     /**
-     * the column name for the config_file_path field
+     * the column name for the search_keywords field
      */
-    const COL_CONFIG_FILE_PATH = 'user.config_file_path';
+    const COL_SEARCH_KEYWORDS = 'user.search_keywords';
+
+    /**
+     * the column name for the search_locations field
+     */
+    const COL_SEARCH_LOCATIONS = 'user.search_locations';
 
     /**
      * The default string format for model objects of the related table
@@ -108,11 +113,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserId', 'UserSlug', 'EmailAddress', 'Name', 'ConfigFilePath', ),
-        self::TYPE_CAMELNAME     => array('userId', 'userSlug', 'emailAddress', 'name', 'configFilePath', ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID, UserTableMap::COL_USER_SLUG, UserTableMap::COL_EMAIL_ADDRESS, UserTableMap::COL_NAME, UserTableMap::COL_CONFIG_FILE_PATH, ),
-        self::TYPE_FIELDNAME     => array('user_id', 'user_slug', 'email_address', 'name', 'config_file_path', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
+        self::TYPE_PHPNAME       => array('UserId', 'UserSlug', 'EmailAddress', 'Name', 'SearchKeywords', 'SearchLocations', ),
+        self::TYPE_CAMELNAME     => array('userId', 'userSlug', 'emailAddress', 'name', 'searchKeywords', 'searchLocations', ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID, UserTableMap::COL_USER_SLUG, UserTableMap::COL_EMAIL_ADDRESS, UserTableMap::COL_NAME, UserTableMap::COL_SEARCH_KEYWORDS, UserTableMap::COL_SEARCH_LOCATIONS, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'user_slug', 'email_address', 'name', 'search_keywords', 'search_locations', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -122,11 +127,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserSlug' => 1, 'EmailAddress' => 2, 'Name' => 3, 'ConfigFilePath' => 4, ),
-        self::TYPE_CAMELNAME     => array('userId' => 0, 'userSlug' => 1, 'emailAddress' => 2, 'name' => 3, 'configFilePath' => 4, ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID => 0, UserTableMap::COL_USER_SLUG => 1, UserTableMap::COL_EMAIL_ADDRESS => 2, UserTableMap::COL_NAME => 3, UserTableMap::COL_CONFIG_FILE_PATH => 4, ),
-        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_slug' => 1, 'email_address' => 2, 'name' => 3, 'config_file_path' => 4, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserSlug' => 1, 'EmailAddress' => 2, 'Name' => 3, 'SearchKeywords' => 4, 'SearchLocations' => 5, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'userSlug' => 1, 'emailAddress' => 2, 'name' => 3, 'searchKeywords' => 4, 'searchLocations' => 5, ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID => 0, UserTableMap::COL_USER_SLUG => 1, UserTableMap::COL_EMAIL_ADDRESS => 2, UserTableMap::COL_NAME => 3, UserTableMap::COL_SEARCH_KEYWORDS => 4, UserTableMap::COL_SEARCH_LOCATIONS => 5, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_slug' => 1, 'email_address' => 2, 'name' => 3, 'search_keywords' => 4, 'search_locations' => 5, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -151,7 +156,8 @@ class UserTableMap extends TableMap
         $this->getColumn('user_slug')->setPrimaryString(true);
         $this->addColumn('email_address', 'EmailAddress', 'VARCHAR', true, 128, null);
         $this->addColumn('name', 'Name', 'VARCHAR', true, 128, 'email_address');
-        $this->addColumn('config_file_path', 'ConfigFilePath', 'VARCHAR', true, 1024, null);
+        $this->addColumn('search_keywords', 'SearchKeywords', 'ARRAY', false, null, null);
+        $this->addColumn('search_locations', 'SearchLocations', 'ARRAY', false, null, null);
     } // initialize()
 
     /**
@@ -159,27 +165,13 @@ class UserTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('UserKeywordSet', '\\JobScooper\\DataAccess\\UserKeywordSet', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserSearchPair', '\\JobScooper\\DataAccess\\UserSearchPair', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
     0 => ':user_id',
     1 => ':user_id',
   ),
-), 'CASCADE', 'CASCADE', 'UserKeywordSets', false);
-        $this->addRelation('UserSearch', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':user_id',
-    1 => ':user_id',
-  ),
-), 'CASCADE', 'CASCADE', 'UserSearches', false);
-        $this->addRelation('UserSearchSiteRun', '\\JobScooper\\DataAccess\\UserSearchSiteRun', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':user_id',
-    1 => ':user_id',
-  ),
-), 'CASCADE', null, 'UserSearchSiteRuns', false);
+), 'CASCADE', 'CASCADE', 'UserSearchPairs', false);
         $this->addRelation('UserJobMatch', '\\JobScooper\\DataAccess\\UserJobMatch', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
@@ -187,10 +179,6 @@ class UserTableMap extends TableMap
     1 => ':user_id',
   ),
 ), 'CASCADE', null, 'UserJobMatches', false);
-        $this->addRelation('UserKeywordSetFromUS', '\\JobScooper\\DataAccess\\UserKeywordSet', RelationMap::MANY_TO_MANY, array(), null, 'CASCADE', 'UserKeywordSetFromuses');
-        $this->addRelation('GeoLocationFromUS', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_MANY, array(), null, null, 'GeoLocationFromuses');
-        $this->addRelation('JobSiteFromUSSR', '\\JobScooper\\DataAccess\\JobSiteRecord', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobSiteFromUSSRs');
-        $this->addRelation('UserSearchFromUSSR', '\\JobScooper\\DataAccess\\UserSearch', RelationMap::MANY_TO_MANY, array(), 'CASCADE', 'CASCADE', 'UserSearchFromUSSRs');
         $this->addRelation('JobPostingFromUJM', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobPostingFromUJMs');
     } // buildRelations()
 
@@ -213,9 +201,7 @@ class UserTableMap extends TableMap
     {
         // Invalidate objects in related instance pools,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
-        UserKeywordSetTableMap::clearInstancePool();
-        UserSearchTableMap::clearInstancePool();
-        UserSearchSiteRunTableMap::clearInstancePool();
+        UserSearchPairTableMap::clearInstancePool();
         UserJobMatchTableMap::clearInstancePool();
     }
 
@@ -364,13 +350,15 @@ class UserTableMap extends TableMap
             $criteria->addSelectColumn(UserTableMap::COL_USER_SLUG);
             $criteria->addSelectColumn(UserTableMap::COL_EMAIL_ADDRESS);
             $criteria->addSelectColumn(UserTableMap::COL_NAME);
-            $criteria->addSelectColumn(UserTableMap::COL_CONFIG_FILE_PATH);
+            $criteria->addSelectColumn(UserTableMap::COL_SEARCH_KEYWORDS);
+            $criteria->addSelectColumn(UserTableMap::COL_SEARCH_LOCATIONS);
         } else {
             $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.user_slug');
             $criteria->addSelectColumn($alias . '.email_address');
             $criteria->addSelectColumn($alias . '.name');
-            $criteria->addSelectColumn($alias . '.config_file_path');
+            $criteria->addSelectColumn($alias . '.search_keywords');
+            $criteria->addSelectColumn($alias . '.search_locations');
         }
     }
 

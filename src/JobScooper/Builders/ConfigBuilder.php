@@ -159,56 +159,28 @@ class ConfigBuilder
 	    $srchmgr = new SearchBuilder();
 
 
-
-	    //
-	    // First load the user email information.  We set this first because it is used
-	    // to send error email if something goes wrong anywhere further along our run
-	    //
-	    $this->_parseUser();
-		$this->_parseAlertReceipients();
-
-	    //
-	    // Validate each of the inputfiles that the user passed
-	    // and configure all searches
-	    //
-	    $verifiedInputs = array();
-	    $inputfiles = $this->_getSetting("inputfiles");
-	    if (!empty($inputfiles) && is_array($inputfiles)) {
-		    foreach ($inputfiles as $key => $iniInputFileItem)
-		    {
-			    $tempFileDetails = null;
-			    $filepath = !empty($iniInputFileItem['path']) ? $iniInputFileItem['path'] : $iniInputFileItem['filename'];
-			    $fileinfo = new \SplFileInfo($filepath);
-		        if($fileinfo->getRealPath() !== false)
-			        $tempFileDetails = parsePathDetailsFromString($fileinfo->getRealPath(), C__FILEPATH_FILE_MUST_EXIST);
-
-			    if(empty($tempFileDetails) || $tempFileDetails->isFile() !== true) {
-				    throw new \Exception("Specified input file '" . $filepath . "' was not found.  Aborting.");
-			    }
-
-			    setConfigurationSetting("user_data_files.".$iniInputFileItem['type'].".".$key, $tempFileDetails->getPathname());
-		    }
-	    }
-
-        LogMessage("Loaded all configuration settings from " . $this->arrFileDetails['config_ini']->getPathname());
-
-	    // Note:  this must happen before any of the job site plugins are instantiated
-	    $this->_parsePluginSettings();
-
 	    //
 	    // Load the global search data that will be used to create
 	    // and configure all searches
 	    //
 	    $this->_parseGlobalSearchParameters();
 
+	    //
+	    // First load the user email information.  We set this first because it is used
+	    // to send error email if something goes wrong anywhere further along our run
+	    //
+	    $this->_parseUserSetup();
+	    $user = User::getCurrentUser();
+		$this->_parseAlertReceipients();
+
+        LogMessage("Loaded all configuration settings from " . $this->arrFileDetails['config_ini']->getPathname());
+
+	    // Note:  this must happen before any of the job site plugins are instantiated
+	    $this->_parsePluginSettings();
+
+
 	    $this->_instantiateLocationManager();
 	    $this->_parseSeleniumParameters();
-
-        //
-        // Load Plugin Specific settings from the config
-        //
-
-        $this->_parseSearchLocations();
 
 	    if(count(JobSitePluginBuilder::getIncludedJobSites()) == 0)
         {
@@ -216,7 +188,8 @@ class ConfigBuilder
             return;
         }
 
-        $this->_parseKeywordSetsFromConfig_();
+		$searchKwds = $user->getSearchKeywords();
+
 
 		startLogSection("Initializing user searches for this run");
 	    $srchmgr->initializeSearches();
@@ -413,123 +386,78 @@ class ConfigBuilder
     }
 
 	/**
-	 * @throws \ErrorException
-	 */
-	private function _parseSearchLocations()
-    {
-
-    	$searchLocs = $this->_getSetting("search_locations.location");
-
-    	if(!empty($searchLocs) && is_array($searchLocs)) {
-		    foreach ($searchLocs as $location_string) {
-
-			    if (!$location_string) throw new \ErrorException("Invalid configuration: search location value was empty.");
-
-			    $locmgr = $this->_instantiateLocationManager();
-			    $location = $locmgr->getAddress($location_string);
-			    if (!empty($location)) {
-				    setConfigurationSetting('search_locations.' . $location->getGeoLocationId(), $location);
-				    if (!empty($location->getCountryCode()))
-					    setConfigurationSetting('country_codes.' . $location->getCountryCode(), $location->getCountryCode());
-			    }
-		    }
-	    }
-    }
-
-	/**
-	 * @throws \Exception
-	 */
-	private function _parseKeywordSetsFromConfig_()
-    {
-        LogMessage("Loading search keywords from config...");
-
-        $verifiedSets = array();
-        $iniSets = $this->_getSetting("search_keyword_set");
-        if (!empty($iniSets)) {
-            foreach ($iniSets as $key => $ini_keyword_set) {
-	            $setKey = 'ks' . (count($verifiedSets) + 1) . "_" . $key;
-	            $ini_keyword_set['key'] = $setKey;
-	            $kwdset = $this->_getUserKeywordSet_($ini_keyword_set);
-	            if(!empty($kwdset))
-		            $verifiedSets[$kwdset->getUserKeywordSetKey()] = $kwdset;
-	            else
-	            	throw new \Exception("Unable to create a user keyword set for the values defined in the config file (" . var_dump($ini_keyword_set, true));
-            }
-	        LogDebug("Added keyword sets: " . join(", ", array_keys($verifiedSets)) );
-			setConfigurationSetting('user_keyword_sets', $verifiedSets);
-        }
-    }
-
-
-	/**
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _parseUser()
+	private function _parseUserSetup()
 	{
-		LogMessage("Configuring users and alerts...");
+		LogMessage("Configuring user for the run...");
 
 		setConfigurationSetting('alerts.configuration.smtp', $this->_getSetting("alerts.configuration.smtp"));
+
 		$userList = array();
 
 		//
 		// Configure the primary user for the config file and set it
 		//
-		$arrUserResultsTo = $this->_getSetting("alerts.results.to");
-		$cfgpath = getConfigurationSetting('command_line_args.configfile');
+		$config_users = $this->_getSetting("user");
+		$config_user_to_run = getConfigurationSetting('command_line_args.user');
+		$arrUserFacts = array();
+		$userToRun = array_keys($config_users)[0];
+		if (empty($config_users))
+			throw new \Exception("No user found in configuration settings.  Aborting.");
+		else {
+			if(!empty($config_user_to_run) && array_key_exists($config_user_to_run, $config_users))
+				$userToRun = $config_user_to_run;
+			else
+				LogWarning("Found " . count($config_users) . " different user settings in the configuration files.  Defaulting to {$userToRun}.");
 
+			$arrUserFacts = $config_users[$userToRun];
+		}
+
+		LogMessage("User configuration for run: " . getArrayDebugOutput($arrUserFacts));
 		$dbgUserId = getConfigurationSetting('command_line_args.debug-userid');
-		if(isDebug() && !empty($dbgUserId))
-		{
-
+		if (isDebug() && !empty($dbgUserId)) {
 			$currentUser = UserQuery::create()
 				->findOneByUserId($dbgUserId);
-			if(empty($currentUser))
+			if (empty($currentUser))
 				throw new \Exception("Could not find debug-userid {$dbgUserId} in the database.  Aborting.");
-		}
-		else
-		{
-			$currentUser = UserQuery::findOrCreateUserByConfigPath($cfgpath, $arrUserResultsTo, $overwriteFacts=true);
-			if(empty($currentUser))
+		} else {
+			$currentUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($userToRun), $arrUserFacts, $overwriteFacts = true);
+			if (empty($currentUser))
 				throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
 		}
 		$currentUser->setCurrentUser($currentUser);
 		$userList[$currentUser->getEmailAddress()] = $currentUser;
 		setConfigurationSetting("alerts.results.to", $currentUser);
 
-		$otherAlertsUsers = $this->_getSetting(array("alerts.errors.to", "alerts.errors.from", "alerts.results.from"));
-		if(empty($otherAlertsUsers))
-			return;
-
 		//
-		// Find or create all the other users who will receive notifications as well
+		// Validate each of the inputfiles that the user passed
+		// and configure all searches
 		//
-		$otherUsers = array_unique(array_values($otherAlertsUsers));
-		foreach($otherUsers as $arrUser)
-		{
-			if(empty($arrUser) || !array_key_exists('email', $arrUser))
-				throw new \Exception("Missing the email address for " . getArrayDebugOutput($arrUser).  "user notifications. Aborting.");
-
-			$otherUser = UserQuery::findUserByEmailAddress($arrUser['email'], $arrUser);
-			if(empty($otherUser))
+		$verifiedInputs = array();
+		if (array_key_exists('inputfiles', $arrUserFacts) && !empty($arrUserFacts['inputfiles']) && is_array($arrUserFacts['inputfiles'])) {
+			$inputfiles = $arrUserFacts['inputfiles'];
+			foreach ($inputfiles as $cfgvalue)
 			{
-				$otherUser = UserQuery::findOrCreateUserByConfigPath("/dev/null", $arrUser);
+				$split= preg_split("/;/", $cfgvalue);
+				$type = $split[0];
+				$path = $split[1];
+
+				$tempFileDetails = null;
+				$fileinfo = new \SplFileInfo($path);
+				if($fileinfo->getRealPath() !== false){
+					$tempFileDetails = parsePathDetailsFromString($fileinfo->getRealPath(), C__FILEPATH_FILE_MUST_EXIST);
+				}
+
+				if(empty($tempFileDetails) || $tempFileDetails->isFile() !== true) {
+					throw new \Exception("Specified input file '" . $path . "' was not found.  Aborting.");
+				}
+
+				$key = $fileinfo->getBasename(".csv");
+				setConfigurationSetting("user_data_files.".$type.".".$key, $tempFileDetails->getPathname());
 			}
-			$userList[$arrUser['email']] = $otherUser;
 		}
-
-		//
-		// set the user each alert type accordingly
-		//
-		foreach($otherAlertsUsers as $alertKind => $arrAlertUser) {
-			if(array_key_exists($arrAlertUser['email'], $userList))
-				setConfigurationSetting($alertKind, $userList[$arrAlertUser['email']]);
-		}
-
-
-		$curuser = User::getCurrentUser();
-		if (empty($curuser))
-			throw new \ErrorException("No email address or user has been set in the configuration files for this run.  Aborting.");
 	}
 
 	/**
@@ -570,61 +498,4 @@ class ConfigBuilder
 	}
 
 
-	/**
-	 * @param array $iniKeywordSetup
-	 *
-	 * @return \JobScooper\DataAccess\UserKeywordSet|null
-	 */
-	private function _getUserKeywordSet_($iniKeywordSetup)
-	{
-		$kwdset = null;
-
-		// If keywords are in a string, split them out into an array instead before continuing
-		if (!empty($iniKeywordSetup) && array_key_exists("keywords", $iniKeywordSetup)) {
-			$keyword_list = $iniKeywordSetup['keywords'];
-			if (!array_key_exists('key', $iniKeywordSetup) ||
-				empty($iniKeywordSetup['key']))
-				$iniKeywordSetup['key'] = cleanupSlugPart($keyword_list);
-
-			if (is_string($keyword_list))
-				$keyword_list = preg_split("/\s*,\s*/", $keyword_list);
-
-			$final_keywd_list = array();
-			foreach ($keyword_list as $kwd) {
-				$scrubbedKwd = strScrub($kwd, ADVANCED_TEXT_CLEANUP);
-				$final_keywd_list[$scrubbedKwd] = $scrubbedKwd;
-			}
-
-			$user = User::getCurrentUser();
-			$kwdset = UserKeywordSetQuery::create()
-				->filterByUserId($user->getUserId())
-				->filterBySearchKeyFromConfig($iniKeywordSetup['key'])
-				->findOne();
-
-			if (empty($kwdset)) {
-				$kwdset = new UserKeywordSet();
-
-				$kwdset->setUserFromUKS($user);
-
-				$kwdset->setSearchKeyFromConfig($iniKeywordSetup['key']);
-
-				$kwdset->setKeywords($final_keywd_list);
-
-				$kwdset->save();
-
-				return $kwdset;
-			}
-			else
-			{
-				$kwdset->setSearchKeyFromConfig($iniKeywordSetup['key']);
-
-				$kwdset->setKeywords($final_keywd_list);
-
-				$kwdset->save();
-			}
-			return $kwdset;
-		}
-
-
-	}
 }

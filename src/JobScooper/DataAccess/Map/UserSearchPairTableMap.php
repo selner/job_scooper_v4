@@ -2,8 +2,8 @@
 
 namespace JobScooper\DataAccess\Map;
 
-use JobScooper\DataAccess\JobSiteRecord;
-use JobScooper\DataAccess\JobSiteRecordQuery;
+use JobScooper\DataAccess\UserSearchPair;
+use JobScooper\DataAccess\UserSearchPairQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'job_site' table.
+ * This class defines the structure of the 'user_search_pair' table.
  *
  *
  *
@@ -26,7 +26,7 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class JobSiteRecordTableMap extends TableMap
+class UserSearchPairTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
@@ -34,7 +34,7 @@ class JobSiteRecordTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'JobScooper.DataAccess.Map.JobSiteRecordTableMap';
+    const CLASS_NAME = 'JobScooper.DataAccess.Map.UserSearchPairTableMap';
 
     /**
      * The default database name for this class
@@ -44,17 +44,17 @@ class JobSiteRecordTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'job_site';
+    const TABLE_NAME = 'user_search_pair';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\JobScooper\\DataAccess\\JobSiteRecord';
+    const OM_CLASS = '\\JobScooper\\DataAccess\\UserSearchPair';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'JobScooper.DataAccess.JobSiteRecord';
+    const CLASS_DEFAULT = 'JobScooper.DataAccess.UserSearchPair';
 
     /**
      * The total number of columns
@@ -72,40 +72,34 @@ class JobSiteRecordTableMap extends TableMap
     const NUM_HYDRATE_COLUMNS = 5;
 
     /**
-     * the column name for the jobsite_key field
+     * the column name for the user_search_pair_id field
      */
-    const COL_JOBSITE_KEY = 'job_site.jobsite_key';
+    const COL_USER_SEARCH_PAIR_ID = 'user_search_pair.user_search_pair_id';
 
     /**
-     * the column name for the plugin_class_name field
+     * the column name for the user_id field
      */
-    const COL_PLUGIN_CLASS_NAME = 'job_site.plugin_class_name';
+    const COL_USER_ID = 'user_search_pair.user_id';
 
     /**
-     * the column name for the display_name field
+     * the column name for the user_keyword field
      */
-    const COL_DISPLAY_NAME = 'job_site.display_name';
+    const COL_USER_KEYWORD = 'user_search_pair.user_keyword';
 
     /**
-     * the column name for the is_disabled field
+     * the column name for the geolocation_id field
      */
-    const COL_IS_DISABLED = 'job_site.is_disabled';
+    const COL_GEOLOCATION_ID = 'user_search_pair.geolocation_id';
 
     /**
-     * the column name for the results_filter_type field
+     * the column name for the is_active field
      */
-    const COL_RESULTS_FILTER_TYPE = 'job_site.results_filter_type';
+    const COL_IS_ACTIVE = 'user_search_pair.is_active';
 
     /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
-
-    /** The enumerated values for the results_filter_type field */
-    const COL_RESULTS_FILTER_TYPE_UNKNOWN = 'unknown';
-    const COL_RESULTS_FILTER_TYPE_ALL_ONLY = 'all-only';
-    const COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION = 'all-by-location';
-    const COL_RESULTS_FILTER_TYPE_USER_FILTERED = 'user-filtered';
 
     /**
      * holds an array of fieldnames
@@ -114,10 +108,10 @@ class JobSiteRecordTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('JobSiteKey', 'PluginClassName', 'DisplayName', 'isDisabled', 'ResultsFilterType', ),
-        self::TYPE_CAMELNAME     => array('jobSiteKey', 'pluginClassName', 'displayName', 'isDisabled', 'resultsFilterType', ),
-        self::TYPE_COLNAME       => array(JobSiteRecordTableMap::COL_JOBSITE_KEY, JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME, JobSiteRecordTableMap::COL_DISPLAY_NAME, JobSiteRecordTableMap::COL_IS_DISABLED, JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE, ),
-        self::TYPE_FIELDNAME     => array('jobsite_key', 'plugin_class_name', 'display_name', 'is_disabled', 'results_filter_type', ),
+        self::TYPE_PHPNAME       => array('UserSearchPairId', 'UserId', 'UserKeyword', 'GeoLocationId', 'IsActive', ),
+        self::TYPE_CAMELNAME     => array('userSearchPairId', 'userId', 'userKeyword', 'geoLocationId', 'isActive', ),
+        self::TYPE_COLNAME       => array(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID, UserSearchPairTableMap::COL_USER_ID, UserSearchPairTableMap::COL_USER_KEYWORD, UserSearchPairTableMap::COL_GEOLOCATION_ID, UserSearchPairTableMap::COL_IS_ACTIVE, ),
+        self::TYPE_FIELDNAME     => array('user_search_pair_id', 'user_id', 'user_keyword', 'geolocation_id', 'is_active', ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
@@ -128,43 +122,12 @@ class JobSiteRecordTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('JobSiteKey' => 0, 'PluginClassName' => 1, 'DisplayName' => 2, 'isDisabled' => 3, 'ResultsFilterType' => 4, ),
-        self::TYPE_CAMELNAME     => array('jobSiteKey' => 0, 'pluginClassName' => 1, 'displayName' => 2, 'isDisabled' => 3, 'resultsFilterType' => 4, ),
-        self::TYPE_COLNAME       => array(JobSiteRecordTableMap::COL_JOBSITE_KEY => 0, JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME => 1, JobSiteRecordTableMap::COL_DISPLAY_NAME => 2, JobSiteRecordTableMap::COL_IS_DISABLED => 3, JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE => 4, ),
-        self::TYPE_FIELDNAME     => array('jobsite_key' => 0, 'plugin_class_name' => 1, 'display_name' => 2, 'is_disabled' => 3, 'results_filter_type' => 4, ),
+        self::TYPE_PHPNAME       => array('UserSearchPairId' => 0, 'UserId' => 1, 'UserKeyword' => 2, 'GeoLocationId' => 3, 'IsActive' => 4, ),
+        self::TYPE_CAMELNAME     => array('userSearchPairId' => 0, 'userId' => 1, 'userKeyword' => 2, 'geoLocationId' => 3, 'isActive' => 4, ),
+        self::TYPE_COLNAME       => array(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID => 0, UserSearchPairTableMap::COL_USER_ID => 1, UserSearchPairTableMap::COL_USER_KEYWORD => 2, UserSearchPairTableMap::COL_GEOLOCATION_ID => 3, UserSearchPairTableMap::COL_IS_ACTIVE => 4, ),
+        self::TYPE_FIELDNAME     => array('user_search_pair_id' => 0, 'user_id' => 1, 'user_keyword' => 2, 'geolocation_id' => 3, 'is_active' => 4, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
-
-    /** The enumerated values for this table */
-    protected static $enumValueSets = array(
-                JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE => array(
-                            self::COL_RESULTS_FILTER_TYPE_UNKNOWN,
-            self::COL_RESULTS_FILTER_TYPE_ALL_ONLY,
-            self::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION,
-            self::COL_RESULTS_FILTER_TYPE_USER_FILTERED,
-        ),
-    );
-
-    /**
-     * Gets the list of values for all ENUM and SET columns
-     * @return array
-     */
-    public static function getValueSets()
-    {
-      return static::$enumValueSets;
-    }
-
-    /**
-     * Gets the list of values for an ENUM or SET column
-     * @param string $colname
-     * @return array list of possible values for the column
-     */
-    public static function getValueSet($colname)
-    {
-        $valueSets = self::getValueSets();
-
-        return $valueSets[$colname];
-    }
 
     /**
      * Initialize the table attributes and columns
@@ -176,25 +139,19 @@ class JobSiteRecordTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('job_site');
-        $this->setPhpName('JobSiteRecord');
+        $this->setName('user_search_pair');
+        $this->setPhpName('UserSearchPair');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\JobScooper\\DataAccess\\JobSiteRecord');
+        $this->setClassName('\\JobScooper\\DataAccess\\UserSearchPair');
         $this->setPackage('JobScooper.DataAccess');
-        $this->setUseIdGenerator(false);
+        $this->setUseIdGenerator(true);
+        $this->setIsCrossRef(true);
         // columns
-        $this->addPrimaryKey('jobsite_key', 'JobSiteKey', 'VARCHAR', true, 100, null);
-        $this->getColumn('jobsite_key')->setPrimaryString(true);
-        $this->addColumn('plugin_class_name', 'PluginClassName', 'VARCHAR', false, 100, null);
-        $this->addColumn('display_name', 'DisplayName', 'VARCHAR', false, 255, null);
-        $this->addColumn('is_disabled', 'isDisabled', 'BOOLEAN', false, 1, false);
-        $this->addColumn('results_filter_type', 'ResultsFilterType', 'ENUM', false, null, 'unknown');
-        $this->getColumn('results_filter_type')->setValueSet(array (
-  0 => 'unknown',
-  1 => 'all-only',
-  2 => 'all-by-location',
-  3 => 'user-filtered',
-));
+        $this->addPrimaryKey('user_search_pair_id', 'UserSearchPairId', 'INTEGER', true, null, null);
+        $this->addForeignKey('user_id', 'UserId', 'INTEGER', 'user', 'user_id', true, null, null);
+        $this->addColumn('user_keyword', 'UserKeyword', 'VARCHAR', true, 50, null);
+        $this->addForeignKey('geolocation_id', 'GeoLocationId', 'INTEGER', 'geolocation', 'geolocation_id', true, null, null);
+        $this->addColumn('is_active', 'IsActive', 'BOOLEAN', true, 1, true);
     } // initialize()
 
     /**
@@ -202,23 +159,30 @@ class JobSiteRecordTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('JobPosting', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
-    0 => ':jobsite_key',
-    1 => ':jobsite_key',
+    0 => ':user_id',
+    1 => ':user_id',
   ),
-), null, null, 'JobPostings', false);
+), 'CASCADE', 'CASCADE', null, false);
+        $this->addRelation('GeoLocationFromUS', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_ONE, array (
+  0 =>
+  array (
+    0 => ':geolocation_id',
+    1 => ':geolocation_id',
+  ),
+), null, null, null, false);
         $this->addRelation('UserSearchSiteRun', '\\JobScooper\\DataAccess\\UserSearchSiteRun', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
-    0 => ':jobsite_key',
-    1 => ':jobsite_key',
+    0 => ':user_search_pair_id',
+    1 => ':user_search_pair_id',
   ),
-), 'CASCADE', null, 'UserSearchSiteRuns', false);
+), 'CASCADE', 'CASCADE', 'UserSearchSiteRuns', false);
     } // buildRelations()
     /**
-     * Method to invalidate the instance pool of all tables related to job_site     * by a foreign key with ON DELETE CASCADE
+     * Method to invalidate the instance pool of all tables related to user_search_pair     * by a foreign key with ON DELETE CASCADE
      */
     public static function clearRelatedInstancePool()
     {
@@ -243,11 +207,11 @@ class JobSiteRecordTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)];
+        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)];
     }
 
     /**
@@ -264,10 +228,10 @@ class JobSiteRecordTableMap extends TableMap
      */
     public static function getPrimaryKeyFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        return (string) $row[
+        return (int) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
-                : self::translateFieldName('JobSiteKey', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)
         ];
     }
 
@@ -284,7 +248,7 @@ class JobSiteRecordTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? JobSiteRecordTableMap::CLASS_DEFAULT : JobSiteRecordTableMap::OM_CLASS;
+        return $withPrefix ? UserSearchPairTableMap::CLASS_DEFAULT : UserSearchPairTableMap::OM_CLASS;
     }
 
     /**
@@ -298,22 +262,22 @@ class JobSiteRecordTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *                         rethrown wrapped into a PropelException.
-     * @return array           (JobSiteRecord object, last column rank)
+     * @return array           (UserSearchPair object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = JobSiteRecordTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = JobSiteRecordTableMap::getInstanceFromPool($key))) {
+        $key = UserSearchPairTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = UserSearchPairTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + JobSiteRecordTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + UserSearchPairTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = JobSiteRecordTableMap::OM_CLASS;
-            /** @var JobSiteRecord $obj */
+            $cls = UserSearchPairTableMap::OM_CLASS;
+            /** @var UserSearchPair $obj */
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            JobSiteRecordTableMap::addInstanceToPool($obj, $key);
+            UserSearchPairTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -336,18 +300,18 @@ class JobSiteRecordTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = JobSiteRecordTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = JobSiteRecordTableMap::getInstanceFromPool($key))) {
+            $key = UserSearchPairTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = UserSearchPairTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
                 $results[] = $obj;
             } else {
-                /** @var JobSiteRecord $obj */
+                /** @var UserSearchPair $obj */
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                JobSiteRecordTableMap::addInstanceToPool($obj, $key);
+                UserSearchPairTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -368,17 +332,17 @@ class JobSiteRecordTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_JOBSITE_KEY);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_DISPLAY_NAME);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_IS_DISABLED);
-            $criteria->addSelectColumn(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_USER_ID);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_USER_KEYWORD);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_GEOLOCATION_ID);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_IS_ACTIVE);
         } else {
-            $criteria->addSelectColumn($alias . '.jobsite_key');
-            $criteria->addSelectColumn($alias . '.plugin_class_name');
-            $criteria->addSelectColumn($alias . '.display_name');
-            $criteria->addSelectColumn($alias . '.is_disabled');
-            $criteria->addSelectColumn($alias . '.results_filter_type');
+            $criteria->addSelectColumn($alias . '.user_search_pair_id');
+            $criteria->addSelectColumn($alias . '.user_id');
+            $criteria->addSelectColumn($alias . '.user_keyword');
+            $criteria->addSelectColumn($alias . '.geolocation_id');
+            $criteria->addSelectColumn($alias . '.is_active');
         }
     }
 
@@ -391,7 +355,7 @@ class JobSiteRecordTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(JobSiteRecordTableMap::DATABASE_NAME)->getTable(JobSiteRecordTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(UserSearchPairTableMap::DATABASE_NAME)->getTable(UserSearchPairTableMap::TABLE_NAME);
     }
 
     /**
@@ -399,16 +363,16 @@ class JobSiteRecordTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap(JobSiteRecordTableMap::DATABASE_NAME);
-        if (!$dbMap->hasTable(JobSiteRecordTableMap::TABLE_NAME)) {
-            $dbMap->addTableObject(new JobSiteRecordTableMap());
+        $dbMap = Propel::getServiceContainer()->getDatabaseMap(UserSearchPairTableMap::DATABASE_NAME);
+        if (!$dbMap->hasTable(UserSearchPairTableMap::TABLE_NAME)) {
+            $dbMap->addTableObject(new UserSearchPairTableMap());
         }
     }
 
     /**
-     * Performs a DELETE on the database, given a JobSiteRecord or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a UserSearchPair or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or JobSiteRecord object or primary key or array of primary keys
+     * @param mixed               $values Criteria or UserSearchPair object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param  ConnectionInterface $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -419,27 +383,27 @@ class JobSiteRecordTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobSiteRecordTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchPairTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \JobScooper\DataAccess\JobSiteRecord) { // it's a model object
+        } elseif ($values instanceof \JobScooper\DataAccess\UserSearchPair) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(JobSiteRecordTableMap::DATABASE_NAME);
-            $criteria->add(JobSiteRecordTableMap::COL_JOBSITE_KEY, (array) $values, Criteria::IN);
+            $criteria = new Criteria(UserSearchPairTableMap::DATABASE_NAME);
+            $criteria->add(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID, (array) $values, Criteria::IN);
         }
 
-        $query = JobSiteRecordQuery::create()->mergeWith($criteria);
+        $query = UserSearchPairQuery::create()->mergeWith($criteria);
 
         if ($values instanceof Criteria) {
-            JobSiteRecordTableMap::clearInstancePool();
+            UserSearchPairTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
             foreach ((array) $values as $singleval) {
-                JobSiteRecordTableMap::removeInstanceFromPool($singleval);
+                UserSearchPairTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -447,20 +411,20 @@ class JobSiteRecordTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the job_site table.
+     * Deletes all rows from the user_search_pair table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return JobSiteRecordQuery::create()->doDeleteAll($con);
+        return UserSearchPairQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a JobSiteRecord or Criteria object.
+     * Performs an INSERT on the database, given a UserSearchPair or Criteria object.
      *
-     * @param mixed               $criteria Criteria or JobSiteRecord object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or UserSearchPair object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -469,18 +433,22 @@ class JobSiteRecordTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(JobSiteRecordTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchPairTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from JobSiteRecord object
+            $criteria = $criteria->buildCriteria(); // build Criteria from UserSearchPair object
+        }
+
+        if ($criteria->containsKey(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID) && $criteria->keyContainsValue(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID) ) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ('.UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID.')');
         }
 
 
         // Set the correct dbName
-        $query = JobSiteRecordQuery::create()->mergeWith($criteria);
+        $query = UserSearchPairQuery::create()->mergeWith($criteria);
 
         // use transaction because $criteria could contain info
         // for more than one table (I guess, conceivably)
@@ -489,7 +457,7 @@ class JobSiteRecordTableMap extends TableMap
         });
     }
 
-} // JobSiteRecordTableMap
+} // UserSearchPairTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-JobSiteRecordTableMap::buildTableMap();
+UserSearchPairTableMap::buildTableMap();
