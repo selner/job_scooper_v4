@@ -10,6 +10,7 @@
         {
           "Name": "TotalPostCount",
           "Selector": "div.page-title span",
+          "Index" : 0,
           "Type": "CSS"
         },
         {
@@ -26,12 +27,14 @@
         {
           "Name": "Title",
           "Selector": "div.job-title a h2",
+          "Index" : 0,
           "Type": "CSS"
         },
         {
           "Name": "Url",
           "Selector": "div.job-title a",
           "Attribute": "href",
+          "Index" : 0,
           "Type": "CSS"
         },
         {
