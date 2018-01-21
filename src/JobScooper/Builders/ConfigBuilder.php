@@ -414,8 +414,10 @@ class ConfigBuilder
 			$currentUser = $user_recs[$cmd_line_user_to_run];
 
 		// if still no user selected, pick the first one in the list of users
-		if(empty($currentUser))
+		if(empty($currentUser)) {
 			$currentUser = array_shift($user_recs);
+			LogWarning("Found " . count($config_users) . " different user settings in the configuration files.  Defaulting to " . $currentUser->getUserSlug() . ".");
+		}
 
 		if (empty($currentUser))
 				throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
@@ -423,10 +425,6 @@ class ConfigBuilder
 		$currentUser->setCurrentUser($currentUser);
 		setConfigurationSetting("alerts.results.to", $currentUser);
 
-		if(!empty($config_user_to_run) && array_key_exists($config_user_to_run, $config_users))
-			$userToRun = $config_user_to_run;
-		else
-			LogWarning("Found " . count($config_users) . " different user settings in the configuration files.  Defaulting to " . $currentUser->getUserSlug() . ".");
 	}
 
 	/**
