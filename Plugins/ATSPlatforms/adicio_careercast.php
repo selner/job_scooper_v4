@@ -37,6 +37,9 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	protected $LocationType = 'location-city-comma-statecode';
 	protected $nTotalJobs = null;
 	protected $lastResponseData = null;
+	/**
+	 * @var \JobScooper\DataAccess\UserSearchSiteRun|null
+	 */
 	protected $currentJsonSearchDetails = null;
 
 	protected $arrBaseListingTagSetupNationalSearch = array(
@@ -98,8 +101,8 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		LogMessage("Downloading JSON listing data from {$apiUri} for " . $this->getJobSiteKey() . "...");
 		if(empty($hostPageUri))
 			$hostPageUri = $this->getActiveWebdriver()->getCurrentURL();
-		if(empty($hostPageUri))
-			$hostPageUri = $searchDetails->nextResultsPageUrl;
+		if(empty($hostPageUri) && !empty($this->currentJsonSearchDetails))
+			$hostPageUri = $this->currentJsonSearchDetails->nextResultsPageUrl;
 
 		$ret = array();
 		$respdata = $this->getJsonApiResult($apiUri, $hostPageUri);
@@ -143,6 +146,8 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 				'PostedAt' => $job->PostDate
 			);
 		}
+
+		LogMessage("Loaded " . count($ret) . " jobs from JSON with " . count($jobs));
 		return $ret;
 	}
 
@@ -168,12 +173,12 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 */
 	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
 	{
-
 		$this->nTotalJobs = 0;
 		$this->lastResponseData = 0;
 
 		$this->currentJsonSearchDetails = $searchDetails;
 		$hostPage = $searchDetails->getSearchStartUrl();
+		LogMessage("Loading first page for {$this->getJobSiteKey()} from {$hostPage}");
 		$jsonUrl = $this->_getJsonSearchUrl($searchDetails);
 		$retData = null;
 		try {
@@ -265,6 +270,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 				}
 				else {
 					$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
+					LogMessage("Loading job results JSON data for {$this->getJobSiteKey()} from {$jsonUrl}");
 					$respData = $this->getJsonResultsPage($jsonUrl);
 					$jobs = $respData->Jobs;
 					$this->nTotalJobs = $respData->Total;
@@ -278,6 +284,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 					$nOffset = $nOffset + count($curPageJobs);
 					if ($nOffset < $this->nTotalJobs) {
 						$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
+						LogMessage("Loading next page of JSON data for {$this->getJobSiteKey()} from {$hostPage}");
 						$respData = $this->getJsonResultsPage($jsonUrl);
 						$jobs = $respData->Jobs;
 					}
