@@ -74,7 +74,7 @@ class ErrorEmailLogHandler extends MailHandler
             else
 	            $flatData[$key] = $value;
 
-        return $renderer($flatData);
+        return call_user_func($renderer, $flatData);
 
     }
 }

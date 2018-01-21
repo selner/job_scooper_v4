@@ -98,7 +98,7 @@ class NotifierDevAlerts extends JobsMailSender
 				"PluginErrors" => $failedJobSites
 			);
 
-			$html = $renderer($data);
+			$html = call_user_func($renderer, $data);
 
 //			$objPageHtml = new SimpleHTMLHelper($html);
 //			$filepath = $objPageHtml->debug_dump_to_file();

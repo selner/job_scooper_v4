@@ -273,7 +273,7 @@ class NotifierJobAlerts extends JobsMailSender
 	{
 
 		$spreadsheet = IOFactory::load(__ROOT__ . '/src/assets/templates/results.xlsx');
-		
+
 		$sheetFilters = array(
 			[NotifierJobAlerts::SHEET_MATCHES, "isUserJobMatchAndNotExcluded", NotifierJobAlerts::KEYS_MATCHES],
 			[NotifierJobAlerts::SHEET_ALL_JOBS, "all", NotifierJobAlerts::KEYS_EXCLUDED]
@@ -339,7 +339,7 @@ class NotifierJobAlerts extends JobsMailSender
 			$data['Search']['Locations'] = join(", ", $searchLocNames);
 		}
 
-		$html = $renderer($data);
+		$html = call_user_func($renderer, $data);
 
 		if(isDebug())
 			file_put_contents(getDefaultJobsOutputFileName("email", "notification", "html", "_", "debug"), $html);
