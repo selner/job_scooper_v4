@@ -40,6 +40,7 @@ class UserQuery extends BaseUserQuery
 		if($user->isNew() || $overwriteFacts === true)
 		{
 			UserQuery::updateUserFacts($user, $arrUserFactsToSet);
+			$user->setUserSlug($slug);
 		}
 		$user->save();
 

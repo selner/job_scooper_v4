@@ -197,7 +197,7 @@ class UserTableMap extends TableMap
     public function getBehaviors()
     {
         return array(
-            'sluggable' => array('slug_column' => 'user_slug', 'slug_pattern' => '{EmailAddress}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'false', 'scope_column' => '', 'unique_constraint' => 'true', ),
+            'sluggable' => array('slug_column' => 'user_slug', 'slug_pattern' => '{EmailAddress}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
         );
     } // getBehaviors()
     /**

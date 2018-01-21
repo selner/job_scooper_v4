@@ -933,7 +933,7 @@ abstract class User implements ActiveRecordInterface
 
             if ($this->isColumnModified(UserTableMap::COL_USER_SLUG) && $this->getUserSlug()) {
                 $this->setUserSlug($this->makeSlugUnique($this->getUserSlug()));
-            } else {
+            } elseif (!$this->getUserSlug()) {
                 $this->setUserSlug($this->createSlug());
             }
             if ($isInsert) {
