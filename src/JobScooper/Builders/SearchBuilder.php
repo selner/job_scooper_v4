@@ -17,6 +17,7 @@
 
 namespace JobScooper\Builders;
 
+use JobScooper\DataAccess\Map\UserSearchPairTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\DataAccess\UserSearchSiteRun;
@@ -189,12 +190,14 @@ class SearchBuilder
 			}
 
 			foreach(array_keys($searches) as $siteKey) {
-				foreach ($searches[$siteKey] as $searchKey => $search) {
-					if (array_key_exists($search->getUserSearchPairId(), $searchPairsToSkip[$siteKey])) {
-						$search->setRunResultCode("skipped");
-						$search->save();
-						unset($searches[$siteKey][$searchKey]);
-						$skipTheseSearches[] = $searchKey;
+				if (!empty($searches[$siteKey])) {
+					foreach ($searches[$siteKey] as $searchKey => $search) {
+						if (!empty($searchPairsToSkip[$siteKey]) && array_key_exists($search->getUserSearchPairId(), $searchPairsToSkip[$siteKey])) {
+							$search->setRunResultCode("skipped");
+							$search->save();
+							unset($searches[$siteKey][$searchKey]);
+							$skipTheseSearches[] = $searchKey;
+						}
 					}
 				}
 			}
@@ -218,36 +221,53 @@ class SearchBuilder
         //
         // let's start with the searches specified with the details in the the config.ini
         //
-        $userSearchPairs = $user->getUserSearchPairs();
+	    $userSearchPairs = $user->getUserSearchPairs();
+	    $userSearchPairs = $user->getActiveUserSearchPairs();
 	    if (empty($userSearchPairs) || empty($sites))
 		    return array();
 
 	    $nKeywords = count($user->getSearchKeywords());
 	    $nLocations = countAssociativeArrayValues($user->getSearchGeoLocations());
+		$nTotalPairs = countAssociativeArrayValues($userSearchPairs);
 	    $nTotalSearches = $nKeywords * $nLocations * count($sites);
 
-        LogMessage(" Creating up to {$nTotalSearches} search runs for {$nKeywords} search keywords X {$nLocations} search locations X " . count($sites) . " jobsites.");
+        LogMessage(" Creating search runs for {$nTotalPairs} search pairs X " . count($sites) . " jobsites = up to {$nTotalSearches} total seraches, from {$nKeywords} search keywords and {$nLocations} search locations.");
 
         $searchRuns = array();
+	    $ntotalSearchRuns = 0;
 
         foreach($sites as $jobsiteKey => $site)
         {
-        	$searchRuns[$jobsiteKey] = array();
+
 
             foreach($userSearchPairs as $searchPair)
             {
-                $searchrun = new UserSearchSiteRun();
-	            $searchrun->setUserSearchPairFromUSSR($searchPair);
-                $searchrun->setJobSiteKey($site);
-                $searchrun->setAppRunId(getConfigurationSetting('app_run_id'));
-                $searchrun->setStartedAt(time());
-                $searchrun->save();
+            	$geoloc = $searchPair->getGeoLocationFromUS();
+            	$ccSearch = $geoloc->getCountryCode();
+            	$ccJobSite = $site->getSupportedCountryCodes();
+	            $matches = null;
+	            $ccOverlaps= array_intersect(array($ccSearch), $ccJobSite);
+	            if(!empty($ccOverlaps)) {
+		            $searchrun = new UserSearchSiteRun();
+		            $searchrun->setUserSearchPairFromUSSR($searchPair);
+	                $searchrun->setJobSiteKey($site);
+	                $searchrun->setAppRunId(getConfigurationSetting('app_run_id'));
+	                $searchrun->setStartedAt(time());
+	                $searchrun->save();
 
-                $searchRuns[$jobsiteKey][$searchrun->getUserSearchSiteRunKey()] = $searchrun;
+	                if(!array_key_exists($jobsiteKey, $searchRuns))
+	                	$searchRuns[$jobsiteKey] = array();
+		            $searchRuns[$jobsiteKey][$searchrun->getUserSearchSiteRunKey()] = $searchrun;
+		            $ntotalSearchRuns += 1;
+	            }
+	            else
+		            LogDebug("JobSite's supported countries [" . join("|", $ccJobSite) . "] does not overlap with search's country [{$ccSearch}].  Skipping search.");
+
 
             }
         }
 
+	    LogMessage(" Generated {$ntotalSearchRuns} total search runs to process.");
         return $searchRuns;
     }
 

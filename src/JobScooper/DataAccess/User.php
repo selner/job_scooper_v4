@@ -5,9 +5,12 @@ namespace JobScooper\DataAccess;
 use JobScooper\Builders\SearchBuilder;
 use JobScooper\DataAccess\Base\User as BaseUser;
 use JobScooper\Manager\LocationManager;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
+use JobScooper\DataAccess\Map\UserSearchPairTableMap;
+use Propel\Runtime\Propel;
 
 /**
  * Skeleton subclass for representing a row from the 'user' table.
@@ -229,6 +232,7 @@ class User extends BaseUser
 			LocationManager::create();
 			$locmgr = LocationManager::getLocationManager();
 		}
+		$searchGeoLocIds = array();
 
 		foreach ($searchLocations as $lockey => $searchLoc)
 		{
@@ -236,6 +240,7 @@ class User extends BaseUser
 			if (!empty($location)) {
 				LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}'s keywords");
 				$locId = $location->getGeoLocationId();
+				$searchGeoLocIds[$locId] = $locId;
 
 				foreach ($searchKeywords as $kwd) {
 					$user_search = UserSearchPairQuery::create()
@@ -244,9 +249,9 @@ class User extends BaseUser
 						->filterByGeoLocationId($locId)
 						->findOneOrCreate();
 
-
 					$user_search->setUserId($this->getUserId());
 					$user_search->setUserKeyword($kwd);
+					$user_search->setIsActive(true);
 					$user_search->setGeoLocationId($locId);
 					$user_search->save();
 
@@ -257,19 +262,28 @@ class User extends BaseUser
 				LogError("Could not create user searches for the '{$searchLoc}'' search location.");
 		}
 
-//		try {
-//			$oldPairUpdate = UserSearchPairQuery::create()
-//				->filterByUserId($this->getUserId())
-//				->filterByIsActive(true)
-//				->filterByUserSearchPairId(array_keys($userSearchPairs), Criteria::NOT_IN)
-//				->update(array("is_active", false));
-//			LogMessage("Marked {$$oldPairUpdate} previous user search pairs as inactive.");
-//
-//		} catch (PropelException $ex) {
-//			handleException($ex, null, false);
-//		} catch (\Exception $ex) {
-//			handleException($ex, null, false);
-//		}
+		try {
+			$query = UserSearchPairQuery::create();
+
+			$locIdColumnName = $query->getAliasedColName(UserSearchPairTableMap::COL_GEOLOCATION_ID);
+			$kwdColumnName = $query->getAliasedColName(UserSearchPairTableMap::COL_USER_KEYWORD);
+			$con = Propel::getWriteConnection(UserSearchPairTableMap::DATABASE_NAME);
+
+			$oldPairUpdate  = $query->filterByUserSearchPairId(array_keys($userSearchPairs), Criteria::NOT_IN)
+				->filterByUserId($this->getUserId())
+				->filterByIsActive(true, Criteria::EQUAL)
+				->addCond('condUserKwds', $kwdColumnName, array_values($searchKeywords), Criteria::NOT_IN)
+				->addCond('condUserLocs', $locIdColumnName, array_values($searchGeoLocIds), Criteria::NOT_IN)
+				->combine(array('condUserKwds', 'condUserLocs'), Criteria::LOGICAL_OR)
+				->update(array("IsActive" => false), $con);
+
+			LogMessage("Marked {$oldPairUpdate} previous user search pairs as inactive.");
+
+		} catch (PropelException $ex) {
+			handleException($ex, null, false);
+		} catch (\Exception $ex) {
+			handleException($ex, null, false);
+		}
 
 		if (empty($userSearchPairs)) {
 			LogMessage("Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.");
@@ -277,6 +291,23 @@ class User extends BaseUser
 		}
 		LogMessage("Updated or created " . count($userSearchPairs) . " user search pairs for {$slug}.");
 
+	}
+
+	/**
+	 * @return array|\JobScooper\DataAccess\UserSearchPair[]|\Propel\Runtime\Collection\ObjectCollection
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	public function getActiveUserSearchPairs()
+	{
+		$searchPairs = $this->getUserSearchPairs();
+		if(!empty($searchPairs))
+		{
+			$ret = array_filter($searchPairs->getData(), function (UserSearchPair $v) {
+				return $v->isActive();
+			});
+		}
+
+		return $ret;
 	}
 
 	/**
