@@ -24,6 +24,7 @@ use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Builders\ConfigBuilder;
+use JobScooper\Utils\DBRecordRemover;
 
 
 const JOBLIST_TYPE_UNFILTERED = "unfiltered";
@@ -54,29 +55,37 @@ class StageManager
 	         */
 	        $usersForRun = getConfigurationSetting("users_for_run");
 
-	        $arrRunStages = getConfigurationSetting("command_line_args.stages");
-            if (!empty($arrRunStages)) {
+	        $cmds = getConfigurationSetting("command_line_args");
+	        if (array_key_exists("recap", $cmds) && !empty($cmds['recap'])) {
+				$this->doWeeklyRecaps($usersForRun);
 
-	            foreach($usersForRun as $user) {
-		            foreach ($arrRunStages as $stage) {
-			            $stageFunc = "doStage" . $stage;
-			            try {
-				            call_user_func(array($this, $stageFunc), $user);
-			            } catch (\Exception $ex) {
-				            throw new \Exception("Error:  failed to call method \$this->" . $stageFunc . "() for " . $stage . " from option --StageProcessor " . join(",", $arrRunStages) . ".  Error: " . $ex);
-			            }
-		            }
-	            }
-            } else {
-	            /*
+	        } elseif (array_key_exists("delete", $cmds) && !empty($cmds['delete'])) {
+		        $this->removeUserData($usersForRun);
+
+	        } elseif (array_key_exists("stages", $cmds) && !empty($cmds['stages'])) {
+
+		        $arrRunStages = getConfigurationSetting("command_line_args.stages");
+
+		        foreach ($usersForRun as $user) {
+			        foreach ($arrRunStages as $stage) {
+				        $stageFunc = "doStage" . $stage;
+				        try {
+					        call_user_func(array($this, $stageFunc), $user);
+				        } catch (\Exception $ex) {
+					        throw new \Exception("Error:  failed to call method \$this->" . $stageFunc . "() for " . $stage . " from option --StageProcessor " . join(",", $arrRunStages) . ".  Error: " . $ex);
+				        }
+			        }
+		        }
+	        } else {
+		        /*
 				 * If no stage was specifically requested, we default to running stages 1 - 3
 				 */
-	            foreach($usersForRun as $user) {
-		            $this->doStage1($user);
-		            $this->doStage2($user);
-		            $this->doStage3($user);
-	            }
-            }
+		        foreach ($usersForRun as $user) {
+			        $this->doStage1($user);
+			        $this->doStage2($user);
+			        $this->doStage3($user);
+		        }
+	        }
         } catch (\Exception $ex) {
 	        handleException($ex, null, true);
 		}
@@ -216,16 +225,24 @@ class StageManager
 
 
 	/**
-	 * @param \JobScooper\DataAccess\User $user
+	 * @param User[] $users
 	 *
 	 * @throws \Exception
 	 */
-	public function doStage4(User $user)
+	public function doWeeklyRecaps($users)
 	{
+		startLogSection("do Weekly Recaps: Sending Weekly Recaps to Users");
 		try {
-			startLogSection("Stage 4: Send a Weekly Recap to User '{$user->getUserSlug()}'");
-			$notify = new NotifierJobAlerts();
-			$notify->processWeekRecapNotifications($user);
+			if(!empty($users))
+			{
+				foreach($users as $user) {
+					startLogSection("Recap begun for '{$user->getUserSlug()}'");
+					$notify = new NotifierJobAlerts();
+					$notify->processWeekRecapNotifications($user);
+					endLogSection("Recap done for {$user->getUserSlug()}'");
+				}
+			}
+
 		} catch (\Exception $ex) {
 			handleException($ex, null, true);
 		} catch (\PhpOffice\PhpSpreadsheet\Style\Exception $ex) {
@@ -233,10 +250,38 @@ class StageManager
 		}
 		finally
 		{
-			endLogSection("End of stage 4 (send weekly recap)");
+			endLogSection("End of do Weekly Recaps command");
 		}
 	}
+	/**
+	 * @param User[] $users
+	 *
+	 * @throws \Exception
+	 */
+	public function removeUserData($users)
+	{
+		startLogSection("BEGIN: removeUserData from database command");
+		if(!isDebug())
+			throw new \Exception("Removing user data is only allowed if the developer is running in debug mode.  Please set --debug flag when running. Aborting.");
 
+		try {
+			if(!empty($users))
+			{
+				foreach($users as $user) {
+					$remover = DBRecordRemover::removeUsers($users);
+				}
+			}
+
+		} catch (\Exception $ex) {
+			handleException($ex, null, true);
+		} catch (\PhpOffice\PhpSpreadsheet\Style\Exception $ex) {
+			handleException($ex, $ex->getMessage(), true);
+		}
+		finally
+		{
+			endLogSection("END:  removeUserData from database");
+		}
+	}
 
 	/**
 	 * @throws \Exception
