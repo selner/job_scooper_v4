@@ -402,11 +402,16 @@ class ConfigBuilder
 
 		$currentUser = null;
 		$cmd_line_user_to_run = getConfigurationSetting('command_line_args.user');
+
+		// First try to pull the user from the database by that userslug value.  Use that user
+		// if we find one.  This allows a dev to override the local config file data if needed
 		if(!empty($cmd_line_user_to_run) && array_key_exists($cmd_line_user_to_run, $user_recs))
-			$currentUser = $user_recs[$cmd_line_user_to_run];
-		if(empty($currentUser))
 			$currentUser = UserQuery::create()
 				->findOneByUserSlug($cmd_line_user_to_run);
+
+		// if we didn't match a user, look for one as the key name in a config file section under [users.*]
+		if(empty($currentUser))
+			$currentUser = $user_recs[$cmd_line_user_to_run];
 
 		// if still no user selected, pick the first one in the list of users
 		if(empty($currentUser))
