@@ -1074,11 +1074,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return \JobScooper\Utils\SimpleHTMLHelper|null
 	 * @throws \Exception
 	 */
-	function getSimpleObjFromPathOrURL($filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
+	function getSimpleObjFromPathOrURL(UserSearchSiteRun &$searchDetails, $filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
 	{
 		try {
 			if (!empty($strURL))
-				$this->nextResultsPageUrl = $strURL;
+				$searchDetails->nextResultsPageUrl = $strURL;
 
 			$objSimpleHTML = null;
 
@@ -1480,7 +1480,7 @@ JSCODE;
 			$driver->manage()->timeouts()->setScriptTimeout(30);
 			$response = $driver->executeAsyncScript($jsCode, array());
 			if (empty($response)) {
-				$simpHtml = $this->getSimpleHtmlDomFromSeleniumPage();
+				$simpHtml = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
 				$node = $simpHtml->find("script#{$apiNodeId}");
 				if (!empty($node)) {
 					$val = $node[0]->text();
@@ -1512,13 +1512,13 @@ JSCODE;
 	 * @return \JobScooper\Utils\SimpleHTMLHelper|null
 	 * @throws \Exception
 	 */
-	protected function getSimpleHtmlDomFromSeleniumPage($url=null)
+	protected function getSimpleHtmlDomFromSeleniumPage(UserSearchSiteRun &$searchDetails, $url=null)
     {
         $objSimpleHTML = null;
         try {
             if(!empty($url))
             {
-	            $this->nextResultsPageUrl = $url;
+	            $searchDetails->nextResultsPageUrl = $url;
                 $this->getActiveWebdriver()->get($url);
             }
 
@@ -1557,18 +1557,23 @@ JSCODE;
                     if (is_null($this->selenium)) {
                         $this->selenium = new SeleniumManager($this->additionalLoadDelaySeconds);
                     }
+                    else
+                    {
+                    	// Close out any previous webdriver sessions before we start anew
+                    	$this->selenium->done();
+                    }
 
                     if (method_exists($this, "doFirstPageLoad") && $nPageCount == 1)
                         $html = $this->doFirstPageLoad($searchDetails);
                     else
                         $html = $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
-                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage();
+                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
                     handleException(new Exception($strError), null, true, $extraData=$searchDetails->toLoggedContext());
                 }
             } else {
-                $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $searchDetails->getSearchStartUrl(), $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
+                $objSimpleHTML = $this->getSimpleObjFromPathOrURL($searchDetails,null, $searchDetails->getSearchStartUrl(), $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
             }
             if (!$objSimpleHTML) {
                 throw new \ErrorException("Error:  unable to get SimpleHTML object for " . $searchDetails->getSearchStartUrl());
@@ -1624,7 +1629,7 @@ JSCODE;
                 LogMessage("Querying " . $this->JobSiteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails->getSearchStartUrl());
 
                 $strURL = $searchDetails->getSearchStartUrl();
-                $this->nextResultsPageUrl = $strURL;
+                $searchDetails->nextResultsPageUrl = $strURL;
                 while ($nPageCount <= $totalPagesCount) {
 
                     $arrPageJobsList = null;
@@ -1695,7 +1700,7 @@ JSCODE;
                                     break;
                             }
 
-                            $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage();
+                            $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
 
                         } catch (Exception $ex) {
                             handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true, $extraData=$searchDetails->toLoggedContext());
@@ -1705,7 +1710,7 @@ JSCODE;
                         if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
                             return null;
 
-                        $objSimpleHTML = $this->getSimpleObjFromPathOrURL(null, $strURL, $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
+                        $objSimpleHTML = $this->getSimpleObjFromPathOrURL($searchDetails, null, $strURL, $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
                     }
                     if (!$objSimpleHTML) {
                         throw new \ErrorException("Error:  unable to get SimpleHTML object for " . $strURL);
@@ -1902,11 +1907,11 @@ JSCODE;
 	 */
 	protected function setResultPageUrl($searchDetails, $nPageCount, $nItemCount)
     {
-	    $this->nextResultsPageUrl = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
-	    if ($this->_checkInvalidURL_($searchDetails, $this->nextResultsPageUrl) == VALUE_NOT_SUPPORTED)
-		    return $this->nextResultsPageUrl;
+	    $searchDetails->nextResultsPageUrl = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
+	    if ($this->_checkInvalidURL_($searchDetails, $searchDetails->nextResultsPageUrl) == VALUE_NOT_SUPPORTED)
+		    return $searchDetails->nextResultsPageUrl;
 
-	    return $this->nextResultsPageUrl;
+	    return $searchDetails->nextResultsPageUrl;
     }
 }
 

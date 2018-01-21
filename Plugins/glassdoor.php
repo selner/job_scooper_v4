@@ -34,7 +34,7 @@ abstract class AbstractGlassdoor extends \JobScooper\BasePlugin\Classes\AjaxHtml
     }
 
 
-    function doFirstPageLoad($searchDetails)
+	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
     {
 
         $js = "

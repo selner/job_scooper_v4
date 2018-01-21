@@ -20,6 +20,8 @@ use Propel\Runtime\Map\TableMap;
  */
 class UserSearchSiteRun extends BaseUserSearchSiteRun
 {
+	public $nextResultsPageUrl = null;
+
 	function failRunWithErrorMessage($err, SimpleHTMLHelper $objPageHtml=null)
 	{
 		$arrV = "";

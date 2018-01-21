@@ -99,7 +99,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		if(empty($hostPageUri))
 			$hostPageUri = $this->getActiveWebdriver()->getCurrentURL();
 		if(empty($hostPageUri))
-			$hostPageUri = $this->nextResultsPageUrl;
+			$hostPageUri = $searchDetails->nextResultsPageUrl;
 
 		$ret = array();
 		$respdata = $this->getJsonApiResult($apiUri, $hostPageUri);
@@ -154,8 +154,8 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 */
 	private function _getJsonSearchUrl(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nOffset=null)
 	{
-		if(!empty($this->nextResultsPageUrl))
-			$jsonUrl = $this->nextResultsPageUrl. "&format=json";
+		if(!empty($searchDetails->nextResultsPageUrl))
+			$jsonUrl = $searchDetails->nextResultsPageUrl. "&format=json";
 		else
 			$jsonUrl = $searchDetails->getSearchStartUrl() . "&format=json";
 		return $jsonUrl;
@@ -168,6 +168,10 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 */
 	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
 	{
+
+		$this->nTotalJobs = 0;
+		$this->lastResponseData = 0;
+
 		$this->currentJsonSearchDetails = $searchDetails;
 		$hostPage = $searchDetails->getSearchStartUrl();
 		$jsonUrl = $this->_getJsonSearchUrl($searchDetails);
@@ -183,7 +187,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 
 		if(is_null($this->nTotalJobs))
 		{
-			$this->setLayoutIfNeeded();
+			$this->setLayoutIfNeeded($searchDetails);
 		}
 	}
 
@@ -292,7 +296,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	/**
 	 * @throws \Exception
 	 */
-	private function _determinePageLayout()
+	private function _determinePageLayout(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
 	{
 		$urlParts = parse_url($this->SearchUrlFormat);
 		$urlParts['query'] = "";
@@ -308,7 +312,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 			}
 		}
 
-		$baseHTML = $this->getSimpleHtmlDomFromSeleniumPage($url);
+		$baseHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetail, $url);
 		$this->_layout = "careersdefault";
 
 		if (!empty($baseHTML)) {
