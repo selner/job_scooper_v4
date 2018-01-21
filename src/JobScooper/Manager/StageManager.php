@@ -52,26 +52,30 @@ class StageManager
 	        /*
 	         * Run specific stages requested via command-line
 	         */
-	        $user = User::getCurrentUser();
+	        $usersForRun = getConfigurationSetting("users_for_run");
 
 	        $arrRunStages = getConfigurationSetting("command_line_args.stages");
             if (!empty($arrRunStages)) {
 
-	            foreach ($arrRunStages as $stage) {
-                    $stageFunc = "doStage" . $stage;
-                    try {
-                        call_user_func(array($this, $stageFunc), $user);
-                    } catch (\Exception $ex) {
-                        throw new \Exception("Error:  failed to call method \$this->" . $stageFunc . "() for " . $stage . " from option --StageProcessor " . join(",", $arrRunStages) . ".  Error: " . $ex);
-                    }
-                }
+	            foreach($usersForRun as $user) {
+		            foreach ($arrRunStages as $stage) {
+			            $stageFunc = "doStage" . $stage;
+			            try {
+				            call_user_func(array($this, $stageFunc), $user);
+			            } catch (\Exception $ex) {
+				            throw new \Exception("Error:  failed to call method \$this->" . $stageFunc . "() for " . $stage . " from option --StageProcessor " . join(",", $arrRunStages) . ".  Error: " . $ex);
+			            }
+		            }
+	            }
             } else {
 	            /*
 				 * If no stage was specifically requested, we default to running stages 1 - 3
 				 */
-                $this->doStage1($user);
-                $this->doStage2($user);
-                $this->doStage3($user);
+	            foreach($usersForRun as $user) {
+		            $this->doStage1($user);
+		            $this->doStage2($user);
+		            $this->doStage3($user);
+	            }
             }
         } catch (\Exception $ex) {
 	        handleException($ex, null, true);
@@ -94,7 +98,7 @@ class StageManager
 	public function doStage1(User $user)
     {
 
-        startLogSection("Stage 1: Downloading Latest Matching Jobs ");
+        startLogSection("Stage 1: Downloading Latest Matching Jobs for User {$user->getUserSlug()}");
 	    $arrSearchesToRunBySite = $user->getUserSearchSiteRuns();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +180,7 @@ class StageManager
     {
         
         try {
-	        startLogSection("Stage 2:  Auto-marking all user job matches...");
+	        startLogSection("Stage 2:  Auto-marking all user job matches for user {$user->getUserSlug()}...");
             $marker = new JobsAutoMarker($user);
             $marker->markJobs();
         } catch (\Exception $ex) {
@@ -196,7 +200,7 @@ class StageManager
 	public function doStage3(User $user)
 	{
 		try {
-			startLogSection("Stage 3: Notifying User");
+			startLogSection("Stage 3: Notifying User '{$user->getUserSlug()}'");
 			$notifier = new NotifierJobAlerts();
 			$notifier->processRunResultsNotifications($user);
 		} catch (\Exception $ex) {
@@ -219,7 +223,7 @@ class StageManager
 	public function doStage4(User $user)
 	{
 		try {
-			startLogSection("Stage 4: Send a Weekly Recap to User");
+			startLogSection("Stage 4: Send a Weekly Recap to User '{$user->getUserSlug()}'");
 			$notify = new NotifierJobAlerts();
 			$notify->processWeekRecapNotifications($user);
 		} catch (\Exception $ex) {

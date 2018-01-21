@@ -25,7 +25,7 @@ private $doc = <<<DOC
 {APP_RUN_COMMAND}
 
 Usage:
-  {APP_RUN_COMMAND} <configfile> --user=<config_user_key> [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--debug --debug-userid=<userid>] [--disable-notifications] 
+  {APP_RUN_COMMAND} <configfile> [--user=<config_user_key>] [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--debug --debug-userid=<userid>] [--disable-notifications] 
   {APP_RUN_COMMAND} <configfile> [--debug] [--disable-notifications]
   {APP_RUN_COMMAND} (-h | --help)
   {APP_RUN_COMMAND} --version

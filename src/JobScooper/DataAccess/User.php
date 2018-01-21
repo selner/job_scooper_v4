@@ -37,6 +37,7 @@ class User extends BaseUser
 	static function setCurrentUser(User $user)
     {
         setConfigurationSetting('current_user', $user);
+	    setConfigurationSetting("alerts.results.to", $user);
     }
 
 	/**

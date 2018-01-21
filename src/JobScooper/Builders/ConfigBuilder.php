@@ -406,17 +406,20 @@ class ConfigBuilder
 		if(empty($currentUser))
 			$currentUser = $user_recs[$cmd_line_user_to_run];
 
-		// if still no user selected, pick the first one in the list of users
-		if(empty($currentUser)) {
-			$currentUser = array_shift($user_recs);
-			LogWarning("Found " . count($config_users) . " different user settings in the configuration files.  Defaulting to " . $currentUser->getUserSlug() . ".");
+		// if we specified a single user to run, reduce the set of users for run to just that single instance
+		if(!empty($currentUser)) {
+			$user_recs = array($cmd_line_user_to_run => $currentUser);
+			setConfigurationSetting("users_for_run", $user_recs);
+
+			LogMessage("Limiting users run to single, specified user: {$cmd_line_user_to_run}");
+		}
+		elseif(!empty($cmd_line_user_to_run))
+		{
+			throw new \Exception("Unable to find user matching {$cmd_line_user_to_run} that was specified for the run.");
 		}
 
-		if (empty($currentUser))
+		if (empty($user_recs))
 				throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
-
-		$currentUser->setCurrentUser($currentUser);
-		setConfigurationSetting("alerts.results.to", $currentUser);
 
 	}
 
@@ -450,10 +453,6 @@ class ConfigBuilder
 			}
 			setConfigurationSetting($alertKey, $nextUser);
 		}
-
-		$currentUser = User::getCurrentUser()->toArray();
-		$currentUser["User"] = User::getCurrentUser();
-		setConfigurationSetting("alerts.results.to", $currentUser);
 	}
 
 
