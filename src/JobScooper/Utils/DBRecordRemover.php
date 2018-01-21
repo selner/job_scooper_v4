@@ -17,10 +17,8 @@
 
 namespace JobScooper\Utils;
 
-use JobScooper\DataAccess\UserKeywordSetQuery;
 use JobScooper\DataAccess\UserQuery;
 use JobScooper\DataAccess\UserSearchPairQuery;
-use JobScooper\DataAccess\UserSearchQuery;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Propel;
@@ -100,16 +98,16 @@ class DBRecordRemover
 			}
 
 			if (!empty($queryFilters['users']))
-				$query->filterByUserId($queryFilters['users'], Criteria::CONTAINS_SOME);
+				$query->filterByUserId($queryFilters['users'], Criteria::IN);
 
 			if (!empty($queryFilters['searchespairs']))
-				$query->filterByUserSearchPairId($queryFilters['searchespairs'], Criteria::CONTAINS_SOME);
+				$query->filterByUserSearchPairId($queryFilters['searchespairs'], Criteria::IN);
 
 			if (!empty($queryFilters['geolocations']))
-				$query->filterByGeoLocationId($queryFilters['geolocations'], Criteria::CONTAINS_SOME);
+				$query->filterByGeoLocationId($queryFilters['geolocations'], Criteria::IN);
 
 			if (!empty($queryFilters['jobsites']))
-				$query->filterByJobSiteKey($queryFilters['jobsites'], Criteria::CONTAINS_SOME);
+				$query->filterByJobSiteKey($queryFilters['jobsites'], Criteria::IN);
 
 
 			if(!isDebug())
@@ -118,7 +116,7 @@ class DBRecordRemover
 			}
 			else {
 				$con = Propel::getServiceContainer()->getWriteConnection("default");
-				$query->deleteAll($con);
+				$query->delete($con);
 			}
 		}
 		catch (\Exception $ex)
