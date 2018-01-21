@@ -188,8 +188,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	public function addSearches($arrSearches, User $user)
+	public function setSearches($arrSearches, User $user)
 	{
+		$this->arrSearchesToReturn = array(); // clear out any previous searches
+
 		$this->_currentUserForSearches = $user;
 		$this->setResultsFilterType();
 
