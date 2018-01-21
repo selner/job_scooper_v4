@@ -368,6 +368,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	protected $nextResultsPageUrl = null;
 
 	/**
+	 * @var User/null
+	 */
+	protected $_currentUserForSearches = null;
+
+	/**
 	 * @param \JobScooper\DataAccess\GeoLocation|null $location
 	 *
 	 * @return null|string
@@ -406,32 +411,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			return $this->selenium->get_driver();
 		} else
 			throw new Exception("Error:  active webdriver for Selenium not found as expected.");
-	}
-
-	/**
-	 * @param $arrKeywordSet
-	 *
-	 * @return string[]
-	 */
-	protected function getCombinedKeywordString($arrKeywordSet)
-	{
-		$arrKeywords = array();
-
-		if (!is_array($arrKeywordSet)) {
-			$arrKeywords[] = $arrKeywordSet[0];
-		} else {
-			$arrKeywords = $arrKeywordSet;
-		}
-
-		if ($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS)) {
-			$arrKeywords = array_mapk(function ($k, $v) {
-				return "\"{$v}\"";
-			}, $arrKeywords);
-		}
-
-		$strRetCombinedKeywords = array_shift($arrKeywords);
-
-		return $strRetCombinedKeywords;
 	}
 
 	/**
@@ -927,46 +906,29 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	private function _getKeywordStringsForUrl_(UserSearchSiteRun $searchDetails)
 	{
+		$strRetCombinedKeywords = $searchDetails->getUserKeyword();
+
 		// if we don't support keywords in the URL at all for this
 		// plugin or we don't have any keywords, return empty string
 		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) ||
-			empty($searchDetails->getUserKeywordSet())) {
-			$ret = "";
+			empty($strRetCombinedKeywords)) {
+			$strRetCombinedKeywords = "";
 		} else {
-			$ret = $this->_getCombinedKeywordStringForURL_($searchDetails->getKeywords());
-		}
+			if ($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS)) {
+				$strRetCombinedKeywords = "\"{$strRetCombinedKeywords}\"";
+			}
 
-		return $ret;
-	}
+			if (!isValueURLEncoded($strRetCombinedKeywords)) {
+				if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE))
+					$strRetCombinedKeywords = rawurlencode($strRetCombinedKeywords);
+				else
+					$strRetCombinedKeywords = urlencode($strRetCombinedKeywords);
+			}
 
-	/**
-	 * @param $arrKeywordSet
-	 *
-	 * @return string
-	 */
-	private function _getCombinedKeywordStringForURL_($arrKeywordSet)
-	{
-		$arrKeywords = array();
-
-		if (!is_array($arrKeywordSet)) {
-			$arrKeywords[] = $arrKeywordSet[0];
-		} else {
-			$arrKeywords = $arrKeywordSet;
-		}
-
-		$strRetCombinedKeywords = $this->getCombinedKeywordString($arrKeywords);
-
-		if (!isValueURLEncoded($strRetCombinedKeywords)) {
-			if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE))
-				$strRetCombinedKeywords = rawurlencode($strRetCombinedKeywords);
-			else
-				$strRetCombinedKeywords = urlencode($strRetCombinedKeywords);
-
-		}
-
-		if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES)) {
-			$strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
-			$strRetCombinedKeywords = str_replace("+", "-", $strRetCombinedKeywords);
+			if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES)) {
+				$strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
+				$strRetCombinedKeywords = str_replace("+", "-", $strRetCombinedKeywords);
+			}
 		}
 
 		return $strRetCombinedKeywords;
