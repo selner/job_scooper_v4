@@ -280,7 +280,7 @@
                 primaryString="true"/>
         <behavior name="sluggable">
             <parameter name="slug_column" value="user_search_site_run_key"/>
-            <parameter name="slug_pattern" value="{UserSearchId}_{JobSiteKey}_{AppRunId}"/>
+            <parameter name="slug_pattern" value="{UserSearchPairId}_{JobSiteKey}_{AppRunId}"/>
             <parameter name="replace_pattern" value="/[^\w\/]+/u"/>
             <parameter name="replacement" value=""/>
             <parameter name="separator" value="-"/>
