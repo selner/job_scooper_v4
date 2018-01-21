@@ -127,6 +127,13 @@ abstract class User implements ActiveRecordInterface
     protected $search_locations_unserialized;
 
     /**
+     * The value for the input_files_json field.
+     *
+     * @var        string
+     */
+    protected $input_files_json;
+
+    /**
      * @var        ObjectCollection|ChildUserSearchPair[] Collection to store aggregation of ChildUserSearchPair objects.
      */
     protected $collUserSearchPairs;
@@ -511,6 +518,16 @@ abstract class User implements ActiveRecordInterface
     } // hasSearchLocation()
 
     /**
+     * Get the [input_files_json] column value.
+     *
+     * @return string
+     */
+    public function getInputFilesJson()
+    {
+        return $this->input_files_json;
+    }
+
+    /**
      * Set the value of [user_id] column.
      *
      * @param int $v new value
@@ -693,6 +710,26 @@ abstract class User implements ActiveRecordInterface
     } // removeSearchLocation()
 
     /**
+     * Set the value of [input_files_json] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     */
+    public function setInputFilesJson($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->input_files_json !== $v) {
+            $this->input_files_json = $v;
+            $this->modifiedColumns[UserTableMap::COL_INPUT_FILES_JSON] = true;
+        }
+
+        return $this;
+    } // setInputFilesJson()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -751,6 +788,9 @@ abstract class User implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserTableMap::translateFieldName('SearchLocations', TableMap::TYPE_PHPNAME, $indexType)];
             $this->search_locations = $col;
             $this->search_locations_unserialized = null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserTableMap::translateFieldName('InputFilesJson', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->input_files_json = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -759,7 +799,7 @@ abstract class User implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 6; // 6 = UserTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 7; // 7 = UserTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\User'), 0, $e);
@@ -1050,6 +1090,9 @@ abstract class User implements ActiveRecordInterface
         if ($this->isColumnModified(UserTableMap::COL_SEARCH_LOCATIONS)) {
             $modifiedColumns[':p' . $index++]  = 'search_locations';
         }
+        if ($this->isColumnModified(UserTableMap::COL_INPUT_FILES_JSON)) {
+            $modifiedColumns[':p' . $index++]  = 'input_files_json';
+        }
 
         $sql = sprintf(
             'INSERT INTO user (%s) VALUES (%s)',
@@ -1078,6 +1121,9 @@ abstract class User implements ActiveRecordInterface
                         break;
                     case 'search_locations':
                         $stmt->bindValue($identifier, $this->search_locations, PDO::PARAM_STR);
+                        break;
+                    case 'input_files_json':
+                        $stmt->bindValue($identifier, $this->input_files_json, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1161,6 +1207,9 @@ abstract class User implements ActiveRecordInterface
             case 5:
                 return $this->getSearchLocations();
                 break;
+            case 6:
+                return $this->getInputFilesJson();
+                break;
             default:
                 return null;
                 break;
@@ -1197,6 +1246,7 @@ abstract class User implements ActiveRecordInterface
             $keys[3] => $this->getName(),
             $keys[4] => $this->getSearchKeywords(),
             $keys[5] => $this->getSearchLocations(),
+            $keys[6] => $this->getInputFilesJson(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1294,6 +1344,9 @@ abstract class User implements ActiveRecordInterface
                 }
                 $this->setSearchLocations($value);
                 break;
+            case 6:
+                $this->setInputFilesJson($value);
+                break;
         } // switch()
 
         return $this;
@@ -1337,6 +1390,9 @@ abstract class User implements ActiveRecordInterface
         }
         if (array_key_exists($keys[5], $arr)) {
             $this->setSearchLocations($arr[$keys[5]]);
+        }
+        if (array_key_exists($keys[6], $arr)) {
+            $this->setInputFilesJson($arr[$keys[6]]);
         }
     }
 
@@ -1396,6 +1452,9 @@ abstract class User implements ActiveRecordInterface
         }
         if ($this->isColumnModified(UserTableMap::COL_SEARCH_LOCATIONS)) {
             $criteria->add(UserTableMap::COL_SEARCH_LOCATIONS, $this->search_locations);
+        }
+        if ($this->isColumnModified(UserTableMap::COL_INPUT_FILES_JSON)) {
+            $criteria->add(UserTableMap::COL_INPUT_FILES_JSON, $this->input_files_json);
         }
 
         return $criteria;
@@ -1488,6 +1547,7 @@ abstract class User implements ActiveRecordInterface
         $copyObj->setName($this->getName());
         $copyObj->setSearchKeywords($this->getSearchKeywords());
         $copyObj->setSearchLocations($this->getSearchLocations());
+        $copyObj->setInputFilesJson($this->getInputFilesJson());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -2318,6 +2378,7 @@ abstract class User implements ActiveRecordInterface
         $this->search_keywords_unserialized = null;
         $this->search_locations = null;
         $this->search_locations_unserialized = null;
+        $this->input_files_json = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->applyDefaultValues();

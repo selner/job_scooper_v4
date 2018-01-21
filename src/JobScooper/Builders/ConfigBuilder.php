@@ -16,23 +16,17 @@
  */
 namespace JobScooper\Builders;
 
-
-
-use JobScooper\DataAccess\UserKeywordSet;
-use JobScooper\DataAccess\UserKeywordSetQuery;
 use JobScooper\DataAccess\UserQuery;
 use JobScooper\DataAccess\User;
 use JobScooper\Manager\LocationManager;
 use JobScooper\Manager\LoggingManager;
-use const JobScooper\BasePlugin\Classes\VALUE_NOT_SUPPORTED;
 use Propel\Common\Config\ConfigurationManager;
-use Propel\Generator\Config\GeneratorConfig;
 use Propel\Runtime\Exception\InvalidArgumentException;
 use \SplFileInfo;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use PHLAK\Config\Config;
-use  \Propel\Runtime\Propel;
+use \Propel\Runtime\Propel;
 
 
 $GLOBALS['CACHES'] = array('LOCATION_MANAGER' =>null, 'GEOCODER_ENABLED' => true);
@@ -68,7 +62,7 @@ class ConfigBuilder
     }
 
     protected $nNumDaysToSearch = -1;
-    public $arrFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null, 'user_input_files_details' => null);
+    public $arrConfigFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null);
     protected $allConfigFileSettings = null;
 
 	/**
@@ -87,21 +81,18 @@ class ConfigBuilder
 
 
 	    $file_name = getConfigurationSetting("command_line_args.configfile");
-        $this->arrFileDetails['config_ini'] = new SplFileInfo($file_name);
+        $this->arrConfigFileDetails = new SplFileInfo($file_name);
 
 	    $rootOutputPath = getConfigurationSetting("output_directories.root");
 	    $rootOutputDir = parsePathDetailsFromString($rootOutputPath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 	    if($rootOutputDir->isDir() !== true)
 	    {
-		    $outputpath = sprintf("%s%s%s", $this->arrFileDetails['config_ini']->getPathname(), DIRECTORY_SEPARATOR, "output");
+		    $outputpath = sprintf("%s%s%s", $this->arrConfigFileDetails->getPathname(), DIRECTORY_SEPARATOR, "output");
 		    $rootOutputDir = parsePathDetailsFromString($outputpath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 		    setConfigurationSetting("output_directories.root", $rootOutputDir->getPathname());
 	    }
 
 	    $this->_setupPropelForRun();
-
-	    //        $name = str_replace(DIRECTORY_SEPARATOR, "", $this->arrFileDetails['config_ini']->getPathname());
-//        $name = substr($name, max([strlen($name) - 31 - strlen(".ini"), 0]), 31);
 
         // Now setup all the output folders
         $this->__setupOutputFolders__();
@@ -110,7 +101,7 @@ class ConfigBuilder
         LogMessage("Output folders configured: " . $strOutfileArrString);
 
 
-        endLogSection("Loaded configuration details from " . $this->arrFileDetails['config_ini']->getPathname());
+        endLogSection("Loaded configuration details from " . $this->arrConfigFileDetails->getPathname());
 
 	    startLogSection("Configuring specific settings for this run... ");
         $this->_setupRunFromConfig_();
@@ -169,15 +160,13 @@ class ConfigBuilder
 	    // First load the user email information.  We set this first because it is used
 	    // to send error email if something goes wrong anywhere further along our run
 	    //
-	    $this->_parseUserSetup();
-	    $user = User::getCurrentUser();
+	    $this->_parseUserConfigs();
 		$this->_parseAlertReceipients();
 
-        LogMessage("Loaded all configuration settings from " . $this->arrFileDetails['config_ini']->getPathname());
+        LogMessage("Loaded all configuration settings from " . $this->arrConfigFileDetails->getPathname());
 
 	    // Note:  this must happen before any of the job site plugins are instantiated
 	    $this->_parsePluginSettings();
-
 
 	    $this->_instantiateLocationManager();
 	    $this->_parseSeleniumParameters();
@@ -188,13 +177,9 @@ class ConfigBuilder
             return;
         }
 
-		$searchKwds = $user->getSearchKeywords();
-
-
 		startLogSection("Initializing user searches for this run");
 	    $srchmgr->initializeSearches();
 	    endLogSection(" User search initialization.");
-
 
     }
 
@@ -389,9 +374,9 @@ class ConfigBuilder
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _parseUserSetup()
+	private function _parseUserConfigs()
 	{
-		LogMessage("Configuring user for the run...");
+		LogMessage("Creating or updating users based on config file settings...");
 
 		setConfigurationSetting('alerts.configuration.smtp', $this->_getSetting("alerts.configuration.smtp"));
 
@@ -400,69 +385,47 @@ class ConfigBuilder
 		//
 		// Configure the primary user for the config file and set it
 		//
-		$config_users = $this->_getSetting("user");
-		$config_user_to_run = getConfigurationSetting('command_line_args.user');
-		$arrUserFacts = array();
-		$userToRun = array_keys($config_users)[0];
+		$config_users = $this->_getSetting("users");
+		$user_recs = array();
 		if (empty($config_users))
-			throw new \Exception("No user found in configuration settings.  Aborting.");
+			throw new \Exception("No users found in configuration settings.  Aborting.");
 		else {
-			if(!empty($config_user_to_run) && array_key_exists($config_user_to_run, $config_users))
-				$userToRun = $config_user_to_run;
-			else
-				LogWarning("Found " . count($config_users) . " different user settings in the configuration files.  Defaulting to {$userToRun}.");
-
-			$arrUserFacts = $config_users[$userToRun];
-		}
-
-		LogMessage("User configuration for run: " . getArrayDebugOutput($arrUserFacts));
-		$dbgUserId = getConfigurationSetting('command_line_args.debug-userid');
-		if (isDebug() && !empty($dbgUserId)) {
-			$currentUser = UserQuery::create()
-				->findOneByUserId($dbgUserId);
-			if (empty($currentUser))
-				throw new \Exception("Could not find debug-userid {$dbgUserId} in the database.  Aborting.");
-		} else {
-			$currentUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($userToRun), $arrUserFacts, $overwriteFacts = true);
-			if (empty($currentUser))
-				throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
-		}
-		$currentUser->setCurrentUser($currentUser);
-		$userList[$currentUser->getEmailAddress()] = $currentUser;
-		setConfigurationSetting("alerts.results.to", $currentUser);
-
-		//
-		// Validate each of the inputfiles that the user passed
-		// and configure all searches
-		//
-		$verifiedInputs = array();
-		if (array_key_exists('inputfiles', $arrUserFacts) && !empty($arrUserFacts['inputfiles']) && is_array($arrUserFacts['inputfiles'])) {
-			$inputfiles = $arrUserFacts['inputfiles'];
-			foreach ($inputfiles as $cfgvalue)
-			{
-				$split= preg_split("/;/", $cfgvalue);
-				$type = $split[0];
-				$path = $split[1];
-
-				$tempFileDetails = null;
-				$fileinfo = new \SplFileInfo($path);
-				if($fileinfo->getRealPath() !== false){
-					$tempFileDetails = parsePathDetailsFromString($fileinfo->getRealPath(), C__FILEPATH_FILE_MUST_EXIST);
-				}
-
-				if(empty($tempFileDetails) || $tempFileDetails->isFile() !== true) {
-					throw new \Exception("Specified input file '" . $path . "' was not found.  Aborting.");
-				}
-
-				$key = $fileinfo->getBasename(".csv");
-				setConfigurationSetting("user_data_files.".$type.".".$key, $tempFileDetails->getPathname());
+			foreach ($config_users as $key_user => $config_user) {
+				$updatedUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($key_user), $config_user, $overwriteFacts = true);
+				if (empty($updatedUser))
+					throw new \Exception("Failed to create or update user based on config section users.{$key_user}.");
+				$user_recs[$key_user] = $updatedUser;
 			}
 		}
+
+		setConfigurationSetting("users_for_run", $user_recs);
+
+		$currentUser = null;
+		$cmd_line_user_to_run = getConfigurationSetting('command_line_args.user');
+		if(!empty($cmd_line_user_to_run) && array_key_exists($cmd_line_user_to_run, $user_recs))
+			$currentUser = $user_recs[$cmd_line_user_to_run];
+		if(empty($currentUser))
+			$currentUser = UserQuery::create()
+				->findOneByUserSlug($cmd_line_user_to_run);
+
+		// if still no user selected, pick the first one in the list of users
+		if(empty($currentUser))
+			$currentUser = array_shift($user_recs);
+
+		if (empty($currentUser))
+				throw new \Exception("No email address or user has been found to send results notifications.  Aborting.");
+
+		$currentUser->setCurrentUser($currentUser);
+		setConfigurationSetting("alerts.results.to", $currentUser);
+
+		if(!empty($config_user_to_run) && array_key_exists($config_user_to_run, $config_users))
+			$userToRun = $config_user_to_run;
+		else
+			LogWarning("Found " . count($config_users) . " different user settings in the configuration files.  Defaulting to " . $currentUser->getUserSlug() . ".");
 	}
 
 	/**
 	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	private function _parseAlertReceipients()
 	{

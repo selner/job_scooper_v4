@@ -18,6 +18,7 @@
 namespace JobScooper\Builders;
 
 use Exception;
+use JobScooper\DataAccess\JobSiteRecord;
 use JobScooper\DataAccess\JobSiteRecordQuery;
 use JobScooper\DataAccess\User;
 
@@ -65,8 +66,8 @@ class JobSitePluginBuilder
 	    {
 	    	$sites = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
 
-		    $disabled = array_filter($sites, function ($v) {
-			    return $v->getisDisabled() === true;
+		    $disabled = array_filter($sites, function (JobSiteRecord $v) {
+			    return $v->getIsDisabled() === true;
 		    });
 		    if (!empty($disabled)) {
 			    LogMessage("Excluding " . join(", ", array_keys($disabled)) . " job site(s):  marked as disabled in the database.");

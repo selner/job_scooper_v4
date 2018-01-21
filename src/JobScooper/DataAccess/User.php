@@ -70,7 +70,7 @@ class User extends BaseUser
 	    {
 	    	$loc[] = $pair->getGeoLocationFromUS();
 	    }
-	    return $loc;
+	    return array_unique($loc);
     }
 
 	/**
@@ -114,6 +114,11 @@ class User extends BaseUser
 					unset($arr['search_locations']);
 					break;
 
+				case "inputfiles":
+					$this->_parseConfigUserInputFiles($arr);
+					unset($arr['inputfiles']);
+					break;
+
 				default:
 					$arr[ucwords($k)] = $v;
 					unset($arr[$k]);
@@ -123,6 +128,79 @@ class User extends BaseUser
 
 	    parent::fromArray($arr, $keyType);
     }
+
+	/**
+	 * @throws \Exception
+	 * @return null
+	 */
+    private function _parseConfigUserInputFiles($arrUserFacts)
+    {
+	    //
+	    // Validate each of the inputfiles that the user passed
+	    // and configure all searches
+	    //
+	    $verifiedInputFiles = array();
+	    if (array_key_exists('inputfiles', $arrUserFacts) && !empty($arrUserFacts['inputfiles']) && is_array($arrUserFacts['inputfiles'])) {
+		    $inputfiles = $arrUserFacts['inputfiles'];
+		    foreach ($inputfiles as $cfgvalue)
+		    {
+			    $split= preg_split("/;/", $cfgvalue);
+			    $type = $split[0];
+			    $path = $split[1];
+
+			    $tempFileDetails = null;
+			    $fileinfo = new \SplFileInfo($path);
+			    if($fileinfo->getRealPath() !== false){
+				    $tempFileDetails = parsePathDetailsFromString($fileinfo->getRealPath(), C__FILEPATH_FILE_MUST_EXIST);
+			    }
+
+			    if(empty($tempFileDetails) || $tempFileDetails->isFile() !== true) {
+				    throw new \Exception("Specified input file '" . $path . "' was not found.  Aborting.");
+			    }
+
+			    $key = $fileinfo->getBasename(".csv");
+			    $verifiedInputFiles[$type] = array();
+			    $verifiedInputFiles[$type][$key] = $tempFileDetails->getPathname();
+		    }
+
+		    $this->setInputFiles($verifiedInputFiles);
+	    }
+
+    }
+
+	/**
+	 * @param array[]|null $v
+	 * @throws \Exception
+	 */
+	public function setInputFiles($v)
+	{
+		if(!empty($v))
+			$this->setInputFilesJson(encodeJSON($v));
+	}
+
+	/**
+	 * @param string $type Return the subset of input files of a specific type only.
+	 *
+	 * @return array[]|null
+	 * @throws \Exception
+	 */
+	public function getInputFiles($type=null)
+	{
+		$files = null;
+		$v = $this->getInputFilesJson();
+		if(!empty($v) && is_string($v))
+			$files = decodeJSON($v);
+
+		if(!empty($type) && !empty($files))
+		{
+			if(array_key_exists($type, $files))
+				$files = $files[$type];
+			else
+				$files = array();
+		}
+
+		return $files;
+	}
 
 	/**
 	 * @return null

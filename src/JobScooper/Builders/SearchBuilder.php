@@ -46,6 +46,7 @@ class SearchBuilder
 	public function initializeSearches()
     {
 
+
 	    JobSitePluginBuilder::setSitesAsExcluded(getConfigurationSetting("config_excluded_sites"));
 
 	    JobSitePluginBuilder::filterJobSitesByCountryCodes();
@@ -257,7 +258,11 @@ class SearchBuilder
 	    if (empty($userSearchPairs) || empty($includedSites))
 		    return;
 
-        LogMessage(" Creating search runs for " . strval(count($userSearchPairs)) . " user searches across " . count($includedSites) . " jobsites.");
+	    $nKeywords = count($user->getSearchKeywords());
+	    $nLocations = countAssociativeArrayValues($user->getSearchGeoLocations());
+	    $nTotalSearches = $nKeywords * $nLocations * count($includedSites);
+
+        LogMessage(" Creating up to {$nTotalSearches} search runs for {$nKeywords} search keywords X {$nLocations} search locations X " . count($includedSites) . " jobsites.");
 
         $searchRuns = array();
 

@@ -24,6 +24,9 @@ class UserQuery extends BaseUserQuery
 	 *
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 *
+	 * @return User|null
+	 *
 	 */
 	static function findOrCreateUserByUserSlug($slug, $arrUserFactsToSet = array(), $overwriteFacts = false)
 	{
@@ -48,7 +51,8 @@ class UserQuery extends BaseUserQuery
 	 * @param array $arrUserFactsToSet
 	 * @param bool  $overwriteFacts
 	 *
-	 * @return null
+	 * @throws \Exception
+	 * @return User|null
 	 */
 	static function findUserByEmailAddress($email_address, $arrUserFactsToSet = array(), $overwriteFacts = false)
 	{

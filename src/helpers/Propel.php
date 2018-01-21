@@ -115,9 +115,10 @@ function updateOrCreateJobPosting($arrJobItem)
  * @return \JobScooper\DataAccess\UserJobMatch[]
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null)
+function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $user=null)
 {
-    $user= \JobScooper\DataAccess\User::getCurrentUser();
+	if(empty($user))
+	    $user= \JobScooper\DataAccess\User::getCurrentUser();
 
 	$userStateCriteria = [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, \Propel\Runtime\ActiveQuery\Criteria::EQUAL];
 	if(empty(!$userNotificationState) && is_array($userNotificationState))

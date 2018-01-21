@@ -59,7 +59,7 @@ class UserTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 6;
+    const NUM_COLUMNS = 7;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 6;
+    const NUM_HYDRATE_COLUMNS = 7;
 
     /**
      * the column name for the user_id field
@@ -102,6 +102,11 @@ class UserTableMap extends TableMap
     const COL_SEARCH_LOCATIONS = 'user.search_locations';
 
     /**
+     * the column name for the input_files_json field
+     */
+    const COL_INPUT_FILES_JSON = 'user.input_files_json';
+
+    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -113,11 +118,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserId', 'UserSlug', 'EmailAddress', 'Name', 'SearchKeywords', 'SearchLocations', ),
-        self::TYPE_CAMELNAME     => array('userId', 'userSlug', 'emailAddress', 'name', 'searchKeywords', 'searchLocations', ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID, UserTableMap::COL_USER_SLUG, UserTableMap::COL_EMAIL_ADDRESS, UserTableMap::COL_NAME, UserTableMap::COL_SEARCH_KEYWORDS, UserTableMap::COL_SEARCH_LOCATIONS, ),
-        self::TYPE_FIELDNAME     => array('user_id', 'user_slug', 'email_address', 'name', 'search_keywords', 'search_locations', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
+        self::TYPE_PHPNAME       => array('UserId', 'UserSlug', 'EmailAddress', 'Name', 'SearchKeywords', 'SearchLocations', 'InputFilesJson', ),
+        self::TYPE_CAMELNAME     => array('userId', 'userSlug', 'emailAddress', 'name', 'searchKeywords', 'searchLocations', 'inputFilesJson', ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID, UserTableMap::COL_USER_SLUG, UserTableMap::COL_EMAIL_ADDRESS, UserTableMap::COL_NAME, UserTableMap::COL_SEARCH_KEYWORDS, UserTableMap::COL_SEARCH_LOCATIONS, UserTableMap::COL_INPUT_FILES_JSON, ),
+        self::TYPE_FIELDNAME     => array('user_id', 'user_slug', 'email_address', 'name', 'search_keywords', 'search_locations', 'input_files_json', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
     );
 
     /**
@@ -127,11 +132,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserSlug' => 1, 'EmailAddress' => 2, 'Name' => 3, 'SearchKeywords' => 4, 'SearchLocations' => 5, ),
-        self::TYPE_CAMELNAME     => array('userId' => 0, 'userSlug' => 1, 'emailAddress' => 2, 'name' => 3, 'searchKeywords' => 4, 'searchLocations' => 5, ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID => 0, UserTableMap::COL_USER_SLUG => 1, UserTableMap::COL_EMAIL_ADDRESS => 2, UserTableMap::COL_NAME => 3, UserTableMap::COL_SEARCH_KEYWORDS => 4, UserTableMap::COL_SEARCH_LOCATIONS => 5, ),
-        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_slug' => 1, 'email_address' => 2, 'name' => 3, 'search_keywords' => 4, 'search_locations' => 5, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
+        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserSlug' => 1, 'EmailAddress' => 2, 'Name' => 3, 'SearchKeywords' => 4, 'SearchLocations' => 5, 'InputFilesJson' => 6, ),
+        self::TYPE_CAMELNAME     => array('userId' => 0, 'userSlug' => 1, 'emailAddress' => 2, 'name' => 3, 'searchKeywords' => 4, 'searchLocations' => 5, 'inputFilesJson' => 6, ),
+        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID => 0, UserTableMap::COL_USER_SLUG => 1, UserTableMap::COL_EMAIL_ADDRESS => 2, UserTableMap::COL_NAME => 3, UserTableMap::COL_SEARCH_KEYWORDS => 4, UserTableMap::COL_SEARCH_LOCATIONS => 5, UserTableMap::COL_INPUT_FILES_JSON => 6, ),
+        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_slug' => 1, 'email_address' => 2, 'name' => 3, 'search_keywords' => 4, 'search_locations' => 5, 'input_files_json' => 6, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
     );
 
     /**
@@ -158,6 +163,7 @@ class UserTableMap extends TableMap
         $this->addColumn('name', 'Name', 'VARCHAR', true, 128, 'email_address');
         $this->addColumn('search_keywords', 'SearchKeywords', 'ARRAY', false, null, null);
         $this->addColumn('search_locations', 'SearchLocations', 'ARRAY', false, null, null);
+        $this->addColumn('input_files_json', 'InputFilesJson', 'LONGVARCHAR', false, null, null);
     } // initialize()
 
     /**
@@ -352,6 +358,7 @@ class UserTableMap extends TableMap
             $criteria->addSelectColumn(UserTableMap::COL_NAME);
             $criteria->addSelectColumn(UserTableMap::COL_SEARCH_KEYWORDS);
             $criteria->addSelectColumn(UserTableMap::COL_SEARCH_LOCATIONS);
+            $criteria->addSelectColumn(UserTableMap::COL_INPUT_FILES_JSON);
         } else {
             $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.user_slug');
@@ -359,6 +366,7 @@ class UserTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.name');
             $criteria->addSelectColumn($alias . '.search_keywords');
             $criteria->addSelectColumn($alias . '.search_locations');
+            $criteria->addSelectColumn($alias . '.input_files_json');
         }
     }
 

@@ -202,6 +202,7 @@
 
         <column name="search_keywords" phpName="SearchKeywords" type="array" required="false"/>
         <column name="search_locations" phpName="SearchLocations" type="array" required="false"/>
+        <column name="input_files_json" phpName="InputFilesJson" type="LONGVARCHAR" required="false"/>
     </table>
 
     <!--

@@ -26,6 +26,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserQuery orderByName($order = Criteria::ASC) Order by the name column
  * @method     ChildUserQuery orderBySearchKeywords($order = Criteria::ASC) Order by the search_keywords column
  * @method     ChildUserQuery orderBySearchLocations($order = Criteria::ASC) Order by the search_locations column
+ * @method     ChildUserQuery orderByInputFilesJson($order = Criteria::ASC) Order by the input_files_json column
  *
  * @method     ChildUserQuery groupByUserId() Group by the user_id column
  * @method     ChildUserQuery groupByUserSlug() Group by the user_slug column
@@ -33,6 +34,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserQuery groupByName() Group by the name column
  * @method     ChildUserQuery groupBySearchKeywords() Group by the search_keywords column
  * @method     ChildUserQuery groupBySearchLocations() Group by the search_locations column
+ * @method     ChildUserQuery groupByInputFilesJson() Group by the input_files_json column
  *
  * @method     ChildUserQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildUserQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -72,7 +74,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUser findOneByEmailAddress(string $email_address) Return the first ChildUser filtered by the email_address column
  * @method     ChildUser findOneByName(string $name) Return the first ChildUser filtered by the name column
  * @method     ChildUser findOneBySearchKeywords(array $search_keywords) Return the first ChildUser filtered by the search_keywords column
- * @method     ChildUser findOneBySearchLocations(array $search_locations) Return the first ChildUser filtered by the search_locations column *
+ * @method     ChildUser findOneBySearchLocations(array $search_locations) Return the first ChildUser filtered by the search_locations column
+ * @method     ChildUser findOneByInputFilesJson(string $input_files_json) Return the first ChildUser filtered by the input_files_json column *
 
  * @method     ChildUser requirePk($key, ConnectionInterface $con = null) Return the ChildUser by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOne(ConnectionInterface $con = null) Return the first ChildUser matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -83,6 +86,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUser requireOneByName(string $name) Return the first ChildUser filtered by the name column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneBySearchKeywords(array $search_keywords) Return the first ChildUser filtered by the search_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneBySearchLocations(array $search_locations) Return the first ChildUser filtered by the search_locations column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUser requireOneByInputFilesJson(string $input_files_json) Return the first ChildUser filtered by the input_files_json column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUser[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUser objects based on current ModelCriteria
  * @method     ChildUser[]|ObjectCollection findByUserId(int $user_id) Return ChildUser objects filtered by the user_id column
@@ -91,6 +95,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUser[]|ObjectCollection findByName(string $name) Return ChildUser objects filtered by the name column
  * @method     ChildUser[]|ObjectCollection findBySearchKeywords(array $search_keywords) Return ChildUser objects filtered by the search_keywords column
  * @method     ChildUser[]|ObjectCollection findBySearchLocations(array $search_locations) Return ChildUser objects filtered by the search_locations column
+ * @method     ChildUser[]|ObjectCollection findByInputFilesJson(string $input_files_json) Return ChildUser objects filtered by the input_files_json column
  * @method     ChildUser[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -189,7 +194,7 @@ abstract class UserQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_id, user_slug, email_address, name, search_keywords, search_locations FROM user WHERE user_id = :p0';
+        $sql = 'SELECT user_id, user_slug, email_address, name, search_keywords, search_locations, input_files_json FROM user WHERE user_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -555,6 +560,31 @@ abstract class UserQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(UserTableMap::COL_SEARCH_LOCATIONS, $searchLocations, $comparison);
+    }
+
+    /**
+     * Filter the query on the input_files_json column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByInputFilesJson('fooValue');   // WHERE input_files_json = 'fooValue'
+     * $query->filterByInputFilesJson('%fooValue%', Criteria::LIKE); // WHERE input_files_json LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $inputFilesJson The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserQuery The current query, for fluid interface
+     */
+    public function filterByInputFilesJson($inputFilesJson = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($inputFilesJson)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserTableMap::COL_INPUT_FILES_JSON, $inputFilesJson, $comparison);
     }
 
     /**

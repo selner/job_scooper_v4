@@ -35,9 +35,20 @@ use Propel\Runtime\Propel;
  */
 class JobsAutoMarker
 {
+
+	/**
+	 * @var LocationManager
+	 */
     protected $_locmgr = null;
 	protected $title_negative_keyword_tokens = null;
 	protected $companies_regex_to_filter = null;
+
+	/**
+	 * @var User
+	 */
+	private $_userBeingMarked = null;
+
+
 
 	/**
 	 * JobsAutoMarker constructor.
@@ -58,7 +69,9 @@ class JobsAutoMarker
     {
 	    return getAllMatchesForUserNotification(
 		    [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, Criteria::EQUAL],
-		    $arrLocIds
+		    $arrLocIds,
+		    null,
+		    $this->_userBeingMarked
 	    );
     }
 
@@ -80,6 +93,8 @@ class JobsAutoMarker
         try {
 	        // Get all the postings that are in the table but not marked as ready-to-send
 	        //
+	        $this->_userBeingMarked = User::getCurrentUser();
+
 	        $arrJobs_AutoUpdatable = $this->_getMatches();
 
 	        if (empty($arrJobs_AutoUpdatable)) {
@@ -235,8 +250,8 @@ class JobsAutoMarker
 	    try
 	    {
 		    startLogSection("Automarker: marking jobs as out of area using counties...");
-	        $user = User::getCurrentUser();
-		    $searchLocations = $user->getSearchGeoLocations();
+
+		    $searchLocations = $this->_userBeingMarked->getSearchGeoLocations();
 
 
 	        $arrIncludeCounties = array();
@@ -253,7 +268,7 @@ class JobsAutoMarker
 	        }
 
 	        LogMessage("Finding job postings not in the following counties & states: " . getArrayValuesAsString($arrIncludeCounties) . " ...");
-	        $arrJobsOutOfArea = array_filter($arrJobsList, function($v) use ($arrIncludeCounties) {
+	        $arrJobsOutOfArea = array_filter($arrJobsList, function(UserJobMatch $v) use ($arrIncludeCounties) {
 	            $posting = $v->getJobPostingFromUJM();
 	            $locId = $posting->getGeoLocationId();
 	            if(is_null($locId))
@@ -301,8 +316,7 @@ class JobsAutoMarker
     	try
 	    {
 	    	startLogSection("Automarker: marking jobs as out of area using geospatial data...");
-		    $user = User::getCurrentUser();
-		    $searchLocations = $user->getSearchGeoLocations();
+		    $searchLocations = $this->_userBeingMarked->getSearchGeoLocations();
 
 		    $arrNearbyIds = array();
 
@@ -437,15 +451,14 @@ class JobsAutoMarker
 			$arrJobItems[$job->getUserJobMatchId()] = $job->toFlatArrayForCSV($jobMatchKeys);
 
 		$searchKeywords = array();
-		$user = User::getCurrentUser();
-		$keywords = $user->getSearchKeywords();
+		$keywords = $this->_userBeingMarked->getSearchKeywords();
 		if(empty($keywords))
 			return null;
 
 		$neg_kwds = $this->_loadUserNegativeTitleKeywords();
 
 		$jsonObj = array(
-			"user" => User::getCurrentUser()->toArray(),
+			"user" => $this->_userBeingMarked->toArray(),
 			"job_matches" => $arrJobItems,
 			"search_keywords" => $searchKeywords,
 			"negative_title_keywords" => $neg_kwds
@@ -594,7 +607,9 @@ class JobsAutoMarker
 	 */
 	private function _loadUserNegativeTitleKeywords()
 	{
-		$inputfiles = getConfigurationSetting("user_data_files.negative_title_keywords");
+		assert(!empty($this->_userBeingMarked));
+
+		$inputfiles = $this->_userBeingMarked->getInputFiles("negative_title_keywords");
 
 		if (!is_array($inputfiles)) {
 			// No files were found, so bail
@@ -662,8 +677,7 @@ class JobsAutoMarker
             LogDebug("Using previously loaded " . count($this->companies_regex_to_filter) . " regexed company strings to exclude." );
             return;
         }
-	    $inputfiles = getConfigurationSetting("user_data_files.regex_filter_companies");
-
+	    $inputfiles = $this->_userBeingMarked->getInputFiles("regex_filter_companies");
         if(!isset($inputfiles) ||  !is_array($inputfiles)) { return; }
 
 	    $regexList = array();
