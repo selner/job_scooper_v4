@@ -38,7 +38,6 @@ class NotifierDevAlerts extends JobsMailSender
 	}
 
 	/**
-	 * @return bool
 	 * @throws \Exception
 	 */
 	function processPluginErrors()

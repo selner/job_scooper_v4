@@ -147,9 +147,6 @@ class ConfigBuilder
 	private function _setupRunFromConfig_()
     {
 
-	    $srchmgr = new SearchBuilder();
-
-
 	    //
 	    // Load the global search data that will be used to create
 	    // and configure all searches
@@ -176,10 +173,6 @@ class ConfigBuilder
             LogError("No job site plugins could be loaded for the given search geographic locations.  Aborting.");
             return;
         }
-
-		startLogSection("Initializing user searches for this run");
-	    $srchmgr->initializeSearches();
-	    endLogSection(" User search initialization.");
 
     }
 

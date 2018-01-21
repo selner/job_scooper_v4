@@ -49,13 +49,14 @@ class JobsAutoMarker
 	private $_userBeingMarked = null;
 
 
-
 	/**
 	 * JobsAutoMarker constructor.
 	 *
+	 * @param \JobScooper\DataAccess\User $user
 	 */
-	function __construct()
+	function __construct(User $user)
     {
+    	$this->_userBeingMarked = $user;
         $this->_locmgr = LocationManager::getLocationManager();
     }
 
@@ -93,8 +94,6 @@ class JobsAutoMarker
         try {
 	        // Get all the postings that are in the table but not marked as ready-to-send
 	        //
-	        $this->_userBeingMarked = User::getCurrentUser();
-
 	        $arrJobs_AutoUpdatable = $this->_getMatches();
 
 	        if (empty($arrJobs_AutoUpdatable)) {

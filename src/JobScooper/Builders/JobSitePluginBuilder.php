@@ -29,8 +29,13 @@ use JobScooper\DataAccess\User;
 class JobSitePluginBuilder
 {
 	/**
-	 * @param bool $requireEnabled
 	 *
+	 */
+	static function resetJobSitesForNewUser()
+	{
+		clearCache("included_jobsites");
+	}
+	/**
 	 * @return \JobScooper\DataAccess\JobSiteRecord[]|null
 	 */
 	static function getAllJobSites()
@@ -76,6 +81,8 @@ class JobSitePluginBuilder
 
 
 		    JobSitePluginBuilder::setIncludedJobSites($sites);
+		    $sites = getCacheAsArray("included_jobsites");
+		    return $sites;
 	    }
 
 	    if($fOptimizeBySiteRunOrder === true)
@@ -148,19 +155,11 @@ class JobSitePluginBuilder
 	}
 
 	/**
-	 * @param $countryCodes
+	 * @param string[] $countryCodes
 	 */
-	static function filterJobSitesByCountryCodes()
+	static function filterJobSitesByCountryCodes(&$sites, $countryCodes)
 	{
-		$countryCodes = array();
-		$user = User::getCurrentUser();
-		$searchLoc = $user->getSearchGeoLocations();
-		foreach($searchLoc as $loc)
-		{
-			$countryCodes[] = $loc->getCountryCode();
-		}
-
-		$ccRun = join(", ", array_unique($countryCodes));
+		$ccRun = array_unique($countryCodes);
 		$includedSites = JobSitePluginBuilder::getIncludedJobSites();
 		$sitesOutOfSearchArea = array();
 
@@ -170,8 +169,8 @@ class JobSitePluginBuilder
 				$sitesOutOfSearchArea[$jobsiteKey] = $includedSites[$jobsiteKey];
 			else {
 				$matches = null;
-				$fResult = substr_count_multi($ccRun, $ccSite, $matches);
-				if (empty($matches) || (count($matches) == 1 && empty($matches[0]))) {
+				$ccMatches = array_intersect($ccRun, $ccSite);
+				if (empty($ccMatches)) {
 					$sitesOutOfSearchArea[$jobsiteKey] = $site;
 				}
 			}
@@ -179,8 +178,9 @@ class JobSitePluginBuilder
 
 		if(!empty($sitesOutOfSearchArea)) {
 			JobSitePluginBuilder::setSitesAsExcluded($sitesOutOfSearchArea);
-		 LogMessage("Skipping searches for " . getArrayDebugOutput(array_keys($sitesOutOfSearchArea)) . " because they do not cover country codes = (" . $ccRun . ").");
-			}
+			$sites = JobSitePluginBuilder::getIncludedJobSites();
+			LogMessage("Skipping searches for " . getArrayDebugOutput(array_keys($sitesOutOfSearchArea)) . " because they do not cover country codes = (" . join(", ", $ccRun) . ").");
+		}
 	}
 
 	/**

@@ -2,10 +2,9 @@
 
 namespace JobScooper\DataAccess;
 
+use JobScooper\Builders\SearchBuilder;
 use JobScooper\DataAccess\Base\User as BaseUser;
-use JobScooper\DataAccess\Map\UserTableMap;
 use JobScooper\Manager\LocationManager;
-use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
@@ -22,6 +21,7 @@ use Propel\Runtime\Map\TableMap;
  */
 class User extends BaseUser
 {
+	private $_userSearchSiteRunsByJobSite = array();
 
 	/**
 	 * @return \JobScooper\DataAccess\User
@@ -209,16 +209,17 @@ class User extends BaseUser
 	private function _updateUserSearchPairs()
 	{
 		$userSearchPairs = array();
+		$slug = $this->getUserSlug();
 
 		$searchLocations = $this->getSearchLocations();
 		if (empty($searchLocations)) {
-			LogWarning("No search locations have been set. Unable to setup a user search run.");
+			LogWarning("No search locations have been set for {$slug}. Unable to create any search pairings for user.");
 			return ;
 		}
 
 		$searchKeywords = $this->getSearchKeywords();
 		if (empty($searchKeywords)) {
-			LogWarning("No user search keywords have been configured. Unable to setup a user search run.");
+			LogWarning("No user search keywords have been configuredfor {$slug}. Unable to create any search pairings for user");
 			return ;
 		}
 
@@ -232,7 +233,7 @@ class User extends BaseUser
 		{
 			$location = $locmgr->getAddress($searchLoc);
 			if (!empty($location)) {
-				LogMessage("Adding user searches in " . $location->getDisplayName() . " for user's keywords sets");
+				LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}'s keywords");
 				$locId = $location->getGeoLocationId();
 
 				foreach ($searchKeywords as $kwd) {
@@ -273,9 +274,32 @@ class User extends BaseUser
 			LogMessage("Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.");
 			return ;
 		}
-
-		LogMessage("Generated " . count($userSearchPairs) . " user search pairs.");
+		LogMessage("Updated or created " . count($userSearchPairs) . " user search pairs for {$slug}.");
 
 	}
 
+	/**
+	 * @return array
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	public function createUserSearchSiteRuns()
+	{
+		startLogSection("Initializing search runs for user " . $this->getUserSlug());
+		$srchmgr = new SearchBuilder();
+		$this->_userSearchSiteRunsByJobSite = $srchmgr->createSearchesForUser($this);
+		endLogSection(" User search site runs initialization.");
+
+		return $this->_userSearchSiteRunsByJobSite;
+	}
+
+	/**
+	 * @return array
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	public function getUserSearchSiteRuns()
+	{
+		if(empty($this->_userSearchSiteRunsByJobSite))
+			$this->createUserSearchSiteRuns();
+		return $this->_userSearchSiteRunsByJobSite;
+	}
 }

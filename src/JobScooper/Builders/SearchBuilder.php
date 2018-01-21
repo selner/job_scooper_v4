@@ -18,8 +18,6 @@
 namespace JobScooper\Builders;
 
 use JobScooper\DataAccess\User;
-use JobScooper\DataAccess\UserSearchPairQuery;
-use JobScooper\DataAccess\UserSearchQuery;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\DataAccess\UserSearchSiteRun;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -43,35 +41,45 @@ class SearchBuilder
 	/**
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	public function initializeSearches()
+	public function createSearchesForUser(User $user)
     {
+    	// reset the included site list to be all sites
+	    JobSitePluginBuilder::resetJobSitesForNewUser();
 
-
+	    //
+	    // Filter out sites excluded in the config file
+	    //
 	    JobSitePluginBuilder::setSitesAsExcluded(getConfigurationSetting("config_excluded_sites"));
 
-	    JobSitePluginBuilder::filterJobSitesByCountryCodes();
+	    $sites = JobSitePluginBuilder::getIncludedJobSites();
 
-	    $this->_filterJobSitesThatAreExcluded();
+	    $this->_filterRecentlyRunJobSites($sites, $user);
+
+	    $countryCodes = array();
+	    $searchLoc = $user->getSearchGeoLocations();
+	    foreach($searchLoc as $loc)
+	    {
+		    $countryCodes[] = $loc->getCountryCode();
+	    }
+	    JobSitePluginBuilder::filterJobSitesByCountryCodes($sites, $countryCodes);
 
 	    //
 	    // Create searches needed to run all the keyword sets
 	    //
-	    $this->_generateUserSearchSiteRuns();
+	    $searchesByJobSite = $this->_generateUserSearchSiteRuns($sites, $user);
 
-	    //
-	    // Filter out sites excluded in the user's config file
-	    //
-	    $this->_filterJobSitesThatShouldNotRunYet();
+	    return $searchesByJobSite;
 
-	    $this->_filterUserSearchesThatShouldNotRunYet();
     }
 
 	/**
+	 * @param                             $sites
+	 * @param \JobScooper\DataAccess\User $user
+	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _filterJobSitesThatShouldNotRunYet()
+	private function _filterRecentlyRunJobSites(&$sites, User $user)
 	{
-
 		$sitesToSkip = array();
 
 		$completedSitesAllOnly = UserSearchSiteRunQuery::create()
@@ -90,7 +98,6 @@ class SearchBuilder
 			$sitesToSkip = array_merge($sitesToSkip, $completedSitesAllOnly);
 		}
 
-		$user = User::getCurrentUser();
 		$searchLocations = $user->getSearchGeoLocations();
 
 		foreach ($searchLocations as $location) {
@@ -115,158 +122,63 @@ class SearchBuilder
 		}
 		$sitesToSkip = array_column($sitesToSkip, "LastCompleted", "JobSiteKey");
 
-		// Filter sites that can be skipped by date.
-		//
-		// Remove any that ran before the cache cut off time, not since that time.
-		// We are left with only those we should skip, aka the ones that
-		// ran after our cutoff time
-		//
-		foreach ($sitesToSkip as $key => $result) {
-			if (new \DateTime($result) <= $this->_cacheCutOffTime)
-				unset($sitesToSkip[$key]);
-		}
+		if(!empty($sitesToSkip)) {
+			// Filter sites that can be skipped by date.
+			//
+			// Remove any that ran before the cache cut off time, not since that time.
+			// We are left with only those we should skip, aka the ones that
+			// ran after our cutoff time
+			//
+			foreach ($sitesToSkip as $key => $result) {
+				if (new \DateTime($result) <= $this->_cacheCutOffTime)
+					unset($sitesToSkip[$key]);
+			}
 
-		$searchesByJobsite = getConfigurationSetting("user_search_site_runs");
-		if (empty($searchesByJobsite))
-			return;
-		$keepThese = array_diff_key($searchesByJobsite, $sitesToSkip);
+			JobSitePluginBuilder::setSitesAsExcluded($sitesToSkip);
+			$sites = array_diff_key($sites, $sitesToSkip);
+			JobSitePluginBuilder::setIncludedJobSites($sites);
 
-		$skipTheseSearches = array_intersect_key($searchesByJobsite, $sitesToSkip);
-		foreach($skipTheseSearches as $siteKey => $siteSearches)
-		{
-			if(!empty($siteSearches))
-				foreach($siteSearches as $search)
-				{
-					$search->setRunResultCode("skipped");
-					$search->save();
-				}
-		}
-		unset($GLOBALS[JOBSCOOPER_CONFIGSETTING_ROOT]["user_search_site_runs"]);
-		setConfigurationSetting("user_search_site_runs", $keepThese);
-
-		if(!empty($skipTheseSearches))
-			LogMessage("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
-	}
-
-	/**
-	 *
-	 */
-	private function _filterJobSitesThatAreExcluded()
-	{
-		$allSites = JobSitePluginBuilder::getAllJobSites();
-		$includedSites = JobSitePluginBuilder::getIncludedJobSites();
-
-		$keysExcludedSites = array_diff_key($allSites, $includedSites);
-		$searchesByJobsite = getConfigurationSetting("user_search_site_runs");
-		if (empty($searchesByJobsite))
-			return;
-
-		foreach($searchesByJobsite as $k => $siteSearches)
-		{
-			if(!empty($siteSearches))
-				foreach($siteSearches as $search)
-				{
-					if(in_array($search->getJobSiteKey(), $keysExcludedSites))
-					{
-						$search->setRunResultCode("excluded");
+			$skipTheseSearches = array_intersect_key($sites, $sitesToSkip);
+			foreach ($skipTheseSearches as $siteKey => $siteSearches) {
+				if (!empty($siteSearches))
+					foreach ($siteSearches as $search) {
+						$search->setRunResultCode("skipped");
 						$search->save();
-						unset($searchesByJobsite[$k]);
 					}
-				}
+			}
+
+			if (!empty($skipTheseSearches))
+				LogMessage("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
+
 		}
-		unset($GLOBALS[JOBSCOOPER_CONFIGSETTING_ROOT]["user_search_site_runs"]);
-		setConfigurationSetting("user_search_site_runs", $searchesByJobsite);
 	}
 
-	/**
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	private function _filterUserSearchesThatShouldNotRunYet()
-    {
-
-	    $completedSearchesUserRecent = UserSearchSiteRunQuery::create()
-		    ->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
-		    ->addAsColumn('PartialUSSRKey', 'CONCAT(jobsite_key, user_search_site_run.user_search_pair_id)')
-		    ->select(array('PartialUSSRKey', 'LastCompleted'))
-		    ->filterByRunResultCode("successful")
-		    ->groupBy(array("PartialUSSRKey", 'UserSearchPairId'))
-		    ->useUserSearchPairFromUSSRQuery()
-		    ->filterByUserFromUS(User::getCurrentUser())
-		    ->endUse()
-		    ->orderBy("LastCompleted", Criteria::ASC)
-		    ->find()
-		    ->getData();
-	    $completedSearchesUserRecent = array_column($completedSearchesUserRecent, "LastCompleted", "PartialUSSRKey");
-
-	    $searchesByJobsite = getConfigurationSetting("user_search_site_runs");
-	    if (empty($searchesByJobsite))
-		    return;
-
-
-	    // Filter sites that can be skipped by date and reorder by least-recent-first
-	    //
-	    // Remove any that ran before the cache cut off time, not since that time.
-	    // We are left with only those we should skip, aka the ones that
-	    // ran after our cutoff time
-	    //
-		$searchesToRunBySiteNewOrder = array();
-
-	    foreach($searchesByJobsite as $jobSiteKey => $siteSearches)
-	    {
-	    	foreach($siteSearches as $ussrKey => $searchRun)
-		    {
-		    	$fKeepSearch = true;
-		    	$partialUSSRKey = $jobSiteKey . $searchRun->getUserSearchPairId();
-		    	if(array_key_exists($partialUSSRKey, $completedSearchesUserRecent) && !empty($completedSearchesUserRecent[$partialUSSRKey]))
-			    {
-				    if (new \DateTime($completedSearchesUserRecent[$partialUSSRKey]) >= $this->_cacheCutOffTime)
-				    {
-					    $fKeepSearch = false;
-					    LogMessage("Skipping search {$ussrKey} because it has run since " .  $this->_cacheCutOffTime->format("Y-m-d H:i"));
-				    }
-			    }
-
-			    if($fKeepSearch == true) {
-				    if (!is_array($searchesToRunBySiteNewOrder[$jobSiteKey]))
-					    $searchesToRunBySiteNewOrder[$jobSiteKey] = array();
-				    $searchesToRunBySiteNewOrder[$jobSiteKey][$ussrKey] = $searchRun;
-			    }
-			    else
-			    {
-				    $searchRun->setRunResultCode("skipped");
-				    $searchRun->save();
-			    }
-		    }
-	    }
-
-	    unset($GLOBALS[JOBSCOOPER_CONFIGSETTING_ROOT]["user_search_site_runs"]);
-	    setConfigurationSetting("user_search_site_runs", $searchesToRunBySiteNewOrder);
-    }
-
 
 	/**
+	 * @param                             $sites
+	 * @param \JobScooper\DataAccess\User $user
+	 *
+	 * @return array
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _generateUserSearchSiteRuns()
+	private function _generateUserSearchSiteRuns($sites, User $user)
     {
         //
         // let's start with the searches specified with the details in the the config.ini
         //
-	    $user = User::getCurrentUser();
         $userSearchPairs = $user->getUserSearchPairs();
-        $includedSites = JobSitePluginBuilder::getIncludedJobSites($fOptimizeBySiteRunOrder=true);
-	    if (empty($userSearchPairs) || empty($includedSites))
-		    return;
+	    if (empty($userSearchPairs) || empty($sites))
+		    return array();
 
 	    $nKeywords = count($user->getSearchKeywords());
 	    $nLocations = countAssociativeArrayValues($user->getSearchGeoLocations());
-	    $nTotalSearches = $nKeywords * $nLocations * count($includedSites);
+	    $nTotalSearches = $nKeywords * $nLocations * count($sites);
 
-        LogMessage(" Creating up to {$nTotalSearches} search runs for {$nKeywords} search keywords X {$nLocations} search locations X " . count($includedSites) . " jobsites.");
+        LogMessage(" Creating up to {$nTotalSearches} search runs for {$nKeywords} search keywords X {$nLocations} search locations X " . count($sites) . " jobsites.");
 
         $searchRuns = array();
 
-        foreach($includedSites as $jobsiteKey => $site)
+        foreach($sites as $jobsiteKey => $site)
         {
         	$searchRuns[$jobsiteKey] = array();
 
@@ -284,7 +196,7 @@ class SearchBuilder
             }
         }
 
-	    setConfigurationSetting("user_search_site_runs", $searchRuns);
+        return $searchRuns;
     }
 
 

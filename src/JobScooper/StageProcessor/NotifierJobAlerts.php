@@ -91,11 +91,12 @@ class NotifierJobAlerts extends JobsMailSender
 	}
 
 	/**
+	 * @param User $user
 	 * @return bool
 	 * @throws \Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	function processRunResultsNotifications()
+	function processRunResultsNotifications(User $user)
 	{
 		startLogSection("Processing user notification alerts");
 
@@ -110,7 +111,9 @@ class NotifierJobAlerts extends JobsMailSender
 		$matches = array();
 		$matches["all"] = getAllMatchesForUserNotification(
 			[UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
-			null
+			null,
+			null,
+			$user
 		);
 
 		if(empty($matches["all"]))
@@ -129,16 +132,17 @@ class NotifierJobAlerts extends JobsMailSender
 		else
 			$subject = countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]) . " New Job Postings: " . getRunDateRange();
 
-		return $this->_sendResultsNotification($matches, $subject);
+		return $this->_sendResultsNotification($matches, $subject, $user);
 	}
 
 
 	/**
+	 * @param User $user
 	 * @return bool
 	 * @throws \Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	function processWeekRecapNotifications()
+	function processWeekRecapNotifications(User $user)
 	{
 		startLogSection("Processing week recap notification...");
 
@@ -156,7 +160,8 @@ class NotifierJobAlerts extends JobsMailSender
 		$matches["all"] = getAllMatchesForUserNotification(
 			array([UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT], Criteria::IN),
 			null,
-			7
+			7,
+			$user
 		);
 
 		if(empty($matches["all"]))
@@ -171,15 +176,16 @@ class NotifierJobAlerts extends JobsMailSender
 		$matches["isUserJobMatchAndNotExcluded"] = array_filter($matches["all"], "isUserJobMatchAndNotExcluded");
 
 		$subject = "Weekly Roundup for " . getRunDateRange(7);
-		return $this->_sendResultsNotification($matches, $subject);
+		return $this->_sendResultsNotification($matches, $subject, $user);
 	}
 
 	/**
+	 * @param User $sendToUser
 	 * @return bool
 	 * @throws \Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	private function _sendResultsNotification($matches, $resultsTitle)
+	private function _sendResultsNotification($matches, $resultsTitle, User $sendToUser)
 	{
 		//
 		// Output the final files we'll send to the user
@@ -211,7 +217,7 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		startLogSection("Generating HTML & text email content for user ");
 
-		$messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches);
+		$messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, $sendToUser);
 
 		endLogSection("Email content ready to send.");
 
@@ -221,7 +227,7 @@ class NotifierJobAlerts extends JobsMailSender
 		startLogSection("Sending email to user...");
 
 		try {
-			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results");
+			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results", $sendToUser);
 			if ($ret !== false || $ret !== null) {
 				if (!isDebug()) {
 					if (!empty($matches['all'])) {
@@ -291,11 +297,12 @@ class NotifierJobAlerts extends JobsMailSender
 	/**
 	 * @param $subject
 	 * @param $matches
+	 * @param User $user
 	 *
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function _generateHTMLEmailContent($subject, &$matches)
+	private function _generateHTMLEmailContent($subject, &$matches, $user)
 	{
 		$renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_results_responsive.tmpl")));
 
@@ -319,11 +326,9 @@ class NotifierJobAlerts extends JobsMailSender
 			"JobMatches" => $matches["isUserJobMatchAndNotExcluded"]
 		);
 
-		$user = User::getCurrentUser();
 		$kwds = $user->getSearchKeywords();
 		$data['Search']['Keywords'] = join(", ", $kwds);
 
-		$user = User::getCurrentUser();
 		$locations = $user->getSearchGeoLocations();
 
 		$searchLocNames = array();
