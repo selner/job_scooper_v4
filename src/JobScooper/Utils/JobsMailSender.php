@@ -115,14 +115,23 @@ class JobsMailSender extends PHPMailer
 	        }
 	        else {
 		        foreach ($alerts_users as $kind => $user) {
-			        $email = (!empty($user['Email'])) ? $user['Email'] : $user['EmailAddress'];
-			        $name = (!empty($user['Name'])) ? $user['Name'] : $user['EmailAddress'];
+		        	$email = null;
+		        	$name = null;
 
-			        if(array_key_exists("User", $user) && !empty($user['User']))
-			        {
-			        	$email = $user['User']->getEmailAddress();
-			        	if(empty($name)) $user['User']->getName();
-			        }
+			        if(array_key_exists("email", $user) && !empty($user['email']))
+				        $email = $user['email'];
+			        elseif(array_key_exists("Email", $user) && !empty($user['Email']))
+				        $email = $user['email'];
+			        elseif(array_key_exists("User", $user) && !empty($user['User']))
+				        $email = $user['User']->getEmailAddress();
+
+			        if(array_key_exists("name", $user) && !empty($user['name']))
+				        $name = $user['name'];
+			        elseif(array_key_exists("Name", $user) && !empty($user['Name']))
+				        $name = $user['Name'];
+			        elseif(array_key_exists("User", $user) && !empty($user['User']))
+				        $name = $user['User']->getName();
+
 			        switch ($kind) {
 
 				        case "from":
