@@ -144,7 +144,7 @@ class NotifierJobAlerts extends JobsMailSender
 	 */
 	function processWeekRecapNotifications(User $user)
 	{
-		startLogSection("Processing week recap notification...");
+		startLogSection("Processing week recap notification for " . $user->getUserSlug() . "...");
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -224,7 +224,7 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		// Send the email notification out for the completed job
 		//
-		startLogSection("Sending email to user...");
+		startLogSection("Sending email to user " . $sendToUser->getEmailAddress() ."...");
 
 		try {
 			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results", $sendToUser);
@@ -273,7 +273,7 @@ class NotifierJobAlerts extends JobsMailSender
 	{
 
 		$spreadsheet = IOFactory::load(__ROOT__ . '/src/assets/templates/results.xlsx');
-
+		
 		$sheetFilters = array(
 			[NotifierJobAlerts::SHEET_MATCHES, "isUserJobMatchAndNotExcluded", NotifierJobAlerts::KEYS_MATCHES],
 			[NotifierJobAlerts::SHEET_ALL_JOBS, "all", NotifierJobAlerts::KEYS_EXCLUDED]
@@ -370,9 +370,11 @@ class NotifierJobAlerts extends JobsMailSender
 
 		$dataSheet = $spreadsheet->getActiveSheet();
 
+		$nHeaderDataRow = 2;
 		$nFirstDataRow = 3;
+		$startHeaderCell = "A" . strval($nHeaderDataRow);
 		$startCell = "A" . strval($nFirstDataRow);
-		$lastCol = chr(ord("A") + (count($keys)));
+		$lastCol = chr(ord("A") + (count($keys)- 1));
 		$lastCellFirstRow = $lastCol . strval($nFirstDataRow);
 		$lastCellLastRow = $lastCol . strval($nFirstDataRow + countAssociativeArrayValues($arrResults));
 
@@ -382,8 +384,8 @@ class NotifierJobAlerts extends JobsMailSender
 		$dataSheet->fromArray(
 			$arrResults,    // The data to set
 			null,  // Array values with this value will not be set
-			$startCell      // Top left coordinate of the worksheet range where
-							//    we want to set these values (default is A1)
+			$startCell,      // Top left coordinate of the worksheet range where
+			true//    we want to set these values (default is A1)
 		);
 
 		//
@@ -418,6 +420,7 @@ class NotifierJobAlerts extends JobsMailSender
 			}
 		}
 
+		$dataSheet->setAutoFilter("{$startHeaderCell}:{$lastCellLastRow}");
 
 	}
 }
