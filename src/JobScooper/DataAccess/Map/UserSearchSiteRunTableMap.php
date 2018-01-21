@@ -267,7 +267,7 @@ class UserSearchSiteRunTableMap extends TableMap
     public function getBehaviors()
     {
         return array(
-            'sluggable' => array('slug_column' => 'user_search_site_run_key', 'slug_pattern' => '{UserSearchId}_{JobSiteKey}_{AppRunId}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
+            'sluggable' => array('slug_column' => 'user_search_site_run_key', 'slug_pattern' => '{UserSearchPairId}_{JobSiteKey}_{AppRunId}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
         );
     } // getBehaviors()
 
