@@ -181,13 +181,16 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	}
 
 	/**
-	 * @param UserSearchSiteRun[] $arrSearches
+	 * @param UserSearchSiteRun[]         $arrSearches
+	 *
+	 * @param \JobScooper\DataAccess\User $user
 	 *
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	public function addSearches($arrSearches)
+	public function addSearches($arrSearches, User $user)
 	{
+		$this->_currentUserForSearches = $user;
 		$this->setResultsFilterType();
 
 		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
@@ -250,7 +253,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 					handleException($ex, null, true, $extraData = $search->toArray());
 				} finally {
 					$search->save();
-					setConfigurationSetting('current_user_search_details', null);
 				}
 			}
 
@@ -259,15 +261,14 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			 *  to all users.  If that is the case, update user matches to assets any jobs that were loaded previously
 			 *  but the user is currently missing from their potential job matches.
 			 */
-			$user = User::getCurrentUser();
             if ((strcasecmp($this->resultsFilterType, "all-only") == 0) || (strcasecmp($this->resultsFilterType, "all-by-location") == 0))
             {
                 try
                 {
-					LogMessage("Checking for missing " . $this->JobSiteKey . " jobs for user " . $user->getUserId() . ".");
+					LogMessage("Checking for missing " . $this->JobSiteKey . " jobs for user " . $this->_currentUserForSearches->getUserId() . ".");
 					$dataExistingUserJobMatchIds = UserJobMatchQuery::create()
 						->select("JobPostingId")
-						->filterByUserId($user->getUserId())
+						->filterByUserId($this->_currentUserForSearches->getUserId())
 						->useJobPostingFromUJMQuery()
 						->filterByJobSiteKey($this->JobSiteKey)
 						->endUse()
@@ -283,13 +284,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 					$jobIdsToAddToUser = array_diff($queryAllJobsFromJobSite, $dataExistingUserJobMatchIds);
 
 					if (!is_null($jobIdsToAddToUser) && count($jobIdsToAddToUser) > 0) {
-						LogMessage("Found " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs not yet assigned to user " . $user->getUserSlug() . ".");
+						LogMessage("Found " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs not yet assigned to user " . $this->_currentUserForSearches->getUserSlug() . ".");
 						$this->_addJobMatchIdsToUser($jobIdsToAddToUser, $search);
-						LogMessage("Successfully added " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs to user " . $user->getUserSlug() . ".");
+						LogMessage("Successfully added " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs to user " . $this->_currentUserForSearches->getUserSlug() . ".");
                     }
                     else
                     {
-						LogMessage("User " . $user->getUserSlug() . " had no missing previously loaded listings from " . $this->JobSiteKey . ".");
+						LogMessage("User " . $this->_currentUserForSearches->getUserSlug() . " had no missing previously loaded listings from " . $this->JobSiteKey . ".");
 					}
 				} catch (Exception $ex) {
 					handleException($ex);
@@ -311,8 +312,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
             {
 				$this->selenium = null;
 			}
-
-			setConfigurationSetting('current_user_search_details', null);
 		}
 
 	}
@@ -1083,11 +1082,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @param SimpleHTMLHelper                         $objPageHtml
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Exception
 	 */
 	private function _setSearchResult_(UserSearchSiteRun $searchDetails, $success = null, $except = null, $runWasSkipped = false, $objPageHtml = null)
 	{
-		if (!($searchDetails instanceof UserSearchSiteRun))
-			$searchDetails = getConfigurationSetting('current_user_search_details');
+		if (empty($searchDetails) || !($searchDetails instanceof UserSearchSiteRun))
+			throw new \Exception("Invalid user search site run object passed to method.");
 
 		if (!is_null($runWasSkipped) && is_bool($runWasSkipped) && $runWasSkipped === true) {
 			$searchDetails->setRunResultCode("skipped");
@@ -1357,14 +1357,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	private function _addJobMatchIdsToUser($arrJobIds, UserSearchSiteRun $searchDetails)
 	{
-		$user = User::getCurrentUser();
 		foreach ($arrJobIds as $jobId) {
 			$newMatch = UserJobMatchQuery::create()
-				->filterByUserId($user->getUserId())
+				->filterByUserId($this->_currentUserForSearches->getUserId())
 				->filterByJobPostingId($jobId)
 				->findOneOrCreate();
 
-			$newMatch->setUserId($user->getUserId());
+			$newMatch->setUserId($this->_currentUserForSearches->getUserId());
 			if (!empty($searchDetails))
 				$newMatch->setSetByUserSearchSiteRunKey($searchDetails->getUserSearchSiteRunKey());
 			$newMatch->save();

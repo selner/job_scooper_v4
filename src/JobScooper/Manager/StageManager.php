@@ -127,7 +127,7 @@ class StageManager
 	                    try
 	                    {
 	                        $site = $jobsites[$jobsiteKey];
-	                        $site->addSearches($searches);
+	                        $site->addSearches($searches, $user);
 	                    }
 	                    catch (\Exception $classError)
 	                    {
