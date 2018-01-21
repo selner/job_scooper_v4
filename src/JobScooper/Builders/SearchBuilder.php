@@ -67,7 +67,7 @@ class SearchBuilder
 	    // Create searches needed to run all the keyword sets
 	    //
 	    $searchesByJobSite = $this->_generateUserSearchSiteRuns($sites, $user);
-
+		$this->_filterRecentlyRunUserSearchRuns($searchesByJobSite, $user);
 	    return $searchesByJobSite;
 
     }
@@ -148,7 +148,59 @@ class SearchBuilder
 			}
 
 			if (!empty($skipTheseSearches))
-				LogMessage("Skipping the following sites & searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
+				LogMessage("Skipping the following sites because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
+
+		}
+	}
+
+	/**
+	 * @param                             $sites
+	 * @param \JobScooper\DataAccess\User $user
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function _filterRecentlyRunUserSearchRuns(&$searches, User $user)
+	{
+		$searchesToSkip = array();
+
+		$recordsToSkip = UserSearchSiteRunQuery::create()
+			->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
+			->select(array('JobSiteKey', 'UserSearchPairId', 'LastCompleted'))
+			->filterByRunResultCode("successful")
+			->groupBy(array("JobSiteKey", 'UserSearchPairId'))
+			->find()
+			->getData();
+
+		if(!empty($recordsToSkip)) {
+			// Filter sites that can be skipped by date.
+			//
+			// Remove any that ran before the cache cut off time, not since that time.
+			// We are left with only those we should skip, aka the ones that
+			// ran after our cutoff time
+			//
+			$searchPairsToSkip= array();
+			foreach ($recordsToSkip as $search) {
+				if (new \DateTime($search['LastCompleted']) >= $this->_cacheCutOffTime)
+				{
+					if(!array_key_exists($search['JobSiteKey'], $searchPairsToSkip))
+						$searchPairsToSkip[$search['JobSiteKey']] = array();
+					$searchPairsToSkip[$search['JobSiteKey']][$search['UserSearchPairId']] = $search['UserSearchPairId'];
+				}
+			}
+
+			foreach(array_keys($searches) as $siteKey) {
+				foreach ($searches[$siteKey] as $searchKey => $search) {
+					if (array_key_exists($search->getUserSearchPairId(), $searchPairsToSkip[$siteKey])) {
+						$search->setRunResultCode("skipped");
+						$search->save();
+						unset($searches[$siteKey][$searchKey]);
+						$skipTheseSearches[] = $searchKey;
+					}
+				}
+			}
+
+			if (!empty($skipTheseSearches))
+				LogMessage("Skipping the following searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
 
 		}
 	}
