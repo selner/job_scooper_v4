@@ -91,12 +91,14 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 * @param mixed  $params
 	 *
 	 * @return array|string
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	public function __call($method, $params)
 	{
-		$user_kwd_set = null;
 		$user = null;
 		$user_search = $this->getUserSearchPairFromUSSR();
+		if(!empty($user_search))
+			$user = $user_search->getUserFromUS();
 
 		if(method_exists($this, $method)) {
 			return call_user_func(
@@ -105,7 +107,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 			);
 		}
 		else {
-			foreach(array($user_search, $user_kwd_set, $user) as $relObject)
+			foreach(array($user_search, $user) as $relObject)
 			{
 				if(method_exists($relObject, $method)) {
 					return call_user_func(
