@@ -245,7 +245,7 @@ class SeleniumManager extends PropertyObject
         }
         else
         {
-            LogMessage("Did not attempt Selenium server shutdown since we didn't and can't autostart it.");
+            LogDebug("Did not attempt Selenium server shutdown since we didn't and can't autostart it.");
         }
 
     }
