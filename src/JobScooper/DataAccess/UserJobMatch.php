@@ -94,6 +94,11 @@ class UserJobMatch extends BaseUserJobMatch
         $arrJobPost = $jobPost->toFlatArrayForCSV();
 
         $arrUserJobMatch = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
+        foreach($arrUserJobMatch as $k => $v)
+        {
+	        if(is_array($v))
+        		$arrUserJobMatch[$k] = join("|", $v);
+        }
         updateColumnsForCSVFlatArray($arrUserJobMatch, new UserJobMatchTableMap());
 
         $arrItem = array_merge_recursive_distinct($arrJobPost, $arrUserJobMatch);
