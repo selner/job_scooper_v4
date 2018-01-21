@@ -259,7 +259,7 @@
     <table name="user_search_site_run" phpName="UserSearchSiteRun" isCrossRef="true" reloadOnUpdate="true" heavyIndexing="true">
 
         <!-- Primary Key -->
-        <column name="user_site_search_run_id" phpName="UserSiteSearchRunId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="user_search_site_run_id" phpName="UserSearchSiteRunId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
 
         <!-- Alternate Key -->
         <column name="user_search_pair_id" phpName="UserSearchPairId" type="integer" required="true"/>

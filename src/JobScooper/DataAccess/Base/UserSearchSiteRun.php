@@ -66,11 +66,11 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
-     * The value for the user_site_search_run_id field.
+     * The value for the user_search_site_run_id field.
      *
      * @var        int
      */
-    protected $user_site_search_run_id;
+    protected $user_search_site_run_id;
 
     /**
      * The value for the user_search_pair_id field.
@@ -407,13 +407,13 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     }
 
     /**
-     * Get the [user_site_search_run_id] column value.
+     * Get the [user_search_site_run_id] column value.
      *
      * @return int
      */
-    public function getUserSiteSearchRunId()
+    public function getUserSearchSiteRunId()
     {
-        return $this->user_site_search_run_id;
+        return $this->user_search_site_run_id;
     }
 
     /**
@@ -565,24 +565,24 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     }
 
     /**
-     * Set the value of [user_site_search_run_id] column.
+     * Set the value of [user_search_site_run_id] column.
      *
      * @param int $v new value
      * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
      */
-    public function setUserSiteSearchRunId($v)
+    public function setUserSearchSiteRunId($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->user_site_search_run_id !== $v) {
-            $this->user_site_search_run_id = $v;
-            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID] = true;
+        if ($this->user_search_site_run_id !== $v) {
+            $this->user_search_site_run_id = $v;
+            $this->modifiedColumns[UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID] = true;
         }
 
         return $this;
-    } // setUserSiteSearchRunId()
+    } // setUserSearchSiteRunId()
 
     /**
      * Set the value of [user_search_pair_id] column.
@@ -868,8 +868,8 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     {
         try {
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserSearchSiteRunTableMap::translateFieldName('UserSiteSearchRunId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->user_site_search_run_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : UserSearchSiteRunTableMap::translateFieldName('UserSearchSiteRunId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->user_search_site_run_id = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : UserSearchSiteRunTableMap::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_search_pair_id = (null !== $col) ? (int) $col : null;
@@ -1159,14 +1159,14 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID] = true;
-        if (null !== $this->user_site_search_run_id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID . ')');
+        $this->modifiedColumns[UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID] = true;
+        if (null !== $this->user_search_site_run_id) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID . ')');
         }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'user_site_search_run_id';
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'user_search_site_run_id';
         }
         if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_PAIR_ID)) {
             $modifiedColumns[':p' . $index++]  = 'user_search_pair_id';
@@ -1209,8 +1209,8 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'user_site_search_run_id':
-                        $stmt->bindValue($identifier, $this->user_site_search_run_id, PDO::PARAM_INT);
+                    case 'user_search_site_run_id':
+                        $stmt->bindValue($identifier, $this->user_search_site_run_id, PDO::PARAM_INT);
                         break;
                     case 'user_search_pair_id':
                         $stmt->bindValue($identifier, $this->user_search_pair_id, PDO::PARAM_INT);
@@ -1255,7 +1255,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         } catch (Exception $e) {
             throw new PropelException('Unable to get autoincrement id.', 0, $e);
         }
-        $this->setUserSiteSearchRunId($pk);
+        $this->setUserSearchSiteRunId($pk);
 
         $this->setNew(false);
     }
@@ -1305,7 +1305,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getUserSiteSearchRunId();
+                return $this->getUserSearchSiteRunId();
                 break;
             case 1:
                 return $this->getUserSearchPairId();
@@ -1367,7 +1367,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         $alreadyDumpedObjects['UserSearchSiteRun'][$this->hashCode()] = true;
         $keys = UserSearchSiteRunTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getUserSiteSearchRunId(),
+            $keys[0] => $this->getUserSearchSiteRunId(),
             $keys[1] => $this->getUserSearchPairId(),
             $keys[2] => $this->getJobSiteKey(),
             $keys[3] => $this->getAppRunId(),
@@ -1458,7 +1458,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                $this->setUserSiteSearchRunId($value);
+                $this->setUserSearchSiteRunId($value);
                 break;
             case 1:
                 $this->setUserSearchPairId($value);
@@ -1525,7 +1525,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         $keys = UserSearchSiteRunTableMap::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) {
-            $this->setUserSiteSearchRunId($arr[$keys[0]]);
+            $this->setUserSearchSiteRunId($arr[$keys[0]]);
         }
         if (array_key_exists($keys[1], $arr)) {
             $this->setUserSearchPairId($arr[$keys[1]]);
@@ -1598,8 +1598,8 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     {
         $criteria = new Criteria(UserSearchSiteRunTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID)) {
-            $criteria->add(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID, $this->user_site_search_run_id);
+        if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID)) {
+            $criteria->add(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID, $this->user_search_site_run_id);
         }
         if ($this->isColumnModified(UserSearchSiteRunTableMap::COL_USER_SEARCH_PAIR_ID)) {
             $criteria->add(UserSearchSiteRunTableMap::COL_USER_SEARCH_PAIR_ID, $this->user_search_pair_id);
@@ -1648,7 +1648,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     public function buildPkeyCriteria()
     {
         $criteria = ChildUserSearchSiteRunQuery::create();
-        $criteria->add(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID, $this->user_site_search_run_id);
+        $criteria->add(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID, $this->user_search_site_run_id);
 
         return $criteria;
     }
@@ -1661,7 +1661,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getUserSiteSearchRunId();
+        $validPk = null !== $this->getUserSearchSiteRunId();
 
         $validPrimaryKeyFKs = 0;
         $primaryKeyFKs = [];
@@ -1681,18 +1681,18 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
      */
     public function getPrimaryKey()
     {
-        return $this->getUserSiteSearchRunId();
+        return $this->getUserSearchSiteRunId();
     }
 
     /**
-     * Generic method to set the primary key (user_site_search_run_id column).
+     * Generic method to set the primary key (user_search_site_run_id column).
      *
      * @param       int $key Primary key.
      * @return void
      */
     public function setPrimaryKey($key)
     {
-        $this->setUserSiteSearchRunId($key);
+        $this->setUserSearchSiteRunId($key);
     }
 
     /**
@@ -1701,7 +1701,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return null === $this->getUserSiteSearchRunId();
+        return null === $this->getUserSearchSiteRunId();
     }
 
     /**
@@ -1729,7 +1729,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         $copyObj->setRunErrorPageHtml($this->getRunErrorPageHtml());
         if ($makeNew) {
             $copyObj->setNew(true);
-            $copyObj->setUserSiteSearchRunId(NULL); // this is a auto-increment column, so set to default value
+            $copyObj->setUserSearchSiteRunId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -1870,7 +1870,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         if (null !== $this->aUserSearchPairFromUSSR) {
             $this->aUserSearchPairFromUSSR->removeUserSearchSiteRun($this);
         }
-        $this->user_site_search_run_id = null;
+        $this->user_search_site_run_id = null;
         $this->user_search_pair_id = null;
         $this->jobsite_key = null;
         $this->app_run_id = null;

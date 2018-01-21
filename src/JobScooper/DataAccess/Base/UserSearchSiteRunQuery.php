@@ -20,7 +20,7 @@ use Propel\Runtime\Exception\PropelException;
  *
  *
  *
- * @method     ChildUserSearchSiteRunQuery orderByUserSiteSearchRunId($order = Criteria::ASC) Order by the user_site_search_run_id column
+ * @method     ChildUserSearchSiteRunQuery orderByUserSearchSiteRunId($order = Criteria::ASC) Order by the user_search_site_run_id column
  * @method     ChildUserSearchSiteRunQuery orderByUserSearchPairId($order = Criteria::ASC) Order by the user_search_pair_id column
  * @method     ChildUserSearchSiteRunQuery orderByJobSiteKey($order = Criteria::ASC) Order by the jobsite_key column
  * @method     ChildUserSearchSiteRunQuery orderByAppRunId($order = Criteria::ASC) Order by the app_run_id column
@@ -32,7 +32,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRunQuery orderByRunErrorDetails($order = Criteria::ASC) Order by the run_error_details column
  * @method     ChildUserSearchSiteRunQuery orderByRunErrorPageHtml($order = Criteria::ASC) Order by the run_error_page_html column
  *
- * @method     ChildUserSearchSiteRunQuery groupByUserSiteSearchRunId() Group by the user_site_search_run_id column
+ * @method     ChildUserSearchSiteRunQuery groupByUserSearchSiteRunId() Group by the user_search_site_run_id column
  * @method     ChildUserSearchSiteRunQuery groupByUserSearchPairId() Group by the user_search_pair_id column
  * @method     ChildUserSearchSiteRunQuery groupByJobSiteKey() Group by the jobsite_key column
  * @method     ChildUserSearchSiteRunQuery groupByAppRunId() Group by the app_run_id column
@@ -77,7 +77,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRun findOne(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query
  * @method     ChildUserSearchSiteRun findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query, or a new ChildUserSearchSiteRun object populated from the query conditions when no match is found
  *
- * @method     ChildUserSearchSiteRun findOneByUserSiteSearchRunId(int $user_site_search_run_id) Return the first ChildUserSearchSiteRun filtered by the user_site_search_run_id column
+ * @method     ChildUserSearchSiteRun findOneByUserSearchSiteRunId(int $user_search_site_run_id) Return the first ChildUserSearchSiteRun filtered by the user_search_site_run_id column
  * @method     ChildUserSearchSiteRun findOneByUserSearchPairId(int $user_search_pair_id) Return the first ChildUserSearchSiteRun filtered by the user_search_pair_id column
  * @method     ChildUserSearchSiteRun findOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchSiteRun filtered by the jobsite_key column
  * @method     ChildUserSearchSiteRun findOneByAppRunId(string $app_run_id) Return the first ChildUserSearchSiteRun filtered by the app_run_id column
@@ -92,7 +92,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRun requirePk($key, ConnectionInterface $con = null) Return the ChildUserSearchSiteRun by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOne(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
- * @method     ChildUserSearchSiteRun requireOneByUserSiteSearchRunId(int $user_site_search_run_id) Return the first ChildUserSearchSiteRun filtered by the user_site_search_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserSearchSiteRun requireOneByUserSearchSiteRunId(int $user_search_site_run_id) Return the first ChildUserSearchSiteRun filtered by the user_search_site_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOneByUserSearchPairId(int $user_search_pair_id) Return the first ChildUserSearchSiteRun filtered by the user_search_pair_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchSiteRun filtered by the jobsite_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOneByAppRunId(string $app_run_id) Return the first ChildUserSearchSiteRun filtered by the app_run_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -105,7 +105,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRun requireOneByRunErrorPageHtml(string $run_error_page_html) Return the first ChildUserSearchSiteRun filtered by the run_error_page_html column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserSearchSiteRun[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserSearchSiteRun objects based on current ModelCriteria
- * @method     ChildUserSearchSiteRun[]|ObjectCollection findByUserSiteSearchRunId(int $user_site_search_run_id) Return ChildUserSearchSiteRun objects filtered by the user_site_search_run_id column
+ * @method     ChildUserSearchSiteRun[]|ObjectCollection findByUserSearchSiteRunId(int $user_search_site_run_id) Return ChildUserSearchSiteRun objects filtered by the user_search_site_run_id column
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findByUserSearchPairId(int $user_search_pair_id) Return ChildUserSearchSiteRun objects filtered by the user_search_pair_id column
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findByJobSiteKey(string $jobsite_key) Return ChildUserSearchSiteRun objects filtered by the jobsite_key column
  * @method     ChildUserSearchSiteRun[]|ObjectCollection findByAppRunId(string $app_run_id) Return ChildUserSearchSiteRun objects filtered by the app_run_id column
@@ -214,7 +214,7 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_site_search_run_id, user_search_pair_id, jobsite_key, app_run_id, user_search_site_run_key, date_started, date_ended, search_start_url, run_result_code, run_error_details, run_error_page_html FROM user_search_site_run WHERE user_site_search_run_id = :p0';
+        $sql = 'SELECT user_search_site_run_id, user_search_pair_id, jobsite_key, app_run_id, user_search_site_run_key, date_started, date_ended, search_start_url, run_result_code, run_error_details, run_error_page_html FROM user_search_site_run WHERE user_search_site_run_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -288,7 +288,7 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
     public function filterByPrimaryKey($key)
     {
 
-        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID, $key, Criteria::EQUAL);
+        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID, $key, Criteria::EQUAL);
     }
 
     /**
@@ -301,20 +301,20 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
     public function filterByPrimaryKeys($keys)
     {
 
-        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID, $keys, Criteria::IN);
+        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID, $keys, Criteria::IN);
     }
 
     /**
-     * Filter the query on the user_site_search_run_id column
+     * Filter the query on the user_search_site_run_id column
      *
      * Example usage:
      * <code>
-     * $query->filterByUserSiteSearchRunId(1234); // WHERE user_site_search_run_id = 1234
-     * $query->filterByUserSiteSearchRunId(array(12, 34)); // WHERE user_site_search_run_id IN (12, 34)
-     * $query->filterByUserSiteSearchRunId(array('min' => 12)); // WHERE user_site_search_run_id > 12
+     * $query->filterByUserSearchSiteRunId(1234); // WHERE user_search_site_run_id = 1234
+     * $query->filterByUserSearchSiteRunId(array(12, 34)); // WHERE user_search_site_run_id IN (12, 34)
+     * $query->filterByUserSearchSiteRunId(array('min' => 12)); // WHERE user_search_site_run_id > 12
      * </code>
      *
-     * @param     mixed $userSiteSearchRunId The value to use as filter.
+     * @param     mixed $userSearchSiteRunId The value to use as filter.
      *              Use scalar values for equality.
      *              Use array values for in_array() equivalent.
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
@@ -322,16 +322,16 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
      *
      * @return $this|ChildUserSearchSiteRunQuery The current query, for fluid interface
      */
-    public function filterByUserSiteSearchRunId($userSiteSearchRunId = null, $comparison = null)
+    public function filterByUserSearchSiteRunId($userSearchSiteRunId = null, $comparison = null)
     {
-        if (is_array($userSiteSearchRunId)) {
+        if (is_array($userSearchSiteRunId)) {
             $useMinMax = false;
-            if (isset($userSiteSearchRunId['min'])) {
-                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID, $userSiteSearchRunId['min'], Criteria::GREATER_EQUAL);
+            if (isset($userSearchSiteRunId['min'])) {
+                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID, $userSearchSiteRunId['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
-            if (isset($userSiteSearchRunId['max'])) {
-                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID, $userSiteSearchRunId['max'], Criteria::LESS_EQUAL);
+            if (isset($userSearchSiteRunId['max'])) {
+                $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID, $userSearchSiteRunId['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -342,7 +342,7 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID, $userSiteSearchRunId, $comparison);
+        return $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID, $userSearchSiteRunId, $comparison);
     }
 
     /**
@@ -877,7 +877,7 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
     public function prune($userSearchSiteRun = null)
     {
         if ($userSearchSiteRun) {
-            $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SITE_SEARCH_RUN_ID, $userSearchSiteRun->getUserSiteSearchRunId(), Criteria::NOT_EQUAL);
+            $this->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID, $userSearchSiteRun->getUserSearchSiteRunId(), Criteria::NOT_EQUAL);
         }
 
         return $this;
