@@ -1961,7 +1961,7 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
      */
     protected function createRawSlug()
     {
-        return '' . $this->cleanupSlugPart($this->getUserSearchPairId()) . '_' . $this->cleanupSlugPart($this->getJobSiteKey()) . '_' . $this->cleanupSlugPart($this->getAppRunId()) . '';
+        return '' . $this->cleanupSlugPart($this->getUserSearchId()) . '_' . $this->cleanupSlugPart($this->getJobSiteKey()) . '_' . $this->cleanupSlugPart($this->getAppRunId()) . '';
     }
 
     /**

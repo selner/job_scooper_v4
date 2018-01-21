@@ -217,7 +217,7 @@ class UserSearchSiteRunTableMap extends TableMap
         $this->setIsCrossRef(true);
         // columns
         $this->addPrimaryKey('user_site_search_run_id', 'UserSiteSearchRunId', 'INTEGER', true, null, null);
-        $this->addForeignKey('user_search_pair_id', 'UserSearchPairId', 'INTEGER', 'user_search_pair', 'user_search_pair_id', false, null, null);
+        $this->addForeignKey('user_search_pair_id', 'UserSearchPairId', 'INTEGER', 'user_search_pair', 'user_search_pair_id', true, null, null);
         $this->addForeignKey('jobsite_key', 'JobSiteKey', 'VARCHAR', 'job_site', 'jobsite_key', true, 100, null);
         $this->addColumn('app_run_id', 'AppRunId', 'VARCHAR', true, 75, null);
         $this->addColumn('user_search_site_run_key', 'UserSearchSiteRunKey', 'VARCHAR', true, 100, null);

@@ -262,7 +262,7 @@
         <column name="user_site_search_run_id" phpName="UserSiteSearchRunId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
 
         <!-- Alternate Key -->
-        <column name="user_search_pair_id" phpName="UserSearchPairId" type="integer" required="false"/>
+        <column name="user_search_pair_id" phpName="UserSearchPairId" type="integer" required="true"/>
 
         <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true" primaryKey="false"/>
 

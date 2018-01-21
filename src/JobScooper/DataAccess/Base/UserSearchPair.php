@@ -1692,7 +1692,7 @@ abstract class UserSearchPair implements ActiveRecordInterface
                 $this->userSearchSiteRunsScheduledForDeletion = clone $this->collUserSearchSiteRuns;
                 $this->userSearchSiteRunsScheduledForDeletion->clear();
             }
-            $this->userSearchSiteRunsScheduledForDeletion[]= $userSearchSiteRun;
+            $this->userSearchSiteRunsScheduledForDeletion[]= clone $userSearchSiteRun;
             $userSearchSiteRun->setUserSearchPairFromUSSR(null);
         }
 

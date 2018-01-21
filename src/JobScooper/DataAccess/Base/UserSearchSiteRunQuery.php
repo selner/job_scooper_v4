@@ -825,7 +825,7 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
      *
      * @return $this|ChildUserSearchSiteRunQuery The current query, for fluid interface
      */
-    public function joinUserSearchPairFromUSSR($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function joinUserSearchPairFromUSSR($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
         $relationMap = $tableMap->getRelation('UserSearchPairFromUSSR');
@@ -860,7 +860,7 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
      *
      * @return \JobScooper\DataAccess\UserSearchPairQuery A secondary query class using the current class as primary query
      */
-    public function useUserSearchPairFromUSSRQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    public function useUserSearchPairFromUSSRQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
             ->joinUserSearchPairFromUSSR($relationAlias, $joinType)
