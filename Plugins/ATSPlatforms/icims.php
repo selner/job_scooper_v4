@@ -125,6 +125,37 @@ class AbstractIcimsATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlug
 	}
 
 	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+	{
+		$jobImpressions = $this->getActiveWebdriver()->executeScript('return window.jobImpressions;');
+		if(!empty($jobImpressions) && is_array($jobImpressions))
+		{
+			$ret = array();
+			foreach($jobImpressions as $jobImp)
+			{
+				$item = array(
+					"Title" => $jobImp["title"],
+					"JobSitePostId" => $jobImp["id"],
+					"Category" => $jobImp["category"],
+					"Company" => $jobImp["company"],
+					"EmploymentType" => $jobImp["positionType"],
+					"Location" => "{$jobImp["location"]["city"]} {$jobImp["location"]["state"]} {$jobImp["location"]["country"]}",
+					"Url" => $this->JobPostingBaseUrl
+				);
+				$ret[$jobImp["position"]] = $item;
+			}
+			return $ret;
+		}
+		else
+			return parent::parseJobsListForPage($objSimpHTML);
+	}
+
+	/**
 	 * @param $arrItem
 	 *
 	 * @return array
