@@ -41,18 +41,18 @@ class AbstractIcimsATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlug
 
 		foreach (array_keys($this->TagIndexes) as $tagKey) {
 			if (array_key_exists($tagKey, $this->TagIndexes) === true && is_null($this->TagIndexes[$tagKey]) !== true &&
-				array_key_exists($tagKey, $this->arrListingTagSetup)) {
-				if (array_key_exists(0, $this->arrListingTagSetup[$tagKey]) && is_array($this->arrListingTagSetup[$tagKey]) === true)
-					$this->arrListingTagSetup[$tagKey][0]['index'] = $this->TagIndexes[$tagKey];
+				array_key_exists($tagKey, $this->arrBaseListingTagSetup)) {
+				if (array_key_exists(0, $this->arrBaseListingTagSetup[$tagKey]) && is_array($this->arrBaseListingTagSetup[$tagKey]) === true)
+					$this->arrBaseListingTagSetup[$tagKey][0]['index'] = $this->TagIndexes[$tagKey];
 				else
-					$this->arrListingTagSetup[$tagKey]['index'] = $this->TagIndexes[$tagKey];
+					$this->arrBaseListingTagSetup[$tagKey]['index'] = $this->TagIndexes[$tagKey];
 			}
 		}
 
 		parent::__construct();
 	}
 
-	protected $arrListingTagSetup = array(
+	protected $arrBaseListingTagSetup = array(
 
 		'JobPostItem'          => array('selector' => 'div.iCIMS_JobsTable div.row'),
 		'Title'                => array('selector' => 'div.title a span'),
