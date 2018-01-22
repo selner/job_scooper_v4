@@ -37,7 +37,7 @@ Options:
   -i <file>, --input <file> input JSON data file with jobs and keywords
 """
 JSON_KEY_JOBMATCHES = u'job_matches'
-JSON_KEY_POS_KEYWORDS = u'search_keywords'
+JSON_KEY_POS_KEYWORDS = u'SearchKeywords'
 JSON_KEY_NEG_KEYWORDS = u'negative_title_keywords'
 JSON_KEY_USER = u'user'
 
@@ -213,19 +213,17 @@ class MatchJobsToKeywordsTask():
         if JSON_KEY_USER in data and 'UserId' in data[JSON_KEY_USER]:
             self.user_id = data[JSON_KEY_USER]['UserId']
 
-        if JSON_KEY_POS_KEYWORDS in data:
-            for setkey in data[JSON_KEY_POS_KEYWORDS]:
-                for word in data[JSON_KEY_POS_KEYWORDS][setkey]:
-                    newkey = "{}-{}".format(setkey, word)
-                    self.keywords[newkey] = {
-                        'key': newkey,
-                        'user_keyword_set_key': setkey,
-                        'keyword': word,
+            if JSON_KEY_POS_KEYWORDS in data[JSON_KEY_USER]:
+                for keyword in data[JSON_KEY_USER][JSON_KEY_POS_KEYWORDS]:
+                    self.keywords[keyword] = {
+                        'key': keyword,
+                        'user_keyword_set_key': keyword,
+                        'keyword': keyword,
                         'tokens': None
                     }
-            outData = tokenizeStrings(self.keywords, 'keyword', 'tokens')
+                outData = tokenizeStrings(self.keywords, 'keyword', 'tokens')
 
-            self.keywords = outData
+                self.keywords = outData
 
         if JSON_KEY_NEG_KEYWORDS in data:
             for kwdkey in data[JSON_KEY_NEG_KEYWORDS]:
