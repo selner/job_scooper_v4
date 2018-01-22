@@ -420,12 +420,21 @@ class SimplePlugin extends BaseJobsSite
             if ($returnAttribute === "collection") {
                 $ret = $nodeMatches;
                 // do nothing.  We already have the node set correctly
-            } elseif (!empty($nodeMatches) && isset($arrTag['index']) && is_array($nodeMatches) && intval($arrTag['index']) < count($nodeMatches)) {
-                $index = $arrTag['index'];
+            } elseif (!empty($nodeMatches) && array_key_exists('index', $arrTag) && is_array($nodeMatches))
+            {
+	            $index = intval($arrTag['index']);
+                if ( $index > count($nodeMatches) - 1) {
+		            LogWarning("Tag specified index {$index} but only " . count($nodeMatches) . " were matched.  Defaulting to first node.");
+		            $index = 0;
+	            } elseif(empty($index) && $index !== 0)
+                {
+	                LogWarning("Tag specified index value was invalid {$arrTag['index']}.  Defaulting to first node.");
+	                $index = 0;
+                }
                 $ret = $this->_getReturnValueByIndex($nodeMatches, $index);
             } elseif (!empty($nodeMatches) && is_array($nodeMatches)) {
                 if (count($nodeMatches) > 1) {
-                    $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.", $this->JobSiteName, count($ret), $strMatch);
+                    $strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.  Tag = %s", $this->JobSiteName, count($nodeMatches), $strMatch, getArrayDebugOutput($arrTag));
                     LogWarning($strError);
                 }
                 $ret = $nodeMatches[0];
