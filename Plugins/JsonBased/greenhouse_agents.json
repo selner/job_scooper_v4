@@ -43,12 +43,6 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "eyeview",
-            "SiteReferenceKey" : "eyeview",
-            "SourceURL": "https://www.eyeview.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "huge",
             "SiteReferenceKey" : "huge",
             "SourceURL": "https://www.huge.com/careers",

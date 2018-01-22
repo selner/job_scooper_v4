@@ -13,7 +13,7 @@
           "Name": "TotalPostCount",
           "Selector": "div.rh-job-result-table__counter label",
           "Index" : 1,
-          "Pattern": "/of\\s*(\\d+)/",
+          "Pattern": "/-\\s*(\\d+)/",
           "Attribute": "text",
           "Type": "CSS"
         },
@@ -32,6 +32,7 @@
           "Name": "Title",
           "Selector": "a.rh-job-result-table__job-title",
           "Attribute": "text",
+          "Index": 0,
           "Type": "CSS"
         },
         {
@@ -44,14 +45,14 @@
         {
           "Name": "Location",
           "Selector": "span.rh-job-result-table__location",
-          "Index" : 1,
+          "Index" : 0,
           "Attribute": "text",
           "Type": "CSS"
         },
         {
-          "Name": "Category",
+          "Name": "EmploymentType",
           "Selector": "span.rh-job-result-table__emptype",
-          "Index" : 1,
+          "Index" : 0,
           "Attribute": "text",
           "Type": "CSS"
         },
@@ -64,7 +65,7 @@
         {
           "Name": "PostedAt",
           "Selector": "span.rh-job-result-table__postdate",
-          "Index" : 1,
+          "Index" : 0,
           "Attribute": "text",
           "Type": "CSS"
         }

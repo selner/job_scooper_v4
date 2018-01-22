@@ -2,8 +2,8 @@
 
 namespace JobScooper\DataAccess\Map;
 
-use JobScooper\DataAccess\User;
-use JobScooper\DataAccess\UserQuery;
+use JobScooper\DataAccess\UserSearchPair;
+use JobScooper\DataAccess\UserSearchPairQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'user' table.
+ * This class defines the structure of the 'user_search_pair' table.
  *
  *
  *
@@ -26,7 +26,7 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class UserTableMap extends TableMap
+class UserSearchPairTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
@@ -34,7 +34,7 @@ class UserTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'JobScooper.DataAccess.Map.UserTableMap';
+    const CLASS_NAME = 'JobScooper.DataAccess.Map.UserSearchPairTableMap';
 
     /**
      * The default database name for this class
@@ -44,22 +44,22 @@ class UserTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'user';
+    const TABLE_NAME = 'user_search_pair';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\JobScooper\\DataAccess\\User';
+    const OM_CLASS = '\\JobScooper\\DataAccess\\UserSearchPair';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'JobScooper.DataAccess.User';
+    const CLASS_DEFAULT = 'JobScooper.DataAccess.UserSearchPair';
 
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 7;
+    const NUM_COLUMNS = 5;
 
     /**
      * The number of lazy-loaded columns
@@ -69,42 +69,32 @@ class UserTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 7;
+    const NUM_HYDRATE_COLUMNS = 5;
+
+    /**
+     * the column name for the user_search_pair_id field
+     */
+    const COL_USER_SEARCH_PAIR_ID = 'user_search_pair.user_search_pair_id';
 
     /**
      * the column name for the user_id field
      */
-    const COL_USER_ID = 'user.user_id';
+    const COL_USER_ID = 'user_search_pair.user_id';
 
     /**
-     * the column name for the user_slug field
+     * the column name for the user_keyword field
      */
-    const COL_USER_SLUG = 'user.user_slug';
+    const COL_USER_KEYWORD = 'user_search_pair.user_keyword';
 
     /**
-     * the column name for the email_address field
+     * the column name for the geolocation_id field
      */
-    const COL_EMAIL_ADDRESS = 'user.email_address';
+    const COL_GEOLOCATION_ID = 'user_search_pair.geolocation_id';
 
     /**
-     * the column name for the name field
+     * the column name for the is_active field
      */
-    const COL_NAME = 'user.name';
-
-    /**
-     * the column name for the search_keywords field
-     */
-    const COL_SEARCH_KEYWORDS = 'user.search_keywords';
-
-    /**
-     * the column name for the search_locations field
-     */
-    const COL_SEARCH_LOCATIONS = 'user.search_locations';
-
-    /**
-     * the column name for the input_files_json field
-     */
-    const COL_INPUT_FILES_JSON = 'user.input_files_json';
+    const COL_IS_ACTIVE = 'user_search_pair.is_active';
 
     /**
      * The default string format for model objects of the related table
@@ -118,11 +108,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserId', 'UserSlug', 'EmailAddress', 'Name', 'SearchKeywords', 'SearchLocations', 'InputFilesJson', ),
-        self::TYPE_CAMELNAME     => array('userId', 'userSlug', 'emailAddress', 'name', 'searchKeywords', 'searchLocations', 'inputFilesJson', ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID, UserTableMap::COL_USER_SLUG, UserTableMap::COL_EMAIL_ADDRESS, UserTableMap::COL_NAME, UserTableMap::COL_SEARCH_KEYWORDS, UserTableMap::COL_SEARCH_LOCATIONS, UserTableMap::COL_INPUT_FILES_JSON, ),
-        self::TYPE_FIELDNAME     => array('user_id', 'user_slug', 'email_address', 'name', 'search_keywords', 'search_locations', 'input_files_json', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('UserSearchPairId', 'UserId', 'UserKeyword', 'GeoLocationId', 'IsActive', ),
+        self::TYPE_CAMELNAME     => array('userSearchPairId', 'userId', 'userKeyword', 'geoLocationId', 'isActive', ),
+        self::TYPE_COLNAME       => array(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID, UserSearchPairTableMap::COL_USER_ID, UserSearchPairTableMap::COL_USER_KEYWORD, UserSearchPairTableMap::COL_GEOLOCATION_ID, UserSearchPairTableMap::COL_IS_ACTIVE, ),
+        self::TYPE_FIELDNAME     => array('user_search_pair_id', 'user_id', 'user_keyword', 'geolocation_id', 'is_active', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -132,11 +122,11 @@ class UserTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserId' => 0, 'UserSlug' => 1, 'EmailAddress' => 2, 'Name' => 3, 'SearchKeywords' => 4, 'SearchLocations' => 5, 'InputFilesJson' => 6, ),
-        self::TYPE_CAMELNAME     => array('userId' => 0, 'userSlug' => 1, 'emailAddress' => 2, 'name' => 3, 'searchKeywords' => 4, 'searchLocations' => 5, 'inputFilesJson' => 6, ),
-        self::TYPE_COLNAME       => array(UserTableMap::COL_USER_ID => 0, UserTableMap::COL_USER_SLUG => 1, UserTableMap::COL_EMAIL_ADDRESS => 2, UserTableMap::COL_NAME => 3, UserTableMap::COL_SEARCH_KEYWORDS => 4, UserTableMap::COL_SEARCH_LOCATIONS => 5, UserTableMap::COL_INPUT_FILES_JSON => 6, ),
-        self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_slug' => 1, 'email_address' => 2, 'name' => 3, 'search_keywords' => 4, 'search_locations' => 5, 'input_files_json' => 6, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('UserSearchPairId' => 0, 'UserId' => 1, 'UserKeyword' => 2, 'GeoLocationId' => 3, 'IsActive' => 4, ),
+        self::TYPE_CAMELNAME     => array('userSearchPairId' => 0, 'userId' => 1, 'userKeyword' => 2, 'geoLocationId' => 3, 'isActive' => 4, ),
+        self::TYPE_COLNAME       => array(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID => 0, UserSearchPairTableMap::COL_USER_ID => 1, UserSearchPairTableMap::COL_USER_KEYWORD => 2, UserSearchPairTableMap::COL_GEOLOCATION_ID => 3, UserSearchPairTableMap::COL_IS_ACTIVE => 4, ),
+        self::TYPE_FIELDNAME     => array('user_search_pair_id' => 0, 'user_id' => 1, 'user_keyword' => 2, 'geolocation_id' => 3, 'is_active' => 4, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -149,21 +139,19 @@ class UserTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('user');
-        $this->setPhpName('User');
+        $this->setName('user_search_pair');
+        $this->setPhpName('UserSearchPair');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\JobScooper\\DataAccess\\User');
+        $this->setClassName('\\JobScooper\\DataAccess\\UserSearchPair');
         $this->setPackage('JobScooper.DataAccess');
         $this->setUseIdGenerator(true);
+        $this->setIsCrossRef(true);
         // columns
-        $this->addPrimaryKey('user_id', 'UserId', 'INTEGER', true, null, null);
-        $this->addColumn('user_slug', 'UserSlug', 'VARCHAR', true, 128, null);
-        $this->getColumn('user_slug')->setPrimaryString(true);
-        $this->addColumn('email_address', 'EmailAddress', 'VARCHAR', true, 128, null);
-        $this->addColumn('name', 'Name', 'VARCHAR', true, 128, 'email_address');
-        $this->addColumn('search_keywords', 'SearchKeywords', 'ARRAY', false, null, null);
-        $this->addColumn('search_locations', 'SearchLocations', 'ARRAY', false, null, null);
-        $this->addColumn('input_files_json', 'InputFilesJson', 'LONGVARCHAR', false, null, null);
+        $this->addPrimaryKey('user_search_pair_id', 'UserSearchPairId', 'INTEGER', true, null, null);
+        $this->addForeignKey('user_id', 'UserId', 'INTEGER', 'user', 'user_id', true, null, null);
+        $this->addColumn('user_keyword', 'UserKeyword', 'VARCHAR', true, 50, null);
+        $this->addForeignKey('geolocation_id', 'GeoLocationId', 'INTEGER', 'geolocation', 'geolocation_id', true, null, null);
+        $this->addColumn('is_active', 'IsActive', 'BOOLEAN', true, 1, true);
     } // initialize()
 
     /**
@@ -171,44 +159,36 @@ class UserTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('UserSearchPair', '\\JobScooper\\DataAccess\\UserSearchPair', RelationMap::ONE_TO_MANY, array (
+        $this->addRelation('UserFromUS', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
     0 => ':user_id',
     1 => ':user_id',
   ),
-), 'CASCADE', 'CASCADE', 'UserSearchPairs', false);
-        $this->addRelation('UserJobMatch', '\\JobScooper\\DataAccess\\UserJobMatch', RelationMap::ONE_TO_MANY, array (
+), 'CASCADE', 'CASCADE', null, false);
+        $this->addRelation('GeoLocationFromUS', '\\JobScooper\\DataAccess\\GeoLocation', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
-    0 => ':user_id',
-    1 => ':user_id',
+    0 => ':geolocation_id',
+    1 => ':geolocation_id',
   ),
-), 'CASCADE', null, 'UserJobMatches', false);
-        $this->addRelation('JobPostingFromUJM', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobPostingFromUJMs');
+), null, null, null, false);
+        $this->addRelation('UserSearchSiteRun', '\\JobScooper\\DataAccess\\UserSearchSiteRun', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':user_search_pair_id',
+    1 => ':user_search_pair_id',
+  ),
+), 'CASCADE', 'CASCADE', 'UserSearchSiteRuns', false);
     } // buildRelations()
-
     /**
-     *
-     * Gets the list of behaviors registered for this table
-     *
-     * @return array Associative array (name => parameters) of behaviors
-     */
-    public function getBehaviors()
-    {
-        return array(
-            'sluggable' => array('slug_column' => 'user_slug', 'slug_pattern' => '{EmailAddress}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
-        );
-    } // getBehaviors()
-    /**
-     * Method to invalidate the instance pool of all tables related to user     * by a foreign key with ON DELETE CASCADE
+     * Method to invalidate the instance pool of all tables related to user_search_pair     * by a foreign key with ON DELETE CASCADE
      */
     public static function clearRelatedInstancePool()
     {
         // Invalidate objects in related instance pools,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
-        UserSearchPairTableMap::clearInstancePool();
-        UserJobMatchTableMap::clearInstancePool();
+        UserSearchSiteRunTableMap::clearInstancePool();
     }
 
     /**
@@ -227,11 +207,11 @@ class UserTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
+        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)];
     }
 
     /**
@@ -251,7 +231,7 @@ class UserTableMap extends TableMap
         return (int) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
-                : self::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('UserSearchPairId', TableMap::TYPE_PHPNAME, $indexType)
         ];
     }
 
@@ -268,7 +248,7 @@ class UserTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? UserTableMap::CLASS_DEFAULT : UserTableMap::OM_CLASS;
+        return $withPrefix ? UserSearchPairTableMap::CLASS_DEFAULT : UserSearchPairTableMap::OM_CLASS;
     }
 
     /**
@@ -282,22 +262,22 @@ class UserTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *                         rethrown wrapped into a PropelException.
-     * @return array           (User object, last column rank)
+     * @return array           (UserSearchPair object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = UserTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = UserTableMap::getInstanceFromPool($key))) {
+        $key = UserSearchPairTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = UserSearchPairTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + UserTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + UserSearchPairTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = UserTableMap::OM_CLASS;
-            /** @var User $obj */
+            $cls = UserSearchPairTableMap::OM_CLASS;
+            /** @var UserSearchPair $obj */
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            UserTableMap::addInstanceToPool($obj, $key);
+            UserSearchPairTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -320,18 +300,18 @@ class UserTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = UserTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = UserTableMap::getInstanceFromPool($key))) {
+            $key = UserSearchPairTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = UserSearchPairTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
                 $results[] = $obj;
             } else {
-                /** @var User $obj */
+                /** @var UserSearchPair $obj */
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                UserTableMap::addInstanceToPool($obj, $key);
+                UserSearchPairTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -352,21 +332,17 @@ class UserTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(UserTableMap::COL_USER_ID);
-            $criteria->addSelectColumn(UserTableMap::COL_USER_SLUG);
-            $criteria->addSelectColumn(UserTableMap::COL_EMAIL_ADDRESS);
-            $criteria->addSelectColumn(UserTableMap::COL_NAME);
-            $criteria->addSelectColumn(UserTableMap::COL_SEARCH_KEYWORDS);
-            $criteria->addSelectColumn(UserTableMap::COL_SEARCH_LOCATIONS);
-            $criteria->addSelectColumn(UserTableMap::COL_INPUT_FILES_JSON);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_USER_ID);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_USER_KEYWORD);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_GEOLOCATION_ID);
+            $criteria->addSelectColumn(UserSearchPairTableMap::COL_IS_ACTIVE);
         } else {
+            $criteria->addSelectColumn($alias . '.user_search_pair_id');
             $criteria->addSelectColumn($alias . '.user_id');
-            $criteria->addSelectColumn($alias . '.user_slug');
-            $criteria->addSelectColumn($alias . '.email_address');
-            $criteria->addSelectColumn($alias . '.name');
-            $criteria->addSelectColumn($alias . '.search_keywords');
-            $criteria->addSelectColumn($alias . '.search_locations');
-            $criteria->addSelectColumn($alias . '.input_files_json');
+            $criteria->addSelectColumn($alias . '.user_keyword');
+            $criteria->addSelectColumn($alias . '.geolocation_id');
+            $criteria->addSelectColumn($alias . '.is_active');
         }
     }
 
@@ -379,7 +355,7 @@ class UserTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(UserTableMap::DATABASE_NAME)->getTable(UserTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(UserSearchPairTableMap::DATABASE_NAME)->getTable(UserSearchPairTableMap::TABLE_NAME);
     }
 
     /**
@@ -387,16 +363,16 @@ class UserTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap(UserTableMap::DATABASE_NAME);
-        if (!$dbMap->hasTable(UserTableMap::TABLE_NAME)) {
-            $dbMap->addTableObject(new UserTableMap());
+        $dbMap = Propel::getServiceContainer()->getDatabaseMap(UserSearchPairTableMap::DATABASE_NAME);
+        if (!$dbMap->hasTable(UserSearchPairTableMap::TABLE_NAME)) {
+            $dbMap->addTableObject(new UserSearchPairTableMap());
         }
     }
 
     /**
-     * Performs a DELETE on the database, given a User or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a UserSearchPair or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or User object or primary key or array of primary keys
+     * @param mixed               $values Criteria or UserSearchPair object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param  ConnectionInterface $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -407,27 +383,27 @@ class UserTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchPairTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \JobScooper\DataAccess\User) { // it's a model object
+        } elseif ($values instanceof \JobScooper\DataAccess\UserSearchPair) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(UserTableMap::DATABASE_NAME);
-            $criteria->add(UserTableMap::COL_USER_ID, (array) $values, Criteria::IN);
+            $criteria = new Criteria(UserSearchPairTableMap::DATABASE_NAME);
+            $criteria->add(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID, (array) $values, Criteria::IN);
         }
 
-        $query = UserQuery::create()->mergeWith($criteria);
+        $query = UserSearchPairQuery::create()->mergeWith($criteria);
 
         if ($values instanceof Criteria) {
-            UserTableMap::clearInstancePool();
+            UserSearchPairTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
             foreach ((array) $values as $singleval) {
-                UserTableMap::removeInstanceFromPool($singleval);
+                UserSearchPairTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -435,20 +411,20 @@ class UserTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the user table.
+     * Deletes all rows from the user_search_pair table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return UserQuery::create()->doDeleteAll($con);
+        return UserSearchPairQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a User or Criteria object.
+     * Performs an INSERT on the database, given a UserSearchPair or Criteria object.
      *
-     * @param mixed               $criteria Criteria or User object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or UserSearchPair object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -457,18 +433,22 @@ class UserTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(UserTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(UserSearchPairTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from User object
+            $criteria = $criteria->buildCriteria(); // build Criteria from UserSearchPair object
+        }
+
+        if ($criteria->containsKey(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID) && $criteria->keyContainsValue(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID) ) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ('.UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID.')');
         }
 
 
         // Set the correct dbName
-        $query = UserQuery::create()->mergeWith($criteria);
+        $query = UserSearchPairQuery::create()->mergeWith($criteria);
 
         // use transaction because $criteria could contain info
         // for more than one table (I guess, conceivably)
@@ -477,7 +457,7 @@ class UserTableMap extends TableMap
         });
     }
 
-} // UserTableMap
+} // UserSearchPairTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-UserTableMap::buildTableMap();
+UserSearchPairTableMap::buildTableMap();

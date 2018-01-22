@@ -17,10 +17,15 @@
 namespace JobScooper\Utils;
 
 //Import PHPMailer classes into the global namespace
+use JobScooper\DataAccess\User;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use InvalidArgumentException;
 
+/**
+ * Class JobsMailSender
+ * @package JobScooper\Utils
+ */
 class JobsMailSender extends PHPMailer
 {
     private $alwaysNotify = false;
@@ -46,16 +51,17 @@ class JobsMailSender extends PHPMailer
 
 
 	/**
-	 * @param null   $strBodyText
-	 * @param null   $strBodyHTML
-	 * @param array  $arrDetailsAttachFiles
-	 * @param string $subject
-	 * @param string $emailKind
+	 * @param null                             $strBodyText
+	 * @param null                             $strBodyHTML
+	 * @param array                            $arrDetailsAttachFiles
+	 * @param string                           $subject
+	 * @param string                           $emailKind
+	 * @param User                             $toUser
 	 *
 	 * @return bool
 	 * @throws \Exception
 	 */
-	function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results')
+	function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results', User $toUser = null)
     {
     	try
 	    {
@@ -88,9 +94,14 @@ class JobsMailSender extends PHPMailer
 	        }
 
 
-	        //
-	        // Add initial email address header values
-	        //
+		    //
+		    // Add initial email address header values
+		    //
+	        if(!empty($toUser))
+	        {
+		        $this->addAnAddress("to", $toUser->getEmailAddress(), $toUser->getName());
+	        }
+
 		    $alerts_users = getConfigurationSetting("alerts." . $emailKind);
 	        if(empty($alerts_users))
 	        {
@@ -104,14 +115,23 @@ class JobsMailSender extends PHPMailer
 	        }
 	        else {
 		        foreach ($alerts_users as $kind => $user) {
-			        $email = (!empty($user['Email'])) ? $user['Email'] : $user['EmailAddress'];
-			        $name = (!empty($user['Name'])) ? $user['Name'] : $user['EmailAddress'];
+		        	$email = null;
+		        	$name = null;
 
-			        if(array_key_exists("User", $user) && !empty($user['User']))
-			        {
-			        	$email = $user['User']->getEmailAddress();
-			        	if(empty($name)) $user['User']->getName();
-			        }
+			        if(array_key_exists("email", $user) && !empty($user['email']))
+				        $email = $user['email'];
+			        elseif(array_key_exists("Email", $user) && !empty($user['Email']))
+				        $email = $user['email'];
+			        elseif(array_key_exists("User", $user) && !empty($user['User']))
+				        $email = $user['User']->getEmailAddress();
+
+			        if(array_key_exists("name", $user) && !empty($user['name']))
+				        $name = $user['name'];
+			        elseif(array_key_exists("Name", $user) && !empty($user['Name']))
+				        $name = $user['Name'];
+			        elseif(array_key_exists("User", $user) && !empty($user['User']))
+				        $name = $user['User']->getName();
+
 			        switch ($kind) {
 
 				        case "from":

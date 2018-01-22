@@ -81,7 +81,6 @@ class JobSiteRecord extends BaseJobSiteRecord
 		else {
 			$plugin = $this->getPlugin();
 			if (!empty($plugin) &&
-				is_a($plugin, "\JobScooper\BasePlugin\Classes\BaseJobsSite") &&
 				method_exists($plugin, $method))
 			{
 				return call_user_func_array(

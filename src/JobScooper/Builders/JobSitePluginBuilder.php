@@ -18,7 +18,9 @@
 namespace JobScooper\Builders;
 
 use Exception;
+use JobScooper\DataAccess\JobSiteRecord;
 use JobScooper\DataAccess\JobSiteRecordQuery;
+use JobScooper\DataAccess\User;
 
 /**
  * Class JobSitePluginBuilder
@@ -27,8 +29,13 @@ use JobScooper\DataAccess\JobSiteRecordQuery;
 class JobSitePluginBuilder
 {
 	/**
-	 * @param bool $requireEnabled
 	 *
+	 */
+	static function resetJobSitesForNewUser()
+	{
+		clearCache("included_jobsites");
+	}
+	/**
 	 * @return \JobScooper\DataAccess\JobSiteRecord[]|null
 	 */
 	static function getAllJobSites()
@@ -64,8 +71,8 @@ class JobSitePluginBuilder
 	    {
 	    	$sites = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
 
-		    $disabled = array_filter($sites, function ($v) {
-			    return $v->getisDisabled() === true;
+		    $disabled = array_filter($sites, function (JobSiteRecord $v) {
+			    return $v->getIsDisabled() === true;
 		    });
 		    if (!empty($disabled)) {
 			    LogMessage("Excluding " . join(", ", array_keys($disabled)) . " job site(s):  marked as disabled in the database.");
@@ -74,6 +81,8 @@ class JobSitePluginBuilder
 
 
 		    JobSitePluginBuilder::setIncludedJobSites($sites);
+		    $sites = getCacheAsArray("included_jobsites");
+		    return $sites;
 	    }
 
 	    if($fOptimizeBySiteRunOrder === true)
@@ -146,11 +155,11 @@ class JobSitePluginBuilder
 	}
 
 	/**
-	 * @param $countryCodes
+	 * @param string[] $countryCodes
 	 */
-	static function filterJobSitesByCountryCodes($countryCodes)
+	static function filterJobSitesByCountryCodes(&$sites, $countryCodes)
 	{
-		$ccRun = join(", ", $countryCodes);
+		$ccRun = array_unique($countryCodes);
 		$includedSites = JobSitePluginBuilder::getIncludedJobSites();
 		$sitesOutOfSearchArea = array();
 
@@ -160,8 +169,8 @@ class JobSitePluginBuilder
 				$sitesOutOfSearchArea[$jobsiteKey] = $includedSites[$jobsiteKey];
 			else {
 				$matches = null;
-				$fResult = substr_count_multi($ccRun, $ccSite, $matches);
-				if (empty($matches) || (count($matches) == 1 && empty($matches[0]))) {
+				$ccMatches = array_intersect($ccRun, $ccSite);
+				if (empty($ccMatches)) {
 					$sitesOutOfSearchArea[$jobsiteKey] = $site;
 				}
 			}
@@ -169,8 +178,9 @@ class JobSitePluginBuilder
 
 		if(!empty($sitesOutOfSearchArea)) {
 			JobSitePluginBuilder::setSitesAsExcluded($sitesOutOfSearchArea);
-		 LogMessage("Skipping searches for " . getArrayDebugOutput(array_keys($sitesOutOfSearchArea)) . " because they do not cover country codes = (" . $ccRun . ").");
-			}
+			$sites = JobSitePluginBuilder::getIncludedJobSites();
+			LogMessage("Skipping searches for " . getArrayDebugOutput(array_keys($sitesOutOfSearchArea)) . " because they do not cover country codes = (" . join(", ", $ccRun) . ").");
+		}
 	}
 
 	/**

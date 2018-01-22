@@ -604,6 +604,20 @@ function setGlobalSetting($root, $keyPath, $value)
 }
 
 /**
+ * @param $root
+ * @param $keyPath
+ */
+function removeGlobalSetting($root, $keyPath)
+{
+	doGlobalSettingExists($root);
+
+	$dot = new \Adbar\Dot($GLOBALS[$root]);
+	if($dot->has($keyPath))
+		$dot->delete($keyPath);
+	$GLOBALS[$root] = $dot->all();
+}
+
+/**
  * @param      $root
  * @param null $keyPath
  *
@@ -703,6 +717,14 @@ function getCacheAsArray($cacheName)
 function setAsCacheData($cacheName, $value)
 {
 	setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName, $value);
+}
+
+/**
+ * @param $cacheName
+ */
+function clearCache($cacheName)
+{
+	removeGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName);
 }
 
 

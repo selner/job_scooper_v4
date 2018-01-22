@@ -17,9 +17,8 @@
 
 namespace JobScooper\Utils;
 
-use JobScooper\DataAccess\UserKeywordSetQuery;
 use JobScooper\DataAccess\UserQuery;
-use JobScooper\DataAccess\UserSearchQuery;
+use JobScooper\DataAccess\UserSearchPairQuery;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Propel;
@@ -41,25 +40,19 @@ class DBRecordRemover
 		return DBRecordRemover::removeUserRelatedRecords($query, $users);
 	}
 
-	static function removeUserKeywordSets($users=null, $userKeywordSets = null)
-	{
-		$query = UserKeywordSetQuery::create();
-		return DBRecordRemover::removeUserRelatedRecords($query, $users, $userKeywordSets);
-	}
-
-	static function removeUserSearchSiteRuns($users=null, $userKeywordSets = null, $userSearches=null, $geolocations=null, $jobsites=null)
+	static function removeUserSearchSiteRuns($users=null, $userSearches=null, $geolocations=null, $jobsites=null)
 	{
 		$query = UserSearchSiteRunQuery::create();
-		return DBRecordRemover::removeUserRelatedRecords($query, $users, $userKeywordSets, $userSearches, $geolocations, $jobsites);
+		return DBRecordRemover::removeUserRelatedRecords($query, $users, $userSearches, $geolocations, $jobsites);
 	}
 
-	static function removeUserSearches($users=null, $userKeywordSets=null, $userSearches=null, $geolocations=null)
+	static function removeUserSearchPairs($users=null, $userSearchPairs=null, $geolocations=null)
 	{
-		$query = UserSearchQuery::create();
-		return DBRecordRemover::removeUserRelatedRecords($query, $users, $userKeywordSets, $userSearches, $geolocations);
+		$query = UserSearchPairQuery::create();
+		return DBRecordRemover::removeUserRelatedRecords($query, $users, $userSearchPairs, $geolocations);
 	}
 
-	static function removeUserRelatedRecords(&$query, $users=null, $userKeywordSets=null, $userSearches=null, $geolocations=null, $jobsites=null)
+	static function removeUserRelatedRecords(&$query, $users=null,  $userSearches=null, $geolocations=null, $jobsites=null)
 	{
 
 		if(empty($query))
@@ -67,7 +60,7 @@ class DBRecordRemover
 
 		try {
 			$queryFilters = array();
-			foreach (["users" => $users, "keywordsets" => $userKeywordSets, "searches" => $userSearches, "geolocations" => $geolocations, "jobsites" => $jobsites] as $k => $param) {
+			foreach (["users" => $users, "searchpairs" => $userSearches, "geolocations" => $geolocations, "jobsites" => $jobsites] as $k => $param) {
 				if (!empty($param) && !is_array($param)) {
 					$queryFilters[$k] = array($param);
 				} elseif (empty($param)) {
@@ -88,13 +81,8 @@ class DBRecordRemover
 								$queryFilters[$k][$itemKey] = $item->getUserId();
 								break;
 
-							case "keywordsets":
-								$queryFilters[$k][$itemKey] = $item->getUserKeywordSetKey();
-								break;
-
-
-							case "searches":
-								$queryFilters[$k][$itemKey] = $item->getUserSearchKey();
+							case "searchpairs":
+								$queryFilters[$k][$itemKey] = $item->getUserSearchPairId();
 								break;
 
 							case "geolocations":
@@ -110,19 +98,16 @@ class DBRecordRemover
 			}
 
 			if (!empty($queryFilters['users']))
-				$query->filterByUserId($queryFilters['users'], Criteria::CONTAINS_SOME);
+				$query->filterByUserId($queryFilters['users'], Criteria::IN);
 
-			if (!empty($queryFilters['keywordsets']))
-				$query->filterByUserKeywordSetKey($queryFilters['keywordsets'], Criteria::CONTAINS_SOME);
-
-			if (!empty($queryFilters['searches']))
-				$query->filterByUserSearchKey($queryFilters['searches'], Criteria::CONTAINS_SOME);
+			if (!empty($queryFilters['searchespairs']))
+				$query->filterByUserSearchPairId($queryFilters['searchespairs'], Criteria::IN);
 
 			if (!empty($queryFilters['geolocations']))
-				$query->filterByGeoLocationId($queryFilters['geolocations'], Criteria::CONTAINS_SOME);
+				$query->filterByGeoLocationId($queryFilters['geolocations'], Criteria::IN);
 
 			if (!empty($queryFilters['jobsites']))
-				$query->filterByJobSiteKey($queryFilters['jobsites'], Criteria::CONTAINS_SOME);
+				$query->filterByJobSiteKey($queryFilters['jobsites'], Criteria::IN);
 
 
 			if(!isDebug())
@@ -131,7 +116,7 @@ class DBRecordRemover
 			}
 			else {
 				$con = Propel::getServiceContainer()->getWriteConnection("default");
-				$query->deleteAll($con);
+				$query->delete($con);
 			}
 		}
 		catch (\Exception $ex)

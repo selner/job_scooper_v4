@@ -3,7 +3,7 @@
     {
       "JobSiteName": "Monster",
       "BaseURL": "https://www.monster.com",
-      "SourceURL": "https://www.monster.com/jobs/search/?q=***KEYWORDS***&sort=dt.rv.di&where=***LOCATION***&tm=***NUMBER_DAYS***&pg=***PAGE_NUMBER***&rad=50",
+      "SourceURL": "https://www.monster.com/jobs/search/?q=***KEYWORDS***&sort=dt.rv.di&where=***LOCATION***&tm=3&rad=50",
       "LocationType": "location-city-comma-statecode-underscores-and-dashes",
       "CountryCodes": [
         "US"
@@ -79,7 +79,7 @@
             {
               "Name": "PostedAt",
               "Selector": "div.job-specs-date p time",
-              "Index": 1,
+              "Index": 0,
               "Attribute": "datetime",
               "Type": "CSS"
             }
@@ -88,7 +88,7 @@
       ],
       "Pagination": {
         "Type": "NEXT-BUTTON",
-        "Selector": "a.next",
+        "Selector": "a.page-link.next",
         "PageLimit": 25
       }
     },

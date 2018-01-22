@@ -85,7 +85,7 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	function doFirstPageLoad($searchDetails)
+	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
     {
         $js = "
             setTimeout(clickSearchButton, " . strval($this->additionalLoadDelaySeconds) .");

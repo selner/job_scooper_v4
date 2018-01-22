@@ -41,18 +41,18 @@ class AbstractIcimsATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlug
 
 		foreach (array_keys($this->TagIndexes) as $tagKey) {
 			if (array_key_exists($tagKey, $this->TagIndexes) === true && is_null($this->TagIndexes[$tagKey]) !== true &&
-				array_key_exists($tagKey, $this->arrListingTagSetup)) {
-				if (array_key_exists(0, $this->arrListingTagSetup[$tagKey]) && is_array($this->arrListingTagSetup[$tagKey]) === true)
-					$this->arrListingTagSetup[$tagKey][0]['index'] = $this->TagIndexes[$tagKey];
+				array_key_exists($tagKey, $this->arrBaseListingTagSetup)) {
+				if (array_key_exists(0, $this->arrBaseListingTagSetup[$tagKey]) && is_array($this->arrBaseListingTagSetup[$tagKey]) === true)
+					$this->arrBaseListingTagSetup[$tagKey][0]['index'] = $this->TagIndexes[$tagKey];
 				else
-					$this->arrListingTagSetup[$tagKey]['index'] = $this->TagIndexes[$tagKey];
+					$this->arrBaseListingTagSetup[$tagKey]['index'] = $this->TagIndexes[$tagKey];
 			}
 		}
 
 		parent::__construct();
 	}
 
-	protected $arrListingTagSetup = array(
+	protected $arrBaseListingTagSetup = array(
 
 		'JobPostItem'          => array('selector' => 'div.iCIMS_JobsTable div.row'),
 		'Title'                => array('selector' => 'div.title a span'),
@@ -122,6 +122,37 @@ class AbstractIcimsATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlug
 		}
 
 		return parent::parseTotalResultsCount($objSimpHTML);
+	}
+
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return array|null
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+	{
+		$jobImpressions = $this->getActiveWebdriver()->executeScript('return window.jobImpressions;');
+		if(!empty($jobImpressions) && is_array($jobImpressions))
+		{
+			$ret = array();
+			foreach($jobImpressions as $jobImp)
+			{
+				$item = array(
+					"Title" => $jobImp["title"],
+					"JobSitePostId" => $jobImp["id"],
+					"Category" => $jobImp["category"],
+					"Company" => $jobImp["company"],
+					"EmploymentType" => $jobImp["positionType"],
+					"Location" => "{$jobImp["location"]["city"]} {$jobImp["location"]["state"]} {$jobImp["location"]["country"]}",
+					"Url" => $this->JobPostingBaseUrl
+				);
+				$ret[$jobImp["position"]] = $item;
+			}
+			return $ret;
+		}
+		else
+			return parent::parseJobsListForPage($objSimpHTML);
 	}
 
 	/**

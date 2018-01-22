@@ -25,7 +25,8 @@ class PluginCareerBuilder extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
 {
     protected $JobSiteName = 'CareerBuilder';
     protected $JobPostingBaseUrl = 'http://www.careerbuilder.com';
-    protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***&sc=date_desc";
+#	protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***&sc=date_desc&sort=date_desc";
+	protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&posted=3&sort=date_desc";
     protected $additionalBitFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
     protected $LocationType = 'location-city-dash-statecode';
     protected $additionalLoadDelaySeconds = 5;
@@ -38,10 +39,10 @@ class PluginCareerBuilder extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
         'Title' =>  array('selector' => 'h2 a', 'return_attribute' => 'text', 'index' => 0),
         'Url' =>  array('selector' => 'h2 a', 'return_attribute' => 'href', 'index' => 0),
         'JobSitePostId' =>  array('selector' => 'h2 a', 'index' => 0, 'return_attribute' => 'data-job-did'),
-        'Company' =>  array('selector' => 'div.job-information div h4 a'),
-        'EmploymentType' =>  array('selector' => 'div.job-information div h4.job-text', 'index'=> 0),
-        'Location' =>  array('selector' => 'div.job-information div h4.job-text', 'index'=> 2),
-        'PostedAt' =>  array('selector' => 'div.time-posted div.show-for-medium-up', 'return_attribute' => 'text'),
+        'Company' =>  array('selector' => 'h4.job-text a', 'index' => 0),
+        'EmploymentType' =>  array('selector' => 'h4.employment-info', 'index'=> 0),
+        'Location' =>  array('selector' => 'h4.job-text', 'index'=> 2),
+        'PostedAt' =>  array('selector' => 'div.time-posted div em', 'index' => 0, 'return_attribute' => 'text'),
         'NextButton' =>  array('selector' => 'a#next-button'),
     );
 
@@ -49,6 +50,48 @@ class PluginCareerBuilder extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
         $keywordval = parent::getKeywordURLValue($searchDetails);
         return strtolower($keywordval);
     }
+
+	/**
+	 * @return bool
+	 * @throws \Exception
+	 */
+	protected function goToNextPageOfResultsViaNextButton()
+	{
+		$secs = $this->additionalLoadDelaySeconds * 1000;
+		if ($secs <= 0)
+			$secs = 1000;
+
+		LogMessage("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...");
+
+		$js = "
+            scroll = setTimeout(doNextPage, 5000);
+            function doNextPage() 
+            {
+                var loadnext = document.querySelector(\"{$this->selectorMoreListings}\");
+                if(loadnext != null && !typeof(loadnext.click) !== \"function\" && loadnext.length >= 1) {
+                    loadnext = loadnext[0];  
+                } 
+                if(loadnext != null) {    
+                    console.log(\"Clicked load next results control a#next-button...\");
+                    loadnext.click();  
+                } 
+                else 
+                { 
+                    console.log(\"No next button found to click.\"); 
+                }
+            }
+              scroll = setTimeout(doNextPage, " . $secs . ");
+
+        ";
+
+		$this->runJavaScriptSnippet($js, false);
+
+		sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
+
+		return true;
+	}
+
+
 }
 
 
@@ -65,7 +108,7 @@ class PluginCareerBuilderUK extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpl
     protected $CountryCodes = array("UK");
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound' => array('selector' => 'h1', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
+        'NoPostsFound' => array('selector' => 'div.row.section-body-container.full-width div div strong', 'index' => 0, 'return_attribute' => 'text',  'return_value_callback' => 'matchesNoResultsPattern', 'callback_parameter' => "no results"),
         'TotalPostCount' => array('selector' => 'h1', 'index'=> 0, 'return_attribute' => 'text', 'return_value_regex' => '/(\d+).*?/'),
         'JobPostItem' => array('selector' => 'article.job-list'),
         'Url' => array('selector' => 'a.job-title', 'return_attribute' => 'href'),
@@ -78,10 +121,25 @@ class PluginCareerBuilderUK extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpl
         'JobSitePostId' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/\/([^\/]*)\/\?.*/'),
     );
 
-    static function checkNoJobResults($var)
-    {
-        return noJobStringMatch($var, "Nothing found");
-    }
+	/**
+	 * @param $searchDetails
+	 *
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+	{
+		$jsCode = "
+			var elem = document.querySelector(\"a.close-reveal-modal\");
+			if(elem != null)
+			{
+				elem.click();
+			}
+		";
+		$this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
+		$this->runJavaScriptSnippet($jsCode);
+
+	}
 
     protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails) {
         return strtolower(parent::getKeywordURLValue($searchDetails));

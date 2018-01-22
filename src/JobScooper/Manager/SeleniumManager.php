@@ -43,7 +43,6 @@ class SeleniumManager extends PropertyObject
 	 */
 	private $remoteWebDriver = null;
     private $additionalLoadDelaySeconds = null;
-    private $lastCookies = array();
     private $_seleniumIsRunning = false;
     private $_settings = null;
 
@@ -92,15 +91,7 @@ class SeleniumManager extends PropertyObject
         try {
             $driver = $this->get_driver();
 
-            foreach ($this->lastCookies as $cookie) {
-                $driver->manage()->addCookie(array(
-                    'name' => $cookie['name'],
-                    'value' => $cookie['value'],
-                ));
-            }
             $this->loadPage($url);
-
-            $this->lastCookies = $driver->manage()->getCookies();
 
             $src = $driver->getPageSource();
 
@@ -245,7 +236,7 @@ class SeleniumManager extends PropertyObject
         }
         else
         {
-            LogMessage("Did not attempt Selenium server shutdown since we didn't and can't autostart it.");
+            LogDebug("Did not attempt Selenium server shutdown since we didn't and can't autostart it.");
         }
 
     }
@@ -469,10 +460,10 @@ class SeleniumManager extends PropertyObject
 //	        $prof->setPreference("setEnableNativeEvents", true);
 //	        $prof->setPreference("webdriver.log.file", $fflog);
 //	        $prof->setPreference("webdriver.log.driver", "INFO");
-//
 //	        $capabilities->setCapability(FirefoxDriver::PROFILE, $prof);
 
 
+	        $capabilities->setCapability('acceptInsecureCerts', true);
 	        $capabilities->setCapability("setThrowExceptionOnScriptError", false);
             $capabilities->setCapability("unexpectedAlertBehaviour", "dismiss");
             $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);

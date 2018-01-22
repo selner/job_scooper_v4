@@ -25,6 +25,7 @@ class PluginAuthenticJobs extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
 #    protected $SearchUrlFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
     protected $LocationType = 'location-city';
     protected $JobListingsPerPage = 50;
+	private $_currentSearchDetails = null;
 
     protected $arrListingTagSetup = array(
         'NoPostsFound'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
@@ -43,10 +44,14 @@ class PluginAuthenticJobs extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
         return noJobStringMatch($var, "No jobs");
     }
 
+	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+	{
+		$this->_currentSearchDetails = $searchDetails;
+	}
 
     protected function goToEndOfResultsSetViaLoadMore($nTotalItems)
     {
-        $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage();
+        $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage($this->_currentSearchDetails);
 
         $node = $objSimplHtml->find("p.more");
         if($node == null || count($node) == 0)

@@ -556,23 +556,6 @@ abstract class JobSiteRecordQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related UserSearch object
-     * using the user_search_site_run table as cross reference
-     *
-     * @param UserSearch $userSearch the related object to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildJobSiteRecordQuery The current query, for fluid interface
-     */
-    public function filterByUserSearchFromUSSR($userSearch, $comparison = Criteria::EQUAL)
-    {
-        return $this
-            ->useUserSearchSiteRunQuery()
-            ->filterByUserSearchFromUSSR($userSearch, $comparison)
-            ->endUse();
-    }
-
-    /**
      * Exclude object from result
      *
      * @param   ChildJobSiteRecord $jobSiteRecord Object to remove from the list of results

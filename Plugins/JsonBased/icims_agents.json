@@ -19,14 +19,16 @@
                     "Fields": [
                         {
                             "Name": "JobPostItem",
-                            "Selector": "tr.iCIMS_JobListingRow",
+                            "Selector": "div.iCIMS_MainWrapper table tbody tr",
                             "Attribute": "collection",
+                            "Index" : 0,
                             "Type": "CSS"
                         },
                         {
                             "Name": "TotalResultPageCount",
                             "Selector": "div.iCIMS_Paginator_Bottom select[paginator='true'] option:last-child",
                             "Attribute": "collection",
+                            "Index" : 0,
                             "Type": "CSS"
                         }
                     ]
@@ -37,19 +39,21 @@
                         {
                             "Name": "Title",
                             "Selector": "td.iCIMS_JobsTableField_2 a",
+                            "Index" : 0,
                             "Type": "CSS"
                         },
                         {
                             "Name": "Url",
                             "Selector": "td.iCIMS_JobsTableField_2 a",
                             "Attribute": "href",
+                            "Index" : 0,
                             "Type": "CSS"
                         },
                         {
                             "Name": "JobSitePostId",
                             "Selector": "td.iCIMS_JobsTableField_1",
                             "Index" : 0,
-                            "Pattern": "/\\s*Job\\sID:(.*)/",
+                            "Pattern": "/(\\d+)/",
                             "Type": "CSS"
                         },
                         {

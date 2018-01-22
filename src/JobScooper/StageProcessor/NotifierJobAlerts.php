@@ -19,6 +19,7 @@ namespace JobScooper\StageProcessor;
 
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
+use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\Utils\JobsMailSender;
@@ -90,11 +91,12 @@ class NotifierJobAlerts extends JobsMailSender
 	}
 
 	/**
+	 * @param User $user
 	 * @return bool
 	 * @throws \Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	function processRunResultsNotifications()
+	function processRunResultsNotifications(User $user)
 	{
 		startLogSection("Processing user notification alerts");
 
@@ -109,7 +111,9 @@ class NotifierJobAlerts extends JobsMailSender
 		$matches = array();
 		$matches["all"] = getAllMatchesForUserNotification(
 			[UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
-			null
+			null,
+			null,
+			$user
 		);
 
 		if(empty($matches["all"]))
@@ -128,18 +132,19 @@ class NotifierJobAlerts extends JobsMailSender
 		else
 			$subject = countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]) . " New Job Postings: " . getRunDateRange();
 
-		return $this->_sendResultsNotification($matches, $subject);
+		return $this->_sendResultsNotification($matches, $subject, $user);
 	}
 
 
 	/**
+	 * @param User $user
 	 * @return bool
 	 * @throws \Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	function processWeekRecapNotifications()
+	function processWeekRecapNotifications(User $user)
 	{
-		startLogSection("Processing week recap notification...");
+		startLogSection("Processing week recap notification for " . $user->getUserSlug() . "...");
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -155,7 +160,8 @@ class NotifierJobAlerts extends JobsMailSender
 		$matches["all"] = getAllMatchesForUserNotification(
 			array([UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT], Criteria::IN),
 			null,
-			7
+			7,
+			$user
 		);
 
 		if(empty($matches["all"]))
@@ -170,15 +176,16 @@ class NotifierJobAlerts extends JobsMailSender
 		$matches["isUserJobMatchAndNotExcluded"] = array_filter($matches["all"], "isUserJobMatchAndNotExcluded");
 
 		$subject = "Weekly Roundup for " . getRunDateRange(7);
-		return $this->_sendResultsNotification($matches, $subject);
+		return $this->_sendResultsNotification($matches, $subject, $user);
 	}
 
 	/**
+	 * @param User $sendToUser
 	 * @return bool
 	 * @throws \Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	private function _sendResultsNotification($matches, $resultsTitle)
+	private function _sendResultsNotification($matches, $resultsTitle, User $sendToUser)
 	{
 		//
 		// Output the final files we'll send to the user
@@ -210,17 +217,17 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		startLogSection("Generating HTML & text email content for user ");
 
-		$messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches);
+		$messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, $sendToUser);
 
 		endLogSection("Email content ready to send.");
 
 		//
 		// Send the email notification out for the completed job
 		//
-		startLogSection("Sending email to user...");
+		startLogSection("Sending email to user " . $sendToUser->getEmailAddress() ."...");
 
 		try {
-			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results");
+			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results", $sendToUser);
 			if ($ret !== false || $ret !== null) {
 				if (!isDebug()) {
 					if (!empty($matches['all'])) {
@@ -290,11 +297,12 @@ class NotifierJobAlerts extends JobsMailSender
 	/**
 	 * @param $subject
 	 * @param $matches
+	 * @param User $user
 	 *
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function _generateHTMLEmailContent($subject, &$matches)
+	private function _generateHTMLEmailContent($subject, &$matches, $user)
 	{
 		$renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_results_responsive.tmpl")));
 
@@ -318,20 +326,11 @@ class NotifierJobAlerts extends JobsMailSender
 			"JobMatches" => $matches["isUserJobMatchAndNotExcluded"]
 		);
 
-		$keywordSets = getConfigurationSetting("user_keyword_sets");
-		$allKwds = array();
-		if(!empty($keywordSets)) {
-			foreach ($keywordSets as $set) {
-				$kwds = $set->getKeywords();
-				if (!is_array($set->getKeywords()))
-					$kwds = preg_split("/\s?,\s?/", $kwds);
-				$allKwds = array_merge($allKwds, $kwds);
+		$kwds = $user->getSearchKeywords();
+		$data['Search']['Keywords'] = join(", ", $kwds);
 
-			$data['Search']['Keywords'] = join(", ", $allKwds);
-			}
-		}
+		$locations = $user->getSearchGeoLocations();
 
-		$locations = getConfigurationSetting("search_locations");
 		$searchLocNames = array();
 		if(!empty($locations)) {
 			foreach ($locations as $loc)
@@ -340,7 +339,7 @@ class NotifierJobAlerts extends JobsMailSender
 			$data['Search']['Locations'] = join(", ", $searchLocNames);
 		}
 
-		$html = $renderer($data);
+		$html = call_user_func($renderer, $data);
 
 		if(isDebug())
 			file_put_contents(getDefaultJobsOutputFileName("email", "notification", "html", "_", "debug"), $html);
@@ -371,9 +370,11 @@ class NotifierJobAlerts extends JobsMailSender
 
 		$dataSheet = $spreadsheet->getActiveSheet();
 
+		$nHeaderDataRow = 2;
 		$nFirstDataRow = 3;
+		$startHeaderCell = "A" . strval($nHeaderDataRow);
 		$startCell = "A" . strval($nFirstDataRow);
-		$lastCol = chr(ord("A") + (count($keys)));
+		$lastCol = chr(ord("A") + (count($keys)- 1));
 		$lastCellFirstRow = $lastCol . strval($nFirstDataRow);
 		$lastCellLastRow = $lastCol . strval($nFirstDataRow + countAssociativeArrayValues($arrResults));
 
@@ -383,8 +384,8 @@ class NotifierJobAlerts extends JobsMailSender
 		$dataSheet->fromArray(
 			$arrResults,    // The data to set
 			null,  // Array values with this value will not be set
-			$startCell      // Top left coordinate of the worksheet range where
-							//    we want to set these values (default is A1)
+			$startCell,      // Top left coordinate of the worksheet range where
+			true//    we want to set these values (default is A1)
 		);
 
 		//
@@ -419,6 +420,7 @@ class NotifierJobAlerts extends JobsMailSender
 			}
 		}
 
+		$dataSheet->setAutoFilter("{$startHeaderCell}:{$lastCellLastRow}");
 
 	}
 }

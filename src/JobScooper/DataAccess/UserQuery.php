@@ -24,21 +24,23 @@ class UserQuery extends BaseUserQuery
 	 *
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 *
+	 * @return User|null
+	 *
 	 */
-	static function findOrCreateUserByConfigPath($config_file, $arrUserFactsToSet = array(), $overwriteFacts = false)
+	static function findOrCreateUserByUserSlug($slug, $arrUserFactsToSet = array(), $overwriteFacts = false)
 	{
-		if (empty($config_file))
-			throw new \Exception("Unable to search for user by config file.  Missing required config file path parameter.");
+		if (empty($slug))
+			throw new \Exception("Unable to search for user by user slug.  Missing required user slug parameter.");
 
 		$user = UserQuery::create()
-			->filterByConfigFilePath($config_file)
+			->filterByUserSlug($slug)
 			->findOneOrCreate();
-
-		$user->setConfigFilePath($config_file);
 
 		if($user->isNew() || $overwriteFacts === true)
 		{
 			UserQuery::updateUserFacts($user, $arrUserFactsToSet);
+			$user->setUserSlug($slug);
 		}
 		$user->save();
 
@@ -50,7 +52,8 @@ class UserQuery extends BaseUserQuery
 	 * @param array $arrUserFactsToSet
 	 * @param bool  $overwriteFacts
 	 *
-	 * @return null
+	 * @throws \Exception
+	 * @return User|null
 	 */
 	static function findUserByEmailAddress($email_address, $arrUserFactsToSet = array(), $overwriteFacts = false)
 	{

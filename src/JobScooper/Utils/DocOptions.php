@@ -21,11 +21,10 @@ class DocOptions extends PropertyObject
 {
     public $arguments = array();
 
-private $doc = <<<DOC
-{APP_RUN_COMMAND}
+private $doc = "{APP_RUN_COMMAND}
 
 Usage:
-  {APP_RUN_COMMAND} <configfile> [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--debug --debug-userid=<userid>] [--disable-notifications] 
+  {APP_RUN_COMMAND} <configfile> [--user=<config_user_key>] [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--recap] [--delete] [--debug] [--disable-notifications] 
   {APP_RUN_COMMAND} <configfile> [--debug] [--disable-notifications]
   {APP_RUN_COMMAND} (-h | --help)
   {APP_RUN_COMMAND} --version
@@ -33,14 +32,14 @@ Usage:
 Options:
   -h --help                 Show this screen.
   --version                 Show version.
+  --user=<config_user_key>  Which set of user configuration settings should we run.  
   --stages=<stage_numbers>  Comma-separated list of stage numbers to run from 1 - 4. [default: 1,2,3]
   --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey. [default: all]
-  --week-recap			    Just send a recap notifiction email for job matches from the past 7 days
-  --debug                   Show debug output. [default: false]
-  --debug-userid=<userid>   Debug mode only.  Override the user configuration and instead use the UserID specified.  [Default: null]
+  --debug  Show debug output. [default: false]
+  --delete  Removes the user data associated with specified users.
+  --recap  Sends a weekly jobs recap notification to specified users.  
   --disable-notifications   Do not send email alerts for new jobs. [default: false]
-
-DOC;
+";
 
     public function __construct($commandFile)
     {
