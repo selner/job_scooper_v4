@@ -305,7 +305,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 					$this->selenium->done();
 				}
 			} catch (Exception $ex) {
-				LogWarning("Unable to shutdown Selenium server successfully while closing down downloads for {$this->JobSiteName}: " . $ex->getMessage());
+				LogWarning("Unable to shutdown Selenium remote webdriver successfully while closing down downloads for {$this->JobSiteName}: " . $ex->getMessage());
             }
             finally
             {
