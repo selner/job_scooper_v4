@@ -1719,6 +1719,8 @@ JSCODE;
 
                     LogMessage("Getting jobs page # " . $nPageCount . " of " . $totalPagesCount . " from " . $strURL . ".  Total listings loaded:  " . ($nItemCount == 1 ? 0 : $nItemCount) . "/" . $nTotalListings . ".");
                     try {
+						$arrJsonLDJobs = $this->parseJobsFromLdJson($objSimpleHTML);
+
                         $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
                         if (!is_array($arrPageJobsList)) {
                             // we likely hit a page where jobs started to be hidden.
@@ -1730,6 +1732,11 @@ JSCODE;
                             LogMessage($strWarnHiddenListings);
                             $nPageCount = $totalPagesCount;
                         }
+                        else {
+                        	foreach($arrPageJobsList as $k => $v)
+                        		if(array_key_exists("JobSitePostId", $v) && array_key_exists($v["JobSitePostId"], $arrJsonLDJobs))
+                        			$arrPageJobsList[$k] = array_merge($v, $arrJsonLDJobs[$v["JobSitePostId"]]);
+                        	}
 
                         if (is_array($arrPageJobsList)) {
 
@@ -1914,6 +1921,94 @@ JSCODE;
 
 	    return $searchDetails->nextResultsPageUrl;
     }
+
+
+
+	/**
+	 * /**
+	 * getJobsFromLdJson
+	 *
+	 * This does the heavy lifting of parsing job records from
+	 * LD+JSON found in the page
+	 * *
+	 */
+	function parseJobsFromLdJson($objSimpHTML)
+	{
+		$ret = array();
+
+		if(empty($objSimpHTML) || !method_exists($objSimpHTML, "find"))
+			return null;
+
+		$jsonNodes = $objSimpHTML->find("script[type='application/ld+json']");
+		if(!empty($jsonNodes) && is_array($jsonNodes)) {
+			$item = array();
+			foreach ($jsonNodes as $node) {
+				$jsonText = $node->text();
+				try
+				{
+					$jsonData = decodeJSON($jsonText);
+					if(!empty($jsonData) && is_array($jsonData))
+					{
+						if(!array_key_exists("@type",$jsonData) || $jsonData["@type"] != "JobPosting")
+							return null;
+
+						foreach($jsonData as $key => $value) {
+							switch ($key)
+							{
+								case "datePosted":
+									$item['PostedAt'] = $value;
+									break;
+
+								case "@id":
+									$item['JobSitePostId'] = $value;
+									break;
+
+								case "title":
+									$item['Title'] = $value;
+									break;
+
+								case "occupationalCategory":
+									$item['Category'] = $value;
+									break;
+
+								case "hiringOrganization":
+									if(array_key_exists("name",$value))
+										$item['Company'] = $value['name'];
+									break;
+
+								case "jobLocation":
+									if(array_key_exists(0, $value))
+										$value = $value[0];
+									if(array_key_exists("@type", $value) && $value["@type"] === "Place" &&
+										array_key_exists("address", $value))
+									{
+										$address = $value["address"];
+										if(array_key_exists("addressLocality", $address) && $address["addressLocality"] != "not set")
+											$item['Location'] = $address["addressLocality"];
+
+										if(array_key_exists("addressRegion", $address) && $address["addressRegion"] != "not set")
+											$item['Location'] .= " " . $address["addressRegion"];
+
+										if(array_key_exists("addressCountry", $address) && $address["addressCountry"] != "not set")
+											$item['Location'] .= " " . $address["addressCountry"];
+									}
+									break;
+							}
+						}
+						$ret[$item['JobSitePostId']] = $item;
+
+					}
+
+				} catch (Exception $ex)
+				{
+					LogDebug("Error parsing LD+JSON for " . $this->getJobSiteKey() . ": " . $ex->getMessage());
+				}
+			}
+		}
+		return $ret;
+	}
+
+
 }
 
 
