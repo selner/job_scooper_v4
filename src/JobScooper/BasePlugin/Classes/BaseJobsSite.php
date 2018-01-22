@@ -1397,6 +1397,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		}
 		try {
 			$driver = $this->getActiveWebdriver();
+			LogMessage("Getting host page for JSON query {$hostPageUri}");
 			$driver->get($hostPageUri);
 			$apiNodeId = "jobs_api_data";
 
