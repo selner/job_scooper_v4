@@ -42,7 +42,7 @@ class ErrorEmailLogHandler extends MailHandler
         );
         $renderer = loadTemplate(__ROOT__ . '/src/assets/templates/html_email_error_alerts.tmpl');
 
-        $htmlBody = $renderer($data);
+	    $htmlBody = call_user_func($renderer, $data);
 
         $mailer = new JobsMailSender(true);
         return $mailer->sendEmail("", $htmlBody, null, $subject, "errors");
