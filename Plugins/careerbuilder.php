@@ -65,7 +65,7 @@ class PluginCareerBuilderUK extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpl
     protected $CountryCodes = array("UK");
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound' => array('selector' => 'h1', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
+        'NoPostsFound' => array('selector' => 'div.row.section-body-container.full-width div div strong', 'index' => 0, 'return_attribute' => 'text',  'return_value_callback' => 'matchesNoResultsPattern', 'callback_parameter' => "no results"),
         'TotalPostCount' => array('selector' => 'h1', 'index'=> 0, 'return_attribute' => 'text', 'return_value_regex' => '/(\d+).*?/'),
         'JobPostItem' => array('selector' => 'article.job-list'),
         'Url' => array('selector' => 'a.job-title', 'return_attribute' => 'href'),
@@ -78,10 +78,25 @@ class PluginCareerBuilderUK extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpl
         'JobSitePostId' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/\/([^\/]*)\/\?.*/'),
     );
 
-    static function checkNoJobResults($var)
-    {
-        return noJobStringMatch($var, "Nothing found");
-    }
+	/**
+	 * @param $searchDetails
+	 *
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+	{
+		$jsCode = "
+			var elem = document.querySelector(\"a.close-reveal-modal\");
+			if(elem != null)
+			{
+				elem.click();
+			}
+		";
+		$this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
+		$this->runJavaScriptSnippet($jsCode);
+
+	}
 
     protected function getKeywordURLValue(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails) {
         return strtolower(parent::getKeywordURLValue($searchDetails));
