@@ -1553,17 +1553,18 @@ JSCODE;
 
 	        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                 try {
-                    if (is_null($this->selenium)) {
-                        $this->selenium = new SeleniumManager($this->additionalLoadDelaySeconds);
-                    }
-                    else
-                    {
-                    	// Close out any previous webdriver sessions before we start anew
-                    	$this->selenium->done();
-                    }
+	                if (is_null($this->selenium)) {
+		                $this->selenium = new SeleniumManager($this->additionalLoadDelaySeconds);
+	                } else {
+		                // Close out any previous webdriver sessions before we start anew
+		                $this->selenium->done();
+	                }
 
-                    if (method_exists($this, "doFirstPageLoad") && $nPageCount == 1)
-                        $html = $this->doFirstPageLoad($searchDetails);
+	                if (method_exists($this, "doFirstPageLoad") && $nPageCount == 1) {
+		                $html = $this->doFirstPageLoad($searchDetails);
+		                if(empty($html) && $this->getActiveWebdriver()->getCurrentURL() === "about:blank")
+			                $html = $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
+	                }
                     else
                         $html = $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
                     $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
