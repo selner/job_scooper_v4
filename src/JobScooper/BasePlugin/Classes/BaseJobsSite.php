@@ -1205,7 +1205,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 		LogMessage("Executing JavaScript in browser:  " . $jscript);
 
-		$ret = $driver->executeScript($jscript);
+			$ret = $driver->executeScript($jscript);
 
 		sleep(5);
 
@@ -1389,7 +1389,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return mixed|null
 	 * @throws \Exception
 	 */
-	protected function getJsonApiResult($apiUri, $hostPageUri)
+	protected function getJsonApiResult($apiUri, $searchDetails, $hostPageUri)
 	{
 		if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
 			try {
@@ -1479,20 +1479,20 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 JSCODE;
 
+			LogMessage("Executing JavaScript: ".PHP_EOL ." {$jsCode}");
 			$driver->manage()->timeouts()->setScriptTimeout(30);
 			$response = $driver->executeAsyncScript($jsCode, array());
 			if (empty($response)) {
 				$simpHtml = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
 				$node = $simpHtml->find("script#{$apiNodeId}");
 				if (!empty($node)) {
-					$val = $node[0]->text();
+					$response = $node[0]->text();
 
 				}
 			}
 			try
 			{
 				$data= json_decode($response);
-
 			}
 			catch (\Exception $ex)
 			{

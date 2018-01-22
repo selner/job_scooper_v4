@@ -105,7 +105,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 			$hostPageUri = $this->currentJsonSearchDetails->nextResultsPageUrl;
 
 		$ret = array();
-		$respdata = $this->getJsonApiResult($apiUri, $hostPageUri);
+		$respdata = $this->getJsonApiResult($apiUri, $this->currentJsonSearchDetails, $hostPageUri);
 		if(!empty($respdata))
 		{
 			$this->lastResponseData = $respdata;
@@ -480,7 +480,7 @@ class PluginHamptonRoads extends AbstractAdicio
 class PluginAnalyticTalent extends AbstractAdicio
 {
 	protected $JobSiteName = 'AnalyticTalent';
-	protected $childSiteURLBase = 'http://careers.analytictalent.com';
+	protected $childSiteURLBase = 'http://www.analytictalent.datasciencecentral.com';
 	protected $LastKnownSiteLayout = "jobsresponsivedefault";
 }
 
