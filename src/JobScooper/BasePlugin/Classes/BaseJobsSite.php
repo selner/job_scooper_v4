@@ -862,7 +862,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		$this->runJavaScriptSnippet($js, false);
 
 		sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
-
+		LogMessage("Page Url is now " . $this->getActiveWebdriver()->getCurrentURL());
 		return true;
 	}
 
@@ -1733,10 +1733,13 @@ JSCODE;
                             $nPageCount = $totalPagesCount;
                         }
                         else {
-                        	foreach($arrPageJobsList as $k => $v)
-                        		if(array_key_exists("JobSitePostId", $v) && array_key_exists($v["JobSitePostId"], $arrJsonLDJobs))
-                        			$arrPageJobsList[$k] = array_merge($v, $arrJsonLDJobs[$v["JobSitePostId"]]);
-                        	}
+	                        if (!empty($arrJsonLDJobs)) {
+		                        foreach ($arrPageJobsList as $k => $v) {
+			                        if (!empty($v) && array_key_exists("JobSitePostId", $v) && array_key_exists($v["JobSitePostId"], $arrJsonLDJobs))
+				                        $arrPageJobsList[$k] = array_merge($v, $arrJsonLDJobs[$v["JobSitePostId"]]);
+		                        }
+	                        }
+                        }
 
                         if (is_array($arrPageJobsList)) {
 
