@@ -18,9 +18,7 @@
 namespace JobScooper\BasePlugin\Classes;
 
 use DiDom\Query;
-use JobScooper\DataAccess\UserSearchSiteRun;
-use JobScooper\Utils\ExtendedDiDomDocument;
-use JobScooper\Utils\ExtendedDiDomElement;
+use \Exception;
 use JobScooper\Utils\SimpleHTMLHelper;
 
 /**
@@ -49,7 +47,7 @@ class SimplePlugin extends BaseJobsSite
             $this->arrListingTagSetup = array();
 
         if(!empty($this->arrBaseListingTagSetup))
-            $this->arrListingTagSetup = array_replace_recursive($this->arrBaseListingTagSetup, $this->arrListingTagSetup);
+            $this->arrListingTagSetup = array_replace($this->arrBaseListingTagSetup, $this->arrListingTagSetup);
 
         if (strlen($this->JobPostingBaseUrl) == 0)
             $this->JobPostingBaseUrl = $this->childSiteURLBase;
@@ -478,85 +476,85 @@ class SimplePlugin extends BaseJobsSite
         return $ret;
     }
 
-    /**
-     * /**
-     * parseJobsListForPage
-     *
-     * This does the heavy lifting of parsing each job record from the
-     * page's HTML it was passed.
-     * *
-     */
-    function getJobFactsFromMicrodata($objSimpHTML, $item=array())
-    {
+	/**
+	 * /**
+	 * parseJobsListForPage
+	 *
+	 * This does the heavy lifting of parsing each job record from the
+	 * page's HTML it was passed.
+	 * *
+	 */
+	function getJobFactsFromMicrodata($objSimpHTML, $item=array())
+	{
 
-        if(empty($objSimpHTML) || !method_exists($objSimpHTML, "find"))
-            return $item;
+		if(empty($objSimpHTML) || !method_exists($objSimpHTML, "find"))
+			return $item;
 
-        $itempropNodes = $objSimpHTML->find("*[itemprop]");
-        if(!empty($itempropNodes) && is_array($itempropNodes)) {
-            foreach ($itempropNodes as $node) {
-                $attribs = $node->attributes();
+		$itempropNodes = $objSimpHTML->find("*[itemprop]");
+		if(!empty($itempropNodes) && is_array($itempropNodes)) {
+			foreach ($itempropNodes as $node) {
+				$attribs = $node->attributes();
 
-                if (!empty($attribs)) {
-	                $itemPropKind = strtolower($attribs['itemprop']);
-	                $eachProp = preg_split("/\s+/", $itemPropKind);
-	                foreach ($eachProp as $propKind)
-	                {
-		                switch ($propKind) {
-			                case "itemlistelement":
-				                if (array_key_exists("id", $attribs))
-					                $item['JobSitePostId'] = $attribs['id'];
-				                if (array_key_exists("data-index", $attribs))
-					                $item['JobSitePostId'] = empty($item['JobSitePostId']) ? $attribs['data-index'] : $item['JobSitePostId'] . "-" . $attribs['data-index'];
-				                break;
+				if (!empty($attribs)) {
+					$itemPropKind = strtolower($attribs['itemprop']);
+					$eachProp = preg_split("/\s+/", $itemPropKind);
+					foreach ($eachProp as $propKind)
+					{
+						switch ($propKind) {
+							case "itemlistelement":
+								if (array_key_exists("id", $attribs))
+									$item['JobSitePostId'] = $attribs['id'];
+								if (array_key_exists("data-index", $attribs))
+									$item['JobSitePostId'] = empty($item['JobSitePostId']) ? $attribs['data-index'] : $item['JobSitePostId'] . "-" . $attribs['data-index'];
+								break;
 
-			                case "name":
-			                case "title":
-				                $item['Title'] = combineTextAllChildren($node);
-				                break;
+							case "name":
+							case "title":
+								$item['Title'] = combineTextAllChildren($node);
+								break;
 
-			                case "identifier":
-				                $item['Title'] = combineTextAllChildren($node);
-				                break;
+							case "identifier":
+								$item['Title'] = combineTextAllChildren($node);
+								break;
 
-			                case "url":
-				                $item['Url'] = $attribs['href'];
-				                break;
+							case "url":
+								$item['Url'] = $attribs['href'];
+								break;
 
-			                case "joblocation":
-			                case "address":
-			                case "postaladdress":
-				                $item['Location'] = combineTextAllChildren($node);
-				                break;
+							case "joblocation":
+							case "address":
+							case "postaladdress":
+								$item['Location'] = combineTextAllChildren($node);
+								break;
 
-			                case "employmenttype":
-				                $item['EmploymentType'] = combineTextAllChildren($node);
-				                break;
+							case "employmenttype":
+								$item['EmploymentType'] = combineTextAllChildren($node);
+								break;
 
-			                case "dateposted":
-				                $item['PostedAt'] = combineTextAllChildren($node);
-				                break;
+							case "dateposted":
+								$item['PostedAt'] = combineTextAllChildren($node);
+								break;
 
-			                case "industry":
-			                case "occupationalcategory":
-				                $item['Category'] = combineTextAllChildren($node);
-				                break;
+							case "industry":
+							case "occupationalcategory":
+								$item['Category'] = combineTextAllChildren($node);
+								break;
 
-			                case "hiringorganization":
-				                $item['Company'] = combineTextAllChildren($node);
-				                break;
-
-
-		                }
-                    }
-                }
-            }
-        }
-        return $item;
-    }
+							case "hiringorganization":
+								$item['Company'] = combineTextAllChildren($node);
+								break;
 
 
-    /**
+						}
+					}
+				}
+			}
+		}
+		return $item;
+	}
+
+
+	/**
      * /**
      * parseJobsListForPage
      *
@@ -598,7 +596,7 @@ class SimplePlugin extends BaseJobsSite
 
                 foreach(array_keys($this->arrListingTagSetup) as $itemKey)
                 {
-                    if(in_array($itemKey, ["JobPostItem", "NextButton", "TotalPostCount", "NoPostsFound"]))
+                    if(in_array($itemKey, ["JobPostItem", "NextButton", "TotalResultPageCount", "TotalPostCount", "NoPostsFound"]))
                         continue;
 
                     $newVal = $this->_getTagValueFromPage_($node, $itemKey, $item);
