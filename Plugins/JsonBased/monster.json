@@ -64,16 +64,16 @@
             },
             {
               "Name": "Company",
-              "Selector": "div.company a",
+              "Selector": "div.company a span",
               "Index": 0,
-              "Attribute": "title",
+              "Attribute": "text",
               "Type": "CSS"
             },
             {
               "Name": "Location",
               "Selector": "div.job-specs-location p a",
               "Index": 0,
-              "Attribute": "title",
+              "Attribute": "text",
               "Type": "CSS"
             },
             {
