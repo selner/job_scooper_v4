@@ -58,8 +58,8 @@ class PluginBoeing extends AbstractTalentBrew
         'Title' =>  array('selector' => 'a h2'),
         'Url' =>  array('selector' => 'a', 'return_attribute' => 'href'),
         'JobSitePostId' =>  array('selector' => 'a', 'return_attribute' => 'data-job-id'),
-//        'Location' =>  array('selector' => 'a h2', 'return_value_regex' =>  '/[^–]*\s?–\s(.*)/i'),
-        'PostedAt' =>  array('selector' => 'span.job-date-posted'),
+        'Location' =>  array('selector' => 'li', 'return_value_callback' =>  'splitValue', 'callback_parameter' => array("\n", 1)),
+        'PostedAt' =>  array('selector' => 'li', 'return_value_callback' =>  'splitValue', 'callback_parameter' => array("\n", 2)),
         'NextButton' => array('selector' => '#pagination-bottom a.next')
     );
 
