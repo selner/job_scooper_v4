@@ -194,8 +194,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
 			$searchToKeep = null;
-            foreach (array_keys($arrSearches) as $searchkey)
-            {
+			foreach (array_keys($arrSearches) as $searchkey) {
 				$search = $arrSearches[$searchkey];
 				if (empty($searchToKeep))
 					$searchToKeep = $search;
@@ -222,22 +221,20 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 		if (count($this->arrSearchesToReturn) == 0) {
 			LogMessage($this->JobSiteName . ": no searches set. Skipping...");
+
 			return array();
 		}
 
-        try
-        {
+		try {
 			/*
 				Check to see if we should pull new job listings now.  If we ran too recently, this will skip the run
 			*/
-            foreach ($this->arrSearchesToReturn as $search)
-            {
+			foreach ($this->arrSearchesToReturn as $search) {
 				$this->_curlWrapper = new CurlWrapper();
 
 				try {
 					if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
-                        try
-                        {
+						try {
 							$this->selenium = new SeleniumManager();
 						} catch (Exception $ex) {
 							handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
@@ -260,10 +257,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			 *  to all users.  If that is the case, update user matches to assets any jobs that were loaded previously
 			 *  but the user is currently missing from their potential job matches.
 			 */
-            if ((strcasecmp($this->resultsFilterType, "all-only") == 0) || (strcasecmp($this->resultsFilterType, "all-by-location") == 0))
-            {
-                try
-                {
+			if ((strcasecmp($this->resultsFilterType, "all-only") == 0) || (strcasecmp($this->resultsFilterType, "all-by-location") == 0)) {
+				try {
 					LogMessage("Checking for missing " . $this->JobSiteKey . " jobs for user " . $this->_currentUserForSearches->getUserId() . ".");
 					$dataExistingUserJobMatchIds = UserJobMatchQuery::create()
 						->select("JobPostingId")
@@ -286,9 +281,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 						LogMessage("Found " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs not yet assigned to user " . $this->_currentUserForSearches->getUserSlug() . ".");
 						$this->_addJobMatchIdsToUser($jobIdsToAddToUser, $search);
 						LogMessage("Successfully added " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs to user " . $this->_currentUserForSearches->getUserSlug() . ".");
-                    }
-                    else
-                    {
+					} else {
 						LogMessage("User " . $this->_currentUserForSearches->getUserSlug() . " had no missing previously loaded listings from " . $this->JobSiteKey . ".");
 					}
 				} catch (Exception $ex) {
@@ -299,16 +292,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		} catch (Exception $ex) {
 			throw $ex;
 		} finally {
-            try
-            {
+			try {
 				if (!is_null($this->selenium)) {
 					$this->selenium->done();
 				}
 			} catch (Exception $ex) {
 				LogWarning("Unable to shutdown Selenium remote webdriver successfully while closing down downloads for {$this->JobSiteName}: " . $ex->getMessage());
-            }
-            finally
-            {
+			} finally {
 				$this->selenium = null;
 			}
 		}
@@ -388,9 +378,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	{
 		if (empty($this->CountryCodes)) {
 			$this->CountryCodes = array("US");
-	    }
-	    else
-	    {
+		} else {
 			foreach ($this->CountryCodes as $k => $code) {
 				if (!empty($code) && array_key_exists(strtoupper($code), GeoLocation::$COUNTRY_CODE_REMAPPINGS))
 					$this->CountryCodes[$k] = GeoLocation::$COUNTRY_CODE_REMAPPINGS[$code];
@@ -488,9 +476,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		$arrTokens = array();
 		preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strUrl, $tokenlist, PREG_SET_ORDER);
 		if (!empty($tokenlist) && is_array($tokenlist)) {
-			foreach($tokenlist as $item)
-			{
-				if(count($item) >= 3) {
+			foreach ($tokenlist as $item) {
+				if (count($item) >= 3) {
 					$tokenType = $item[1];
 					$srcValue = $item[0];
 					$tokFmt = $item[2];
@@ -863,7 +850,19 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 		sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
 		LogMessage("Page Url is now " . $this->getActiveWebdriver()->getCurrentURL());
+
 		return true;
+	}
+
+	function splitValue($var)
+	{
+		$val = $var[0];
+		$delim = $var[1];
+		$index = $var[2];
+
+		$match_value = $var[1];
+		$parts = preg_split("/{$delim}/", $val);
+		return $parts[$index];
 	}
 
 

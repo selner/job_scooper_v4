@@ -467,7 +467,7 @@ class SimplePlugin extends BaseJobsSite
                 throw new \Exception($strError);
             }
 
-            if (array_key_exists("callback_parameter", $arrTag) && (strlen($arrTag['callback_parameter']) > 0))
+            if (array_key_exists("callback_parameter", $arrTag) && !empty($arrTag['callback_parameter']))
                 $ret = call_user_func($callback, array($ret, $arrTag['callback_parameter']));
             else
                 $ret = call_user_func($callback, $ret);
