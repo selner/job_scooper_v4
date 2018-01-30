@@ -55,22 +55,22 @@
         },
         {
           "Name": "Location",
-          "Selector": "div.show-on-large .hide-on-med-and-down p span",
-          "Index" : 0,
+          "Selector": "div div p span",
+          "Index" : 1,
           "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "Company",
-          "Selector": "div.show-on-large .hide-on-med-and-down p span",
-          "Index" : 1,
+          "Selector": "div div p span",
+          "Index" : 0,
           "Attribute": "text",
           "Type": "CSS"
         },
 
         {
           "Name": "PostedAt",
-          "Selector": "div.show-on-large .hide-on-med-and-down p span",
+          "Selector": "div div p span",
           "Index" : 2,
           "Attribute": "text",
           "Type": "CSS"
