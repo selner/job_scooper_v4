@@ -854,15 +854,22 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		return true;
 	}
 
-	function splitValue($var)
+	static function splitValue($var)
 	{
-		$val = $var[0];
-		$delim = $var[1];
-		$index = $var[2];
 
-		$match_value = $var[1];
-		$parts = preg_split("/{$delim}/", $val);
-		return $parts[$index];
+		$val = $var[0];
+
+		if(empty($val))
+			return null;
+
+		if(is_array($var[1])) {
+			$delim = $var[1]['delimeter'];
+			$index = $var[1]['index'];
+			$parts = preg_split("/{$delim}/", $val);
+			return $parts[$index];
+		}
+
+		return null;
 	}
 
 
