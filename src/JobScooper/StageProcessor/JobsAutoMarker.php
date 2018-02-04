@@ -149,15 +149,17 @@ class JobsAutoMarker
 			$sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string('7 days ago'));
 			$included_sites = array_keys(JobSitePluginBuilder::getIncludedJobSites());
 
-			$duplicatePostings = JobPostingQuery::create()
-				->filterByDuplicatesJobPostingId(null)
-				->filterByJobSiteKey($included_sites, Criteria::IN)
-				->filterByFirstSeenAt(array('min' => $sinceWhen))
-				->withColumn('COUNT(jobposting_id)', "DupeCount")
-				->withColumn('MIN(jobposting_id)', "PrimaryJobPostingId")
-				->select(array("PrimaryJobPostingId", "Company", "Title", "KeyCompanyAndTitle", "DupeCount"))
-				->groupBy(array("KeyCompanyAndTitle", "Company", "Title"))
-				->having('DupeCount >= ?', 2, \PDO::PARAM_INT)
+			$dupeQuery = JobPostingQuery::create();
+
+			if(!empty($included_sites))
+				$dupeQuery->filterByJobSiteKey($included_sites, Criteria::IN);
+
+			$duplicatePostings = $dupeQuery->filterByFirstSeenAt(array('min' => $sinceWhen))
+				->select(array("KeyCompanyAndTitle"))
+				->addAsColumn("DupeCount", "COUNT(DISTINCT jobposting_id)")
+				->addAsColumn("PrimaryJobPostingId", "MIN(jobposting_id)")
+				->groupByKeyCompanyAndTitle()
+				->having('DupeCount > ?', 0, \PDO::PARAM_INT)
 				->find()
 				->getData();
 
