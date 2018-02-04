@@ -27,6 +27,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserQuery orderBySearchKeywords($order = Criteria::ASC) Order by the search_keywords column
  * @method     ChildUserQuery orderBySearchLocations($order = Criteria::ASC) Order by the search_locations column
  * @method     ChildUserQuery orderByInputFilesJson($order = Criteria::ASC) Order by the input_files_json column
+ * @method     ChildUserQuery orderByLastNotifiedAt($order = Criteria::ASC) Order by the date_last_notified column
+ * @method     ChildUserQuery orderByNotificationFrequency($order = Criteria::ASC) Order by the notification_frequency column
  *
  * @method     ChildUserQuery groupByUserId() Group by the user_id column
  * @method     ChildUserQuery groupByUserSlug() Group by the user_slug column
@@ -35,6 +37,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserQuery groupBySearchKeywords() Group by the search_keywords column
  * @method     ChildUserQuery groupBySearchLocations() Group by the search_locations column
  * @method     ChildUserQuery groupByInputFilesJson() Group by the input_files_json column
+ * @method     ChildUserQuery groupByLastNotifiedAt() Group by the date_last_notified column
+ * @method     ChildUserQuery groupByNotificationFrequency() Group by the notification_frequency column
  *
  * @method     ChildUserQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildUserQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -75,7 +79,9 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUser findOneByName(string $name) Return the first ChildUser filtered by the name column
  * @method     ChildUser findOneBySearchKeywords(array $search_keywords) Return the first ChildUser filtered by the search_keywords column
  * @method     ChildUser findOneBySearchLocations(array $search_locations) Return the first ChildUser filtered by the search_locations column
- * @method     ChildUser findOneByInputFilesJson(string $input_files_json) Return the first ChildUser filtered by the input_files_json column *
+ * @method     ChildUser findOneByInputFilesJson(string $input_files_json) Return the first ChildUser filtered by the input_files_json column
+ * @method     ChildUser findOneByLastNotifiedAt(string $date_last_notified) Return the first ChildUser filtered by the date_last_notified column
+ * @method     ChildUser findOneByNotificationFrequency(int $notification_frequency) Return the first ChildUser filtered by the notification_frequency column *
 
  * @method     ChildUser requirePk($key, ConnectionInterface $con = null) Return the ChildUser by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOne(ConnectionInterface $con = null) Return the first ChildUser matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -87,6 +93,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUser requireOneBySearchKeywords(array $search_keywords) Return the first ChildUser filtered by the search_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneBySearchLocations(array $search_locations) Return the first ChildUser filtered by the search_locations column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOneByInputFilesJson(string $input_files_json) Return the first ChildUser filtered by the input_files_json column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUser requireOneByLastNotifiedAt(string $date_last_notified) Return the first ChildUser filtered by the date_last_notified column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUser requireOneByNotificationFrequency(int $notification_frequency) Return the first ChildUser filtered by the notification_frequency column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUser[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUser objects based on current ModelCriteria
  * @method     ChildUser[]|ObjectCollection findByUserId(int $user_id) Return ChildUser objects filtered by the user_id column
@@ -96,6 +104,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUser[]|ObjectCollection findBySearchKeywords(array $search_keywords) Return ChildUser objects filtered by the search_keywords column
  * @method     ChildUser[]|ObjectCollection findBySearchLocations(array $search_locations) Return ChildUser objects filtered by the search_locations column
  * @method     ChildUser[]|ObjectCollection findByInputFilesJson(string $input_files_json) Return ChildUser objects filtered by the input_files_json column
+ * @method     ChildUser[]|ObjectCollection findByLastNotifiedAt(string $date_last_notified) Return ChildUser objects filtered by the date_last_notified column
+ * @method     ChildUser[]|ObjectCollection findByNotificationFrequency(int $notification_frequency) Return ChildUser objects filtered by the notification_frequency column
  * @method     ChildUser[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -194,7 +204,7 @@ abstract class UserQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_id, user_slug, email_address, name, search_keywords, search_locations, input_files_json FROM user WHERE user_id = :p0';
+        $sql = 'SELECT user_id, user_slug, email_address, name, search_keywords, search_locations, input_files_json, date_last_notified, notification_frequency FROM user WHERE user_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -585,6 +595,90 @@ abstract class UserQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(UserTableMap::COL_INPUT_FILES_JSON, $inputFilesJson, $comparison);
+    }
+
+    /**
+     * Filter the query on the date_last_notified column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByLastNotifiedAt('2011-03-14'); // WHERE date_last_notified = '2011-03-14'
+     * $query->filterByLastNotifiedAt('now'); // WHERE date_last_notified = '2011-03-14'
+     * $query->filterByLastNotifiedAt(array('max' => 'yesterday')); // WHERE date_last_notified > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $lastNotifiedAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserQuery The current query, for fluid interface
+     */
+    public function filterByLastNotifiedAt($lastNotifiedAt = null, $comparison = null)
+    {
+        if (is_array($lastNotifiedAt)) {
+            $useMinMax = false;
+            if (isset($lastNotifiedAt['min'])) {
+                $this->addUsingAlias(UserTableMap::COL_DATE_LAST_NOTIFIED, $lastNotifiedAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($lastNotifiedAt['max'])) {
+                $this->addUsingAlias(UserTableMap::COL_DATE_LAST_NOTIFIED, $lastNotifiedAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserTableMap::COL_DATE_LAST_NOTIFIED, $lastNotifiedAt, $comparison);
+    }
+
+    /**
+     * Filter the query on the notification_frequency column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByNotificationFrequency(1234); // WHERE notification_frequency = 1234
+     * $query->filterByNotificationFrequency(array(12, 34)); // WHERE notification_frequency IN (12, 34)
+     * $query->filterByNotificationFrequency(array('min' => 12)); // WHERE notification_frequency > 12
+     * </code>
+     *
+     * @param     mixed $notificationFrequency The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserQuery The current query, for fluid interface
+     */
+    public function filterByNotificationFrequency($notificationFrequency = null, $comparison = null)
+    {
+        if (is_array($notificationFrequency)) {
+            $useMinMax = false;
+            if (isset($notificationFrequency['min'])) {
+                $this->addUsingAlias(UserTableMap::COL_NOTIFICATION_FREQUENCY, $notificationFrequency['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($notificationFrequency['max'])) {
+                $this->addUsingAlias(UserTableMap::COL_NOTIFICATION_FREQUENCY, $notificationFrequency['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserTableMap::COL_NOTIFICATION_FREQUENCY, $notificationFrequency, $comparison);
     }
 
     /**

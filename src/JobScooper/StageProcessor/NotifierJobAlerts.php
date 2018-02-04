@@ -17,11 +17,8 @@
 
 namespace JobScooper\StageProcessor;
 
-use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
-use JobScooper\DataAccess\UserJobMatchQuery;
-use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\Utils\JobsMailSender;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -29,7 +26,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Font;
 use Propel\Runtime\ActiveQuery\Criteria;
-use Propel\Runtime\Propel;
 
 /**
  * Class NotifierJobAlerts
@@ -106,6 +102,12 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		$class = null;
+
+		if(!$user->canNotifyUser())
+		{
+			LogMessage("Notification would violate the user's notification frequency.  Skipping send");
+			return false;
+		}
 
 		LogMessage("Building job match lists for notifications");
 		$matches = array();
@@ -231,6 +233,9 @@ class NotifierJobAlerts extends JobsMailSender
 			if ($ret !== false || $ret !== null) {
 				if (!isDebug()) {
 					if (!empty($matches['all'])) {
+						$now = new \DateTime();
+						$sendToUser->setLastNotifiedAt($now);
+						$sendToUser->save();
 						$ids = array_keys($matches['all']);
 						updateUserJobMatchesStatus($ids, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT);
 					}

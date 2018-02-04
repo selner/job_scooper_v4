@@ -203,6 +203,9 @@
         <column name="search_keywords" phpName="SearchKeywords" type="array" required="false"/>
         <column name="search_locations" phpName="SearchLocations" type="array" required="false"/>
         <column name="input_files_json" phpName="InputFilesJson" type="LONGVARCHAR" required="false"/>
+
+        <column name="date_last_notified" phpName="LastNotifiedAt" type="timestamp" required="false"/>
+        <column name="notification_frequency" phpName="NotificationFrequency" type="integer" required="false" default="2"/>
     </table>
 
     <!--

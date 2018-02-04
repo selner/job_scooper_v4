@@ -2,6 +2,7 @@
 
 namespace JobScooper\DataAccess\Base;
 
+use \DateTime;
 use \Exception;
 use \PDO;
 use JobScooper\DataAccess\JobPosting as ChildJobPosting;
@@ -27,6 +28,7 @@ use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
+use Propel\Runtime\Util\PropelDateTime;
 
 /**
  * Base class that represents a row from the 'user' table.
@@ -134,6 +136,21 @@ abstract class User implements ActiveRecordInterface
     protected $input_files_json;
 
     /**
+     * The value for the date_last_notified field.
+     *
+     * @var        DateTime
+     */
+    protected $date_last_notified;
+
+    /**
+     * The value for the notification_frequency field.
+     *
+     * Note: this column has a database default value of: 2
+     * @var        int
+     */
+    protected $notification_frequency;
+
+    /**
      * @var        ObjectCollection|ChildUserSearchPair[] Collection to store aggregation of ChildUserSearchPair objects.
      */
     protected $collUserSearchPairs;
@@ -190,6 +207,7 @@ abstract class User implements ActiveRecordInterface
     public function applyDefaultValues()
     {
         $this->name = 'email_address';
+        $this->notification_frequency = 2;
     }
 
     /**
@@ -528,6 +546,36 @@ abstract class User implements ActiveRecordInterface
     }
 
     /**
+     * Get the [optionally formatted] temporal [date_last_notified] column value.
+     *
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getLastNotifiedAt($format = NULL)
+    {
+        if ($format === null) {
+            return $this->date_last_notified;
+        } else {
+            return $this->date_last_notified instanceof \DateTimeInterface ? $this->date_last_notified->format($format) : null;
+        }
+    }
+
+    /**
+     * Get the [notification_frequency] column value.
+     *
+     * @return int
+     */
+    public function getNotificationFrequency()
+    {
+        return $this->notification_frequency;
+    }
+
+    /**
      * Set the value of [user_id] column.
      *
      * @param int $v new value
@@ -730,6 +778,46 @@ abstract class User implements ActiveRecordInterface
     } // setInputFilesJson()
 
     /**
+     * Sets the value of [date_last_notified] column to a normalized version of the date/time value specified.
+     *
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     */
+    public function setLastNotifiedAt($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->date_last_notified !== null || $dt !== null) {
+            if ($this->date_last_notified === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->date_last_notified->format("Y-m-d H:i:s.u")) {
+                $this->date_last_notified = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[UserTableMap::COL_DATE_LAST_NOTIFIED] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setLastNotifiedAt()
+
+    /**
+     * Set the value of [notification_frequency] column.
+     *
+     * @param int $v new value
+     * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
+     */
+    public function setNotificationFrequency($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->notification_frequency !== $v) {
+            $this->notification_frequency = $v;
+            $this->modifiedColumns[UserTableMap::COL_NOTIFICATION_FREQUENCY] = true;
+        }
+
+        return $this;
+    } // setNotificationFrequency()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -740,6 +828,10 @@ abstract class User implements ActiveRecordInterface
     public function hasOnlyDefaultValues()
     {
             if ($this->name !== 'email_address') {
+                return false;
+            }
+
+            if ($this->notification_frequency !== 2) {
                 return false;
             }
 
@@ -791,6 +883,15 @@ abstract class User implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserTableMap::translateFieldName('InputFilesJson', TableMap::TYPE_PHPNAME, $indexType)];
             $this->input_files_json = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserTableMap::translateFieldName('LastNotifiedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
+            $this->date_last_notified = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserTableMap::translateFieldName('NotificationFrequency', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->notification_frequency = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -799,7 +900,7 @@ abstract class User implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 7; // 7 = UserTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 9; // 9 = UserTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\User'), 0, $e);
@@ -1093,6 +1194,12 @@ abstract class User implements ActiveRecordInterface
         if ($this->isColumnModified(UserTableMap::COL_INPUT_FILES_JSON)) {
             $modifiedColumns[':p' . $index++]  = 'input_files_json';
         }
+        if ($this->isColumnModified(UserTableMap::COL_DATE_LAST_NOTIFIED)) {
+            $modifiedColumns[':p' . $index++]  = 'date_last_notified';
+        }
+        if ($this->isColumnModified(UserTableMap::COL_NOTIFICATION_FREQUENCY)) {
+            $modifiedColumns[':p' . $index++]  = 'notification_frequency';
+        }
 
         $sql = sprintf(
             'INSERT INTO user (%s) VALUES (%s)',
@@ -1124,6 +1231,12 @@ abstract class User implements ActiveRecordInterface
                         break;
                     case 'input_files_json':
                         $stmt->bindValue($identifier, $this->input_files_json, PDO::PARAM_STR);
+                        break;
+                    case 'date_last_notified':
+                        $stmt->bindValue($identifier, $this->date_last_notified ? $this->date_last_notified->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                        break;
+                    case 'notification_frequency':
+                        $stmt->bindValue($identifier, $this->notification_frequency, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -1210,6 +1323,12 @@ abstract class User implements ActiveRecordInterface
             case 6:
                 return $this->getInputFilesJson();
                 break;
+            case 7:
+                return $this->getLastNotifiedAt();
+                break;
+            case 8:
+                return $this->getNotificationFrequency();
+                break;
             default:
                 return null;
                 break;
@@ -1247,7 +1366,13 @@ abstract class User implements ActiveRecordInterface
             $keys[4] => $this->getSearchKeywords(),
             $keys[5] => $this->getSearchLocations(),
             $keys[6] => $this->getInputFilesJson(),
+            $keys[7] => $this->getLastNotifiedAt(),
+            $keys[8] => $this->getNotificationFrequency(),
         );
+        if ($result[$keys[7]] instanceof \DateTimeInterface) {
+            $result[$keys[7]] = $result[$keys[7]]->format('c');
+        }
+
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
             $result[$key] = $virtualColumn;
@@ -1347,6 +1472,12 @@ abstract class User implements ActiveRecordInterface
             case 6:
                 $this->setInputFilesJson($value);
                 break;
+            case 7:
+                $this->setLastNotifiedAt($value);
+                break;
+            case 8:
+                $this->setNotificationFrequency($value);
+                break;
         } // switch()
 
         return $this;
@@ -1393,6 +1524,12 @@ abstract class User implements ActiveRecordInterface
         }
         if (array_key_exists($keys[6], $arr)) {
             $this->setInputFilesJson($arr[$keys[6]]);
+        }
+        if (array_key_exists($keys[7], $arr)) {
+            $this->setLastNotifiedAt($arr[$keys[7]]);
+        }
+        if (array_key_exists($keys[8], $arr)) {
+            $this->setNotificationFrequency($arr[$keys[8]]);
         }
     }
 
@@ -1455,6 +1592,12 @@ abstract class User implements ActiveRecordInterface
         }
         if ($this->isColumnModified(UserTableMap::COL_INPUT_FILES_JSON)) {
             $criteria->add(UserTableMap::COL_INPUT_FILES_JSON, $this->input_files_json);
+        }
+        if ($this->isColumnModified(UserTableMap::COL_DATE_LAST_NOTIFIED)) {
+            $criteria->add(UserTableMap::COL_DATE_LAST_NOTIFIED, $this->date_last_notified);
+        }
+        if ($this->isColumnModified(UserTableMap::COL_NOTIFICATION_FREQUENCY)) {
+            $criteria->add(UserTableMap::COL_NOTIFICATION_FREQUENCY, $this->notification_frequency);
         }
 
         return $criteria;
@@ -1548,6 +1691,8 @@ abstract class User implements ActiveRecordInterface
         $copyObj->setSearchKeywords($this->getSearchKeywords());
         $copyObj->setSearchLocations($this->getSearchLocations());
         $copyObj->setInputFilesJson($this->getInputFilesJson());
+        $copyObj->setLastNotifiedAt($this->getLastNotifiedAt());
+        $copyObj->setNotificationFrequency($this->getNotificationFrequency());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -2379,6 +2524,8 @@ abstract class User implements ActiveRecordInterface
         $this->search_locations = null;
         $this->search_locations_unserialized = null;
         $this->input_files_json = null;
+        $this->date_last_notified = null;
+        $this->notification_frequency = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->applyDefaultValues();

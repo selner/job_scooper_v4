@@ -44,6 +44,28 @@ class User extends BaseUser
     }
 
 	/**
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	function canNotifyUser()
+    {
+	    $now = new \DateTime();
+	    $lastNotify = $this->getLastNotifiedAt();
+	    if(empty($lastNotify))
+	    	return true;
+
+	    $numDays = $this->getNotificationFrequency();
+	    if(empty($numDays))
+		    $numDays = 1;
+	    $interval = date_interval_create_from_date_string(strval($numDays) . ' days');
+	    $nextNotify = date_add($lastNotify, $interval);
+	    if(empty($lastNotify) || $now >= $nextNotify)
+	    	return true;
+
+	    return false;
+
+    }
+
+	/**
 	 * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
 	 *
 	 * @return bool|void
