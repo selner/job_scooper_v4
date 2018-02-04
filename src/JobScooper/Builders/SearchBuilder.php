@@ -261,7 +261,7 @@ class SearchBuilder
 		            $ntotalSearchRuns += 1;
 	            }
 	            else
-		            LogDebug("JobSite's supported countries [" . join("|", $ccJobSite) . "] does not overlap with search's country [{$ccSearch}].  Skipping search.");
+		            LogDebug("JobSite {$jobsiteKey} supported countries [" . join("|", $ccJobSite) . "] does not include the search's country [{$ccSearch}].  Skipping search.");
 
 
             }
