@@ -29,7 +29,6 @@ abstract class AbstractGreenhouseATS  extends \JobScooper\BasePlugin\Classes\Aja
 //		'Url' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href'),
 //		'Location' => array('selector' => 'ul li', 'index' => 0),
 //		'Department' => array('selector' => 'ul li', 'index' => 1),
-//		'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
 	);
 
 	public function __construct()

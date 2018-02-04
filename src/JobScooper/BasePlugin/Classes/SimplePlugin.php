@@ -610,9 +610,6 @@ class SimplePlugin extends BaseJobsSite
                 if(empty($item['JobSiteKey']))
                     $item['JobSiteKey'] = $this->JobSiteName;
 
-                if (array_key_exists('regex_link_job_id', $this->arrListingTagSetup) && count($this->arrListingTagSetup['regex_link_job_id']) >= 1)
-                    $this->regex_link_job_id = $this->arrListingTagSetup['regex_link_job_id'];
-
                 $ret[] = $item;
 
             }

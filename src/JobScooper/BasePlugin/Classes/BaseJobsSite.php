@@ -342,7 +342,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 
 	protected $detailsMyFileOut = "";
-	protected $regex_link_job_id = null;
 	protected $prevCookies = "";
 	protected $prevURL = null;
 
@@ -553,24 +552,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	//
 	//
 	//************************************************************************
-	/**
-	 * @param $regex_link_job_id
-	 * @param $url
-	 *
-	 * @return string
-	 */
-	function getIDFromLink($regex_link_job_id, $url)
-	{
-		if (isset($regex_link_job_id)) {
-			$fMatchedID = preg_match($regex_link_job_id, $url, $idMatches);
-			if ($fMatchedID && count($idMatches) >= 1) {
-				return $idMatches[count($idMatches) - 1];
-			}
-		}
-
-		return "";
-	}
-
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun|null $searchDetails
@@ -1255,11 +1236,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 		$arrItem['JobSitePostId'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['JobSitePostId']);
 		$arrItem ['JobSitePostId'] = strScrub($arrItem['JobSitePostId'], FOR_LOOKUP_VALUE_MATCHING);
-		if (empty($arrItem['JobSitePostId'])) {
-			if (isset($this->regex_link_job_id)) {
-				$arrItem['JobSitePostId'] = $this->getIDFromLink($this->regex_link_job_id, $arrItem['Url']);
-			}
-		}
 
 		return $arrItem;
 

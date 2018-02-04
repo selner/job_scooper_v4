@@ -17,19 +17,6 @@
  */
 
 
-//abstract class AbstractResumator extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
-//{
-//    protected $arrListingTagSetup = array(
-//        'JobPostItem' => array('selector' => 'div#resumator-content-left-wrapper div.resumator-job'),
-//        'Title' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link'),
-//        'Url' => array('tag' => 'a', 'attribute' => 'class', 'attribute_value' =>'resumator-job-title-link', 'return_attribute' => 'href'),
-//        'Department' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'resumator-job-info'),
-//        'Location' => null,
-//        'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
-//    );
-//}
-//
-
 abstract class AbstractResumatorFall2017  extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
 {
 	protected $arrListingTagSetup = array(
@@ -38,7 +25,7 @@ abstract class AbstractResumatorFall2017  extends \JobScooper\BasePlugin\Classes
 		'Url' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href'),
 		'Location' => array('selector' => 'ul li', 'index' => 0),
 		'Department' => array('selector' => 'ul li', 'index' => 1),
-		'regex_link_job_id' => '/.com\/apply\/(\S*)\//i',
+		'JobSitePostId' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href', 'return_value_regex' => '/.com\/apply\/(\S*)\//i'),
 	);
 }
 
