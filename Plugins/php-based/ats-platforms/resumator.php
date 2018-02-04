@@ -27,6 +27,26 @@ abstract class AbstractResumatorFall2017  extends \JobScooper\BasePlugin\Classes
 		'Department' => array('selector' => 'ul li', 'index' => 1),
 		'JobSitePostId' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href', 'return_value_regex' => '/.com\/apply\/(\S*)\//i'),
 	);
+
+
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return \JobScooper\DataAccess\JobPosting[]|null
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+	{
+	$retItems = parent::parseJobsListForPage($objSimpHTML);
+
+		foreach(array_keys($retItems) as $k => $ret)
+		{
+			if(!array_key_exists('Company', $ret) || empty($ret['Company']))
+				$retItems[$k]['Company'] = $this->getJobSiteKey();
+		}
+
+		return $retItems;
+	}
 }
 
 class PluginAtlanticMedia extends AbstractResumatorFall2017

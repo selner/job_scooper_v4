@@ -1,10 +1,10 @@
 {
-  "JobSiteName": "RobertHalfUK",
-  "BaseURL": "https://www.roberthalf.co.uk/",
-  "SourceURL": "https://www.roberthalf.co.uk/jobs/all-jobs/***LOCATION***?pageSize=1500",
-  "LocationType": "location-city",
-  "CountryCodes" : ["GB"],
-  "AdditionalFlags" : ["JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES"],
+  "JobSiteName": "RobertHalf",
+  "BaseURL": "https://www.roberthalf.com/",
+  "SourceURL": "https://www.roberthalf.com/technology/jobs/all-jobs/***LOCATION***?pageSize=1500",
+  "LocationType": "location-city-dash-statecode",
+  "CountryCodes" : ["US"],
+  "AdditionalFlags" : ["C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES"],
   "Collections": [
     {
       "Name": "PageFields",
@@ -12,14 +12,14 @@
         {
           "Name": "TotalPostCount",
           "Selector": "div.rh-job-result-table__counter label",
-          "Pattern": "/.*?of\\s(\\d+)\\s*/",
-          "Index": 1,
+          "Index" : 1,
+          "Pattern": "/-\\s*(\\d+)/",
           "Attribute": "text",
           "Type": "CSS"
         },
         {
           "Name": "JobPostItem",
-          "Selector": "div.rh-job-result-table__row",
+          "Selector": "div.row .rh-job-result-table__row",
           "Attribute": "collection",
           "Type": "CSS"
         }
@@ -32,6 +32,7 @@
           "Name": "Title",
           "Selector": "a.rh-job-result-table__job-title",
           "Attribute": "text",
+          "Index": 0,
           "Type": "CSS"
         },
         {
@@ -40,6 +41,11 @@
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
+        },
+        {
+          "Name": "Company",
+          "Type": "STATIC",
+          "Value": "RobertHalf"
         },
         {
           "Name": "Location",
@@ -56,19 +62,11 @@
           "Type": "CSS"
         },
         {
-          "Name": "PayRange",
-          "Selector": "span.rh-job-result-table__salary",
-          "Index" : 0,
-          "Attribute": "text",
-          "Type": "CSS"
-        },
-        {
           "Name": "JobSitePostId",
-          "Pattern": "/\/job\/([^?]+)/i",
+          "Pattern": "/\\/job\\/([^?]+)/i",
           "Type": "SOURCEFIELD",
           "Field": "Url"
         },
-
         {
           "Name": "PostedAt",
           "Selector": "span.rh-job-result-table__postdate",

@@ -32,6 +32,11 @@
           "Type": "CSS"
         },
         {
+          "Name": "Company",
+          "Type": "STATIC",
+          "Value": "LucasGroup"
+        },
+        {
           "Name": "Category",
           "Selector": "div.jsr-pg",
           "Index": 0,

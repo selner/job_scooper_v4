@@ -119,5 +119,23 @@ class AbstractTalentBrew extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePl
         parent::__construct();
         $this->SearchUrlFormat = $this->JobPostingBaseUrl . $this->SearchUrlFormat;
     }
+	/**
+	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+	 *
+	 * @return \JobScooper\DataAccess\JobPosting[]|null
+	 * @throws \Exception
+	 */
+	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+	{
+		$retItems = parent::parseJobsListForPage($objSimpHTML);
+
+		foreach(array_keys($retItems) as $k => $ret)
+		{
+			if(!array_key_exists('Company', $ret) || empty($ret['Company']))
+				$retItems[$k]['Company'] = $this->getJobSiteKey();
+		}
+
+		return $retItems;
+	}
 
 }

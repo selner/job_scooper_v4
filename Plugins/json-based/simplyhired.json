@@ -1,0 +1,108 @@
+{
+    "jobsite_plugins": [
+        {
+            "JobSiteName": "SimplyHired",
+            "SourceURL": "https://www.simplyhired.com/search?q=***KEYWORDS***&l=***LOCATION:{Place},{RegionCode}***&fdb=1&sb=dd",
+            "BaseURL": "https://www.simplyhired.com",
+            "CountryCodes": [
+                "US"
+            ],
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name": "TotalPostCount",
+                            "Selector": "span.posting-total",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "NoPostsFound",
+                            "Selector": "h3.zrp-header",
+                            "Index": 0,
+                            "Callback": "matchesNoResultsPattern",
+                            "CallbackParameter": "There are no",
+                            "Attribute": "text",
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "JobPostItem",
+                            "Selector": "div.js-job",
+                            "Attribute": "collection",
+                            "Type": "CSS"
+                        }
+                    ]
+                },
+                {
+                    "Name": "ItemFields",
+                    "Fields": [
+                        {
+                            "Name": "Title",
+                            "Selector": "h2.jobposting-title a",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "Url",
+                            "Selector": "h2.jobposting-title a",
+                            "Attribute": "href",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "JobSitePostId",
+                            "Selector": "div.js-job",
+                            "Type": "CSS",
+                            "Field": "data-jobkey"
+                        },
+                        {
+                            "Name": "Location",
+                            "Selector": "span.jobposting-location",
+                            "Index": 0,
+                            "Attribute": "text",
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "Company",
+                            "Selector": "span.jobposting-company",
+                            "Index": 0,
+                            "Attribute": "text",
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "PayRange",
+                            "Selector": "span.jobposting-salary",
+                            "Index": 0,
+                            "Attribute": "text",
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "PostedAt",
+                            "Selector": "span.jobposting-timestamp",
+                            "Index": 0,
+                            "Attribute": "text",
+                            "Type": "CSS"
+                        }
+                    ]
+                }
+            ],
+            "Pagination": {
+                "Type": "NEXT-BUTTON",
+                "PageLimit": 20,
+                "Selector": "a.next-pagination"
+            }
+        },
+        {
+            "JobSiteName": "SimplyHiredUk",
+            "SourceURL": "https://www.simplyhired.co.uk/search?q=***KEYWORDS***&l=***LOCATION:{Place}***&fdb=1&sb=dd",
+            "BaseURL": "https://www.simplyhired.co.uk",
+            "CountryCodes": [
+                "UK"
+            ]
+        }
+
+    ]
+}

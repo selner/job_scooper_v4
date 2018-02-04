@@ -33,6 +33,11 @@
           "Type": "CSS"
         },
         {
+          "Name": "Company",
+          "Type": "STATIC",
+          "Value": "Altasource"
+        },
+        {
           "Name": "JobSitePostId",
           "Selector": "td",
           "Index": 3,

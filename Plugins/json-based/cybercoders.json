@@ -59,6 +59,11 @@
                     "Type": "CSS"
                 },
                 {
+                    "Name": "Company",
+                    "Type": "STATIC",
+                    "Value": "CyberCoders"
+                },
+                {
                     "Name": "Location",
                     "Selector": "div.location",
                     "Index": 0,

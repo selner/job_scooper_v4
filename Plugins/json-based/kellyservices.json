@@ -48,6 +48,11 @@
           "Type": "CSS"
         },
         {
+          "Name": "Company",
+          "Type": "STATIC",
+          "Value": "KellyServices"
+        },
+        {
           "Name": "Url",
           "Selector": "div a",
           "Attribute": "href",

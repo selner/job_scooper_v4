@@ -51,6 +51,11 @@
           "Type": "CSS"
         },
         {
+          "Name": "Company",
+          "Type": "STATIC",
+          "Value": "Excel Staffing"
+        },
+        {
           "Name": "Url",
           "Selector": "a.joblink",
           "Attribute": "href",
