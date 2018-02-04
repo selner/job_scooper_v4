@@ -269,51 +269,50 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	{
 		$v = $this->_cleanupTextValue($v, $maxLength=100);
 
-		if (is_null($v) || strlen($v) == 0) {
-			$v = $this->getJobSiteKey();
-		} else {
-			$v = strip_punctuation($v);
+		if (empty($v))
+			return;
 
-			// Remove common company name extensions like "Corporation" or "Inc." so we have
-			// a higher match likelihood
-			$v = preg_replace(array('/\s[Cc]orporat[e|ion]/', '/\s[Cc]orp\W{0,1}/', '/\.com/', '/\W{0,}\s[iI]nc/', '/\W{0,}\s[lL][lL][cC]/', '/\W{0,}\s[lL][tT][dD]/'), "", $v);
+		$v = strip_punctuation($v);
 
-			switch (strScrub($v)) {
-				case "amazon":
-				case "amazon com":
-				case "a2z":
-				case "lab 126":
-				case "amazon Web Services":
-				case "amazon fulfillment services":
-				case "amazonwebservices":
-				case "amazon (seattle)":
-					$v = "Amazon";
-					break;
+		// Remove common company name extensions like "Corporation" or "Inc." so we have
+		// a higher match likelihood
+		$v = preg_replace(array('/\s[Cc]orporat[e|ion]/', '/\s[Cc]orp\W{0,1}/', '/\.com/', '/\W{0,}\s[iI]nc/', '/\W{0,}\s[lL][lL][cC]/', '/\W{0,}\s[lL][tT][dD]/'), "", $v);
 
-				case "market leader":
-				case "market leader inc":
-				case "market leader llc":
-					$v = "Market Leader";
-					break;
+		switch (strScrub($v)) {
+			case "amazon":
+			case "amazon com":
+			case "a2z":
+			case "lab 126":
+			case "amazon Web Services":
+			case "amazon fulfillment services":
+			case "amazonwebservices":
+			case "amazon (seattle)":
+				$v = "Amazon";
+				break;
+
+			case "market leader":
+			case "market leader inc":
+			case "market leader llc":
+				$v = "Market Leader";
+				break;
 
 
-				case "walt disney parks &amp resorts online":
-				case "walt disney parks resorts online":
-				case "the walt disney studios":
-				case "walt disney studios":
-				case "the walt disney company corporate":
-				case "the walt disney company":
-				case "disney parks &amp resorts":
-				case "disney parks resorts":
-				case "walt disney parks resorts":
-				case "walt disney parks &amp resorts":
-				case "walt disney parks resorts careers":
-				case "walt disney parks &amp resorts careers":
-				case "disney":
-					$v = "Disney";
-					break;
+			case "walt disney parks &amp resorts online":
+			case "walt disney parks resorts online":
+			case "the walt disney studios":
+			case "walt disney studios":
+			case "the walt disney company corporate":
+			case "the walt disney company":
+			case "disney parks &amp resorts":
+			case "disney parks resorts":
+			case "walt disney parks resorts":
+			case "walt disney parks &amp resorts":
+			case "walt disney parks resorts careers":
+			case "walt disney parks &amp resorts careers":
+			case "disney":
+				$v = "Disney";
+				break;
 
-			}
 		}
 		parent::setCompany($v);
 
