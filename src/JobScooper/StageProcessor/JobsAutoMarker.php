@@ -156,10 +156,10 @@ class JobsAutoMarker
 
 			$duplicatePostings = $dupeQuery->filterByFirstSeenAt(array('min' => $sinceWhen))
 				->select(array("KeyCompanyAndTitle"))
-				->addAsColumn("DupeCount", "COUNT(DISTINCT jobposting_id)")
+				->addAsColumn("CountTitleCompanyPair", "COUNT(DISTINCT jobposting_id)")
 				->addAsColumn("PrimaryJobPostingId", "MIN(jobposting_id)")
 				->groupByKeyCompanyAndTitle()
-				->having('DupeCount > ?', 0, \PDO::PARAM_INT)
+				->having('CountTitleCompanyPair > ?', 1, \PDO::PARAM_INT)
 				->find()
 				->getData();
 
