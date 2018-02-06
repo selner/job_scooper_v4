@@ -165,7 +165,7 @@ class MatchJobsToKeywordsTask():
                 if isinstance(grp[u'token_match'], basestring):
                     terms = grp[u'token_match']
                 else:
-                    terms = " ".glue(list(grp[u'token_match']))
+                    terms = " ".join(list(grp[u'token_match']))
             self.jobs[jobid][u'MatchedUserKeywords'] = terms
 
         print "Positive Search Keywords: {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids))
@@ -201,7 +201,7 @@ class MatchJobsToKeywordsTask():
                 if isinstance(grp[u'token_match'], basestring):
                     terms = grp[u'token_match']
                 else:
-                    terms = " ".glue(list(grp[u'token_match']))
+                    terms = " ".join(list(grp[u'token_match']))
             self.jobs[jobid][u'MatchedNegativeTitleKeywords'] = terms
 
         print "Negative Title Keywords:  {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids))
