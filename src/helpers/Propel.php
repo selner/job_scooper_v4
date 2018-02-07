@@ -117,7 +117,7 @@ function updateOrCreateJobPosting($arrJobItem)
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $user=null)
+function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null, \JobScooper\DataAccess\GeoLocation $geolocation=null)
 {
 	if(empty($user))
 	    throw new Exception("No user was specified to query for user job matches.");
@@ -159,6 +159,15 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 	    $query->useJobPostingFromUJMQuery()
 		    ->orderByKeyCompanyAndTitle()
 		    ->endUse();
+
+	if(!empty($geolocation))
+	{
+		$query->useUserSearchSiteRunFromUJMQuery()
+				->useUserSearchPairFromUSSRQuery()
+				->filterByGeoLocationId($geolocation->getGeoLocationId(), Criteria::EQUAL)
+				->endUse()
+			->endUse();
+	}
 
 	$results =  $query->find()->toKeyIndex("UserJobMatchId");
 
