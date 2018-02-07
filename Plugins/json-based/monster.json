@@ -58,13 +58,21 @@
             {
               "Name": "JobSitePostId",
               "Selector": "div.jobTitle h2 a",
-              "Attribute": "data-m_impr_j_postingid",
+              "Attribute": "data-m_impr_j_jobid",
+              "AlternateAttributeNotes" : "Could also be data-m_impr_j_postingid attribute",
               "Index": 0,
               "Type": "CSS"
             },
             {
               "Name": "Company",
               "Selector": "div.company a span",
+              "Index": 0,
+              "Attribute": "text",
+              "Type": "CSS"
+            },
+            {
+              "Name": "PayRange",
+              "Selector": "div.job-specs-salary p",
               "Index": 0,
               "Attribute": "text",
               "Type": "CSS"
@@ -95,7 +103,7 @@
     {
     "JobSiteName": "MonsterUK",
     "BaseURL": "https://www.monster.co.uk",
-    "SourceURL": "https://www.monster.co.uk/jobs/search/?q=***KEYWORDS***&where=***LOCATION***&client=power&cy=uk&rad=20&intcid=swoop_HeroSearch_UK",
+    "SourceURL": "https://www.monster.co.uk/jobs/search/?q=***KEYWORDS***&where=***LOCATION***&client=power&cy=uk&sort=dt.rv.di",
     "LocationType": "location-city-comma-statecode-underscores-and-dashes",
     "CountryCodes" : ["GB"],
       "PluginExtendsClassName" : "PluginMonster"
