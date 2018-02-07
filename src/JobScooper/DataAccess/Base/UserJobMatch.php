@@ -9,6 +9,8 @@ use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
 use JobScooper\DataAccess\User as ChildUser;
 use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
 use JobScooper\DataAccess\UserQuery as ChildUserQuery;
+use JobScooper\DataAccess\UserSearchSiteRun as ChildUserSearchSiteRun;
+use JobScooper\DataAccess\UserSearchSiteRunQuery as ChildUserSearchSiteRunQuery;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -171,6 +173,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @var        ChildJobPosting
      */
     protected $aJobPostingFromUJM;
+
+    /**
+     * @var        ChildUserSearchSiteRun
+     */
+    protected $aUserSearchSiteRunFromUJM;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -971,6 +978,10 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->modifiedColumns[UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY] = true;
         }
 
+        if ($this->aUserSearchSiteRunFromUJM !== null && $this->aUserSearchSiteRunFromUJM->getUserSearchSiteRunKey() !== $v) {
+            $this->aUserSearchSiteRunFromUJM = null;
+        }
+
         return $this;
     } // setSetByUserSearchSiteRunKey()
 
@@ -1085,6 +1096,9 @@ abstract class UserJobMatch implements ActiveRecordInterface
         if ($this->aJobPostingFromUJM !== null && $this->jobposting_id !== $this->aJobPostingFromUJM->getJobPostingId()) {
             $this->aJobPostingFromUJM = null;
         }
+        if ($this->aUserSearchSiteRunFromUJM !== null && $this->set_by_user_search_site_run_key !== $this->aUserSearchSiteRunFromUJM->getUserSearchSiteRunKey()) {
+            $this->aUserSearchSiteRunFromUJM = null;
+        }
     } // ensureConsistency
 
     /**
@@ -1126,6 +1140,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
 
             $this->aUserFromUJM = null;
             $this->aJobPostingFromUJM = null;
+            $this->aUserSearchSiteRunFromUJM = null;
         } // if (deep)
     }
 
@@ -1246,6 +1261,13 @@ abstract class UserJobMatch implements ActiveRecordInterface
                     $affectedRows += $this->aJobPostingFromUJM->save($con);
                 }
                 $this->setJobPostingFromUJM($this->aJobPostingFromUJM);
+            }
+
+            if ($this->aUserSearchSiteRunFromUJM !== null) {
+                if ($this->aUserSearchSiteRunFromUJM->isModified() || $this->aUserSearchSiteRunFromUJM->isNew()) {
+                    $affectedRows += $this->aUserSearchSiteRunFromUJM->save($con);
+                }
+                $this->setUserSearchSiteRunFromUJM($this->aUserSearchSiteRunFromUJM);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -1530,6 +1552,21 @@ abstract class UserJobMatch implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->aJobPostingFromUJM->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aUserSearchSiteRunFromUJM) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'userSearchSiteRun';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'user_search_site_run';
+                        break;
+                    default:
+                        $key = 'UserSearchSiteRunFromUJM';
+                }
+
+                $result[$key] = $this->aUserSearchSiteRunFromUJM->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -1996,6 +2033,59 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
+     * Declares an association between this object and a ChildUserSearchSiteRun object.
+     *
+     * @param  ChildUserSearchSiteRun $v
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setUserSearchSiteRunFromUJM(ChildUserSearchSiteRun $v = null)
+    {
+        if ($v === null) {
+            $this->setSetByUserSearchSiteRunKey(NULL);
+        } else {
+            $this->setSetByUserSearchSiteRunKey($v->getUserSearchSiteRunKey());
+        }
+
+        $this->aUserSearchSiteRunFromUJM = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildUserSearchSiteRun object, it will not be re-added.
+        if ($v !== null) {
+            $v->addUserJobMatch($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildUserSearchSiteRun object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildUserSearchSiteRun The associated ChildUserSearchSiteRun object.
+     * @throws PropelException
+     */
+    public function getUserSearchSiteRunFromUJM(ConnectionInterface $con = null)
+    {
+        if ($this->aUserSearchSiteRunFromUJM === null && (($this->set_by_user_search_site_run_key !== "" && $this->set_by_user_search_site_run_key !== null))) {
+            $this->aUserSearchSiteRunFromUJM = ChildUserSearchSiteRunQuery::create()
+                ->filterByUserJobMatch($this) // here
+                ->findOne($con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aUserSearchSiteRunFromUJM->addUserJobMatches($this);
+             */
+        }
+
+        return $this->aUserSearchSiteRunFromUJM;
+    }
+
+    /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
      * change of those foreign objects when you call `save` there).
@@ -2007,6 +2097,9 @@ abstract class UserJobMatch implements ActiveRecordInterface
         }
         if (null !== $this->aJobPostingFromUJM) {
             $this->aJobPostingFromUJM->removeUserJobMatch($this);
+        }
+        if (null !== $this->aUserSearchSiteRunFromUJM) {
+            $this->aUserSearchSiteRunFromUJM->removeUserJobMatch($this);
         }
         $this->user_job_match_id = null;
         $this->user_id = null;
@@ -2045,6 +2138,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
 
         $this->aUserFromUJM = null;
         $this->aJobPostingFromUJM = null;
+        $this->aUserSearchSiteRunFromUJM = null;
     }
 
     /**

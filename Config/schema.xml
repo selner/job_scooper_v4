@@ -374,9 +374,9 @@
             <reference local="jobposting_id" foreign="jobposting_id"/>
         </foreign-key>
 
-        <!--<foreign-key foreignTable="user_search_site_runs" onDelete="cascade" phpName="UserSearchSiteRunFromUJM">-->
-            <!--<reference local="set_by_user_search_site_run_key" foreign="user_search_site_run_key"/>-->
-        <!--</foreign-key>-->
+        <foreign-key foreignTable="user_search_site_run" onDelete="cascade" phpName="UserSearchSiteRunFromUJM">
+            <reference local="set_by_user_search_site_run_key" foreign="user_search_site_run_key"/>
+        </foreign-key>
 
     </table>
 

@@ -5,17 +5,25 @@ namespace JobScooper\DataAccess\Base;
 use \DateTime;
 use \Exception;
 use \PDO;
+use JobScooper\DataAccess\JobPosting as ChildJobPosting;
 use JobScooper\DataAccess\JobSiteRecord as ChildJobSiteRecord;
 use JobScooper\DataAccess\JobSiteRecordQuery as ChildJobSiteRecordQuery;
+use JobScooper\DataAccess\User as ChildUser;
+use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
+use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
 use JobScooper\DataAccess\UserSearchPair as ChildUserSearchPair;
 use JobScooper\DataAccess\UserSearchPairQuery as ChildUserSearchPairQuery;
+use JobScooper\DataAccess\UserSearchSiteRun as ChildUserSearchSiteRun;
 use JobScooper\DataAccess\UserSearchSiteRunQuery as ChildUserSearchSiteRunQuery;
+use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
+use Propel\Runtime\Collection\ObjectCollection;
+use Propel\Runtime\Collection\ObjectCombinationCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\LogicException;
@@ -161,12 +169,59 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     protected $aUserSearchPairFromUSSR;
 
     /**
+     * @var        ObjectCollection|ChildUserJobMatch[] Collection to store aggregation of ChildUserJobMatch objects.
+     */
+    protected $collUserJobMatches;
+    protected $collUserJobMatchesPartial;
+
+    /**
+     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildUser, ChildJobPosting combination combinations.
+     */
+    protected $combinationCollUserFromUJMJobPostingFromUJMs;
+
+    /**
+     * @var bool
+     */
+    protected $combinationCollUserFromUJMJobPostingFromUJMsPartial;
+
+    /**
+     * @var        ObjectCollection|ChildUser[] Cross Collection to store aggregation of ChildUser objects.
+     */
+    protected $collUserFromUJMs;
+
+    /**
+     * @var bool
+     */
+    protected $collUserFromUJMsPartial;
+
+    /**
+     * @var        ObjectCollection|ChildJobPosting[] Cross Collection to store aggregation of ChildJobPosting objects.
+     */
+    protected $collJobPostingFromUJMs;
+
+    /**
+     * @var bool
+     */
+    protected $collJobPostingFromUJMsPartial;
+
+    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      *
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    /**
+     * @var ObjectCombinationCollection Cross CombinationCollection to store aggregation of ChildUser, ChildJobPosting combination combinations.
+     */
+    protected $combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion = null;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildUserJobMatch[]
+     */
+    protected $userJobMatchesScheduledForDeletion = null;
 
     /**
      * Applies default values to this object.
@@ -984,6 +1039,9 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
 
             $this->aJobSiteFromUSSR = null;
             $this->aUserSearchPairFromUSSR = null;
+            $this->collUserJobMatches = null;
+
+            $this->collUserFromUJMJobPostingFromUJMs = null;
         } // if (deep)
     }
 
@@ -1133,6 +1191,62 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
                     }
                 }
                 $this->resetModified();
+            }
+
+            if ($this->combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion !== null) {
+                if (!$this->combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion->isEmpty()) {
+                    $pks = array();
+                    foreach ($this->combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion as $combination) {
+                        $entryPk = [];
+
+                        $entryPk[] = $this->getUserSearchSiteRunKey();
+                        $entryPk[0] = $combination[0]->getUserId();
+                        $entryPk[1] = $combination[1]->getJobPostingId();
+
+                        $pks[] = $entryPk;
+                    }
+
+                    \JobScooper\DataAccess\UserJobMatchQuery::create()
+                        ->filterByPrimaryKeys($pks)
+                        ->delete($con);
+
+                    $this->combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion = null;
+                }
+
+            }
+
+            if (null !== $this->combinationCollUserFromUJMJobPostingFromUJMs) {
+                foreach ($this->combinationCollUserFromUJMJobPostingFromUJMs as $combination) {
+
+                    //$combination[0] = User (user_job_match_fk_38da1e)
+                    if (!$combination[0]->isDeleted() && ($combination[0]->isNew() || $combination[0]->isModified())) {
+                        $combination[0]->save($con);
+                    }
+
+                    //$combination[1] = JobPosting (user_job_match_fk_dd5799)
+                    if (!$combination[1]->isDeleted() && ($combination[1]->isNew() || $combination[1]->isModified())) {
+                        $combination[1]->save($con);
+                    }
+
+                }
+            }
+
+
+            if ($this->userJobMatchesScheduledForDeletion !== null) {
+                if (!$this->userJobMatchesScheduledForDeletion->isEmpty()) {
+                    \JobScooper\DataAccess\UserJobMatchQuery::create()
+                        ->filterByPrimaryKeys($this->userJobMatchesScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->userJobMatchesScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collUserJobMatches !== null) {
+                foreach ($this->collUserJobMatches as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
             }
 
             $this->alreadyInSave = false;
@@ -1422,6 +1536,21 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->aUserSearchPairFromUSSR->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->collUserJobMatches) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'userJobMatches';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'user_job_matches';
+                        break;
+                    default:
+                        $key = 'UserJobMatches';
+                }
+
+                $result[$key] = $this->collUserJobMatches->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1727,6 +1856,20 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         $copyObj->setRunResultCode($this->getRunResultCode());
         $copyObj->setRunErrorDetails($this->getRunErrorDetails());
         $copyObj->setRunErrorPageHtml($this->getRunErrorPageHtml());
+
+        if ($deepCopy) {
+            // important: temporarily setNew(false) because this affects the behavior of
+            // the getter/setter methods for fkey referrer objects.
+            $copyObj->setNew(false);
+
+            foreach ($this->getUserJobMatches() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addUserJobMatch($relObj->copy($deepCopy));
+                }
+            }
+
+        } // if ($deepCopy)
+
         if ($makeNew) {
             $copyObj->setNew(true);
             $copyObj->setUserSearchSiteRunId(NULL); // this is a auto-increment column, so set to default value
@@ -1857,6 +2000,625 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
         return $this->aUserSearchPairFromUSSR;
     }
 
+
+    /**
+     * Initializes a collection based on the name of a relation.
+     * Avoids crafting an 'init[$relationName]s' method name
+     * that wouldn't work when StandardEnglishPluralizer is used.
+     *
+     * @param      string $relationName The name of the relation to initialize
+     * @return void
+     */
+    public function initRelation($relationName)
+    {
+        if ('UserJobMatch' == $relationName) {
+            $this->initUserJobMatches();
+            return;
+        }
+    }
+
+    /**
+     * Clears out the collUserJobMatches collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addUserJobMatches()
+     */
+    public function clearUserJobMatches()
+    {
+        $this->collUserJobMatches = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collUserJobMatches collection loaded partially.
+     */
+    public function resetPartialUserJobMatches($v = true)
+    {
+        $this->collUserJobMatchesPartial = $v;
+    }
+
+    /**
+     * Initializes the collUserJobMatches collection.
+     *
+     * By default this just sets the collUserJobMatches collection to an empty array (like clearcollUserJobMatches());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initUserJobMatches($overrideExisting = true)
+    {
+        if (null !== $this->collUserJobMatches && !$overrideExisting) {
+            return;
+        }
+
+        $collectionClassName = UserJobMatchTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collUserJobMatches = new $collectionClassName;
+        $this->collUserJobMatches->setModel('\JobScooper\DataAccess\UserJobMatch');
+    }
+
+    /**
+     * Gets an array of ChildUserJobMatch objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildUserSearchSiteRun is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildUserJobMatch[] List of ChildUserJobMatch objects
+     * @throws PropelException
+     */
+    public function getUserJobMatches(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserJobMatchesPartial && !$this->isNew();
+        if (null === $this->collUserJobMatches || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collUserJobMatches) {
+                // return empty collection
+                $this->initUserJobMatches();
+            } else {
+                $collUserJobMatches = ChildUserJobMatchQuery::create(null, $criteria)
+                    ->filterByUserSearchSiteRunFromUJM($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collUserJobMatchesPartial && count($collUserJobMatches)) {
+                        $this->initUserJobMatches(false);
+
+                        foreach ($collUserJobMatches as $obj) {
+                            if (false == $this->collUserJobMatches->contains($obj)) {
+                                $this->collUserJobMatches->append($obj);
+                            }
+                        }
+
+                        $this->collUserJobMatchesPartial = true;
+                    }
+
+                    return $collUserJobMatches;
+                }
+
+                if ($partial && $this->collUserJobMatches) {
+                    foreach ($this->collUserJobMatches as $obj) {
+                        if ($obj->isNew()) {
+                            $collUserJobMatches[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collUserJobMatches = $collUserJobMatches;
+                $this->collUserJobMatchesPartial = false;
+            }
+        }
+
+        return $this->collUserJobMatches;
+    }
+
+    /**
+     * Sets a collection of ChildUserJobMatch objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $userJobMatches A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildUserSearchSiteRun The current object (for fluent API support)
+     */
+    public function setUserJobMatches(Collection $userJobMatches, ConnectionInterface $con = null)
+    {
+        /** @var ChildUserJobMatch[] $userJobMatchesToDelete */
+        $userJobMatchesToDelete = $this->getUserJobMatches(new Criteria(), $con)->diff($userJobMatches);
+
+
+        $this->userJobMatchesScheduledForDeletion = $userJobMatchesToDelete;
+
+        foreach ($userJobMatchesToDelete as $userJobMatchRemoved) {
+            $userJobMatchRemoved->setUserSearchSiteRunFromUJM(null);
+        }
+
+        $this->collUserJobMatches = null;
+        foreach ($userJobMatches as $userJobMatch) {
+            $this->addUserJobMatch($userJobMatch);
+        }
+
+        $this->collUserJobMatches = $userJobMatches;
+        $this->collUserJobMatchesPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related UserJobMatch objects.
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related UserJobMatch objects.
+     * @throws PropelException
+     */
+    public function countUserJobMatches(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collUserJobMatchesPartial && !$this->isNew();
+        if (null === $this->collUserJobMatches || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collUserJobMatches) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getUserJobMatches());
+            }
+
+            $query = ChildUserJobMatchQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByUserSearchSiteRunFromUJM($this)
+                ->count($con);
+        }
+
+        return count($this->collUserJobMatches);
+    }
+
+    /**
+     * Method called to associate a ChildUserJobMatch object to this object
+     * through the ChildUserJobMatch foreign key attribute.
+     *
+     * @param  ChildUserJobMatch $l ChildUserJobMatch
+     * @return $this|\JobScooper\DataAccess\UserSearchSiteRun The current object (for fluent API support)
+     */
+    public function addUserJobMatch(ChildUserJobMatch $l)
+    {
+        if ($this->collUserJobMatches === null) {
+            $this->initUserJobMatches();
+            $this->collUserJobMatchesPartial = true;
+        }
+
+        if (!$this->collUserJobMatches->contains($l)) {
+            $this->doAddUserJobMatch($l);
+
+            if ($this->userJobMatchesScheduledForDeletion and $this->userJobMatchesScheduledForDeletion->contains($l)) {
+                $this->userJobMatchesScheduledForDeletion->remove($this->userJobMatchesScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildUserJobMatch $userJobMatch The ChildUserJobMatch object to add.
+     */
+    protected function doAddUserJobMatch(ChildUserJobMatch $userJobMatch)
+    {
+        $this->collUserJobMatches[]= $userJobMatch;
+        $userJobMatch->setUserSearchSiteRunFromUJM($this);
+    }
+
+    /**
+     * @param  ChildUserJobMatch $userJobMatch The ChildUserJobMatch object to remove.
+     * @return $this|ChildUserSearchSiteRun The current object (for fluent API support)
+     */
+    public function removeUserJobMatch(ChildUserJobMatch $userJobMatch)
+    {
+        if ($this->getUserJobMatches()->contains($userJobMatch)) {
+            $pos = $this->collUserJobMatches->search($userJobMatch);
+            $this->collUserJobMatches->remove($pos);
+            if (null === $this->userJobMatchesScheduledForDeletion) {
+                $this->userJobMatchesScheduledForDeletion = clone $this->collUserJobMatches;
+                $this->userJobMatchesScheduledForDeletion->clear();
+            }
+            $this->userJobMatchesScheduledForDeletion[]= $userJobMatch;
+            $userJobMatch->setUserSearchSiteRunFromUJM(null);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this UserSearchSiteRun is new, it will return
+     * an empty collection; or if this UserSearchSiteRun has previously
+     * been saved, it will retrieve related UserJobMatches from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in UserSearchSiteRun.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserJobMatch[] List of ChildUserJobMatch objects
+     */
+    public function getUserJobMatchesJoinUserFromUJM(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserJobMatchQuery::create(null, $criteria);
+        $query->joinWith('UserFromUJM', $joinBehavior);
+
+        return $this->getUserJobMatches($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this UserSearchSiteRun is new, it will return
+     * an empty collection; or if this UserSearchSiteRun has previously
+     * been saved, it will retrieve related UserJobMatches from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in UserSearchSiteRun.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildUserJobMatch[] List of ChildUserJobMatch objects
+     */
+    public function getUserJobMatchesJoinJobPostingFromUJM(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildUserJobMatchQuery::create(null, $criteria);
+        $query->joinWith('JobPostingFromUJM', $joinBehavior);
+
+        return $this->getUserJobMatches($query, $con);
+    }
+
+    /**
+     * Clears out the collUserFromUJMJobPostingFromUJMs collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addUserFromUJMJobPostingFromUJMs()
+     */
+    public function clearUserFromUJMJobPostingFromUJMs()
+    {
+        $this->collUserFromUJMJobPostingFromUJMs = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Initializes the combinationCollUserFromUJMJobPostingFromUJMs crossRef collection.
+     *
+     * By default this just sets the combinationCollUserFromUJMJobPostingFromUJMs collection to an empty collection (like clearUserFromUJMJobPostingFromUJMs());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @return void
+     */
+    public function initUserFromUJMJobPostingFromUJMs()
+    {
+        $this->combinationCollUserFromUJMJobPostingFromUJMs = new ObjectCombinationCollection;
+        $this->combinationCollUserFromUJMJobPostingFromUJMsPartial = true;
+    }
+
+    /**
+     * Checks if the combinationCollUserFromUJMJobPostingFromUJMs collection is loaded.
+     *
+     * @return bool
+     */
+    public function isUserFromUJMJobPostingFromUJMsLoaded()
+    {
+        return null !== $this->combinationCollUserFromUJMJobPostingFromUJMs;
+    }
+
+    /**
+     * Gets a combined collection of ChildUser, ChildJobPosting objects related by a many-to-many relationship
+     * to the current object by way of the user_job_match cross-reference table.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildUserSearchSiteRun is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      ConnectionInterface $con Optional connection object
+     *
+     * @return ObjectCombinationCollection Combination list of ChildUser, ChildJobPosting objects
+     */
+    public function getUserFromUJMJobPostingFromUJMs($criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->combinationCollUserFromUJMJobPostingFromUJMsPartial && !$this->isNew();
+        if (null === $this->combinationCollUserFromUJMJobPostingFromUJMs || null !== $criteria || $partial) {
+            if ($this->isNew()) {
+                // return empty collection
+                if (null === $this->combinationCollUserFromUJMJobPostingFromUJMs) {
+                    $this->initUserFromUJMJobPostingFromUJMs();
+                }
+            } else {
+
+                $query = ChildUserJobMatchQuery::create(null, $criteria)
+                    ->filterByUserSearchSiteRunFromUJM($this)
+                    ->joinUserFromUJM()
+                    ->joinJobPostingFromUJM()
+                ;
+
+                $items = $query->find($con);
+                $combinationCollUserFromUJMJobPostingFromUJMs = new ObjectCombinationCollection();
+                foreach ($items as $item) {
+                    $combination = [];
+
+                    $combination[] = $item->getUserFromUJM();
+                    $combination[] = $item->getJobPostingFromUJM();
+                    $combinationCollUserFromUJMJobPostingFromUJMs[] = $combination;
+                }
+
+                if (null !== $criteria) {
+                    return $combinationCollUserFromUJMJobPostingFromUJMs;
+                }
+
+                if ($partial && $this->combinationCollUserFromUJMJobPostingFromUJMs) {
+                    //make sure that already added objects gets added to the list of the database.
+                    foreach ($this->combinationCollUserFromUJMJobPostingFromUJMs as $obj) {
+                        if (!call_user_func_array([$combinationCollUserFromUJMJobPostingFromUJMs, 'contains'], $obj)) {
+                            $combinationCollUserFromUJMJobPostingFromUJMs[] = $obj;
+                        }
+                    }
+                }
+
+                $this->combinationCollUserFromUJMJobPostingFromUJMs = $combinationCollUserFromUJMJobPostingFromUJMs;
+                $this->combinationCollUserFromUJMJobPostingFromUJMsPartial = false;
+            }
+        }
+
+        return $this->combinationCollUserFromUJMJobPostingFromUJMs;
+    }
+
+    /**
+     * Returns a not cached ObjectCollection of ChildUser objects. This will hit always the databases.
+     * If you have attached new ChildUser object to this object you need to call `save` first to get
+     * the correct return value. Use getUserFromUJMJobPostingFromUJMs() to get the current internal state.
+     *
+     * @param ChildJobPosting $jobPostingFromUJM
+     * @param Criteria $criteria
+     * @param ConnectionInterface $con
+     *
+     * @return ChildUser[]|ObjectCollection
+     */
+    public function getUserFromUJMs(ChildJobPosting $jobPostingFromUJM = null, Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        return $this->createUserFromUJMsQuery($jobPostingFromUJM, $criteria)->find($con);
+    }
+
+    /**
+     * Sets a collection of ChildUser, ChildJobPosting combination objects related by a many-to-many relationship
+     * to the current object by way of the user_job_match cross-reference table.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param  Collection $userFromUJMJobPostingFromUJMs A Propel collection.
+     * @param  ConnectionInterface $con Optional connection object
+     * @return $this|ChildUserSearchSiteRun The current object (for fluent API support)
+     */
+    public function setUserFromUJMJobPostingFromUJMs(Collection $userFromUJMJobPostingFromUJMs, ConnectionInterface $con = null)
+    {
+        $this->clearUserFromUJMJobPostingFromUJMs();
+        $currentUserFromUJMJobPostingFromUJMs = $this->getUserFromUJMJobPostingFromUJMs();
+
+        $combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion = $currentUserFromUJMJobPostingFromUJMs->diff($userFromUJMJobPostingFromUJMs);
+
+        foreach ($combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion as $toDelete) {
+            call_user_func_array([$this, 'removeUserFromUJMJobPostingFromUJM'], $toDelete);
+        }
+
+        foreach ($userFromUJMJobPostingFromUJMs as $userFromUJMJobPostingFromUJM) {
+            if (!call_user_func_array([$currentUserFromUJMJobPostingFromUJMs, 'contains'], $userFromUJMJobPostingFromUJM)) {
+                call_user_func_array([$this, 'doAddUserFromUJMJobPostingFromUJM'], $userFromUJMJobPostingFromUJM);
+            }
+        }
+
+        $this->combinationCollUserFromUJMJobPostingFromUJMsPartial = false;
+        $this->combinationCollUserFromUJMJobPostingFromUJMs = $userFromUJMJobPostingFromUJMs;
+
+        return $this;
+    }
+
+    /**
+     * Gets the number of ChildUser, ChildJobPosting combination objects related by a many-to-many relationship
+     * to the current object by way of the user_job_match cross-reference table.
+     *
+     * @param      Criteria $criteria Optional query object to filter the query
+     * @param      boolean $distinct Set to true to force count distinct
+     * @param      ConnectionInterface $con Optional connection object
+     *
+     * @return int the number of related ChildUser, ChildJobPosting combination objects
+     */
+    public function countUserFromUJMJobPostingFromUJMs(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->combinationCollUserFromUJMJobPostingFromUJMsPartial && !$this->isNew();
+        if (null === $this->combinationCollUserFromUJMJobPostingFromUJMs || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->combinationCollUserFromUJMJobPostingFromUJMs) {
+                return 0;
+            } else {
+
+                if ($partial && !$criteria) {
+                    return count($this->getUserFromUJMJobPostingFromUJMs());
+                }
+
+                $query = ChildUserJobMatchQuery::create(null, $criteria);
+                if ($distinct) {
+                    $query->distinct();
+                }
+
+                return $query
+                    ->filterByUserSearchSiteRunFromUJM($this)
+                    ->count($con);
+            }
+        } else {
+            return count($this->combinationCollUserFromUJMJobPostingFromUJMs);
+        }
+    }
+
+    /**
+     * Returns the not cached count of ChildUser objects. This will hit always the databases.
+     * If you have attached new ChildUser object to this object you need to call `save` first to get
+     * the correct return value. Use getUserFromUJMJobPostingFromUJMs() to get the current internal state.
+     *
+     * @param ChildJobPosting $jobPostingFromUJM
+     * @param Criteria $criteria
+     * @param ConnectionInterface $con
+     *
+     * @return integer
+     */
+    public function countUserFromUJMs(ChildJobPosting $jobPostingFromUJM = null, Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        return $this->createUserFromUJMsQuery($jobPostingFromUJM, $criteria)->count($con);
+    }
+
+    /**
+     * Associate a ChildUser to this object
+     * through the user_job_match cross reference table.
+     *
+     * @param ChildUser $userFromUJM,
+     * @param ChildJobPosting $jobPostingFromUJM
+     * @return ChildUserSearchSiteRun The current object (for fluent API support)
+     */
+    public function addUserFromUJM(ChildUser $userFromUJM, ChildJobPosting $jobPostingFromUJM)
+    {
+        if ($this->combinationCollUserFromUJMJobPostingFromUJMs === null) {
+            $this->initUserFromUJMJobPostingFromUJMs();
+        }
+
+        if (!$this->getUserFromUJMJobPostingFromUJMs()->contains($userFromUJM, $jobPostingFromUJM)) {
+            // only add it if the **same** object is not already associated
+            $this->combinationCollUserFromUJMJobPostingFromUJMs->push($userFromUJM, $jobPostingFromUJM);
+            $this->doAddUserFromUJMJobPostingFromUJM($userFromUJM, $jobPostingFromUJM);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Associate a ChildJobPosting to this object
+     * through the user_job_match cross reference table.
+     *
+     * @param ChildJobPosting $jobPostingFromUJM,
+     * @param ChildUser $userFromUJM
+     * @return ChildUserSearchSiteRun The current object (for fluent API support)
+     */
+    public function addJobPostingFromUJM(ChildJobPosting $jobPostingFromUJM, ChildUser $userFromUJM)
+    {
+        if ($this->combinationCollUserFromUJMJobPostingFromUJMs === null) {
+            $this->initUserFromUJMJobPostingFromUJMs();
+        }
+
+        if (!$this->getUserFromUJMJobPostingFromUJMs()->contains($jobPostingFromUJM, $userFromUJM)) {
+            // only add it if the **same** object is not already associated
+            $this->combinationCollUserFromUJMJobPostingFromUJMs->push($jobPostingFromUJM, $userFromUJM);
+            $this->doAddUserFromUJMJobPostingFromUJM($jobPostingFromUJM, $userFromUJM);
+        }
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param ChildUser $userFromUJM,
+     * @param ChildJobPosting $jobPostingFromUJM
+     */
+    protected function doAddUserFromUJMJobPostingFromUJM(ChildUser $userFromUJM, ChildJobPosting $jobPostingFromUJM)
+    {
+        $userJobMatch = new ChildUserJobMatch();
+
+        $userJobMatch->setUserFromUJM($userFromUJM);
+        $userJobMatch->setJobPostingFromUJM($jobPostingFromUJM);
+
+        $userJobMatch->setUserSearchSiteRunFromUJM($this);
+
+        $this->addUserJobMatch($userJobMatch);
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if ($userFromUJM->isJobPostingFromUJMUserSearchSiteRunFromUJMsLoaded()) {
+            $userFromUJM->initJobPostingFromUJMUserSearchSiteRunFromUJMs();
+            $userFromUJM->getJobPostingFromUJMUserSearchSiteRunFromUJMs()->push($jobPostingFromUJM, $this);
+        } elseif (!$userFromUJM->getJobPostingFromUJMUserSearchSiteRunFromUJMs()->contains($jobPostingFromUJM, $this)) {
+            $userFromUJM->getJobPostingFromUJMUserSearchSiteRunFromUJMs()->push($jobPostingFromUJM, $this);
+        }
+
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if ($jobPostingFromUJM->isUserFromUJMUserSearchSiteRunFromUJMsLoaded()) {
+            $jobPostingFromUJM->initUserFromUJMUserSearchSiteRunFromUJMs();
+            $jobPostingFromUJM->getUserFromUJMUserSearchSiteRunFromUJMs()->push($userFromUJM, $this);
+        } elseif (!$jobPostingFromUJM->getUserFromUJMUserSearchSiteRunFromUJMs()->contains($userFromUJM, $this)) {
+            $jobPostingFromUJM->getUserFromUJMUserSearchSiteRunFromUJMs()->push($userFromUJM, $this);
+        }
+
+    }
+
+    /**
+     * Remove userFromUJM, jobPostingFromUJM of this object
+     * through the user_job_match cross reference table.
+     *
+     * @param ChildUser $userFromUJM,
+     * @param ChildJobPosting $jobPostingFromUJM
+     * @return ChildUserSearchSiteRun The current object (for fluent API support)
+     */
+    public function removeUserFromUJMJobPostingFromUJM(ChildUser $userFromUJM, ChildJobPosting $jobPostingFromUJM)
+    {
+        if ($this->getUserFromUJMJobPostingFromUJMs()->contains($userFromUJM, $jobPostingFromUJM)) {
+            $userJobMatch = new ChildUserJobMatch();
+            $userJobMatch->setUserFromUJM($userFromUJM);
+            if ($userFromUJM->isJobPostingFromUJMUserSearchSiteRunFromUJMsLoaded()) {
+                //remove the back reference if available
+                $userFromUJM->getJobPostingFromUJMUserSearchSiteRunFromUJMs()->removeObject($jobPostingFromUJM, $this);
+            }
+
+            $userJobMatch->setJobPostingFromUJM($jobPostingFromUJM);
+            if ($jobPostingFromUJM->isUserFromUJMUserSearchSiteRunFromUJMsLoaded()) {
+                //remove the back reference if available
+                $jobPostingFromUJM->getUserFromUJMUserSearchSiteRunFromUJMs()->removeObject($userFromUJM, $this);
+            }
+
+            $userJobMatch->setUserSearchSiteRunFromUJM($this);
+            $this->removeUserJobMatch(clone $userJobMatch);
+            $userJobMatch->clear();
+
+            $this->combinationCollUserFromUJMJobPostingFromUJMs->remove($this->combinationCollUserFromUJMJobPostingFromUJMs->search($userFromUJM, $jobPostingFromUJM));
+
+            if (null === $this->combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion) {
+                $this->combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion = clone $this->combinationCollUserFromUJMJobPostingFromUJMs;
+                $this->combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion->clear();
+            }
+
+            $this->combinationCollUserFromUJMJobPostingFromUJMsScheduledForDeletion->push($userFromUJM, $jobPostingFromUJM);
+        }
+
+
+        return $this;
+    }
+
     /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
@@ -1901,8 +2663,20 @@ abstract class UserSearchSiteRun implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
+            if ($this->collUserJobMatches) {
+                foreach ($this->collUserJobMatches as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
+            if ($this->combinationCollUserFromUJMJobPostingFromUJMs) {
+                foreach ($this->combinationCollUserFromUJMJobPostingFromUJMs as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
         } // if ($deep)
 
+        $this->collUserJobMatches = null;
+        $this->combinationCollUserFromUJMJobPostingFromUJMs = null;
         $this->aJobSiteFromUSSR = null;
         $this->aUserSearchPairFromUSSR = null;
     }

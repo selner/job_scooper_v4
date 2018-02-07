@@ -256,6 +256,15 @@ class UserSearchSiteRunTableMap extends TableMap
     1 => ':user_search_pair_id',
   ),
 ), 'CASCADE', 'CASCADE', null, false);
+        $this->addRelation('UserJobMatch', '\\JobScooper\\DataAccess\\UserJobMatch', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':set_by_user_search_site_run_key',
+    1 => ':user_search_site_run_key',
+  ),
+), 'CASCADE', null, 'UserJobMatches', false);
+        $this->addRelation('UserFromUJM', '\\JobScooper\\DataAccess\\User', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'UserFromUJMs');
+        $this->addRelation('JobPostingFromUJM', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobPostingFromUJMs');
     } // buildRelations()
 
     /**
@@ -270,6 +279,15 @@ class UserSearchSiteRunTableMap extends TableMap
             'sluggable' => array('slug_column' => 'user_search_site_run_key', 'slug_pattern' => '{UserSearchPairId}_{JobSiteKey}_{AppRunId}', 'replace_pattern' => '/[^\w\/]+/u', 'replacement' => '', 'separator' => '-', 'permanent' => 'true', 'scope_column' => '', 'unique_constraint' => 'true', ),
         );
     } // getBehaviors()
+    /**
+     * Method to invalidate the instance pool of all tables related to user_search_site_run     * by a foreign key with ON DELETE CASCADE
+     */
+    public static function clearRelatedInstancePool()
+    {
+        // Invalidate objects in related instance pools,
+        // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
+        UserJobMatchTableMap::clearInstancePool();
+    }
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.

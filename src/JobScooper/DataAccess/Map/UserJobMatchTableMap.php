@@ -227,7 +227,7 @@ class UserJobMatchTableMap extends TableMap
   1 => 'marked-ready-to-send',
   2 => 'sent',
 ));
-        $this->addColumn('set_by_user_search_site_run_key', 'SetByUserSearchSiteRunKey', 'VARCHAR', false, 100, null);
+        $this->addForeignKey('set_by_user_search_site_run_key', 'SetByUserSearchSiteRunKey', 'VARCHAR', 'user_search_site_run', 'user_search_site_run_key', false, 100, null);
     } // initialize()
 
     /**
@@ -247,6 +247,13 @@ class UserJobMatchTableMap extends TableMap
   array (
     0 => ':jobposting_id',
     1 => ':jobposting_id',
+  ),
+), 'CASCADE', null, null, false);
+        $this->addRelation('UserSearchSiteRunFromUJM', '\\JobScooper\\DataAccess\\UserSearchSiteRun', RelationMap::MANY_TO_ONE, array (
+  0 =>
+  array (
+    0 => ':set_by_user_search_site_run_key',
+    1 => ':user_search_site_run_key',
   ),
 ), 'CASCADE', null, null, false);
     } // buildRelations()

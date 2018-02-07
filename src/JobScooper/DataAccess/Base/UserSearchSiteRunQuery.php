@@ -72,7 +72,17 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserSearchSiteRunQuery rightJoinWithUserSearchPairFromUSSR() Adds a RIGHT JOIN clause and with to the query using the UserSearchPairFromUSSR relation
  * @method     ChildUserSearchSiteRunQuery innerJoinWithUserSearchPairFromUSSR() Adds a INNER JOIN clause and with to the query using the UserSearchPairFromUSSR relation
  *
- * @method     \JobScooper\DataAccess\JobSiteRecordQuery|\JobScooper\DataAccess\UserSearchPairQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     ChildUserSearchSiteRunQuery leftJoinUserJobMatch($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserJobMatch relation
+ * @method     ChildUserSearchSiteRunQuery rightJoinUserJobMatch($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserJobMatch relation
+ * @method     ChildUserSearchSiteRunQuery innerJoinUserJobMatch($relationAlias = null) Adds a INNER JOIN clause to the query using the UserJobMatch relation
+ *
+ * @method     ChildUserSearchSiteRunQuery joinWithUserJobMatch($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the UserJobMatch relation
+ *
+ * @method     ChildUserSearchSiteRunQuery leftJoinWithUserJobMatch() Adds a LEFT JOIN clause and with to the query using the UserJobMatch relation
+ * @method     ChildUserSearchSiteRunQuery rightJoinWithUserJobMatch() Adds a RIGHT JOIN clause and with to the query using the UserJobMatch relation
+ * @method     ChildUserSearchSiteRunQuery innerJoinWithUserJobMatch() Adds a INNER JOIN clause and with to the query using the UserJobMatch relation
+ *
+ * @method     \JobScooper\DataAccess\JobSiteRecordQuery|\JobScooper\DataAccess\UserSearchPairQuery|\JobScooper\DataAccess\UserJobMatchQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildUserSearchSiteRun findOne(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query
  * @method     ChildUserSearchSiteRun findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query, or a new ChildUserSearchSiteRun object populated from the query conditions when no match is found
@@ -865,6 +875,113 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
         return $this
             ->joinUserSearchPairFromUSSR($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserSearchPairFromUSSR', '\JobScooper\DataAccess\UserSearchPairQuery');
+    }
+
+    /**
+     * Filter the query by a related \JobScooper\DataAccess\UserJobMatch object
+     *
+     * @param \JobScooper\DataAccess\UserJobMatch|ObjectCollection $userJobMatch the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildUserSearchSiteRunQuery The current query, for fluid interface
+     */
+    public function filterByUserJobMatch($userJobMatch, $comparison = null)
+    {
+        if ($userJobMatch instanceof \JobScooper\DataAccess\UserJobMatch) {
+            return $this
+                ->addUsingAlias(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY, $userJobMatch->getSetByUserSearchSiteRunKey(), $comparison);
+        } elseif ($userJobMatch instanceof ObjectCollection) {
+            return $this
+                ->useUserJobMatchQuery()
+                ->filterByPrimaryKeys($userJobMatch->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByUserJobMatch() only accepts arguments of type \JobScooper\DataAccess\UserJobMatch or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the UserJobMatch relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this|ChildUserSearchSiteRunQuery The current query, for fluid interface
+     */
+    public function joinUserJobMatch($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('UserJobMatch');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'UserJobMatch');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the UserJobMatch relation UserJobMatch object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return \JobScooper\DataAccess\UserJobMatchQuery A secondary query class using the current class as primary query
+     */
+    public function useUserJobMatchQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        return $this
+            ->joinUserJobMatch($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserJobMatch', '\JobScooper\DataAccess\UserJobMatchQuery');
+    }
+
+    /**
+     * Filter the query by a related User object
+     * using the user_job_match table as cross reference
+     *
+     * @param User $user the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildUserSearchSiteRunQuery The current query, for fluid interface
+     */
+    public function filterByUserFromUJM($user, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserJobMatchQuery()
+            ->filterByUserFromUJM($user, $comparison)
+            ->endUse();
+    }
+
+    /**
+     * Filter the query by a related JobPosting object
+     * using the user_job_match table as cross reference
+     *
+     * @param JobPosting $jobPosting the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildUserSearchSiteRunQuery The current query, for fluid interface
+     */
+    public function filterByJobPostingFromUJM($jobPosting, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserJobMatchQuery()
+            ->filterByJobPostingFromUJM($jobPosting, $comparison)
+            ->endUse();
     }
 
     /**
