@@ -178,29 +178,14 @@ function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 	LogMessage("Marking " . count($arrUserJobMatchIds) . " user job matches as {$strNewStatus}...");
 	$con = \Propel\Runtime\Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
 	$valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
-
-	$dateCol = "LastUpdatedAt";
-	switch($strNewStatus)
-	{
-		case UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT:
-			$dateCol = UserJobMatchTableMap::COL_DATE_LAST_NOTIFY;
-			break;
-
-		case UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND:
-			$dateCol = UserJobMatchTableMap::COL_DATE_LAST_AUTOMARKED;
-			break;
-	}
-
 	$statusInt = array_search($strNewStatus, $valueSet);
 	$nChunkCounter = 1;
-	$now = new \DateTime();
-
 	foreach (array_chunk($arrUserJobMatchIds, 50) as $chunk) {
 		$nMax = ($nChunkCounter+50);
 		LogMessage("Marking user job matches " . $nChunkCounter . " - " . ($nMax >= count($arrUserJobMatchIds) ? count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
 		\JobScooper\DataAccess\UserJobMatchQuery::create()
 			->filterByUserJobMatchId($chunk)
-			->update(array("UserNotificationState" => $statusInt, $dateCol => $now), $con);
+			->update(array("UserNotificationState" => $statusInt), $con);
 		$nChunkCounter += 50;
 	}
 
