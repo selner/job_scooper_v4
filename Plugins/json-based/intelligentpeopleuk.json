@@ -1,0 +1,83 @@
+{
+  "jobsite_plugins": [
+    {
+      "JobSiteName": "IntelligentPeople",
+      "BaseURL": "https://www.intelligentpeople.co.uk",
+      "SourceURL": "https://www.intelligentpeople.co.uk/page/***PAGE_NUMBER***/?s=***KEYWORDS***&post_type=job",
+      "CountryCodes": [
+        "UK"
+      ],
+      "Collections": [
+        {
+          "Name": "PageFields",
+          "Fields": [
+            {
+              "Name": "TotalPostCount",
+              "Selector": "div.content div div.box p",
+              "Index": 0,
+              "Pattern": "/(\\d+).*/",
+              "Attribute": "text",
+              "Type": "CSS"
+            },
+            {
+              "Name": "JobPostItem",
+              "Selector": "ul.jobListing li",
+              "Attribute": "collection",
+              "Type": "CSS"
+            }
+          ]
+        },
+        {
+          "Name": "ItemFields",
+          "Fields": [
+            {
+              "Name": "Title",
+              "Selector": "h5 a",
+              "Attribute": "title",
+              "Type": "CSS"
+            },
+            {
+              "Name": "Url",
+              "Selector": "h5 a",
+              "Attribute": "href",
+              "Index": 0,
+              "Type": "CSS"
+            },
+            {
+              "Name": "JobSitePostId",
+              "Selector": "p strong",
+              "Attribute": "text",
+              "Index": 0,
+              "Pattern": "/Reference:\\s*(.*)/",
+              "Type": "CSS"
+            },
+            {
+              "Name": "Company",
+              "Value": "Recruiter - Intelligent People",
+              "Type": "STATIC"
+            },
+            {
+              "Name": "PayRange",
+              "Selector": "h6",
+              "Index": 0,
+              "Attribute": "text",
+              "Pattern": "/(.*(?=-))/",
+              "Type": "CSS"
+            },
+            {
+              "Name": "Location",
+              "Selector": "h6 span",
+              "Index": 0,
+              "Attribute": "text",
+              "Type": "CSS"
+            }
+          ]
+        }
+      ],
+      "Pagination": {
+        "Type": "PAGE-VIA-URL",
+        "PageLimit": 10
+      }
+    }
+  ]
+}
