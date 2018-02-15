@@ -36,6 +36,7 @@ abstract class AbstractTaleo extends \JobScooper\BasePlugin\Classes\ServerHtmlPl
 	 */
 	function __construct()
     {
+	    $this->additionalBitFlags["COMPANY"] = C__JOB_USE_SITENAME_AS_COMPANY;
         $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
         
         if(!isset($this->server) or strlen($this->server) <= 0) {

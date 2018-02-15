@@ -28,6 +28,11 @@ abstract class AbstractResumatorFall2017  extends \JobScooper\BasePlugin\Classes
 		'JobSitePostId' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href', 'return_value_regex' => '/.com\/apply\/(\S*)\//i'),
 	);
 
+	function __construct()
+	{
+		$this->additionalBitFlags["COMPANY"] = C__JOB_USE_SITENAME_AS_COMPANY;
+		parent::__construct();
+	}
 
 	/**
 	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML

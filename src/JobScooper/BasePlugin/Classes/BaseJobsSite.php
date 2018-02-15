@@ -857,7 +857,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			$index = $var[1][1];
 			$parts = preg_split("/{$delim}/", $val,  -1, PREG_SPLIT_NO_EMPTY);
 			if(count($parts) >= $index)
-			return $parts[$index];
+				return $parts[$index];
 		}
 
 		return null;
@@ -1213,6 +1213,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	function cleanupJobItemFields($arrItem)
 	{
+		if($this->isBitFlagSet(C__JOB_USE_SITENAME_AS_COMPANY)) {
+			if (!array_key_exists('Company', $arrItem) || empty($ret['Company']))
+				$arrItem['Company'] = $this->getJobSiteKey();
+		}
+
 		$keys = array_keys($arrItem);
 		foreach ($keys as $key) {
 			$arrItem[$key] = cleanupTextValue($arrItem[$key]);
