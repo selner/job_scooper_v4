@@ -16,35 +16,6 @@
  * under the License.
  */
 
-
-/*class PluginHP extends AbstractTalentBrew
-{
-    protected $JobSiteName = "HP";
-    protected $JobPostingBaseUrl = 'https://h30631.www3.hp.com';
-    protected $JobListingsPerPage = 15;
-    protected $SearchUrlFormat = "/search-jobs";  // HP's keyword search is a little squirrelly so more successful if we don't filter up front and get the mismatches removed later
-    protected $additionalBitFlags = [ C__PAGINATION_INFSCROLLPAGE_NOCONTROL];
-
-    function __construct($strBaseDir = null)
-    {
-        unset($this->arrListingTagSetup['NextButton']);
-
-        parent::__construct();
-    }
-
-    function takeNextPageAction($nItem=null, $nPage=null)
-    {
-        $this->runJavaScriptSnippet("document.getElementsByClassName(\"next\")[0].setAttribute(\"class\", \"pagination-show-all\"); document.getElementsByClassName(\"pagination-show-all\")[0].click();", false, $this->additionalLoadDelaySeconds + 10);
-        sleep($this->additionalLoadDelaySeconds+1 );
-        $this->nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH * 3;
-        $this->JobListingsPerPage = $this->nMaxJobsToReturn;
-
-        $this->moveDownOnePageInBrowser();
-        
-    }
-}*/
-
-
 class PluginBoeing extends AbstractTalentBrew
 {
     protected $JobSiteName = 'Boeing';
@@ -58,8 +29,8 @@ class PluginBoeing extends AbstractTalentBrew
         'Title' =>  array('selector' => 'a h2'),
         'Url' =>  array('selector' => 'a', 'return_attribute' => 'href'),
         'JobSitePostId' =>  array('selector' => 'a', 'return_attribute' => 'data-job-id'),
-        'Location' =>  array('selector' => 'li', 'return_value_callback' =>  'splitValue', 'callback_parameter' => array("\n", 1)),
-        'PostedAt' =>  array('selector' => 'li', 'return_value_callback' =>  'splitValue', 'callback_parameter' => array("\n", 2)),
+        'Location' =>  array('selector' => 'li a', 'return_value_callback' =>  'parseLocation', 'callback_parameter' => array("\n", 2)),
+        'PostedAt' =>  array('selector' => 'li a span.job-date-posted'),
         'NextButton' => array('selector' => '#pagination-bottom a.next')
     );
 
@@ -67,6 +38,25 @@ class PluginBoeing extends AbstractTalentBrew
     {
         $this->arrListingTagSetup['TotalPostCount'] = array('selector' => 'h1[role="status"]');
         parent::__construct();
+    }
+
+	/**
+	 * @param $var
+	 *
+	 * @return null|string
+	 * @throws \Exception
+	 */
+	function parseLocation($var)
+    {
+	    if(count($var) < 2)
+		    throw new \Exception("parseLocation was not passed enough callback parameters to continue. " . getArrayDebugOutput($var));
+
+	    if(empty($var[0]))
+		    return null;
+
+	    $var[0] = preg_replace("/,\s*/", ", ", $var[0]);
+
+	    return $this->splitValue($var);
     }
 }
 

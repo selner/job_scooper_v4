@@ -835,18 +835,28 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		return true;
 	}
 
+	/**
+	 * @param $var
+	 *
+	 * @return string|null
+	 * @throws \Exception
+	 */
 	static function splitValue($var)
 	{
+
+		if(count($var) < 2)
+			throw new \Exception("splitValue was not passed enough callback parameters to continue. " . getArrayDebugOutput($var));
 
 		$val = $var[0];
 
 		if(empty($val))
 			return null;
 
-		if(is_array($var[1])) {
-			$delim = $var[1]['delimeter'];
-			$index = $var[1]['index'];
-			$parts = preg_split("/{$delim}/", $val);
+		if(is_array($var[1]) && count($var[1]) >= 2) {
+			$delim = $var[1][0];
+			$index = $var[1][1];
+			$parts = preg_split("/{$delim}/", $val,  -1, PREG_SPLIT_NO_EMPTY);
+			if(count($parts) >= $index)
 			return $parts[$index];
 		}
 
