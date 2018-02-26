@@ -168,8 +168,8 @@
                             </td>
                             <td width="65%" align="left"
                                 style="max-width: 65%; font-family: Open Sans, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 400; line-height: 24px; padding: 15px 10px 5px 10px; vertical-align: top;">
-                                <span style="font-size: small">{{{RunErrorDetails}}}</span>
-                                {{#if RunErrorPageHtml}}HTML file path = {{RunErrorPageHtml}}{{/if}}
+                                {{#if RunErrorPageHtml}}<span style="display: inline-block; margin-bottom: 10px;">HTML file path: <br/><span style="font-size: small">{{RunErrorPageHtml}}</span></span>{{/if}}
+                                {{#if RunErrorDetails}} <span style="display: inline-block; margin-bottom: 10px;">Last Error Details: <br/><span style="font-size: small">{{{RunErrorDetails}}}</span></span>{{/if}}
                             </td>
                         </tr>
                     {{/each}}

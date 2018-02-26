@@ -19,7 +19,6 @@ namespace JobScooper\StageProcessor;
 
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\Utils\JobsMailSender;
-use Exception;
 use JobScooper\Utils\SimpleHTMLHelper;
 use Propel\Runtime\ActiveQuery\Criteria;
 
@@ -49,19 +48,19 @@ class NotifierDevAlerts extends JobsMailSender
 		$strMod = "-5 days";
 		$dateDaysAgo = $startDate->modify($strMod);
 
-		$errFields = array("JobSiteKey", "RunResultCode", "RunErrorDetails", "RunErrorPageHtml");
-
+		$errFields = array("JobSiteKey", "RunResultCode");
 		$returnedJobSites = UserSearchSiteRunQuery::create()
 			->select($errFields)
 			->addAsColumn('LastStartedAt', 'max(date_started)')
 			->addAsColumn('LastCompletedAt', 'max(date_ended)')
 			->addAsColumn('CountFailedRuns', 'count(*)')
+			->addAsColumn('LastRunId', 'max(user_search_site_run_id)')
 			->groupBy($errFields)
 			->filterByRunResultCode("failed", Criteria::EQUAL)
 			->filterByEndedAt($dateDaysAgo, Criteria::GREATER_EQUAL)
-			->orderBy("CountFailedRuns", Criteria::DESC)
+			->having('CountFailedRuns >= ?', 3, \PDO::PARAM_INT)
 			->find()
-			->getData();
+			->toArray("JobSiteKey");
 
 		$lastJobsiteSuccess = UserSearchSiteRunQuery::create()
 			->select($errFields)
@@ -74,17 +73,32 @@ class NotifierDevAlerts extends JobsMailSender
 
 		$failedJobSites = array();
 		foreach($returnedJobSites as $jobsite) {
-			$jskey = $jobsite['JobSiteKey'];
-			if (!(array_key_exists($jskey, $lastJobsiteSuccess) && $jobsite['LastCompletedAt'] < $lastJobsiteSuccess[$jskey]['LastCompletedAt']))
+			$jsKey = $jobsite['JobSiteKey'];
+			if (!(array_key_exists($jsKey, $lastJobsiteSuccess) && $jobsite['LastCompletedAt'] < $lastJobsiteSuccess[$jsKey]['LastCompletedAt']))
 			{
-				$jobsite['RunErrorDetails'] = nl2br(htmlentities($jobsite['RunErrorDetails']));
 				if ($jobsite['CountFailedRuns'] >= 3) {
-					$failedJobSites[$jskey] = $jobsite;
+					$failedJobSites[$jsKey] = $jobsite;
 				}
 			}
 		}
 
-		if(!empty($failedJobSites)) {
+		if(!empty($failedJobSites))
+		{
+			$searchRunIds = array_column($failedJobSites, "LastRunId");
+			$errFields = array("JobSiteKey", "RunResultCode", "RunErrorDetails", "RunErrorPageHtml");
+			$reportJobSites = UserSearchSiteRunQuery::create()
+				->select($errFields)
+				->filterByUserSearchSiteRunId($searchRunIds, Criteria::IN)
+				->filterByJobSiteKey(array_keys($failedJobSites), Criteria::IN)
+				->find()
+				->toArray("JobSiteKey");
+
+			foreach(array_keys($failedJobSites) as $jsKey)
+			{
+				$reportJobSites[$jsKey] = array_merge($reportJobSites[$jsKey], $failedJobSites[$jsKey]);
+				$reportJobSites[$jsKey]['RunErrorDetails'] = nl2br(htmlentities($reportJobSites[$jsKey]['RunErrorDetails']));
+			}
+
 			$renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_plugin_error_alert.tmpl")));
 			$subject = "Plugin Failures for " . getRunDateRange(5);
 			$data = array(
@@ -95,7 +109,7 @@ class NotifierDevAlerts extends JobsMailSender
 					"IntroText"     => "",
 					"PreHeaderText" => ""
 				),
-				"PluginErrors" => $failedJobSites
+				"PluginErrors" => $reportJobSites
 			);
 
 			$html = call_user_func($renderer, $data);
