@@ -43,12 +43,22 @@ class StageManager
 	/**
 	 * @throws \Exception
 	 */
+	private function _initConfig()
+	{
+		if (empty($this->classConfig))
+		{
+			$this->classConfig = new ConfigBuilder();
+			$this->classConfig->initialize();
+		}
+	}
+
+	/**
+	 * @throws \Exception
+	 */
 	public function runAll()
     {
         try {
-	        $this->classConfig = new ConfigBuilder();
-
-	        $this->classConfig->initialize();
+	        $this->_initConfig();
 
 	        /*
 	         * Run specific stages requested via command-line
@@ -106,6 +116,7 @@ class StageManager
 	 */
 	public function doStage1(User $user)
     {
+	    $this->_initConfig();
 
         startLogSection("Stage 1: Downloading Latest Matching Jobs for User {$user->getUserSlug()}");
 	    $arrSearchesToRunBySite = $user->getUserSearchSiteRuns();
@@ -187,8 +198,9 @@ class StageManager
 	 */
 	public function doStage2(User $user)
     {
-        
-        try {
+	    $this->_initConfig();
+
+	    try {
 	        startLogSection("Stage 2:  Auto-marking all user job matches for user {$user->getUserSlug()}...");
             $marker = new JobsAutoMarker($user);
             $marker->markJobs();
@@ -208,6 +220,7 @@ class StageManager
 	 */
 	public function doStage3(User $user)
 	{
+		$this->_initConfig();
 		try {
 			startLogSection("Stage 3: Notifying User '{$user->getUserSlug()}'");
 			$notifier = new NotifierJobAlerts();
@@ -231,6 +244,8 @@ class StageManager
 	 */
 	public function doWeeklyRecaps($users)
 	{
+		$this->_initConfig();
+
 		startLogSection("do Weekly Recaps: Sending Weekly Recaps to Users");
 		try {
 			if(!empty($users))
@@ -260,6 +275,8 @@ class StageManager
 	 */
 	public function removeUserData($users)
 	{
+		$this->_initConfig();
+
 		startLogSection("BEGIN: removeUserData from database command");
 		if(!isDebug())
 			throw new \Exception("Removing user data is only allowed if the developer is running in debug mode.  Please set --debug flag when running. Aborting.");
@@ -288,6 +305,8 @@ class StageManager
 	 */
 	public function doFinalStage()
     {
+	    $this->_initConfig();
+
 	    try {
 		    startLogSection("Final Stage: Developer Alerts + Cleanup");
 		    $devNotifier = new NotifierDevAlerts();
