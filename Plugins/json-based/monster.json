@@ -65,7 +65,7 @@
             },
             {
               "Name": "Company",
-              "Selector": "div.company a span",
+              "Selector": "div.company",
               "Index": 0,
               "Attribute": "text",
               "Type": "CSS"
