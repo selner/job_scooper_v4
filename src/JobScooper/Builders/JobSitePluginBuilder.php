@@ -35,6 +35,16 @@ class JobSitePluginBuilder
 	{
 		clearCache("included_jobsites");
 	}
+
+	static function isSubsetOfSites()
+	{
+		$cmdLineSites = getConfigurationSetting("command_line_args.jobsite");
+		if(in_array("all", $cmdLineSites))
+			return false;
+
+		return true;
+	}
+
 	/**
 	 * @return \JobScooper\DataAccess\JobSiteRecord[]|null
 	 */
