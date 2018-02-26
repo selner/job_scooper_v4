@@ -84,6 +84,8 @@ class ConfigBuilder
         $this->arrConfigFileDetails = new SplFileInfo($file_name);
 
 	    $rootOutputPath = getConfigurationSetting("output_directories.root");
+	    if(empty($rootOutputPath))
+	    	throw new \Exception("Missing JOBSCOOPER_OUPUT environment variable value.");
 	    $rootOutputDir = parsePathDetailsFromString($rootOutputPath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
 	    if($rootOutputDir->isDir() !== true)
 	    {
