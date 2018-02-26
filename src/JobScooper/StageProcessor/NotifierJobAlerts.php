@@ -131,24 +131,25 @@ class NotifierJobAlerts extends JobsMailSender
 		// Send a separate notification for each GeoLocation the user had set
 		//
 		foreach ($this->_getSearchPairLocations($user) as $geoLocation) {
+			$matches = array( "all" => array());
+			$dbMatches = array();
 
 			LogMessage("Building job notification list for {$user->getName()}'s keyword matches in {$geoLocation->getDisplayName()}...");
 
-			$matches = array();
-			$matches["all"] = getAllMatchesForUserNotification(
+			$dbMatches = getAllMatchesForUserNotification(
 				[UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
-				null,
+				array($geoLocation->getGeoLocationId()),
 				null,
 				$user,
 				$geoLocation
 			);
 
-			if (empty($matches["all"]))
+			if (empty($dbMatches))
 				$matches["all"] = array();
 			else {
-				LogMessage("Converting " . countAssociativeArrayValues($matches["all"]) . " UserJobMatch objects to array data for use in notifications...");
-				foreach ($matches["all"] as $userMatchId => $item) {
-					$item = $matches["all"][$userMatchId]->toFlatArrayForCSV();
+				LogMessage("Converting " . countAssociativeArrayValues($dbMatches) . " UserJobMatch objects to array data for use in notifications...");
+				foreach ($dbMatches as $userMatchId => $item) {
+					$item = $dbMatches[$userMatchId]->toFlatArrayForCSV();
 					$matches["all"][$userMatchId] = $item;
 				}
 			}
