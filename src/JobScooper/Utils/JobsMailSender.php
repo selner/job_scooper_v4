@@ -53,7 +53,7 @@ class JobsMailSender extends PHPMailer
 	/**
 	 * @param null                             $strBodyText
 	 * @param null                             $strBodyHTML
-	 * @param array                            $arrDetailsAttachFiles
+	 * @param array                            $arrAttachFilePaths
 	 * @param string                           $subject
 	 * @param string                           $emailKind
 	 * @param User                             $toUser
@@ -61,7 +61,7 @@ class JobsMailSender extends PHPMailer
 	 * @return bool
 	 * @throws \Exception
 	 */
-	function sendEmail($strBodyText = null, $strBodyHTML = null, $arrDetailsAttachFiles = array(), $subject="No subject", $emailKind='results', User $toUser = null)
+	function sendEmail($strBodyText = null, $strBodyHTML = null, $arrAttachFilePaths = array(), $subject="No subject", $emailKind='results', User $toUser = null)
     {
     	try
 	    {
@@ -158,11 +158,11 @@ class JobsMailSender extends PHPMailer
 		    $this->WordWrap = 120;
 
 		    // Add attachments
-		    if(!empty($arrDetailsAttachFiles) && is_array($arrDetailsAttachFiles))
+		    if(!empty($arrAttachFilePaths) && is_array($arrAttachFilePaths))
 	        {
-	            foreach($arrDetailsAttachFiles as $detailsAttach)
+	            foreach($arrAttachFilePaths as $attachPath)
 	            {
-	                $this->addAttachment($detailsAttach);
+	                $this->addAttachment($attachPath);
 	            }
 	        }
 
