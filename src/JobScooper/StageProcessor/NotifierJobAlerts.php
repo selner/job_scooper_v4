@@ -252,6 +252,8 @@ class NotifierJobAlerts extends JobsMailSender
 		startLogSection("Generating HTML & text email content for user ");
 
 		$messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, $sendToUser, $geoLocation);
+		if(empty($messageHtml))
+			throw new Exception("Failed to generate email notification content for email {$resultsTitle} to sent to user {$sendToUser}.");
 
 		endLogSection("Email content ready to send.");
 
