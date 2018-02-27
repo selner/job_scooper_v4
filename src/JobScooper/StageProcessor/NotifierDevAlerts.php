@@ -118,9 +118,23 @@ class NotifierDevAlerts extends JobsMailSender
 //			$filepath = $objPageHtml->debug_dump_to_file();
 //			LogMessage("Debug template for html error email saved to: {$filepath}");
 
+			$attach = array();
+			if(!empty($GLOBALS['logger']) && isset($GLOBALS['logger']))
+			{
+				$logpath = $GLOBALS['logger']->getMainLogFilePath();
+				if(!empty($logpath))
+					$attach[] = $logpath;
+			}
+
+			foreach($reportJobSites as $jobsite)
+			{
+				if(array_key_exists("RunErrorPageHtml", $jobsite) && is_file($jobsite["RunErrorPageHtml"]))
+					$attach[] = $jobsite['RunErrorPageHtml'];
+			}
+
 			try {
 				$mailer = new JobsMailSender(true);
-				$mailer->sendEmail("", $html, null, $subject, "errors");
+				$mailer->sendEmail("", $html, $attach, $subject, "errors");
 			} catch (\Exception $ex)
 			{
 				handleException($ex);

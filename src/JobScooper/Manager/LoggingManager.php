@@ -133,6 +133,21 @@ Class LoggingManager extends \Monolog\Logger
         $this->logRecord(LogLevel::INFO,"Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'));
     }
 
+    public function getMainLogFilePath()
+    {
+    	$handler = $this->_handlersByType['logfile'];
+    	$stream = $handler->getStream();
+        $meta = null;
+    	if(!empty($stream))
+		    $meta = stream_get_meta_data($stream);
+
+	    if(is_array($meta) && array_key_exists("uri", $meta))
+	    	return $meta['uri'];
+
+	    return null;
+
+    }
+
 	/**
 	 * @param $channel
 	 *
