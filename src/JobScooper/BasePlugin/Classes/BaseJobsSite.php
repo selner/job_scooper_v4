@@ -808,7 +808,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		if ($secs <= 0)
 			$secs = 1000;
 
-		LogMessage("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...");
+		$this->log("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...");
 
 		$js = "
             scroll = setTimeout(doNextPage, " . $secs . ");
@@ -830,7 +830,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		$this->runJavaScriptSnippet($js, false);
 
 		sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
-		LogMessage("Page Url is now " . $this->getActiveWebdriver()->getCurrentURL());
+		$this->log("Page Url is now " . $this->getActiveWebdriver()->getCurrentURL());
 
 		return true;
 	}
@@ -891,7 +891,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		// Add the search to the list of ones to run
 		//
 		$this->arrSearchesToReturn[$searchDetails->getUserSearchSiteRunKey()] = $searchDetails;
-		LogMessage($this->JobSiteName . ": added search (" . $searchDetails->getUserSearchSiteRunKey() . ")");
+		$this->log($this->JobSiteName . ": added search (" . $searchDetails->getUserSearchSiteRunKey() . ")");
 
 	}
 
@@ -944,7 +944,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			$searchStartURL = $this->JobPostingBaseUrl;
 
 		$searchDetails->setSearchStartUrl($searchStartURL);
-		LogMessage("Setting start URL for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] to: " . PHP_EOL . $searchDetails->getSearchStartUrl());
+		$this->log("Setting start URL for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] to: " . PHP_EOL . $searchDetails->getSearchStartUrl());
 
 	}
 
@@ -1080,15 +1080,15 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 			if (isDebug() == true) {
 
-				LogMessage("URL        = " . $strURL);
-				LogMessage("Referrer   = " . $referrer);
-				LogMessage("Cookies    = " . $cookies);
+				$this->log("URL        = " . $strURL);
+				$this->log("Referrer   = " . $referrer);
+				$this->log("Cookies    = " . $cookies);
 			}
 
 			if (!$objSimpleHTML && ($filePath && strlen($filePath) > 0)) {
-				LogMessage("Loading ALTERNATE results from " . $filePath);
+				$this->log("Loading ALTERNATE results from " . $filePath);
 				$objSimpleHTML = null;
-				LogMessage("Loading HTML from " . $filePath);
+				$this->log("Loading HTML from " . $filePath);
 
 				if (!file_exists($filePath) && !is_file($filePath)) return $objSimpleHTML;
 				$fp = fopen($filePath, 'r');
@@ -1137,7 +1137,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	{
 		$nItemCount = 0;
 
-		LogMessage("Downloading count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "'");
+		$this->log("Downloading count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "'");
 
 		$pageNumber = 1;
 		$noMoreJobs = false;
@@ -1177,7 +1177,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			$pageNumber++;
 		}
 
-		LogMessage($this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL);
+		$this->log($this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL);
 
 	}
 
@@ -1197,7 +1197,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			$jscript = "function call_from_php() { " . $jscript . " }; call_from_php();";
 		}
 
-		LogMessage("Executing JavaScript in browser:  " . $jscript);
+		$this->log("Executing JavaScript in browser:  " . $jscript);
 
 			$ret = $driver->executeScript($jscript);
 
@@ -1394,11 +1394,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		}
 		try {
 			$driver = $this->getActiveWebdriver();
-			LogMessage("Getting host page for JSON query {$hostPageUri}");
+			$this->log("Getting host page for JSON query {$hostPageUri}");
 			$driver->get($hostPageUri);
 			$apiNodeId = "jobs_api_data";
 
-			LogMessage("Downloading JSON data from {$apiUri} using page at {$hostPageUri} ...");
+			$this->log("Downloading JSON data from {$apiUri} using page at {$hostPageUri} ...");
 
 
 			$jsCode = /** @lang javascript */
@@ -1474,7 +1474,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 JSCODE;
 
-			LogMessage("Executing JavaScript: ".PHP_EOL ." {$jsCode}");
+			$this->log("Executing JavaScript: ".PHP_EOL ." {$jsCode}");
 			$driver->manage()->timeouts()->setScriptTimeout(30);
 			$response = $driver->executeAsyncScript($jsCode, array());
 			if (empty($response)) {
