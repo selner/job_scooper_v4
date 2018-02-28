@@ -113,6 +113,19 @@
             "Pagination": {
                 "PageDelaySeconds": 5
             }
+        },
+        {
+            "JobSiteName": "Economist",
+            "SiteReferenceKey": "globalcareers-economist",
+            "PluginExtendsClassName": "AbstractIcimsATS",
+            "TagIndexes": {
+                "Title": 2,
+                "Url": 2,
+                "JobSitePostId": 1,
+                "Department": 1,
+                "Location": 3,
+                "PostedAt": 0
+            }
         }
     ]
 }
