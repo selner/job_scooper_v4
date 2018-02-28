@@ -32,7 +32,8 @@
         "docopt/docopt": "~1.0",
         "phpoffice/phpspreadsheet": "dev-master",
         "sentry/sentry": "^1.9@dev",
-        "adbario/php-dot-notation": "2.x-dev"
+        "adbario/php-dot-notation": "2.x-dev",
+        "bramus/monolog-colored-line-formatter": "~2.0"
     },
     "autoload": {
         "psr-4": {

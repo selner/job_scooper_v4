@@ -16,6 +16,7 @@
  */
 namespace JobScooper\Manager;
 
+use Bramus\Monolog\Formatter\ColorSchemes\DefaultScheme;
 use JobScooper\Logging\CSVLogHandler;
 use JobScooper\Logging\ErrorEmailLogHandler;
 use Monolog\ErrorHandler;
@@ -28,23 +29,13 @@ use \Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use DateTime;
 use Exception;
+use \Bramus\Monolog\Formatter\ColoredLineFormatter;
 
 /****************************************************************************************************************/
 /****                                                                                                        ****/
 /****         Helper Class:  Information and Error Logging                                               ****/
 /****                                                                                                        ****/
 /****************************************************************************************************************/
-
-/**
- * @param $channel
- *
- * @return mixed
- */
-function getChannelLogger($channel)
-{
-    if(!is_null($GLOBALS['logger']))
-        return $GLOBALS['logger']->getChannelLogger($channel);
-}
 
 /**
  * Class JobsErrorHandler
@@ -106,10 +97,6 @@ Class LoggingManager extends \Monolog\Logger
 
         parent::__construct($name, $handlers = $this->_handlersByType);
 
-        $this->_loggers[$this->_loggerName] = $this;
-        $this->_loggers['plugins'] = $this->withName('plugins');
-        $this->_loggers['database'] = $this->withName('database');
-
         $logOptions = getConfigurationSetting('logging', array());
         $this->_doLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
 
@@ -117,7 +104,8 @@ Class LoggingManager extends \Monolog\Logger
         $now = new DateTime('NOW');
 
         $this->_handlersByType['stderr'] = new StreamHandler("php://stderr", Logger::DEBUG );
-	    $fmter = $this->_handlersByType['stderr']->getFormatter();
+	    $fmter = new ColoredLineFormatter(new DefaultScheme());
+//	    $fmter = $this->_handlersByType['stderr']->getFormatter();
 	    $fmter->allowInlineLineBreaks(true);
 	    $fmter->includeStacktraces(true);
 	    $fmter->ignoreEmptyContextAndExtra(true);
@@ -125,7 +113,12 @@ Class LoggingManager extends \Monolog\Logger
         $this->pushHandler($this->_handlersByType['stderr']);
         $this->_addSentryHandler();
 
-        $this->LogRecord(\Psr\Log\LogLevel::INFO,"Logging started from STDIN");
+
+	    $this->_loggers[$this->_loggerName] = $this;
+	    $this->_loggers['plugins'] = $this->withName('plugins');
+	    $this->_loggers['database'] = $this->withName('database');
+
+	    $this->LogRecord(\Psr\Log\LogLevel::INFO,"Logging started from STDIN");
 
 //        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
         $propelContainer = Propel::getServiceContainer();
@@ -155,14 +148,14 @@ Class LoggingManager extends \Monolog\Logger
 	 */
 	public function getChannelLogger($channel)
     {
-        if( is_null($channel) || !in_array($channel, array_keys($this->_loggers)))
-            $channel = 'default';
+        if( empty($channel) || !in_array($channel, array_keys($this->_loggers)))
+            $channel = $this->_loggerName;
 
         return $this->_loggers[$channel];
     }
 
     /**
-     * @private
+     * @throws \Exception
      */
     public function handleException($e)
     {
@@ -175,7 +168,9 @@ Class LoggingManager extends \Monolog\Logger
 	 */
 	public function updatePropelLogging()
     {
-        Propel::getServiceContainer()->setLogger('defaultLogger', $this);
+    	$logger = $this->getChannelLogger("database");
+
+        Propel::getServiceContainer()->setLogger($logger->getName(), $logger);
         if(isDebug()) {
             $con = Propel::getWriteConnection(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
             $con->useDebug(true);
@@ -277,8 +272,13 @@ Class LoggingManager extends \Monolog\Logger
 	 * @param array $extras
 	 * @param null  $ex
 	 */
-	public function logRecord($level, $message, $extras=array(), $ex=null)
+	public function logRecord($level, $message, $extras=array(), $ex=null, $channel=null)
 	{
+		if(empty($level))
+			$level = Logger::INFO;
+
+		$logger = $this->getChannelLogger($channel);
+
 		$context = array();
 		$monologLevel = \Monolog\Logger::toMonologLevel($level);
 		if(in_array($level, array(
@@ -286,8 +286,11 @@ Class LoggingManager extends \Monolog\Logger
 			$context = $this->getDebugContext($extras, $ex);
 		}
 
-		if(parent::log($monologLevel, $message, $context) === false)
+		if($logger->log($monologLevel, $message, $context) === false)
 			print($message .PHP_EOL . PHP_EOL );
+
+//		if(parent::log($monologLevel, $message, $context) === false)
+//			print($message .PHP_EOL . PHP_EOL );
 	}
 
     private $_openSections = 0;
@@ -352,6 +355,10 @@ Class LoggingManager extends \Monolog\Logger
 
     }
 
+    public function getName()
+    {
+    	return $this->_loggerName;
+    }
 
 	/**
 	 * @param array $context

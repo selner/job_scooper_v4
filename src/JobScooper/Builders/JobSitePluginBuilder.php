@@ -240,7 +240,7 @@ class JobSitePluginBuilder
 	 */
 	private function _syncDatabaseJobSitePluginClassList()
     {
-        LogMessage('Adding any missing declared jobsite plugins and jobsite records in database...');
+        LogMessage('Adding any missing declared jobsite plugins and jobsite records in database...',null, null, null, $channel="plugins");
 
         $classListBySite = $this->_getAllPluginClassesByJobSiteKey();
 
@@ -252,7 +252,7 @@ class JobSitePluginBuilder
         $jobsitesToAdd = array_diff_key($classListBySite, $all_jobsites_by_key);
         if (!empty($jobsitesToAdd)) {
 
-            LogMessage('Adding ' . getArrayValuesAsString($jobsitesToAdd));
+            LogMessage('Adding ' . getArrayValuesAsString($jobsitesToAdd),null, null, null, $channel="plugins");
 
             foreach ($jobsitesToAdd as $jobSiteKey => $pluginClass) {
                 $dbrec = JobSiteRecordQuery::create()
@@ -269,7 +269,7 @@ class JobSitePluginBuilder
         $jobsitesToDisable = array_diff_key($all_jobsites_by_key, $classListBySite);
         if (!empty($jobsitesToDisable))
         {
-	        LogMessage('Disabling ' . array_keys($jobsitesToDisable));
+	        LogMessage('Disabling ' . array_keys($jobsitesToDisable),null, null, null, $channel="plugins");
         	foreach($jobsitesToDisable as $jobSiteKey =>$jobsite)
 	        {
 		        $all_jobsites_by_key[$jobSiteKey]->setIsDisabled(true);
@@ -289,9 +289,9 @@ class JobSitePluginBuilder
 	private function _initializeAllJsonPlugins()
     {
         $arrAddedPlugins = null;
-        LogMessage('Initializing all job site plugins...');
+        LogMessage('Initializing all job site plugins...',null, null, null, $channel="plugins");
 
-        LogMessage('Generating classes for ' . count($this->_jsonPluginSetups) . ' JSON-loaded plugins...');
+        LogMessage('Generating classes for ' . count($this->_jsonPluginSetups) . ' JSON-loaded plugins...',null, null, null, $channel="plugins");
         foreach (array('Abstract', 'Plugin') as $type) {
             $plugins = array_filter($this->_jsonPluginSetups, function ($val) use ($type) {
                 $matched = preg_match("/^" . $type . "/", $val['PhpClassName']);
@@ -299,7 +299,7 @@ class JobSitePluginBuilder
             });
 
             foreach (array_keys($plugins) as $agentkey) {
-                LogDebug("Running eval statement for class " . $plugins[$agentkey]['PhpClassName']);
+                LogDebug("Running eval statement for class " . $plugins[$agentkey]['PhpClassName'],null, $channel="plugins");
                 try {
                 	if(!in_array($plugins[$agentkey]['PhpClassName'], get_declared_classes()))
 	                {
@@ -314,7 +314,7 @@ class JobSitePluginBuilder
                 }
             }
 
-            LogMessage("Added " . count($plugins) . " " . ($type === "Abstract" ? $type : "json") . " plugins: ");
+            LogMessage("Added " . count($plugins) . " " . ($type === "Abstract" ? $type : "json") . " plugins: ",null, null, null, $channel="plugins");
         }
 
     }
@@ -326,7 +326,7 @@ class JobSitePluginBuilder
 	private function _loadJsonPluginConfigFiles_()
 	{
 		$this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . "*.json");
-		LogMessage("Loading JSON-based, jobsite plugin configurations from " . count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...");
+		LogMessage("Loading JSON-based, jobsite plugin configurations from " . count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...", null, null, null, $channel="plugins");
 		foreach ($this->_configJsonFiles as $f) {
 			$dataPlugins = loadJSON($f, null, true);
 			if(empty($dataPlugins))
@@ -449,7 +449,7 @@ class JobSitePluginBuilder
             }
         }
 
-        LogDebug("Loaded JSON config for new plugin: " . $pluginData['JobSiteName']);
+        LogDebug("Loaded JSON config for new plugin: " . $pluginData['JobSiteName'],null,  $channel="plugins");
 
         return $pluginData;
 

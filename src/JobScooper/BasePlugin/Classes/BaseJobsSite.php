@@ -297,7 +297,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 					$this->selenium->done();
 				}
 			} catch (Exception $ex) {
-				LogWarning("Unable to shutdown Selenium remote webdriver successfully while closing down downloads for {$this->JobSiteName}: " . $ex->getMessage());
+				$this->log("Unable to shutdown Selenium remote webdriver successfully while closing down downloads for {$this->JobSiteName}: " . $ex->getMessage(), \Monolog\Logger::WARNING);
 			} finally {
 				$this->selenium = null;
 			}
@@ -1145,7 +1145,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			$arrPageJobsList = [];
 			$apiJobs = $this->getSearchJobsFromAPI($searchDetails);
 			if (is_null($apiJobs)) {
-				LogWarning("Warning: " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] returned zero jobs from the API." . PHP_EOL);
+				$this->log("Warning: " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] returned zero jobs from the API." . PHP_EOL, \Monolog\Logger::WARNING);
 
 				return;
 			}
@@ -1243,7 +1243,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 				}
 			}
 		} catch (\Exception $ex) {
-			LogWarning($ex->getMessage());
+			$this->log($ex->getMessage(), \Monolog\Logger::WARNING);
 		}
 		if (empty($arrItem['JobSitePostId'])) {
 			$arrItem['JobSitePostId'] = $arrItem['Url'];
@@ -1300,7 +1300,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 					if ($hoursSince->h < 1)
 						$nCountNewJobs += 1;
 				} else
-					LogWarning("Failed to save job to database.  Job details = " . getArrayDebugOutput($jobitem));
+					$this->log("Failed to save job to database.  Job details = " . getArrayDebugOutput($jobitem), \Monolog\Logger::WARNING);
 			}
 		} catch (Exception $ex) {
 			handleException($ex, "Unable to save job search results to database.", true);
@@ -1496,10 +1496,20 @@ JSCODE;
 			return $data;
 
 		} catch (Exception $ex) {
-			LogError("Failed to download JSON data from API call {$apiUri}.  Error:  " . $ex->getMessage(), null, $ex);
+			$this->log("Failed to download JSON data from API call {$apiUri}.  Error:  " . $ex->getMessage(), \Monolog\Logger::ERROR, $ex);
 		}
 
 		return null;
+	}
+
+	/**
+	 * @param $msg
+	 * @param \Psr\Log\LogLevel $level
+	 * @param array $context
+	 */
+	function log($msg, $logLevel=\Monolog\Logger::INFO, $extras=array(), $ex=null)
+	{
+		LogMessage($msg, $logLevel, $extras, $ex, $channel="plugins");
 	}
 
 
@@ -1519,7 +1529,7 @@ JSCODE;
                 $this->getActiveWebdriver()->get($url);
             }
 
-            LogMessage("... sleeping " . $this->additionalLoadDelaySeconds . " seconds while the page results load for " . $this->JobSiteName);
+            $this->log("... sleeping " . $this->additionalLoadDelaySeconds . " seconds while the page results load for " . $this->JobSiteName);
             sleep($this>$this->additionalLoadDelaySeconds);
 
             $html = $this->getActiveWebdriver()->getPageSource();
@@ -1546,7 +1556,7 @@ JSCODE;
         try {
             $nItemCount = 1;
             $nPageCount = 1;
-	        LogMessage("Starting first page load for " . $this->JobSiteName . " job search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
+	        $this->log("Starting first page load for " . $this->JobSiteName . " job search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
 
 
 	        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
@@ -1601,7 +1611,7 @@ JSCODE;
                 }
             }
 
-	        LogMessage("Getting count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
+	        $this->log("Getting count of " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "': " . $searchDetails->getSearchStartUrl());
 
 	        if (!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
@@ -1610,7 +1620,7 @@ JSCODE;
                     $totalPagesCount = 0;
                 } elseif ($nTotalListings != C__TOTAL_ITEMS_UNKNOWN__) {
                     if ($nTotalListings > $this->nMaxJobsToReturn) {
-                        LogWarning("Search '" . $searchDetails->getUserSearchSiteRunKey() . "' returned more results than allowed.  Only retrieving the first " . $this->nMaxJobsToReturn . " of  " . $nTotalListings . " job listings.");
+                        $this->log("Search '" . $searchDetails->getUserSearchSiteRunKey() . "' returned more results than allowed.  Only retrieving the first " . $this->nMaxJobsToReturn . " of  " . $nTotalListings . " job listings.", \Monolog\Logger::WARNING);
                         $nTotalListings = $this->nMaxJobsToReturn;
                     }
                     $totalPagesCount = intceil($nTotalListings / $this->JobListingsPerPage); // round up always
@@ -1619,12 +1629,12 @@ JSCODE;
             }
 
             if ($nTotalListings <= 0) {
-                LogMessage("No new job listings were found on " . $this->JobSiteName . " for search '" . $searchDetails->getUserSearchSiteRunKey() . "'.");
+                $this->log("No new job listings were found on " . $this->JobSiteName . " for search '" . $searchDetails->getUserSearchSiteRunKey() . "'.");
                 return array();
             } else {
                 $nJobsFound = 0;
 
-                LogMessage("Querying " . $this->JobSiteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails->getSearchStartUrl());
+                $this->log("Querying " . $this->JobSiteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails->getSearchStartUrl());
 
                 $strURL = $searchDetails->getSearchStartUrl();
                 $searchDetails->nextResultsPageUrl = $strURL;
@@ -1676,7 +1686,7 @@ JSCODE;
                                     //
                                     while ($nPageCount <= $totalPagesCount) {
                                         if (isDebug() == true) {
-                                            LogMessage("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount);
+                                            $this->log("... getting infinite results page #" . $nPageCount . " of " . $totalPagesCount);
                                         }
                                         $this->moveDownOnePageInBrowser();
                                         $nPageCount = $nPageCount + 1;
@@ -1714,7 +1724,7 @@ JSCODE;
                         throw new \ErrorException("Error:  unable to get SimpleHTML object for " . $strURL);
                     }
 
-                    LogMessage("Getting jobs page # " . $nPageCount . " of " . $totalPagesCount . " from " . $strURL . ".  Total listings loaded:  " . ($nItemCount == 1 ? 0 : $nItemCount) . "/" . $nTotalListings . ".");
+                    $this->log("Getting jobs page # " . $nPageCount . " of " . $totalPagesCount . " from " . $strURL . ".  Total listings loaded:  " . ($nItemCount == 1 ? 0 : $nItemCount) . "/" . $nTotalListings . ".");
                     try {
 						$arrJsonLDJobs = $this->parseJobsFromLdJson($objSimpleHTML);
 
@@ -1726,7 +1736,7 @@ JSCODE;
                             if ($nPageCount < $totalPagesCount)
                                 $strWarnHiddenListings .= "  They likely have hidden the remaining " . ($totalPagesCount - $nPageCount) . " pages worth. ";
 
-                            LogMessage($strWarnHiddenListings);
+                            $this->log($strWarnHiddenListings);
                             $nPageCount = $totalPagesCount;
                         }
                         else {
@@ -1770,7 +1780,7 @@ JSCODE;
                                 $nTotalListings = countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]);
                             }
 
-                            LogMessage("Loaded " . countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) . " of " . $nTotalListings . " job listings from " . $this->JobSiteName);
+                            $this->log("Loaded " . countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) . " of " . $nTotalListings . " job listings from " . $this->JobSiteName);
 
 
                             //
@@ -1784,7 +1794,7 @@ JSCODE;
                                 $this->isBitFlagSet(C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER) &&
                                 $nJobsFound < $nTotalListings)
                             {
-                                LogMessage("All " . count($arrPageJobsList) . " job listings downloaded for this page have been seen before.  Skipping remaining job downloads since they are likely to be repeats.");
+                                $this->log("All " . count($arrPageJobsList) . " job listings downloaded for this page have been seen before.  Skipping remaining job downloads since they are likely to be repeats.");
                                 return;
 
                             }
@@ -1812,15 +1822,15 @@ JSCODE;
                         $err = "Retrieved only " . $nJobsFound . " of the " . $nTotalListings . " listings that we expected for " . $this->JobSiteName . " (search = " . $searchDetails->getUserSearchSiteRunKey() . ")";
                     elseif ($nJobsFound > $nTotalListings * (1 + $marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
                         $warnMsg = "Warning:  Downloaded " . ($nJobsFound - $nTotalListings) . " jobs more than the " . $nTotalListings . " expected for " . $this->JobSiteName . " (search = " . $searchDetails->getUserSearchSiteRunKey() . ")";
-                        LogWarning($warnMsg);
+                        $this->log($warnMsg, \Monolog\Logger::WARNING);
                     }
 
                     if (!is_null($err)) {
                         if ($this->isBitFlagSet(C__JOB_IGNORE_MISMATCHED_JOB_COUNTS) || $this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) === true) {
-                            LogWarning("Warning: " . $err);
+                            $this->log("Warning: " . $err, \Monolog\Logger::WARNING);
                         } else {
                             $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.";
-                            LogError($err);
+                            $this->log($err, \Monolog\Logger::ERROR);
                             handleException(new Exception($err), null, true, $extraData=$searchDetails->toLoggedContext());
                         }
                     }
@@ -1885,12 +1895,12 @@ JSCODE;
 
             }
 
-            LogMessage($this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL);
+            $this->log($this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]" . ": " . $nJobsFound . " jobs found." . PHP_EOL);
 
         } catch (Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex, false, $objSimpleHTML);
-            handleException($ex, null, true, $extraData=$searchDetails->toLoggedContext());
-	        LogWarning("Failed to download new job postings for search run " . $searchDetails->getUserSearchSiteRunKey() . ".  Continuing to next search.   Error details: " . $ex->getMessage());
+            handleException($ex, null, false, $extraData=$searchDetails->toLoggedContext());
+	        $this->log("Failed to download new job postings for search run " . $searchDetails->getUserSearchSiteRunKey() . ".  Continuing to next search.   Error details: " . $ex->getMessage(), \Monolog\Logger::WARNING);
         }
 
         return null;
@@ -2001,7 +2011,7 @@ JSCODE;
 
 				} catch (Exception $ex)
 				{
-					LogDebug("Error parsing LD+JSON for " . $this->getJobSiteKey() . ": " . $ex->getMessage());
+					$this->log("Error parsing LD+JSON for " . $this->getJobSiteKey() . ": " . $ex->getMessage(), \Monolog\Logger::DEBUG);
 				}
 			}
 		}

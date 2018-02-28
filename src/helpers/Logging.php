@@ -17,6 +17,9 @@
 
 
 /****************************************************************************************************************/
+
+use Monolog\Logger;
+
 /****                                                                                                        ****/
 /****         Logging                                                                                        ****/
 /****                                                                                                        ****/
@@ -62,7 +65,7 @@ function endLogSection($headerText)
  * @param \Psr\Log\LogLevel $level
  * @param array $context
  */
-function LogMessage($msg, $logLevel=\Monolog\Logger::INFO, $extras=array(), $ex=null)
+function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $channel=null)
 {
 	if(empty($GLOBALS['logger']) || !isset($GLOBALS['logger']))
 	{
@@ -70,7 +73,7 @@ function LogMessage($msg, $logLevel=\Monolog\Logger::INFO, $extras=array(), $ex=
 	}
 	else
 	{
-		$GLOBALS['logger']->logRecord($logLevel, $msg, $extras, $ex);
+		$GLOBALS['logger']->logRecord($logLevel, $msg, $extras, $ex, $channel);
 	}
 }
 
@@ -80,7 +83,7 @@ function LogMessage($msg, $logLevel=\Monolog\Logger::INFO, $extras=array(), $ex=
  */
 function LogError($msg, $extras=array(), $ex=null)
 {
-	LogMessage($msg,\Monolog\Logger::ERROR, $extras, $ex);
+	LogMessage($msg, Logger::ERROR, $extras, $ex);
 }
 
 
@@ -89,18 +92,18 @@ function LogError($msg, $extras=array(), $ex=null)
  */
 function LogWarning($msg, $extras=array())
 {
-	LogMessage($msg,\Monolog\Logger::WARNING, $extras);
+	LogMessage($msg, Logger::WARNING, $extras);
 }
 
 /**
  * @param     $msg
  * @param int $scooper_level
  */
-function LogDebug($msg, $extras=array())
+function LogDebug($msg, $extras=array(), $channel=null)
 {
 	if(isDebug())
 	{
-		LogMessage($msg,\Monolog\Logger::DEBUG, $extras);
+		LogMessage($msg, Logger::DEBUG, $extras, $channel=$channel);
 	}
 }
 
@@ -119,6 +122,19 @@ function LogPlainText($msg, $context = array())
 		}
 	}
 }
+
+
+
+/**
+ * @param $channel
+ *
+ * @return mixed
+ */
+function getChannelLogger($channel)
+{
+	return $GLOBALS['logger']->getChannelLogger($channel);
+}
+
 /**
  * @param      $ex
  * @param null $fmtLogMsg
@@ -126,8 +142,7 @@ function LogPlainText($msg, $context = array())
  *
  * @throws \Exception
  */
-
-function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null)
+function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null, $channel=null)
 {
 	$toThrow = $ex;
 	if (empty($toThrow))
@@ -152,7 +167,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
 		$msg = $toThrow->getMessage();
 	}
 
-	LogError($msg, $extraData, $toThrow);
+	LogMessage($msg, Logger::ERROR, $extras=$extraData, $ex=$toThrow, $channel);
 
 	if ($raise == true) {
 		throw $toThrow;
