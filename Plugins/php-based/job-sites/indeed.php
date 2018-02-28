@@ -30,7 +30,7 @@ class PluginIndeed extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
     protected $PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
 
     protected $arrListingTagSetup = array(
-        'TotalPostCount' =>  array('selector' => 'div#searchCount', 'return_value_regex' => '/.*?of\s*(\d+).*?/'),
+        'TotalPostCount' =>  array('selector' => 'div#searchCount', 'return_value_regex' => '/.*?of\s*([\d,]+).*?/'),
         'NoPostsFound' =>  array('selector' => 'body', 'index' => 0, 'return_attribute' => 'collection', 'return_value_callback' => "checkNoJobResults"),
         'NextButton' => array('selector' => 'span.np'),
         'JobPostItem' => array('selector' => 'td#resultsCol div[data-tn-component=\'organicJob\']'),
