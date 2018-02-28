@@ -344,7 +344,7 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function _generateHTMLEmailContent($subject, &$matches, User $user, GeoLocation $geoLocation=null)
+	private function _generateHTMLEmailContent($subject, $matches, User $user, GeoLocation $geoLocation=null)
 	{
 		try {
 
