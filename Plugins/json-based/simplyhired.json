@@ -13,8 +13,9 @@
                     "Fields": [
                         {
                             "Name": "TotalPostCount",
-                            "Selector": "span.posting-total",
-                            "Attribute": "text",
+                            "Selector": "meta[name='description']",
+                            "Attribute": "content",
+                            "Pattern": "/([\\d,]+).*/",
                             "Index": 0,
                             "Type": "CSS"
                         },
@@ -56,7 +57,8 @@
                             "Name": "JobSitePostId",
                             "Selector": "div.js-job",
                             "Type": "CSS",
-                            "Field": "data-jobkey"
+                            "Index": 0,
+                            "Attribute": "data-jobkey"
                         },
                         {
                             "Name": "Location",
@@ -101,8 +103,8 @@
             "BaseURL": "https://www.simplyhired.co.uk",
             "CountryCodes": [
                 "UK"
-            ]
+            ],
+            "PluginExtendsClassName": "PluginSimplyHired"
         }
-
     ]
 }
