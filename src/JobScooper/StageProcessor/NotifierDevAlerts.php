@@ -100,7 +100,7 @@ class NotifierDevAlerts extends JobsMailSender
 			}
 
 			$renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_plugin_error_alert.tmpl")));
-			$subject = "Plugin Failures for " . getRunDateRange(5);
+			$subject = "Plugin Failures[" . gethostname() . "]: for " . getRunDateRange(5);
 			$data = array(
 				"Email"        => array(
 					"Subject"       => $subject,
