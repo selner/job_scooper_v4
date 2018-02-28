@@ -1899,7 +1899,7 @@ JSCODE;
 
         } catch (Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex, false, $objSimpleHTML);
-            handleException($ex, null, false, $extraData=$searchDetails->toLoggedContext());
+            handleException($ex, null, true, $extraData=$searchDetails->toLoggedContext());
 	        $this->log("Failed to download new job postings for search run " . $searchDetails->getUserSearchSiteRunKey() . ".  Continuing to next search.   Error details: " . $ex->getMessage(), \Monolog\Logger::WARNING);
         }
 
