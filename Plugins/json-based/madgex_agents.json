@@ -53,15 +53,7 @@
             "SiteReferenceKey": "www.exec-appointments",
             "PluginExtendsClassName": "AbstractMadgexATS",
             "CountryCodes": [
-                "US"
-            ]
-        },
-        {
-            "JobSiteName": "Economist",
-            "SiteReferenceKey": "jobs.economist",
-            "PluginExtendsClassName": "AbstractMadgexATS",
-            "CountryCodes": [
-                "US"
+                "GB"
             ]
         },
         {
