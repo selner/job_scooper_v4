@@ -28,10 +28,12 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	 */
 	function __construct()
     {
+    	$this->locationid = null;
 	    $this->JobPostingBaseUrl = "https://{$this->SiteReferenceKey}.com";
 	    $this->SearchUrlFormat = "{$this->JobPostingBaseUrl}/searchjobs?Keywords=***KEYWORDS***&radialtown=***LOCATION:{Place}***+***LOCATION:{Region}***&RadialLocation=50&NearFacetsShown=true&countrycode=***LOCATION:{CountryCode}***&sort=Date&Page=***PAGE_NUMBER***";
         $this->prevURL = $this->JobPostingBaseUrl;
         $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
+        $this->additionalLoadDelaySeconds = 3;
 
         $this->additionalBitFlags[] = C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER;
         parent::__construct();
@@ -63,8 +65,8 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	    if (!empty($this->locationid))
             $strURL = $strURL. "&LocationID=" . $this->locationid;
 
-        $page = $nPage == 1 ? "" : "&Page=" . $this->getPageURLValue($nPage);
-        $strURL = preg_replace('/&[Pp]age=\d+/', $page, $strURL);
+//        $page = $nPage == 1 ? "" : "&Page=" . $this->getPageURLValue($nPage);
+//        $strURL = preg_replace('/&[Pp]age=\d+/', $page, $strURL);
         return $strURL;
 
     }
@@ -72,16 +74,17 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
     protected $arrListingTagSetup = array(
         'NoPostsFound'          => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_callback' => 'matchesNoResultsPattern', 'callback_parameter' => "Found 0 jobs"),
         'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b(\d+)\b/i'),
-        'JobPostItem'           => array('selector' => 'li.lister__item'),
-        'Title'                 => array('selector' => 'h3.lister__header a span', 'return_attribute' => 'text'),
-        'Url'                   => array('selector' => 'h3.lister__header a', 'return_attribute' => 'href'),
-        'Company'               => array('selector' => 'ul li.lister__meta-item--recruiter', 'return_attribute' => 'text'),
-        'PageRange'             => array('selector' => 'ul li.lister__meta-item--salary', 'return_attribute' => 'text'),
-        'Location'              => array('selector' => 'ul li.lister__meta-item--location', 'return_attribute' => 'text'),
-        'JobSitePostId'         => array('selector' => 'li.lister__item', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i'),
+//        'JobPostItem'           => array('selector' => 'li.lister__item'),
+        'JobPostItem'           => array('selector' => 'ul#listing li.cf'),
+        'Title'                 => array('selector' => 'h3.lister__header a span', 'return_attribute' => 'text', 'index' =>0),
+        'Url'                   => array('selector' => 'h3.lister__header a', 'return_attribute' => 'href', 'index' =>0),
+        'Company'               => array('selector' => 'ul li.lister__meta-item--recruiter', 'return_attribute' => 'text', 'index' =>0),
+        'PageRange'             => array('selector' => 'ul li.lister__meta-item--salary', 'return_attribute' => 'text', 'index' =>0),
+        'Location'              => array('selector' => 'ul li.lister__meta-item--location', 'return_attribute' => 'text', 'index' =>0),
+        'JobSitePostId'         => array('selector' => 'li', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i', 'index' =>0),
         'PostedAt'              => array('selector' => 'li.job-actions__action', 'index' =>0),
-        'company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src'),
-        'NextButton'            => array('selector' => 'li.paginator__item a[rel="next"]')
+        'company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src', 'index' =>0),
+        'NextButton'            => array('selector' => 'a[rel="next"]', 'index' =>0)
     );
 
 
