@@ -1864,6 +1864,7 @@ JSCODE;
                                         if ($ret == false)
                                             $totalPagesCount = $nPageCount;
                                     }
+	                                $strURL = $this->getActiveWebdriver()->getCurrentURL();
                                     break;
 
                                 case C__PAGINATION_PAGE_VIA_CALLBACK:
@@ -1883,6 +1884,7 @@ JSCODE;
                                             handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true, $extraData=$searchDetails->toLoggedContext());
                                         }
                                     }
+	                                $strURL = $this->getActiveWebdriver()->getCurrentURL();
                                     break;
 
                             }
