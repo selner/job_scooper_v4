@@ -64,7 +64,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 				break;
 
 			case 'successful':
-				$this->setRunErrorDetails(null);
+				$this->removeRunErrorDetail(array());
 				break;
 
 			case "skipped":
