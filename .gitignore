@@ -11,3 +11,5 @@ vendor/*
 
 
 python/pyJobNormalizer/venv
+*.NOTREADY
+.env
