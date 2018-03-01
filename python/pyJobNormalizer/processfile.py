@@ -176,6 +176,7 @@ def tokenizeStrings(listData, field, fieldTokenized = "tokenized", retType="stri
             continue
 
         tokens = getScrubbedStringTokens(listData[k][field])
+        sorted(tokens)
 
         if retType == "list":
             listData[k][fieldTokenized] = tokens

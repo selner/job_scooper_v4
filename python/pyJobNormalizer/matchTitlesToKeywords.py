@@ -55,7 +55,7 @@ class SetEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class MatchJobsToKeywordsTask():
+class MatchJobsToKeywordsTask:
     inputfile = None
     keywords = {}
     negative_keywords = {}
