@@ -64,7 +64,7 @@ class JobsAutoMarker
 	 * @param null $arrLocIds
 	 *
 	 * @return \JobScooper\DataAccess\UserJobMatch[]
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Propel\Runtime\Exception\PropelException|\Exception
 	 */
 	private function _getMatches($arrLocIds=null)
     {
@@ -145,41 +145,87 @@ class JobsAutoMarker
 	{
 		startLogSection("Finding new duplicate company / job title pairs in the past 7 days to mark as dupe...");
 		try {
-
-			$sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string('7 days ago'));
+			$daysBack = 7;
+			$sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string("{$daysBack} days ago"));
 			$included_sites = array_keys(JobSitePluginBuilder::getIncludedJobSites());
+			$itemKeysToExport = array("JobPostingId", "Title", "Company", "JobSite", "KeyCompanyAndTitle", "FirstSeenAt", "DuplicatesJobPostingId");
 
-			$dupeQuery = JobPostingQuery::create();
+			LogMessage("Querying for all job postings created in the last {$daysBack} days");
+			$dupeQuery = JobPostingQuery::create()
+				->filterByFirstSeenAt(array('min' => $sinceWhen));
 
 			if(!empty($included_sites))
 				$dupeQuery->filterByJobSiteKey($included_sites, Criteria::IN);
 
-			$duplicatePostings = $dupeQuery->filterByFirstSeenAt(array('min' => $sinceWhen))
-				->select(array("KeyCompanyAndTitle"))
-				->addAsColumn("CountTitleCompanyPair", "COUNT(DISTINCT jobposting_id)")
-				->addAsColumn("PrimaryJobPostingId", "MIN(jobposting_id)")
-				->groupByKeyCompanyAndTitle()
-				->having('CountTitleCompanyPair > ?', 1, \PDO::PARAM_INT)
-				->find()
-				->getData();
+			$recentJobPostings = $dupeQuery->find();
+
+//			$outfile = generateOutputFileName("dedupe", "csv", true, 'debug');
+//			LogMessage("Writing results to CSV {$outfile}");
+//			file_put_contents($outfile, $recentJobPostings->toCSV(false, false));
+//
+
+			$arrRecentJobs = array();
+			LogMessage("Reducing full resultset data to just the columns needed for deduplication...");
+			foreach ($recentJobPostings->toKeyIndex("JobPostingId") as $id => $job) {
+				$arrRecentJobs[$id] = $job->toFlatArrayForCSV(false, $itemKeysToExport);
+			}
+			$cntJobs = countAssociativeArrayValues($arrRecentJobs);
+
+			$jsonObj = array(
+				"user" => $this->_userBeingMarked->toArray(),
+				"job_postings" => $arrRecentJobs
+			);
+
+			$outfile = generateOutputFileName("dedupe", "json", true, 'debug');
+			$resultsfile = generateOutputFileName("deduped_jobs_results", "json", true, 'debug');
+			LogMessage("Exporting {$cntJobs} job postings to {$outfile} for deduplication...");
+			writeJson($jsonObj, $outfile );
+
+			$arrRecentJobs = null;
+			$jsonObj = null;
+
+			try {
+				startLogSection("Calling python to dedupe new job postings...");
+				$PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/mark_duplicates.py");
+				$cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($outfile) . " -o " . escapeshellarg($resultsfile);
+
+#					$cmd = "source " . realpath(__ROOT__) . "/python/pyJobNormalizer/venv/bin/activate; " . $cmd;
+
+				LogMessage(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL);
+				doExec($cmd);
+			} catch (Exception $ex)
+			{
+				throw $ex;
+			}
+			finally
+			{
+				endLogSection("Python command call finished.");
+			}
+			
+			if(!is_file($resultsfile))
+				throw new Exception("Job posting deduplication failed.  No dedupe results file was found to load into the database at {$resultsfile}");
+
+			LogMessage("Loading list of duplicate job postings from {$resultsfile}...");
+			$jobsToMarkDupe = loadJSON($resultsfile);
+
+			$cntJobsToMark = countAssociativeArrayValues($jobsToMarkDupe["duplicate_job_postings"]);
+
+			LogMessage("Marking {$cntJobsToMark} jobs as duplicate in the database...");
 
 			$totalMarked = 0;
-			if (!empty($duplicatePostings) && is_array($duplicatePostings)) {
-				LogMessage("Found " . countAssociativeArrayValues($duplicatePostings) . " company/title pairs that are new duplicates within the past 7 days.  Marking the duplicates now...");
-				$chunks = array_chunk($duplicatePostings, 25);
-				$nCounter = 1;
-				foreach ($chunks as $dupesChunk) {
-					LogMessage("... marking duplicate company title pairs " . strval($nCounter) . "-" . strval($nCounter + 25));
-					foreach ($dupesChunk as $dupeSet) {
-						$nNewlyMarked= JobPostingQuery::create()
-							->filterByJobPostingId($dupeSet['PrimaryJobPostingId'], Criteria::NOT_EQUAL)
-							->filterByKeyCompanyAndTitle($dupeSet['KeyCompanyAndTitle'], Criteria::EQUAL)
-							->update(array("DuplicatesJobPostingId" => $dupeSet['PrimaryJobPostingId']));
-						$totalMarked = $totalMarked + $nNewlyMarked;
-					}
-					$nCounter += 25;
-				}
+			foreach($jobsToMarkDupe["duplicate_job_postings"] as $key=>$job)
+			{
+				$jobRecord =  \JobScooper\DataAccess\JobPostingQuery::create()
+					->filterByPrimaryKey($key)
+					->findOneOrCreate();
+				assert($jobRecord->isNew() === False);
+				$jobRecord->setDuplicatesJobPostingId($job["isDuplicateOf"]);
+				$jobRecord->save();
+				$totalMarked += 1;
+				if ($totalMarked % 25 === 0)
+					LogMessage("... marked {$totalMarked} duplicate job postings...");
 			}
+
 			LogMessage("Marked {$totalMarked} job listings as duplicate of an earlier job posting with the same company and job title.");
 		} catch (\Exception $ex)
 		{
