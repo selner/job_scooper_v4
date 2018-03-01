@@ -46,11 +46,12 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
 	/**
 	 * @param bool $includeGeolocation
+	 * @param array $limitToKeys
 	 *
 	 * @return array
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	public function toFlatArrayForCSV($includeGeolocation = false)
+	public function toFlatArrayForCSV($includeGeolocation = false, $limitToKeys=null)
 	{
 		$location = array();
 		$arrJobPosting = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
@@ -64,6 +65,11 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
 		} else
 			$arrItem = $arrJobPosting;
+
+		if(!empty($limitToKeys) && is_array($limitToKeys))
+		{
+			return array_subset_keys($arrItem, $limitToKeys);
+		}
 
 		return $arrItem;
 	}
