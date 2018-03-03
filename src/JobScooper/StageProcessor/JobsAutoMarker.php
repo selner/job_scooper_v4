@@ -677,7 +677,8 @@ class JobsAutoMarker
 			$arrRecs = loadCSV($fileItem);
 			foreach ($arrRecs as $arrRec) {
 				if (array_key_exists('negative_keywords', $arrRec)) {
-					$kwd = strtolower($arrRec['negative_keywords']);
+					$kwd = trim(strtolower($arrRec['negative_keywords']));
+					if(!empty($kwd))
 					$arrNegKwds[$kwd] = $kwd;
 				}
 			}
