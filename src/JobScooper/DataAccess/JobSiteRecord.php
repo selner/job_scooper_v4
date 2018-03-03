@@ -48,31 +48,35 @@ class JobSiteRecord extends BaseJobSiteRecord
 	    if (is_null($this->getPluginClassName()))
 		    throw new \Exception("Missing jobsite plugin class name for " . $this->getJobSiteKey());
 
-	    if (is_null($this->_pluginObject)) {
-		    try {
-			    $class = $this->getPluginClassName();
-			    if (!in_array($class, get_declared_classes())) {
-				    LogWarning("Unable to find declared class " . $this->getPluginClassName() . "] for plugin " . $this->getJobSiteKey() .".  Disabling JobSite for future runs.");
-				    $this->_pluginObject = null;
-				    $this->setisDisabled(true);
-				    $this->save();
-			    }
-			    else
-			    {
-				    $this->_pluginObject = new $class();
+	    if (!is_null($this->_pluginObject))
+	        return $this->_pluginObject;
+	    try {
+		    $class = $this->getPluginClassName();
+//			    if (!in_array($class, get_declared_classes())) {
+//				    LogWarning("Unable to find declared class " . $this->getPluginClassName() . "] for plugin " . $this->getJobSiteKey() .".  Disabling JobSite for future runs.");
+//				    $this->_pluginObject = null;
+//				    $this->setisDisabled(true);
+//				    $this->save();
+//			    }
+//			    else
+//			    {
+		    if(empty($class))
+		        LogWarning("Unable to find plugin class name for {$this->getJobSiteKey()}.");
+		    else
+		    {
+			    $this->_pluginObject = new $class();
 
-				    setCacheItem("all_jobsites_and_plugins", $this->getJobSiteKey(), $this);
-			    }
-
-		    } catch (\Exception $ex) {
-			    LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() . "]:  " . $ex->getMessage());
-			    $this->_pluginObject = null;
+			    setCacheItem("all_jobsites_and_plugins", $this->getJobSiteKey(), $this);
 		    }
+
+	    } catch (\Exception $ex) {
+		    LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() . "]:  " . $ex->getMessage());
+		    $this->_pluginObject = null;
 	    }
-
-        return $this->_pluginObject;
-
-
+	    finally
+	    {
+		    return $this->_pluginObject;
+	    }
     }
 
 
