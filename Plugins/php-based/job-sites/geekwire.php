@@ -15,14 +15,6 @@
 * under the License.
  */
 
-
-class PluginGeekwire extends AbstractWPJobify
-{
-	protected $JobSiteName = 'Geekwire';
-	protected $JobPostingBaseUrl = 'http://www.geekwire.com/';
-	protected $SearchUrlFormat = "http://www.geekwire.com/jobs/";
-}
-
 /**
  * Class AbstractWPJobify
  */
@@ -65,4 +57,13 @@ abstract class AbstractWPJobify extends \JobScooper\BasePlugin\Classes\AjaxHtmlS
 
 
 
+}
+
+
+
+class PluginGeekwire extends AbstractWPJobify
+{
+	protected $JobSiteName = 'Geekwire';
+	protected $JobPostingBaseUrl = 'http://www.geekwire.com/';
+	protected $SearchUrlFormat = "http://www.geekwire.com/jobs/";
 }
