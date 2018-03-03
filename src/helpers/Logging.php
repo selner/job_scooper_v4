@@ -81,18 +81,18 @@ function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $c
 /**
  * @param $msg
  */
-function LogError($msg, $extras=array(), $ex=null)
+function LogError($msg, $extras=array(), $ex=null, $channel=null)
 {
-	LogMessage($msg, Logger::ERROR, $extras, $ex);
+	LogMessage($msg, Logger::ERROR, $extras, $ex, $channel);
 }
 
 
 /**
  * @param $msg
  */
-function LogWarning($msg, $extras=array())
+function LogWarning($msg, $extras=array(), $channel=null)
 {
-	LogMessage($msg, Logger::WARNING, $extras);
+	LogMessage($msg, Logger::WARNING, $extras, null, $channel);
 }
 
 /**
@@ -103,7 +103,7 @@ function LogDebug($msg, $extras=array(), $channel=null)
 {
 	if(isDebug())
 	{
-		LogMessage($msg, Logger::DEBUG, $extras, $channel=$channel);
+		LogMessage($msg, Logger::DEBUG, $extras, null, $channel);
 	}
 }
 
@@ -111,14 +111,14 @@ function LogDebug($msg, $extras=array(), $channel=null)
  * @param       $msg
  * @param array $context
  */
-function LogPlainText($msg, $context = array())
+function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $channel=null)
 {
 	$textParts = preg_split("/[\\r\\n|" . PHP_EOL . "]/", $msg);
 	if(($textParts === false) || is_null($textParts))
 		LogMessage($msg);
 	else {
 		foreach ($textParts as $part) {
-			LogMessage($part);
+			LogMessage($part, $logLevel, $extras, null, $channel);
 		}
 	}
 }
