@@ -114,10 +114,11 @@ class MatchJobsToKeywordsTask:
     def match_keywords(self, data_keywords):
         dictKeywords = {}
         for kwdset in data_keywords:
-            toksstring = data_keywords[kwdset]['tokens']
-            toks = toksstring.split("|")
-            l = [t for t in toks if t != ""]
-            dictKeywords[toksstring] = l
+            if data_keywords[kwdset]['tokens']:
+                toksstring = data_keywords[kwdset]['tokens']
+                toks = toksstring.split("|")
+                l = [t for t in toks if t != ""]
+                dictKeywords[toksstring] = l
 
         matches = []
         for jobid in self.jobs:
