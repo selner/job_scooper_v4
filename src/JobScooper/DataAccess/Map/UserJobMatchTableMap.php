@@ -59,7 +59,7 @@ class UserJobMatchTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 11;
+    const NUM_COLUMNS = 12;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class UserJobMatchTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 11;
+    const NUM_HYDRATE_COLUMNS = 12;
 
     /**
      * the column name for the user_job_match_id field
@@ -122,9 +122,14 @@ class UserJobMatchTableMap extends TableMap
     const COL_USER_NOTIFICATION_STATE = 'user_job_match.user_notification_state';
 
     /**
-     * the column name for the set_by_user_search_site_run_key field
+     * the column name for the last_updated_at field
      */
-    const COL_SET_BY_USER_SEARCH_SITE_RUN_KEY = 'user_job_match.set_by_user_search_site_run_key';
+    const COL_LAST_UPDATED_AT = 'user_job_match.last_updated_at';
+
+    /**
+     * the column name for the first_matched_at field
+     */
+    const COL_FIRST_MATCHED_AT = 'user_job_match.first_matched_at';
 
     /**
      * The default string format for model objects of the related table
@@ -143,11 +148,11 @@ class UserJobMatchTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('UserJobMatchId', 'UserId', 'JobPostingId', 'IsJobMatch', 'IsExcluded', 'OutOfUserArea', 'MatchedUserKeywords', 'MatchedNegativeTitleKeywords', 'MatchedNegativeCompanyKeywords', 'UserNotificationState', 'SetByUserSearchSiteRunKey', ),
-        self::TYPE_CAMELNAME     => array('userJobMatchId', 'userId', 'jobPostingId', 'isJobMatch', 'isExcluded', 'outOfUserArea', 'matchedUserKeywords', 'matchedNegativeTitleKeywords', 'matchedNegativeCompanyKeywords', 'userNotificationState', 'setByUserSearchSiteRunKey', ),
-        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, UserJobMatchTableMap::COL_USER_ID, UserJobMatchTableMap::COL_JOBPOSTING_ID, UserJobMatchTableMap::COL_IS_JOB_MATCH, UserJobMatchTableMap::COL_IS_EXCLUDED, UserJobMatchTableMap::COL_OUT_OF_USER_AREA, UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY, ),
-        self::TYPE_FIELDNAME     => array('user_job_match_id', 'user_id', 'jobposting_id', 'is_job_match', 'is_excluded', 'out_of_user_area', 'matched_user_keywords', 'matched_negative_title_keywords', 'matched_negative_company_keywords', 'user_notification_state', 'set_by_user_search_site_run_key', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, )
+        self::TYPE_PHPNAME       => array('UserJobMatchId', 'UserId', 'JobPostingId', 'IsJobMatch', 'IsExcluded', 'OutOfUserArea', 'MatchedUserKeywords', 'MatchedNegativeTitleKeywords', 'MatchedNegativeCompanyKeywords', 'UserNotificationState', 'UpdatedAt', 'FirstMatchedAt', ),
+        self::TYPE_CAMELNAME     => array('userJobMatchId', 'userId', 'jobPostingId', 'isJobMatch', 'isExcluded', 'outOfUserArea', 'matchedUserKeywords', 'matchedNegativeTitleKeywords', 'matchedNegativeCompanyKeywords', 'userNotificationState', 'updatedAt', 'firstMatchedAt', ),
+        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, UserJobMatchTableMap::COL_USER_ID, UserJobMatchTableMap::COL_JOBPOSTING_ID, UserJobMatchTableMap::COL_IS_JOB_MATCH, UserJobMatchTableMap::COL_IS_EXCLUDED, UserJobMatchTableMap::COL_OUT_OF_USER_AREA, UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, UserJobMatchTableMap::COL_LAST_UPDATED_AT, UserJobMatchTableMap::COL_FIRST_MATCHED_AT, ),
+        self::TYPE_FIELDNAME     => array('user_job_match_id', 'user_id', 'jobposting_id', 'is_job_match', 'is_excluded', 'out_of_user_area', 'matched_user_keywords', 'matched_negative_title_keywords', 'matched_negative_company_keywords', 'user_notification_state', 'last_updated_at', 'first_matched_at', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
     );
 
     /**
@@ -157,11 +162,11 @@ class UserJobMatchTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('UserJobMatchId' => 0, 'UserId' => 1, 'JobPostingId' => 2, 'IsJobMatch' => 3, 'IsExcluded' => 4, 'OutOfUserArea' => 5, 'MatchedUserKeywords' => 6, 'MatchedNegativeTitleKeywords' => 7, 'MatchedNegativeCompanyKeywords' => 8, 'UserNotificationState' => 9, 'SetByUserSearchSiteRunKey' => 10, ),
-        self::TYPE_CAMELNAME     => array('userJobMatchId' => 0, 'userId' => 1, 'jobPostingId' => 2, 'isJobMatch' => 3, 'isExcluded' => 4, 'outOfUserArea' => 5, 'matchedUserKeywords' => 6, 'matchedNegativeTitleKeywords' => 7, 'matchedNegativeCompanyKeywords' => 8, 'userNotificationState' => 9, 'setByUserSearchSiteRunKey' => 10, ),
-        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID => 0, UserJobMatchTableMap::COL_USER_ID => 1, UserJobMatchTableMap::COL_JOBPOSTING_ID => 2, UserJobMatchTableMap::COL_IS_JOB_MATCH => 3, UserJobMatchTableMap::COL_IS_EXCLUDED => 4, UserJobMatchTableMap::COL_OUT_OF_USER_AREA => 5, UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS => 6, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS => 7, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS => 8, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE => 9, UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY => 10, ),
-        self::TYPE_FIELDNAME     => array('user_job_match_id' => 0, 'user_id' => 1, 'jobposting_id' => 2, 'is_job_match' => 3, 'is_excluded' => 4, 'out_of_user_area' => 5, 'matched_user_keywords' => 6, 'matched_negative_title_keywords' => 7, 'matched_negative_company_keywords' => 8, 'user_notification_state' => 9, 'set_by_user_search_site_run_key' => 10, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, )
+        self::TYPE_PHPNAME       => array('UserJobMatchId' => 0, 'UserId' => 1, 'JobPostingId' => 2, 'IsJobMatch' => 3, 'IsExcluded' => 4, 'OutOfUserArea' => 5, 'MatchedUserKeywords' => 6, 'MatchedNegativeTitleKeywords' => 7, 'MatchedNegativeCompanyKeywords' => 8, 'UserNotificationState' => 9, 'UpdatedAt' => 10, 'FirstMatchedAt' => 11, ),
+        self::TYPE_CAMELNAME     => array('userJobMatchId' => 0, 'userId' => 1, 'jobPostingId' => 2, 'isJobMatch' => 3, 'isExcluded' => 4, 'outOfUserArea' => 5, 'matchedUserKeywords' => 6, 'matchedNegativeTitleKeywords' => 7, 'matchedNegativeCompanyKeywords' => 8, 'userNotificationState' => 9, 'updatedAt' => 10, 'firstMatchedAt' => 11, ),
+        self::TYPE_COLNAME       => array(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID => 0, UserJobMatchTableMap::COL_USER_ID => 1, UserJobMatchTableMap::COL_JOBPOSTING_ID => 2, UserJobMatchTableMap::COL_IS_JOB_MATCH => 3, UserJobMatchTableMap::COL_IS_EXCLUDED => 4, UserJobMatchTableMap::COL_OUT_OF_USER_AREA => 5, UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS => 6, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS => 7, UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS => 8, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE => 9, UserJobMatchTableMap::COL_LAST_UPDATED_AT => 10, UserJobMatchTableMap::COL_FIRST_MATCHED_AT => 11, ),
+        self::TYPE_FIELDNAME     => array('user_job_match_id' => 0, 'user_id' => 1, 'jobposting_id' => 2, 'is_job_match' => 3, 'is_excluded' => 4, 'out_of_user_area' => 5, 'matched_user_keywords' => 6, 'matched_negative_title_keywords' => 7, 'matched_negative_company_keywords' => 8, 'user_notification_state' => 9, 'last_updated_at' => 10, 'first_matched_at' => 11, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
     );
 
     /** The enumerated values for this table */
@@ -227,7 +232,8 @@ class UserJobMatchTableMap extends TableMap
   1 => 'marked-ready-to-send',
   2 => 'sent',
 ));
-        $this->addColumn('set_by_user_search_site_run_key', 'SetByUserSearchSiteRunKey', 'VARCHAR', false, 100, null);
+        $this->addColumn('last_updated_at', 'UpdatedAt', 'TIMESTAMP', true, null, null);
+        $this->addColumn('first_matched_at', 'FirstMatchedAt', 'TIMESTAMP', true, null, null);
     } // initialize()
 
     /**
@@ -250,6 +256,19 @@ class UserJobMatchTableMap extends TableMap
   ),
 ), 'CASCADE', null, null, false);
     } // buildRelations()
+
+    /**
+     *
+     * Gets the list of behaviors registered for this table
+     *
+     * @return array Associative array (name => parameters) of behaviors
+     */
+    public function getBehaviors()
+    {
+        return array(
+            'timestampable' => array('create_column' => 'first_matched_at', 'update_column' => 'last_updated_at', 'disable_created_at' => 'false', 'disable_updated_at' => 'false', ),
+        );
+    } // getBehaviors()
 
     /**
      * Adds an object to the instance pool.
@@ -464,7 +483,8 @@ class UserJobMatchTableMap extends TableMap
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS);
             $criteria->addSelectColumn(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
-            $criteria->addSelectColumn(UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY);
+            $criteria->addSelectColumn(UserJobMatchTableMap::COL_LAST_UPDATED_AT);
+            $criteria->addSelectColumn(UserJobMatchTableMap::COL_FIRST_MATCHED_AT);
         } else {
             $criteria->addSelectColumn($alias . '.user_job_match_id');
             $criteria->addSelectColumn($alias . '.user_id');
@@ -476,7 +496,8 @@ class UserJobMatchTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.matched_negative_title_keywords');
             $criteria->addSelectColumn($alias . '.matched_negative_company_keywords');
             $criteria->addSelectColumn($alias . '.user_notification_state');
-            $criteria->addSelectColumn($alias . '.set_by_user_search_site_run_key');
+            $criteria->addSelectColumn($alias . '.last_updated_at');
+            $criteria->addSelectColumn($alias . '.first_matched_at');
         }
     }
 

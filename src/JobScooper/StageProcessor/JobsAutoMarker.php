@@ -378,17 +378,7 @@ class JobsAutoMarker
 	        foreach($searchLocations as $searchloc)
 	        {
 	            if(!empty($searchloc))
-	            {
-	                $nearbyLocations = GeoLocationQuery::create()
-	                    ->filterByDistanceFrom($searchloc->getLatitude(), $searchloc->getLongitude(), 50, GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
-	                    ->find();
-
-	                if(!empty($nearbyLocations))
-	                {
-	                    foreach($nearbyLocations as $near)
-	                        $arrNearbyIds[] = $near->getGeoLocationId();
-	                }
-	            }
+		            $arrNearbyIds = array_merge($arrNearbyIds, getGeoLocationsNearby($searchloc));
 	        }
 
 	        LogMessage("Marking job postings in the " . count($arrNearbyIds) . " matching areas ...");

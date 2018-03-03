@@ -30,7 +30,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery orderByMatchedNegativeTitleKeywords($order = Criteria::ASC) Order by the matched_negative_title_keywords column
  * @method     ChildUserJobMatchQuery orderByMatchedNegativeCompanyKeywords($order = Criteria::ASC) Order by the matched_negative_company_keywords column
  * @method     ChildUserJobMatchQuery orderByUserNotificationState($order = Criteria::ASC) Order by the user_notification_state column
- * @method     ChildUserJobMatchQuery orderBySetByUserSearchSiteRunKey($order = Criteria::ASC) Order by the set_by_user_search_site_run_key column
+ * @method     ChildUserJobMatchQuery orderByUpdatedAt($order = Criteria::ASC) Order by the last_updated_at column
+ * @method     ChildUserJobMatchQuery orderByFirstMatchedAt($order = Criteria::ASC) Order by the first_matched_at column
  *
  * @method     ChildUserJobMatchQuery groupByUserJobMatchId() Group by the user_job_match_id column
  * @method     ChildUserJobMatchQuery groupByUserId() Group by the user_id column
@@ -42,7 +43,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatchQuery groupByMatchedNegativeTitleKeywords() Group by the matched_negative_title_keywords column
  * @method     ChildUserJobMatchQuery groupByMatchedNegativeCompanyKeywords() Group by the matched_negative_company_keywords column
  * @method     ChildUserJobMatchQuery groupByUserNotificationState() Group by the user_notification_state column
- * @method     ChildUserJobMatchQuery groupBySetByUserSearchSiteRunKey() Group by the set_by_user_search_site_run_key column
+ * @method     ChildUserJobMatchQuery groupByUpdatedAt() Group by the last_updated_at column
+ * @method     ChildUserJobMatchQuery groupByFirstMatchedAt() Group by the first_matched_at column
  *
  * @method     ChildUserJobMatchQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildUserJobMatchQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -87,7 +89,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch findOneByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_title_keywords column
  * @method     ChildUserJobMatch findOneByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_company_keywords column
  * @method     ChildUserJobMatch findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
- * @method     ChildUserJobMatch findOneBySetByUserSearchSiteRunKey(string $set_by_user_search_site_run_key) Return the first ChildUserJobMatch filtered by the set_by_user_search_site_run_key column *
+ * @method     ChildUserJobMatch findOneByUpdatedAt(string $last_updated_at) Return the first ChildUserJobMatch filtered by the last_updated_at column
+ * @method     ChildUserJobMatch findOneByFirstMatchedAt(string $first_matched_at) Return the first ChildUserJobMatch filtered by the first_matched_at column *
 
  * @method     ChildUserJobMatch requirePk($key, ConnectionInterface $con = null) Return the ChildUserJobMatch by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -102,7 +105,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch requireOneByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_title_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return the first ChildUserJobMatch filtered by the matched_negative_company_keywords column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildUserJobMatch requireOneBySetByUserSearchSiteRunKey(string $set_by_user_search_site_run_key) Return the first ChildUserJobMatch filtered by the set_by_user_search_site_run_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByUpdatedAt(string $last_updated_at) Return the first ChildUserJobMatch filtered by the last_updated_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildUserJobMatch requireOneByFirstMatchedAt(string $first_matched_at) Return the first ChildUserJobMatch filtered by the first_matched_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildUserJobMatch[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildUserJobMatch objects based on current ModelCriteria
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserJobMatchId(int $user_job_match_id) Return ChildUserJobMatch objects filtered by the user_job_match_id column
@@ -115,7 +119,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedNegativeTitleKeywords(array $matched_negative_title_keywords) Return ChildUserJobMatch objects filtered by the matched_negative_title_keywords column
  * @method     ChildUserJobMatch[]|ObjectCollection findByMatchedNegativeCompanyKeywords(array $matched_negative_company_keywords) Return ChildUserJobMatch objects filtered by the matched_negative_company_keywords column
  * @method     ChildUserJobMatch[]|ObjectCollection findByUserNotificationState(int $user_notification_state) Return ChildUserJobMatch objects filtered by the user_notification_state column
- * @method     ChildUserJobMatch[]|ObjectCollection findBySetByUserSearchSiteRunKey(string $set_by_user_search_site_run_key) Return ChildUserJobMatch objects filtered by the set_by_user_search_site_run_key column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByUpdatedAt(string $last_updated_at) Return ChildUserJobMatch objects filtered by the last_updated_at column
+ * @method     ChildUserJobMatch[]|ObjectCollection findByFirstMatchedAt(string $first_matched_at) Return ChildUserJobMatch objects filtered by the first_matched_at column
  * @method     ChildUserJobMatch[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -214,7 +219,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_job_match_id, user_id, jobposting_id, is_job_match, is_excluded, out_of_user_area, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, user_notification_state, set_by_user_search_site_run_key FROM user_job_match WHERE user_id = :p0 AND jobposting_id = :p1';
+        $sql = 'SELECT user_job_match_id, user_id, jobposting_id, is_job_match, is_excluded, out_of_user_area, matched_user_keywords, matched_negative_title_keywords, matched_negative_company_keywords, user_notification_state, last_updated_at, first_matched_at FROM user_job_match WHERE user_id = :p0 AND jobposting_id = :p1';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);
@@ -801,28 +806,89 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the set_by_user_search_site_run_key column
+     * Filter the query on the last_updated_at column
      *
      * Example usage:
      * <code>
-     * $query->filterBySetByUserSearchSiteRunKey('fooValue');   // WHERE set_by_user_search_site_run_key = 'fooValue'
-     * $query->filterBySetByUserSearchSiteRunKey('%fooValue%', Criteria::LIKE); // WHERE set_by_user_search_site_run_key LIKE '%fooValue%'
+     * $query->filterByUpdatedAt('2011-03-14'); // WHERE last_updated_at = '2011-03-14'
+     * $query->filterByUpdatedAt('now'); // WHERE last_updated_at = '2011-03-14'
+     * $query->filterByUpdatedAt(array('max' => 'yesterday')); // WHERE last_updated_at > '2011-03-13'
      * </code>
      *
-     * @param     string $setByUserSearchSiteRunKey The value to use as filter.
+     * @param     mixed $updatedAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
      */
-    public function filterBySetByUserSearchSiteRunKey($setByUserSearchSiteRunKey = null, $comparison = null)
+    public function filterByUpdatedAt($updatedAt = null, $comparison = null)
     {
-        if (null === $comparison) {
-            if (is_array($setByUserSearchSiteRunKey)) {
+        if (is_array($updatedAt)) {
+            $useMinMax = false;
+            if (isset($updatedAt['min'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_LAST_UPDATED_AT, $updatedAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($updatedAt['max'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_LAST_UPDATED_AT, $updatedAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
         }
 
-        return $this->addUsingAlias(UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY, $setByUserSearchSiteRunKey, $comparison);
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_LAST_UPDATED_AT, $updatedAt, $comparison);
+    }
+
+    /**
+     * Filter the query on the first_matched_at column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByFirstMatchedAt('2011-03-14'); // WHERE first_matched_at = '2011-03-14'
+     * $query->filterByFirstMatchedAt('now'); // WHERE first_matched_at = '2011-03-14'
+     * $query->filterByFirstMatchedAt(array('max' => 'yesterday')); // WHERE first_matched_at > '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $firstMatchedAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function filterByFirstMatchedAt($firstMatchedAt = null, $comparison = null)
+    {
+        if (is_array($firstMatchedAt)) {
+            $useMinMax = false;
+            if (isset($firstMatchedAt['min'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_FIRST_MATCHED_AT, $firstMatchedAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($firstMatchedAt['max'])) {
+                $this->addUsingAlias(UserJobMatchTableMap::COL_FIRST_MATCHED_AT, $firstMatchedAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_FIRST_MATCHED_AT, $firstMatchedAt, $comparison);
     }
 
     /**
@@ -1056,6 +1122,72 @@ abstract class UserJobMatchQuery extends ModelCriteria
 
             return $affectedRows;
         });
+    }
+
+    // timestampable behavior
+
+    /**
+     * Filter by the latest updated
+     *
+     * @param      int $nbDays Maximum age of the latest update in days
+     *
+     * @return     $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function recentlyUpdated($nbDays = 7)
+    {
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_LAST_UPDATED_AT, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
+    }
+
+    /**
+     * Order by update date desc
+     *
+     * @return     $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function lastUpdatedFirst()
+    {
+        return $this->addDescendingOrderByColumn(UserJobMatchTableMap::COL_LAST_UPDATED_AT);
+    }
+
+    /**
+     * Order by update date asc
+     *
+     * @return     $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function firstUpdatedFirst()
+    {
+        return $this->addAscendingOrderByColumn(UserJobMatchTableMap::COL_LAST_UPDATED_AT);
+    }
+
+    /**
+     * Order by create date desc
+     *
+     * @return     $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function lastCreatedFirst()
+    {
+        return $this->addDescendingOrderByColumn(UserJobMatchTableMap::COL_FIRST_MATCHED_AT);
+    }
+
+    /**
+     * Filter by the latest created
+     *
+     * @param      int $nbDays Maximum age of in days
+     *
+     * @return     $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function recentlyCreated($nbDays = 7)
+    {
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_FIRST_MATCHED_AT, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
+    }
+
+    /**
+     * Order by create date asc
+     *
+     * @return     $this|ChildUserJobMatchQuery The current query, for fluid interface
+     */
+    public function firstCreatedFirst()
+    {
+        return $this->addAscendingOrderByColumn(UserJobMatchTableMap::COL_FIRST_MATCHED_AT);
     }
 
 } // UserJobMatchQuery

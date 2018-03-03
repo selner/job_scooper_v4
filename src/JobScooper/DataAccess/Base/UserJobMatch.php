@@ -2,11 +2,13 @@
 
 namespace JobScooper\DataAccess\Base;
 
+use \DateTime;
 use \Exception;
 use \PDO;
 use JobScooper\DataAccess\JobPosting as ChildJobPosting;
 use JobScooper\DataAccess\JobPostingQuery as ChildJobPostingQuery;
 use JobScooper\DataAccess\User as ChildUser;
+use JobScooper\DataAccess\UserJobMatch as ChildUserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery as ChildUserJobMatchQuery;
 use JobScooper\DataAccess\UserQuery as ChildUserQuery;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
@@ -21,6 +23,7 @@ use Propel\Runtime\Exception\LogicException;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
+use Propel\Runtime\Util\PropelDateTime;
 
 /**
  * Base class that represents a row from the 'user_job_match' table.
@@ -156,11 +159,18 @@ abstract class UserJobMatch implements ActiveRecordInterface
     protected $user_notification_state;
 
     /**
-     * The value for the set_by_user_search_site_run_key field.
+     * The value for the last_updated_at field.
      *
-     * @var        string
+     * @var        DateTime
      */
-    protected $set_by_user_search_site_run_key;
+    protected $last_updated_at;
+
+    /**
+     * The value for the first_matched_at field.
+     *
+     * @var        DateTime
+     */
+    protected $first_matched_at;
 
     /**
      * @var        ChildUser
@@ -615,13 +625,43 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
-     * Get the [set_by_user_search_site_run_key] column value.
+     * Get the [optionally formatted] temporal [last_updated_at] column value.
      *
-     * @return string
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
      */
-    public function getSetByUserSearchSiteRunKey()
+    public function getUpdatedAt($format = NULL)
     {
-        return $this->set_by_user_search_site_run_key;
+        if ($format === null) {
+            return $this->last_updated_at;
+        } else {
+            return $this->last_updated_at instanceof \DateTimeInterface ? $this->last_updated_at->format($format) : null;
+        }
+    }
+
+    /**
+     * Get the [optionally formatted] temporal [first_matched_at] column value.
+     *
+     *
+     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     *                            If format is NULL, then the raw DateTime object will be returned.
+     *
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     *
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getFirstMatchedAt($format = NULL)
+    {
+        if ($format === null) {
+            return $this->first_matched_at;
+        } else {
+            return $this->first_matched_at instanceof \DateTimeInterface ? $this->first_matched_at->format($format) : null;
+        }
     }
 
     /**
@@ -955,24 +995,44 @@ abstract class UserJobMatch implements ActiveRecordInterface
     } // setUserNotificationState()
 
     /**
-     * Set the value of [set_by_user_search_site_run_key] column.
+     * Sets the value of [last_updated_at] column to a normalized version of the date/time value specified.
      *
-     * @param string $v new value
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
-    public function setSetByUserSearchSiteRunKey($v)
+    public function setUpdatedAt($v)
     {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->set_by_user_search_site_run_key !== $v) {
-            $this->set_by_user_search_site_run_key = $v;
-            $this->modifiedColumns[UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY] = true;
-        }
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->last_updated_at !== null || $dt !== null) {
+            if ($this->last_updated_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->last_updated_at->format("Y-m-d H:i:s.u")) {
+                $this->last_updated_at = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[UserJobMatchTableMap::COL_LAST_UPDATED_AT] = true;
+            }
+        } // if either are not null
 
         return $this;
-    } // setSetByUserSearchSiteRunKey()
+    } // setUpdatedAt()
+
+    /**
+     * Sets the value of [first_matched_at] column to a normalized version of the date/time value specified.
+     *
+     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     *               Empty strings are treated as NULL.
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     */
+    public function setFirstMatchedAt($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->first_matched_at !== null || $dt !== null) {
+            if ($this->first_matched_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->first_matched_at->format("Y-m-d H:i:s.u")) {
+                $this->first_matched_at = $dt === null ? null : clone $dt;
+                $this->modifiedColumns[UserJobMatchTableMap::COL_FIRST_MATCHED_AT] = true;
+            }
+        } // if either are not null
+
+        return $this;
+    } // setFirstMatchedAt()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -1047,8 +1107,17 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : UserJobMatchTableMap::translateFieldName('UserNotificationState', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_notification_state = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserJobMatchTableMap::translateFieldName('SetByUserSearchSiteRunKey', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->set_by_user_search_site_run_key = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserJobMatchTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
+            $this->last_updated_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : UserJobMatchTableMap::translateFieldName('FirstMatchedAt', TableMap::TYPE_PHPNAME, $indexType)];
+            if ($col === '0000-00-00 00:00:00') {
+                $col = null;
+            }
+            $this->first_matched_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -1057,7 +1126,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 11; // 11 = UserJobMatchTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 12; // 12 = UserJobMatchTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\UserJobMatch'), 0, $e);
@@ -1192,8 +1261,20 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $isInsert = $this->isNew();
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
+                // timestampable behavior
+
+                if (!$this->isColumnModified(UserJobMatchTableMap::COL_FIRST_MATCHED_AT)) {
+                    $this->setFirstMatchedAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
+                }
+                if (!$this->isColumnModified(UserJobMatchTableMap::COL_LAST_UPDATED_AT)) {
+                    $this->setUpdatedAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
+                }
             } else {
                 $ret = $ret && $this->preUpdate($con);
+                // timestampable behavior
+                if ($this->isModified() && !$this->isColumnModified(UserJobMatchTableMap::COL_LAST_UPDATED_AT)) {
+                    $this->setUpdatedAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
+                }
             }
             if ($ret) {
                 $affectedRows = $this->doSave($con);
@@ -1311,8 +1392,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE)) {
             $modifiedColumns[':p' . $index++]  = 'user_notification_state';
         }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY)) {
-            $modifiedColumns[':p' . $index++]  = 'set_by_user_search_site_run_key';
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_LAST_UPDATED_AT)) {
+            $modifiedColumns[':p' . $index++]  = 'last_updated_at';
+        }
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_FIRST_MATCHED_AT)) {
+            $modifiedColumns[':p' . $index++]  = 'first_matched_at';
         }
 
         $sql = sprintf(
@@ -1355,8 +1439,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
                     case 'user_notification_state':
                         $stmt->bindValue($identifier, $this->user_notification_state, PDO::PARAM_INT);
                         break;
-                    case 'set_by_user_search_site_run_key':
-                        $stmt->bindValue($identifier, $this->set_by_user_search_site_run_key, PDO::PARAM_STR);
+                    case 'last_updated_at':
+                        $stmt->bindValue($identifier, $this->last_updated_at ? $this->last_updated_at->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
+                        break;
+                    case 'first_matched_at':
+                        $stmt->bindValue($identifier, $this->first_matched_at ? $this->first_matched_at->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1451,7 +1538,10 @@ abstract class UserJobMatch implements ActiveRecordInterface
                 return $this->getUserNotificationState();
                 break;
             case 10:
-                return $this->getSetByUserSearchSiteRunKey();
+                return $this->getUpdatedAt();
+                break;
+            case 11:
+                return $this->getFirstMatchedAt();
                 break;
             default:
                 return null;
@@ -1493,8 +1583,17 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $keys[7] => $this->getMatchedNegativeTitleKeywords(),
             $keys[8] => $this->getMatchedNegativeCompanyKeywords(),
             $keys[9] => $this->getUserNotificationState(),
-            $keys[10] => $this->getSetByUserSearchSiteRunKey(),
+            $keys[10] => $this->getUpdatedAt(),
+            $keys[11] => $this->getFirstMatchedAt(),
         );
+        if ($result[$keys[10]] instanceof \DateTimeInterface) {
+            $result[$keys[10]] = $result[$keys[10]]->format('c');
+        }
+
+        if ($result[$keys[11]] instanceof \DateTimeInterface) {
+            $result[$keys[11]] = $result[$keys[11]]->format('c');
+        }
+
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
             $result[$key] = $virtualColumn;
@@ -1612,7 +1711,10 @@ abstract class UserJobMatch implements ActiveRecordInterface
                 $this->setUserNotificationState($value);
                 break;
             case 10:
-                $this->setSetByUserSearchSiteRunKey($value);
+                $this->setUpdatedAt($value);
+                break;
+            case 11:
+                $this->setFirstMatchedAt($value);
                 break;
         } // switch()
 
@@ -1671,7 +1773,10 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->setUserNotificationState($arr[$keys[9]]);
         }
         if (array_key_exists($keys[10], $arr)) {
-            $this->setSetByUserSearchSiteRunKey($arr[$keys[10]]);
+            $this->setUpdatedAt($arr[$keys[10]]);
+        }
+        if (array_key_exists($keys[11], $arr)) {
+            $this->setFirstMatchedAt($arr[$keys[11]]);
         }
     }
 
@@ -1744,8 +1849,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE)) {
             $criteria->add(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, $this->user_notification_state);
         }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY)) {
-            $criteria->add(UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY, $this->set_by_user_search_site_run_key);
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_LAST_UPDATED_AT)) {
+            $criteria->add(UserJobMatchTableMap::COL_LAST_UPDATED_AT, $this->last_updated_at);
+        }
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_FIRST_MATCHED_AT)) {
+            $criteria->add(UserJobMatchTableMap::COL_FIRST_MATCHED_AT, $this->first_matched_at);
         }
 
         return $criteria;
@@ -1864,7 +1972,8 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $copyObj->setMatchedNegativeTitleKeywords($this->getMatchedNegativeTitleKeywords());
         $copyObj->setMatchedNegativeCompanyKeywords($this->getMatchedNegativeCompanyKeywords());
         $copyObj->setUserNotificationState($this->getUserNotificationState());
-        $copyObj->setSetByUserSearchSiteRunKey($this->getSetByUserSearchSiteRunKey());
+        $copyObj->setUpdatedAt($this->getUpdatedAt());
+        $copyObj->setFirstMatchedAt($this->getFirstMatchedAt());
         if ($makeNew) {
             $copyObj->setNew(true);
             $copyObj->setUserJobMatchId(NULL); // this is a auto-increment column, so set to default value
@@ -2021,7 +2130,8 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $this->matched_negative_company_keywords = null;
         $this->matched_negative_company_keywords_unserialized = null;
         $this->user_notification_state = null;
-        $this->set_by_user_search_site_run_key = null;
+        $this->last_updated_at = null;
+        $this->first_matched_at = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->applyDefaultValues();
@@ -2055,6 +2165,20 @@ abstract class UserJobMatch implements ActiveRecordInterface
     public function __toString()
     {
         return (string) $this->exportTo(UserJobMatchTableMap::DEFAULT_STRING_FORMAT);
+    }
+
+    // timestampable behavior
+
+    /**
+     * Mark the current object so that the update date doesn't get updated during next save
+     *
+     * @return     $this|ChildUserJobMatch The current object (for fluent API support)
+     */
+    public function keepUpdateDateUnchanged()
+    {
+        $this->modifiedColumns[UserJobMatchTableMap::COL_LAST_UPDATED_AT] = true;
+
+        return $this;
     }
 
     /**

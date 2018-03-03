@@ -34,7 +34,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery orderByUpdatedAt($order = Criteria::ASC) Order by the last_updated_at column
  * @method     ChildJobPostingQuery orderByPostedAt($order = Criteria::ASC) Order by the job_posted_date column
  * @method     ChildJobPostingQuery orderByFirstSeenAt($order = Criteria::ASC) Order by the first_seen_at column
- * @method     ChildJobPostingQuery orderByRemovedAt($order = Criteria::ASC) Order by the post_removed_at column
  * @method     ChildJobPostingQuery orderByLocationDisplayValue($order = Criteria::ASC) Order by the location_display_value column
  * @method     ChildJobPostingQuery orderByGeoLocationId($order = Criteria::ASC) Order by the geolocation_id column
  * @method     ChildJobPostingQuery orderByDuplicatesJobPostingId($order = Criteria::ASC) Order by the duplicates_posting_id column
@@ -54,7 +53,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery groupByUpdatedAt() Group by the last_updated_at column
  * @method     ChildJobPostingQuery groupByPostedAt() Group by the job_posted_date column
  * @method     ChildJobPostingQuery groupByFirstSeenAt() Group by the first_seen_at column
- * @method     ChildJobPostingQuery groupByRemovedAt() Group by the post_removed_at column
  * @method     ChildJobPostingQuery groupByLocationDisplayValue() Group by the location_display_value column
  * @method     ChildJobPostingQuery groupByGeoLocationId() Group by the geolocation_id column
  * @method     ChildJobPostingQuery groupByDuplicatesJobPostingId() Group by the duplicates_posting_id column
@@ -137,7 +135,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting findOneByUpdatedAt(string $last_updated_at) Return the first ChildJobPosting filtered by the last_updated_at column
  * @method     ChildJobPosting findOneByPostedAt(string $job_posted_date) Return the first ChildJobPosting filtered by the job_posted_date column
  * @method     ChildJobPosting findOneByFirstSeenAt(string $first_seen_at) Return the first ChildJobPosting filtered by the first_seen_at column
- * @method     ChildJobPosting findOneByRemovedAt(string $post_removed_at) Return the first ChildJobPosting filtered by the post_removed_at column
  * @method     ChildJobPosting findOneByLocationDisplayValue(string $location_display_value) Return the first ChildJobPosting filtered by the location_display_value column
  * @method     ChildJobPosting findOneByGeoLocationId(int $geolocation_id) Return the first ChildJobPosting filtered by the geolocation_id column
  * @method     ChildJobPosting findOneByDuplicatesJobPostingId(int $duplicates_posting_id) Return the first ChildJobPosting filtered by the duplicates_posting_id column
@@ -160,7 +157,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting requireOneByUpdatedAt(string $last_updated_at) Return the first ChildJobPosting filtered by the last_updated_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByPostedAt(string $job_posted_date) Return the first ChildJobPosting filtered by the job_posted_date column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByFirstSeenAt(string $first_seen_at) Return the first ChildJobPosting filtered by the first_seen_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobPosting requireOneByRemovedAt(string $post_removed_at) Return the first ChildJobPosting filtered by the post_removed_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByLocationDisplayValue(string $location_display_value) Return the first ChildJobPosting filtered by the location_display_value column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByGeoLocationId(int $geolocation_id) Return the first ChildJobPosting filtered by the geolocation_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByDuplicatesJobPostingId(int $duplicates_posting_id) Return the first ChildJobPosting filtered by the duplicates_posting_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -181,7 +177,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting[]|ObjectCollection findByUpdatedAt(string $last_updated_at) Return ChildJobPosting objects filtered by the last_updated_at column
  * @method     ChildJobPosting[]|ObjectCollection findByPostedAt(string $job_posted_date) Return ChildJobPosting objects filtered by the job_posted_date column
  * @method     ChildJobPosting[]|ObjectCollection findByFirstSeenAt(string $first_seen_at) Return ChildJobPosting objects filtered by the first_seen_at column
- * @method     ChildJobPosting[]|ObjectCollection findByRemovedAt(string $post_removed_at) Return ChildJobPosting objects filtered by the post_removed_at column
  * @method     ChildJobPosting[]|ObjectCollection findByLocationDisplayValue(string $location_display_value) Return ChildJobPosting objects filtered by the location_display_value column
  * @method     ChildJobPosting[]|ObjectCollection findByGeoLocationId(int $geolocation_id) Return ChildJobPosting objects filtered by the geolocation_id column
  * @method     ChildJobPosting[]|ObjectCollection findByDuplicatesJobPostingId(int $duplicates_posting_id) Return ChildJobPosting objects filtered by the duplicates_posting_id column
@@ -284,7 +279,7 @@ abstract class JobPostingQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT jobposting_id, jobsite_key, jobsite_post_id, title, url, employment_type, pay_range, company, location, department, category, last_updated_at, job_posted_date, first_seen_at, post_removed_at, location_display_value, geolocation_id, duplicates_posting_id, key_company_and_title FROM jobposting WHERE jobposting_id = :p0';
+        $sql = 'SELECT jobposting_id, jobsite_key, jobsite_post_id, title, url, employment_type, pay_range, company, location, department, category, last_updated_at, job_posted_date, first_seen_at, location_display_value, geolocation_id, duplicates_posting_id, key_company_and_title FROM jobposting WHERE jobposting_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -792,49 +787,6 @@ abstract class JobPostingQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(JobPostingTableMap::COL_FIRST_SEEN_AT, $firstSeenAt, $comparison);
-    }
-
-    /**
-     * Filter the query on the post_removed_at column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByRemovedAt('2011-03-14'); // WHERE post_removed_at = '2011-03-14'
-     * $query->filterByRemovedAt('now'); // WHERE post_removed_at = '2011-03-14'
-     * $query->filterByRemovedAt(array('max' => 'yesterday')); // WHERE post_removed_at > '2011-03-13'
-     * </code>
-     *
-     * @param     mixed $removedAt The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobPostingQuery The current query, for fluid interface
-     */
-    public function filterByRemovedAt($removedAt = null, $comparison = null)
-    {
-        if (is_array($removedAt)) {
-            $useMinMax = false;
-            if (isset($removedAt['min'])) {
-                $this->addUsingAlias(JobPostingTableMap::COL_POST_REMOVED_AT, $removedAt['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($removedAt['max'])) {
-                $this->addUsingAlias(JobPostingTableMap::COL_POST_REMOVED_AT, $removedAt['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobPostingTableMap::COL_POST_REMOVED_AT, $removedAt, $comparison);
     }
 
     /**

@@ -117,7 +117,7 @@ function updateOrCreateJobPosting($arrJobItem)
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null, \JobScooper\DataAccess\GeoLocation $geolocation=null)
+function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null)
 {
 	if(empty($user))
 	    throw new Exception("No user was specified to query for user job matches.");
@@ -129,7 +129,7 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 	}
 
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create()
-        ->filterByUserNotificationState($userStateCriteria[0], $userStateCriteria[1])
+	    ->filterByUserNotificationState($userStateCriteria[0], $userStateCriteria[1])
         ->filterByUserFromUJM($user)
         ->joinWithJobPostingFromUJM();
 
@@ -140,22 +140,7 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 		$dateDaysAgo = $startDate->modify($strMod);
 		$strDateDaysAgo = $dateDaysAgo->format("Y-m-d");
 
-		$sql = UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY . " IN (SELECT user_search_site_run_key FROM user_search_site_run WHERE date_ended >= '{$strDateDaysAgo}') ";
-		$query->add(UserJobMatchTableMap::COL_SET_BY_USER_SEARCH_SITE_RUN_KEY, $sql, Criteria::CUSTOM);
-
-	}
-
-	if(!empty($geolocation))
-	{
-		$searches = \JobScooper\DataAccess\UserSearchSiteRunQuery::create()
-			->select(array("UserSearchSiteRunKey"))
-			->useUserSearchPairFromUSSRQuery()
-			->filterByGeoLocationId($geolocation->getGeoLocationId(), Criteria::EQUAL)
-			->endUse()
-			->find()
-			->getData();
-		$query->filterBySetByUserSearchSiteRunKey($searches, Criteria::IN);
-
+		$query->filterByFirstMatchedAt($strDateDaysAgo, Criteria::GREATER_EQUAL);
 	}
 
     if(!empty($arrGeoLocIds) && is_array($arrGeoLocIds))
@@ -178,6 +163,26 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
     return $results;
 }
 
+/**
+ * @param \JobScooper\DataAccess\GeoLocation $sourceGeoLocation
+ *
+ * @return array
+ */
+function getGeoLocationsNearby(\JobScooper\DataAccess\GeoLocation $sourceGeoLocation)
+{
+	$arrNearbyIds = [$sourceGeoLocation->getGeoLocationId()];
+	$nearbyLocations = \JobScooper\DataAccess\GeoLocationQuery::create()
+		->filterByDistanceFrom($sourceGeoLocation->getLatitude(), $sourceGeoLocation->getLongitude(), 50, \JobScooper\DataAccess\Map\GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
+		->find();
+
+	if(!empty($nearbyLocations))
+	{
+		foreach($nearbyLocations as $near)
+			$arrNearbyIds[] = $near->getGeoLocationId();
+	}
+
+	return $arrNearbyIds;
+}
 
 /**
  * @param $arrUserJobMatchIds
@@ -250,6 +255,11 @@ function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 // Jobs List Filter Functions
 //
 
+/**
+ * @param $var
+ *
+ * @return bool
+ */
 function isUserJobMatchAndNotExcluded($var)
 {
 	return ((empty($var['IsExcluded']) || $var['IsExcluded'] !== true) && (!empty($var['IsJobMatch']) && $var['IsJobMatch'] === true));

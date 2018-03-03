@@ -171,13 +171,6 @@ abstract class JobPosting implements ActiveRecordInterface
     protected $first_seen_at;
 
     /**
-     * The value for the post_removed_at field.
-     *
-     * @var        DateTime
-     */
-    protected $post_removed_at;
-
-    /**
      * The value for the location_display_value field.
      *
      * @var        string
@@ -664,26 +657,6 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
-     * Get the [optionally formatted] temporal [post_removed_at] column value.
-     *
-     *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
-     *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
-     *
-     * @throws PropelException - if unable to parse/validate the date/time value.
-     */
-    public function getRemovedAt($format = NULL)
-    {
-        if ($format === null) {
-            return $this->post_removed_at;
-        } else {
-            return $this->post_removed_at instanceof \DateTimeInterface ? $this->post_removed_at->format($format) : null;
-        }
-    }
-
-    /**
      * Get the [location_display_value] column value.
      *
      * @return string
@@ -1008,26 +981,6 @@ abstract class JobPosting implements ActiveRecordInterface
     } // setFirstSeenAt()
 
     /**
-     * Sets the value of [post_removed_at] column to a normalized version of the date/time value specified.
-     *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
-     *               Empty strings are treated as NULL.
-     * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
-     */
-    public function setRemovedAt($v)
-    {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->post_removed_at !== null || $dt !== null) {
-            if ($this->post_removed_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->post_removed_at->format("Y-m-d H:i:s.u")) {
-                $this->post_removed_at = $dt === null ? null : clone $dt;
-                $this->modifiedColumns[JobPostingTableMap::COL_POST_REMOVED_AT] = true;
-            }
-        } // if either are not null
-
-        return $this;
-    } // setRemovedAt()
-
-    /**
      * Set the value of [location_display_value] column.
      *
      * @param string $v new value
@@ -1202,22 +1155,16 @@ abstract class JobPosting implements ActiveRecordInterface
             }
             $this->first_seen_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : JobPostingTableMap::translateFieldName('RemovedAt', TableMap::TYPE_PHPNAME, $indexType)];
-            if ($col === '0000-00-00 00:00:00') {
-                $col = null;
-            }
-            $this->post_removed_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 15 + $startcol : JobPostingTableMap::translateFieldName('LocationDisplayValue', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 14 + $startcol : JobPostingTableMap::translateFieldName('LocationDisplayValue', TableMap::TYPE_PHPNAME, $indexType)];
             $this->location_display_value = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 16 + $startcol : JobPostingTableMap::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 15 + $startcol : JobPostingTableMap::translateFieldName('GeoLocationId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->geolocation_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 17 + $startcol : JobPostingTableMap::translateFieldName('DuplicatesJobPostingId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 16 + $startcol : JobPostingTableMap::translateFieldName('DuplicatesJobPostingId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->duplicates_posting_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 18 + $startcol : JobPostingTableMap::translateFieldName('KeyCompanyAndTitle', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 17 + $startcol : JobPostingTableMap::translateFieldName('KeyCompanyAndTitle', TableMap::TYPE_PHPNAME, $indexType)];
             $this->key_company_and_title = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
@@ -1227,7 +1174,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 19; // 19 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 18; // 18 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\JobPosting'), 0, $e);
@@ -1586,9 +1533,6 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_FIRST_SEEN_AT)) {
             $modifiedColumns[':p' . $index++]  = 'first_seen_at';
         }
-        if ($this->isColumnModified(JobPostingTableMap::COL_POST_REMOVED_AT)) {
-            $modifiedColumns[':p' . $index++]  = 'post_removed_at';
-        }
         if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE)) {
             $modifiedColumns[':p' . $index++]  = 'location_display_value';
         }
@@ -1653,9 +1597,6 @@ abstract class JobPosting implements ActiveRecordInterface
                         break;
                     case 'first_seen_at':
                         $stmt->bindValue($identifier, $this->first_seen_at ? $this->first_seen_at->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
-                        break;
-                    case 'post_removed_at':
-                        $stmt->bindValue($identifier, $this->post_removed_at ? $this->post_removed_at->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
                         break;
                     case 'location_display_value':
                         $stmt->bindValue($identifier, $this->location_display_value, PDO::PARAM_STR);
@@ -1776,18 +1717,15 @@ abstract class JobPosting implements ActiveRecordInterface
                 return $this->getFirstSeenAt();
                 break;
             case 14:
-                return $this->getRemovedAt();
-                break;
-            case 15:
                 return $this->getLocationDisplayValue();
                 break;
-            case 16:
+            case 15:
                 return $this->getGeoLocationId();
                 break;
-            case 17:
+            case 16:
                 return $this->getDuplicatesJobPostingId();
                 break;
-            case 18:
+            case 17:
                 return $this->getKeyCompanyAndTitle();
                 break;
             default:
@@ -1834,11 +1772,10 @@ abstract class JobPosting implements ActiveRecordInterface
             $keys[11] => $this->getUpdatedAt(),
             $keys[12] => $this->getPostedAt(),
             $keys[13] => $this->getFirstSeenAt(),
-            $keys[14] => $this->getRemovedAt(),
-            $keys[15] => $this->getLocationDisplayValue(),
-            $keys[16] => $this->getGeoLocationId(),
-            $keys[17] => $this->getDuplicatesJobPostingId(),
-            $keys[18] => $this->getKeyCompanyAndTitle(),
+            $keys[14] => $this->getLocationDisplayValue(),
+            $keys[15] => $this->getGeoLocationId(),
+            $keys[16] => $this->getDuplicatesJobPostingId(),
+            $keys[17] => $this->getKeyCompanyAndTitle(),
         );
         if ($result[$keys[11]] instanceof \DateTimeInterface) {
             $result[$keys[11]] = $result[$keys[11]]->format('c');
@@ -1850,10 +1787,6 @@ abstract class JobPosting implements ActiveRecordInterface
 
         if ($result[$keys[13]] instanceof \DateTimeInterface) {
             $result[$keys[13]] = $result[$keys[13]]->format('c');
-        }
-
-        if ($result[$keys[14]] instanceof \DateTimeInterface) {
-            $result[$keys[14]] = $result[$keys[14]]->format('c');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -2014,18 +1947,15 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->setFirstSeenAt($value);
                 break;
             case 14:
-                $this->setRemovedAt($value);
-                break;
-            case 15:
                 $this->setLocationDisplayValue($value);
                 break;
-            case 16:
+            case 15:
                 $this->setGeoLocationId($value);
                 break;
-            case 17:
+            case 16:
                 $this->setDuplicatesJobPostingId($value);
                 break;
-            case 18:
+            case 17:
                 $this->setKeyCompanyAndTitle($value);
                 break;
         } // switch()
@@ -2097,19 +2027,16 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setFirstSeenAt($arr[$keys[13]]);
         }
         if (array_key_exists($keys[14], $arr)) {
-            $this->setRemovedAt($arr[$keys[14]]);
+            $this->setLocationDisplayValue($arr[$keys[14]]);
         }
         if (array_key_exists($keys[15], $arr)) {
-            $this->setLocationDisplayValue($arr[$keys[15]]);
+            $this->setGeoLocationId($arr[$keys[15]]);
         }
         if (array_key_exists($keys[16], $arr)) {
-            $this->setGeoLocationId($arr[$keys[16]]);
+            $this->setDuplicatesJobPostingId($arr[$keys[16]]);
         }
         if (array_key_exists($keys[17], $arr)) {
-            $this->setDuplicatesJobPostingId($arr[$keys[17]]);
-        }
-        if (array_key_exists($keys[18], $arr)) {
-            $this->setKeyCompanyAndTitle($arr[$keys[18]]);
+            $this->setKeyCompanyAndTitle($arr[$keys[17]]);
         }
     }
 
@@ -2193,9 +2120,6 @@ abstract class JobPosting implements ActiveRecordInterface
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_FIRST_SEEN_AT)) {
             $criteria->add(JobPostingTableMap::COL_FIRST_SEEN_AT, $this->first_seen_at);
-        }
-        if ($this->isColumnModified(JobPostingTableMap::COL_POST_REMOVED_AT)) {
-            $criteria->add(JobPostingTableMap::COL_POST_REMOVED_AT, $this->post_removed_at);
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE)) {
             $criteria->add(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE, $this->location_display_value);
@@ -2308,7 +2232,6 @@ abstract class JobPosting implements ActiveRecordInterface
         $copyObj->setUpdatedAt($this->getUpdatedAt());
         $copyObj->setPostedAt($this->getPostedAt());
         $copyObj->setFirstSeenAt($this->getFirstSeenAt());
-        $copyObj->setRemovedAt($this->getRemovedAt());
         $copyObj->setLocationDisplayValue($this->getLocationDisplayValue());
         $copyObj->setGeoLocationId($this->getGeoLocationId());
         $copyObj->setDuplicatesJobPostingId($this->getDuplicatesJobPostingId());
@@ -3336,7 +3259,6 @@ abstract class JobPosting implements ActiveRecordInterface
         $this->last_updated_at = null;
         $this->job_posted_date = null;
         $this->first_seen_at = null;
-        $this->post_removed_at = null;
         $this->location_display_value = null;
         $this->geolocation_id = null;
         $this->duplicates_posting_id = null;

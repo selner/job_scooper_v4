@@ -1322,8 +1322,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 				->findOneOrCreate();
 
 			$newMatch->setUserId($this->_currentUserForSearches->getUserId());
-			if (!empty($searchDetails))
-				$newMatch->setSetByUserSearchSiteRunKey($searchDetails->getUserSearchSiteRunKey());
 			$newMatch->save();
 		}
 	}
