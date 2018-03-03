@@ -725,7 +725,27 @@ function getCacheAsArray($cacheName)
 {
 	doGlobalSettingExists(JOBSCOOPER_CACHES_ROOT);
 
-	return getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName);
+	$cache = getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName);
+	if(empty($cache))
+	{
+		switch($cacheName)
+		{
+			case "all_jobsites_and_plugins":
+				\JobScooper\Builders\JobSitePluginBuilder::getAllJobSites();
+				break;
+
+			case "included_sites":
+				\JobScooper\Builders\JobSitePluginBuilder::setSitesAsExcluded();
+				break;
+
+			default:
+				break;
+		}
+
+		$cache = getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName);
+	}
+
+	return $cache;
 }
 
 /**
