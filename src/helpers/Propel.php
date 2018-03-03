@@ -145,6 +145,19 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 
 	}
 
+	if(!empty($geolocation))
+	{
+		$searches = \JobScooper\DataAccess\UserSearchSiteRunQuery::create()
+			->select(array("UserSearchSiteRunKey"))
+			->useUserSearchPairFromUSSRQuery()
+			->filterByGeoLocationId($geolocation->getGeoLocationId(), Criteria::EQUAL)
+			->endUse()
+			->find()
+			->getData();
+		$query->filterBySetByUserSearchSiteRunKey($searches, Criteria::IN);
+
+	}
+
     if(!empty($arrGeoLocIds) && is_array($arrGeoLocIds))
     {
     	$locIdColumnName = $query->getAliasedColName(\JobScooper\DataAccess\Map\JobPostingTableMap::COL_GEOLOCATION_ID);
@@ -159,15 +172,6 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 	    $query->useJobPostingFromUJMQuery()
 		    ->orderByKeyCompanyAndTitle()
 		    ->endUse();
-
-	if(!empty($geolocation))
-	{
-		$query->useUserSearchSiteRunFromUJMQuery()
-				->useUserSearchPairFromUSSRQuery()
-				->filterByGeoLocationId($geolocation->getGeoLocationId(), Criteria::EQUAL)
-				->endUse()
-			->endUse();
-	}
 
 	$results =  $query->find()->toKeyIndex("UserJobMatchId");
 
