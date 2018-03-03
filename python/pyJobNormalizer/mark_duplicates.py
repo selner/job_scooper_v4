@@ -40,7 +40,7 @@ DATA_KEY_JOBPOSTINGS = u'job_postings'
 DATA_KEY_JOBPOSTINGS_KEYFIELD = u'JobPostingId'
 DATA_KEY_USER = u'user'
 DATA_KEY_OUTPUT_DUPLICATE_IDS = u'user'
-JSON_DEDUPE_FIELDS = ["JobPostingId", "Title", "Company", "JobSite", "KeyCompanyAndTitle", "FirstSeenAt", "DuplicatesJobPostingId"]
+JSON_DEDUPE_FIELDS = ["JobPostingId", "Title", "Company", "JobSite", "GeoLocationId", "KeyCompanyAndTitle", "FirstSeenAt", "DuplicatesJobPostingId"]
 
 from docopt import docopt
 import json
@@ -88,20 +88,20 @@ class TaskDedupeJobPostings:
         dfJobs.sort_values('JobPostingId', ascending=True)
 
         print "Marking jobs as duplicate..."
-        dfJobs["is_duplicate"] = dfJobs.duplicated(set(["Company", "TitleTokensString"]), keep="first")
-        dfJobs["is_duplicate_stringver"] = dfJobs.duplicated("CompanyTitleTokensString", keep="first")
+        dfJobs["is_duplicate"] = dfJobs.duplicated({"Company", "TitleTokensString", "GeoLocationId"}, keep="first")
+        dfJobs["is_duplicate_stringver"] = dfJobs.duplicated("CompanyTitleGeoLocation", keep="first")
         dictOrigPosts = dfJobs[(dfJobs["is_duplicate"] == False)].to_dict(orient="index")
         dictDupePosts = dfJobs[(dfJobs["is_duplicate"] == True)].to_dict(orient="index")
-        dictOrigByCompTitle = { v["CompanyTitleTokensString"]:v["JobPostingId"] for (n,v) in dictOrigPosts.items() if ("CompanyTitleTokensString") in v.keys()}
+        dictOrigByCompTitle = { v["CompanyTitleGeoLocation"]:v["JobPostingId"] for (n,v) in dictOrigPosts.items() if ("CompanyTitleGeoLocation") in v.keys()}
 
         print "Preparing duplicate job post results for export..."
         retDupesByJobId = {}
         for jobid in dictDupePosts:
             item = dictDupePosts[jobid]
-            strCompTitle = item["CompanyTitleTokensString"]
+            strCompTitle = item["CompanyTitleGeoLocation"]
             retDupesByJobId[jobid] = {
                 "JobPostingId" : jobid,
-                "CompanyTitleTokensString" : strCompTitle,
+                "CompanyTitleGeoLocation" : strCompTitle,
                 "isDuplicateOf" : dictOrigByCompTitle[strCompTitle]
                 # ,
                 # "DuplicateJob" : item,
@@ -156,7 +156,11 @@ class TaskDedupeJobPostings:
                     if k in JSON_DEDUPE_FIELDS:
                         subitem[k] = v
                 subitem["TitleTokensString"] = "~".join(item["TitleTokens"])
-                subitem["CompanyTitleTokensString"] = "{}__{}".format(subitem["Company"], subitem["TitleTokensString"])
+                if "GeoLocationId" in subitem and subitem["GeoLocationId"]:
+                    loc = subitem["GeoLocationId"]
+                else:
+                    loc = "NoLocation"
+                subitem["CompanyTitleGeoLocation"] = "{}_{}_{}".format(subitem["Company"], subitem["TitleTokensString"], loc)
                 self.jobs[rowkey] = subitem
         jobsdata = None
 

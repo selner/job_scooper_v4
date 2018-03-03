@@ -92,6 +92,12 @@ class JobsAutoMarker
         LogMessage(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL);
 
         try {
+
+        	// Dupes aren't affected by the user's matches so do that marking first
+	        //
+	        $this->_findAndMarkRecentDuplicatePostings();
+
+
 	        // Get all the postings that are in the table but not marked as ready-to-send
 	        //
 	        $arrJobs_AutoUpdatable = $this->_getMatches();
@@ -107,7 +113,6 @@ class JobsAutoMarker
 
 	        $this->_markJobsList_KeywordMatches_($arrJobs_AutoUpdatable);
 
-	        $this->_findAndMarkRecentDuplicatePostings();
 
 	        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
@@ -148,7 +153,7 @@ class JobsAutoMarker
 			$daysBack = 7;
 			$sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string("{$daysBack} days ago"));
 			$included_sites = array_keys(JobSitePluginBuilder::getIncludedJobSites());
-			$itemKeysToExport = array("JobPostingId", "Title", "Company", "JobSite", "KeyCompanyAndTitle", "FirstSeenAt", "DuplicatesJobPostingId");
+			$itemKeysToExport = array("JobPostingId", "Title", "Company", "JobSite", "KeyCompanyAndTitle", "GeoLocationId", "FirstSeenAt", "DuplicatesJobPostingId");
 
 			LogMessage("Querying for all job postings created in the last {$daysBack} days");
 			$dupeQuery = JobPostingQuery::create()
