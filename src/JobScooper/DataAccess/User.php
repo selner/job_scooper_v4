@@ -54,6 +54,9 @@ class User extends BaseUser
 	    	return true;
 
 	    $numDays = $this->getNotificationFrequency();
+	    if($numDays === 0)
+	    	return true;
+
 	    if(empty($numDays))
 		    $numDays = 1;
 	    $interval = date_interval_create_from_date_string(strval($numDays) . ' days');
