@@ -185,7 +185,8 @@ class User extends BaseUser
 			    }
 
 			    $key = $fileinfo->getBasename(".csv");
-			    $verifiedInputFiles[$type] = array();
+			    if(!array_key_exists($type, $verifiedInputFiles))
+			        $verifiedInputFiles[$type] = array();
 			    $verifiedInputFiles[$type][$key] = $tempFileDetails->getPathname();
 		    }
 
