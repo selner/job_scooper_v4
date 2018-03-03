@@ -343,6 +343,24 @@ function array_subset_keys(array $haystack, array $keys)
 	return array_intersect_key($haystack, $arrKeys);
 }
 
+function collectionToArray($coll, $limitToKeys=null)
+{
+	if(!empty($limitToKeys) && !is_array($limitToKeys))
+		$limitToKeys = array($limitToKeys);
+
+	$ret = array_map(function ($v) use ($limitToKeys) {
+		$arrV = $v->toArray();
+		if(!empty($limitToKeys))
+			return array_subset($arrV, $limitToKeys);
+
+		return $arrV;
+		}
+		, $coll);
+
+	return $ret;
+}
+
+
 /**
  * @param array $list
  * @param array $keysToReturn
