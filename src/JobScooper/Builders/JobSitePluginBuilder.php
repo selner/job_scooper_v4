@@ -28,14 +28,10 @@ use JobScooper\DataAccess\User;
  */
 class JobSitePluginBuilder
 {
-	/**
-	 *
-	 */
-	static function resetJobSitesForNewUser()
-	{
-		clearCache("included_jobsites");
-	}
 
+	/**
+	 * @return bool
+	 */
 	static function isSubsetOfSites()
 	{
 		$cmdLineSites = getConfigurationSetting("command_line_args.jobsite");
@@ -47,14 +43,16 @@ class JobSitePluginBuilder
 
 	/**
 	 * @return \JobScooper\DataAccess\JobSiteRecord[]|null
+	 * @throws \Exception
 	 */
 	static function getAllJobSites()
     {
-	    $sitesBySiteKey = getCacheAsArray("all_jobsites_and_plugins");
-		if(!empty($sitesBySiteKey))
+	    $sitesBySiteKey = getGlobalSetting(JOBSCOOPER_CACHES_ROOT, "all_jobsites_and_plugins" );
+		if(!empty($sitesBySiteKey)) {
+			$sitesBySiteKey = getCacheAsArray("all_jobsites_and_plugins");
 			return $sitesBySiteKey;
+		}
 
-		$plugins = new JobSitePluginBuilder();
 
         $query = JobSiteRecordQuery::create();
 
@@ -75,43 +73,43 @@ class JobSitePluginBuilder
 	 * @return array|mixed
 	 */
 	static function getIncludedJobSites($fOptimizeBySiteRunOrder=false)
-    {
-	    $sites = getCacheAsArray("included_jobsites");
-	    if (is_null($sites))
-	    {
-	    	$sites = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
+	{
+		$sites = getCacheAsArray("included_jobsites");
+		if (is_null($sites))
+		{
+			$sites = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
 
-		    $disabled = array_filter($sites, function (JobSiteRecord $v) {
-			    return $v->getIsDisabled() === true;
-		    });
-		    if (!empty($disabled)) {
-			    LogMessage("Excluding " . join(", ", array_keys($disabled)) . " job site(s):  marked as disabled in the database.");
-			    $sites = array_diff_key($sites, $disabled);
-		    }
+			$disabled = array_filter($sites, function (JobSiteRecord $v) {
+				return $v->getIsDisabled() === true;
+			});
+			if (!empty($disabled)) {
+				LogMessage("Excluding " . join(", ", array_keys($disabled)) . " job site(s):  marked as disabled in the database.");
+				$sites = array_diff_key($sites, $disabled);
+			}
 
 
-		    JobSitePluginBuilder::setIncludedJobSites($sites);
-		    $sites = getCacheAsArray("included_jobsites");
-		    return $sites;
-	    }
+			JobSitePluginBuilder::setIncludedJobSites($sites);
+			$sites = getCacheAsArray("included_jobsites");
+			return $sites;
+		}
 
-	    if($fOptimizeBySiteRunOrder === true)
-	    {
-	    	$sitesToSort = array();
-	    	foreach($sites as $k => $v)
-	    		$sitesToSort[$k] = $v->toArray();
-		    $tmpArrSorted = array_orderby($sitesToSort, "isDisabled", SORT_DESC, "ResultsFilterType", SORT_ASC);
+		if($fOptimizeBySiteRunOrder === true)
+		{
+			$sitesToSort = array();
+			foreach($sites as $k => $v)
+				$sitesToSort[$k] = $v->toArray();
+			$tmpArrSorted = array_orderby($sitesToSort, "isDisabled", SORT_DESC, "ResultsFilterType", SORT_ASC);
 
-		    // now use the temp sorted array's keys and replace the
-		    // values with the actual JobSite objects instead of the
-		    // array version we used for sorting
-		    //
-		    $sorted = array_replace($tmpArrSorted, $sites);
+			// now use the temp sorted array's keys and replace the
+			// values with the actual JobSite objects instead of the
+			// array version we used for sorting
+			//
+			$sorted = array_replace($tmpArrSorted, $sites);
 
-		    return $sorted;
-	    }
-	    return $sites;
-    }
+			return $sorted;
+		}
+		return $sites;
+	}
 
 	/**
 	 * @param $sitesInclude
@@ -123,6 +121,7 @@ class JobSitePluginBuilder
 
 	/**
 	 * @return array
+	 * @throws \Exception
 	 */
 	static function getExcludedJobSites()
 	{
@@ -134,6 +133,7 @@ class JobSitePluginBuilder
 
 	/**
 	 * @return array|mixed
+	 * @throws \Exception
 	 */
 	static function getJobSitesCmdLineIncludedInRun()
 	{
@@ -170,13 +170,12 @@ class JobSitePluginBuilder
 	static function filterJobSitesByCountryCodes(&$sites, $countryCodes)
 	{
 		$ccRun = array_unique($countryCodes);
-		$includedSites = JobSitePluginBuilder::getIncludedJobSites();
 		$sitesOutOfSearchArea = array();
 
-		foreach ($includedSites as $jobsiteKey => $site) {
+		foreach ($sites as $jobsiteKey => $site) {
 			$ccSite = $site->getSupportedCountryCodes();
 			if (empty($ccSite))
-				$sitesOutOfSearchArea[$jobsiteKey] = $includedSites[$jobsiteKey];
+				$sitesOutOfSearchArea[$jobsiteKey] = $sites[$jobsiteKey];
 			else {
 				$matches = null;
 				$ccMatches = array_intersect($ccRun, $ccSite);
@@ -202,37 +201,38 @@ class JobSitePluginBuilder
 	protected $_configJsonFiles = array();
 	protected $_jsonPluginSetups = array();
 
+	private $_pluginsLoaded = false;
 
 	/**
 	 * JobSitePluginBuilder constructor.
 	 * @throws \Exception
 	 */
 	function __construct()
-    {
-	    $sitesBySiteKey = getCacheAsArray("all_jobsites_and_plugins");
-		if(!empty($sitesBySiteKey))
-			return;
+	{
 
-	    $pathPluginDirectory = join(DIRECTORY_SEPARATOR, array(__ROOT__, "Plugins"));
-        if (is_null($pathPluginDirectory) || strlen($pathPluginDirectory) == 0)
-            throw new Exception("Path to plugins source directory was not set.");
+		if ($this->_pluginsLoaded !== true) {
+			$pathPluginDirectory = join(DIRECTORY_SEPARATOR, array(__ROOT__, "Plugins"));
+			if (is_null($pathPluginDirectory) || strlen($pathPluginDirectory) == 0)
+				throw new Exception("Path to plugins source directory was not set.");
 
-        if(!is_dir($pathPluginDirectory))
-	        throw new Exception(sprintf("Unable to access the plugin directory '%s'", $pathPluginDirectory));
+			if (!is_dir($pathPluginDirectory))
+				throw new Exception(sprintf("Unable to access the plugin directory '%s'", $pathPluginDirectory));
 
-        $this->_dirPluginsRoot = realpath($pathPluginDirectory . DIRECTORY_SEPARATOR);
+			$this->_dirPluginsRoot = realpath($pathPluginDirectory . DIRECTORY_SEPARATOR);
 
-        $this->_dirJsonConfigs = join(DIRECTORY_SEPARATOR, array($pathPluginDirectory, "json-based"));
+			$this->_dirJsonConfigs = join(DIRECTORY_SEPARATOR, array($pathPluginDirectory, "json-based"));
 
-        $this->_renderer = loadTemplate(__ROOT__ . '/src/assets/templates/eval_jsonplugin.tmpl');
+			$this->_renderer = loadTemplate(__ROOT__ . '/src/assets/templates/eval_jsonplugin.tmpl');
 
 
-	    $this->_loadPHPPluginFiles_();
-	    $this->_loadJsonPluginConfigFiles_();
-        $this->_initializeAllJsonPlugins();
+			$this->_loadPHPPluginFiles_();
+			$this->_loadJsonPluginConfigFiles_();
+			$this->_initializeAllJsonPlugins();
 
-        $this->_syncDatabaseJobSitePluginClassList();
+			$this->_syncDatabaseJobSitePluginClassList();
 
+			$this->_pluginsLoaded = true;
+		}
     }
 
 	/**

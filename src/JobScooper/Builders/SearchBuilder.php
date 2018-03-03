@@ -44,13 +44,6 @@ class SearchBuilder
 	 */
 	public function createSearchesForUser(User $user)
     {
-    	// reset the included site list to be all sites
-	    JobSitePluginBuilder::resetJobSitesForNewUser();
-
-	    //
-	    // Filter out sites excluded in the config file
-	    //
-	    JobSitePluginBuilder::setSitesAsExcluded(getConfigurationSetting("config_excluded_sites"));
 
 	    $sites = JobSitePluginBuilder::getIncludedJobSites();
 
@@ -160,7 +153,7 @@ class SearchBuilder
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _filterRecentlyRunUserSearchRuns(&$searches, User $user)
+	private function _filterRecentlyRunUserSearchRuns(array &$searches, User $user)
 	{
 		$searchesToSkip = array();
 

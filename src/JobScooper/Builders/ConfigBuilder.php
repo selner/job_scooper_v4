@@ -167,6 +167,10 @@ class ConfigBuilder
 	    // Note:  this must happen before any of the job site plugins are instantiated
 	    $this->_parsePluginSettings();
 
+	    // initialize the plugin bulder class so that all the plugins get loaded
+	    //
+	    new JobSitePluginBuilder();
+
 	    $this->_instantiateLocationManager();
 	    $this->_parseSeleniumParameters();
 
@@ -334,6 +338,12 @@ class ConfigBuilder
                     }
                }
             }
+
+			//
+			// Filter out sites excluded in the config file
+			//
+			JobSitePluginBuilder::setSitesAsExcluded(getConfigurationSetting("config_excluded_sites"));
+
         }
     }
 
