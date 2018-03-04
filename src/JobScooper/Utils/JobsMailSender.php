@@ -63,96 +63,91 @@ class JobsMailSender extends PHPMailer
 	 */
 	function sendEmail($strBodyText = null, $strBodyHTML = null, $arrAttachFilePaths = array(), $subject="No subject", $emailKind='results', User $toUser = null)
     {
-    	try
-	    {
+	    LogMessage(PHP_EOL . "Sending email titled '{$subject}'...'" . PHP_EOL);
 
-	        if($this->alwaysNotify === false) {
-	            $skipNotify = getGlobalConfigOptionBoolean("command_line_args.disable-notifications");
-	            if ($skipNotify === true) {
-	                LogMessage(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL);
-	                LogMessage("Mail contents would have been:" . PHP_EOL . $strBodyText);
-	                return null;
-	            }
-	        }
+	    try {
+
+		    if ($this->alwaysNotify === false) {
+			    $skipNotify = getGlobalConfigOptionBoolean("command_line_args.disable-notifications");
+			    if ($skipNotify === true) {
+				    LogMessage(PHP_EOL . "User set -send_notifications = false so skipping email notification.)" . PHP_EOL);
+				    LogMessage("Mail contents would have been:" . PHP_EOL . $strBodyText);
+
+				    return null;
+			    }
+		    }
 
 
-	        $smtpSettings = getConfigurationSetting('alerts.configuration.smtp');
+		    $smtpSettings = getConfigurationSetting('alerts.configuration.smtp');
 
-	        if($smtpSettings != null && is_array($smtpSettings))
-	        {
-	            $this->isSMTP();
-	            $properties = array_keys($smtpSettings);
-	            foreach($properties as $property)
-	            {
-		            $this->$property = $smtpSettings[$property];
-	            }
+		    if ($smtpSettings != null && is_array($smtpSettings)) {
+			    $this->isSMTP();
+			    $properties = array_keys($smtpSettings);
+			    foreach ($properties as $property) {
+				    $this->$property = $smtpSettings[$property];
+			    }
 
-	        }
-	        else
-	        {
-		        $this->isSendmail();
-	        }
+		    } else {
+			    $this->isSendmail();
+		    }
 
 
 		    //
 		    // Add initial email address header values
 		    //
-	        if(!empty($toUser))
-	        {
-		        $this->addAnAddress("to", $toUser->getEmailAddress(), $toUser->getName());
-	        }
+		    if (!empty($toUser)) {
+			    $this->addAnAddress("to", $toUser->getEmailAddress(), $toUser->getName());
+		    }
 
 		    $alerts_users = getConfigurationSetting("alerts." . $emailKind);
-	        if(empty($alerts_users))
-	        {
-	            //
-	            // hardcoded in the case where we were unable to load the email addresses for some reason
-		        //
-		        $this->addAnAddress("to", "dev@bryanselner.com", "JobScooper Deveopers");
-		        $this->setFrom("dev@bryanselner.com", "JobScooper Deveopers");
-		        $this->addReplyTo("dev@bryanselner.com", "JobScooper Deveopers" );
+		    if (empty($alerts_users)) {
+			    //
+			    // hardcoded in the case where we were unable to load the email addresses for some reason
+			    //
+			    $this->addAnAddress("to", "dev@bryanselner.com", "JobScooper Deveopers");
+			    $this->setFrom("dev@bryanselner.com", "JobScooper Deveopers");
+			    $this->addReplyTo("dev@bryanselner.com", "JobScooper Deveopers");
 
-	        }
-	        else {
-		        foreach ($alerts_users as $kind => $user) {
-		        	$email = null;
-		        	$name = null;
+		    } else {
+			    foreach ($alerts_users as $kind => $user) {
+				    $email = null;
+				    $name = null;
 
-			        if(array_key_exists("email", $user) && !empty($user['email']))
-				        $email = $user['email'];
-			        elseif(array_key_exists("Email", $user) && !empty($user['Email']))
-				        $email = $user['email'];
-			        elseif(array_key_exists("User", $user) && !empty($user['User']))
-				        $email = $user['User']->getEmailAddress();
+				    if (array_key_exists("email", $user) && !empty($user['email']))
+					    $email = $user['email'];
+				    elseif (array_key_exists("Email", $user) && !empty($user['Email']))
+					    $email = $user['email'];
+				    elseif (array_key_exists("User", $user) && !empty($user['User']))
+					    $email = $user['User']->getEmailAddress();
 
-			        if(array_key_exists("name", $user) && !empty($user['name']))
-				        $name = $user['name'];
-			        elseif(array_key_exists("Name", $user) && !empty($user['Name']))
-				        $name = $user['Name'];
-			        elseif(array_key_exists("User", $user) && !empty($user['User']))
-				        $name = $user['User']->getName();
+				    if (array_key_exists("name", $user) && !empty($user['name']))
+					    $name = $user['name'];
+				    elseif (array_key_exists("Name", $user) && !empty($user['Name']))
+					    $name = $user['Name'];
+				    elseif (array_key_exists("User", $user) && !empty($user['User']))
+					    $name = $user['User']->getName();
 
-			        switch ($kind) {
+				    switch ($kind) {
 
-				        case "from":
-					        $this->setFrom($email, $name);
-					        break;
+					    case "from":
+						    $this->setFrom($email, $name);
+						    break;
 
-				        default:
-					        $this->addAnAddress($kind, $email, $name);
+					    default:
+						    $this->addAnAddress($kind, $email, $name);
 
-			        }
-		        }
-	        }
+				    }
+			    }
+		    }
 
-	        $this->addReplyTo("dev@bryanselner.com", "JobScooper Deveopers" );
+		    $this->addReplyTo("dev@bryanselner.com", "JobScooper Deveopers");
 		    $this->SMTPOptions = array(
-	            'ssl' => array(
-	                'verify_peer' => false,
-	                'verify_peer_name' => false,
-	                'allow_self_signed' => true
-	            )
-	        );
+			    'ssl' => array(
+				    'verify_peer'       => false,
+				    'verify_peer_name'  => false,
+				    'allow_self_signed' => true
+			    )
+		    );
 
 		    // Set word wrap to 120 characters
 		    $this->WordWrap = 120;
@@ -161,17 +156,17 @@ class JobsMailSender extends PHPMailer
 		    if(!empty($arrAttachFilePaths) && is_array($arrAttachFilePaths))
 	        {
 	            foreach($arrAttachFilePaths as $attachPath)
-	            {
-	                $this->addAttachment($attachPath);
-	            }
-	        }
+				    {
+				    $this->addAttachment($attachPath);
+			    }
+		    }
 
 		    $this->isHTML(true);                                            // Set email format to HTML
 
-	        if(strlen($strBodyText) == 0 || strlen($strBodyHTML) > 0)
-	            $strBodyText = strip_tags($strBodyHTML);
+		    if (strlen($strBodyText) == 0 || strlen($strBodyHTML) > 0)
+			    $strBodyText = strip_tags($strBodyHTML);
 
-		    $this->Body    = $strBodyHTML;
+		    $this->Body = $strBodyHTML;
 		    $this->AltBody = $strBodyText;
 		    $this->Subject = $subject;
 

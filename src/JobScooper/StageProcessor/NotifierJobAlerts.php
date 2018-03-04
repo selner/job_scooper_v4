@@ -226,13 +226,15 @@ class NotifierJobAlerts extends JobsMailSender
 		// Output the final files we'll send to the user
 		//
 		$arrFilesToAttach = array();
+		$spreadsheet = null;
 		startLogSection("Generating Excel file for user's job match results...");
 		try {
 			$spreadsheet = $this->_generateMatchResultsExcelFile($matches);
 
+			$pathExcelResults = getDefaultJobsOutputFileName("", "JobMatches", "XLSX", "_", 'debug');
+			LogMessage("Writing final workbook for user notifications to {$pathExcelResults}...");
 			$writer = IOFactory::createWriter($spreadsheet, "Xlsx");
 
-			$pathExcelResults = getDefaultJobsOutputFileName("", "JobMatches", "XLSX", "_", 'debug');
 			$writer->save($pathExcelResults);
 			$arrFilesToAttach[] = $pathExcelResults;
 
@@ -243,6 +245,10 @@ class NotifierJobAlerts extends JobsMailSender
 		} catch (\Exception $ex) {
 			handleException($ex);
 		} finally {
+			if(!empty($spreadsheet)) {
+				$spreadsheet->disconnectWorksheets();
+				unset($spreadsheet);
+			}
 			endLogSection("Generating Excel file.");
 		}
 
@@ -323,6 +329,7 @@ class NotifierJobAlerts extends JobsMailSender
 		);
 
 		foreach ($sheetFilters as $sheetParams) {
+			LogMessage("Creating worksheet '{$sheetParams[0]}' in workbook...");
 			if (!$spreadsheet->sheetNameExists($sheetParams[0])) {
 				LogWarning("No template sheet exists named {$sheetParams[0]} so creating it from blank sheet.");
 				$newSheet = $spreadsheet->createSheet();
@@ -330,6 +337,7 @@ class NotifierJobAlerts extends JobsMailSender
 			}
 			$spreadsheet->setActiveSheetIndexByName($sheetParams[0]);
 			$spreadsheet->getActiveSheet()->getCell("F1")->setValue(getRunDateRange());
+
 			$this->_writeJobMatchesToSheet($spreadsheet, $sheetParams[0], $arrJobsToNotify[$sheetParams[1]], $sheetParams[2]);
 		}
 		$spreadsheet->setActiveSheetIndexByName($sheetFilters[0][0]);
@@ -345,7 +353,7 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function _generateHTMLEmailContent($subject, $matches, User $user, GeoLocation $geoLocation=null)
+	private function _generateHTMLEmailContent($subject, &$matches, User $user, GeoLocation $geoLocation=null)
 	{
 		try {
 
@@ -388,10 +396,11 @@ class NotifierJobAlerts extends JobsMailSender
 				}
 			}
 
+			LogMessage("Generating HTML for user email notification...");
 			$html = call_user_func($renderer, $data);
+			file_put_contents(getDefaultJobsOutputFileName("email", "notification", "html", "_", "debug"), $html);
 
-			if (isDebug())
-				file_put_contents(getDefaultJobsOutputFileName("email", "notification", "html", "_", "debug"), $html);
+//			if (isDebug())
 
 			return $html;
 		}
@@ -410,7 +419,7 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @throws \PhpOffice\PhpSpreadsheet\Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	private function _writeJobMatchesToSheet(Spreadsheet &$spreadsheet, $sheetName, $arrResults, $keys)
+	private function _writeJobMatchesToSheet(Spreadsheet &$spreadsheet, $sheetName, &$arrResults, $keys)
 	{
 
 		foreach ($arrResults as $k => $v) {
@@ -434,6 +443,7 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		// Place the results data on the worksheet
 		//
+		LogMessage("Writing the data to cells starting at '{$startCell}'...");
 		$dataSheet->fromArray(
 			$arrResults,    // The data to set
 			null,  // Array values with this value will not be set
@@ -444,6 +454,7 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		// Clone the style formatting from the first line to each line of the results set
 		//
+		LogMessage("Matching template styles for the data...");
 		$dataSheet->duplicateStyle(
 				$dataSheet->getStyle("{$startCell}:{$lastCellFirstRow}"),
 			"{$startCell}:{$lastCellLastRow}"
@@ -453,6 +464,7 @@ class NotifierJobAlerts extends JobsMailSender
 		// If we had a Url or Title array key, then we need to iterate over
 		// all the rows in that column and set the hyperlink
 		//
+		LogMessage("Matching template styles for the data...");
 		$nUrlColIndex = array_search("Url", $keys);
 		$nTitleColIndex = array_search("Title", $keys);
 		if ($nUrlColIndex >= 0 && $nUrlColIndex !== false) {
@@ -473,6 +485,7 @@ class NotifierJobAlerts extends JobsMailSender
 			}
 		}
 
+		LogMessage("Setting data autofilter om sheet {$sheetName}...");
 		$dataSheet->setAutoFilter("{$startHeaderCell}:{$lastCellLastRow}");
 
 	}
