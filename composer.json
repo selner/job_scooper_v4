@@ -30,7 +30,7 @@
         "cache/array-adapter": "^1.0@dev",
         "PHLAK/config": "dev-allow-imports",
         "docopt/docopt": "~1.0",
-        "phpoffice/phpspreadsheet": "dev-master",
+        "phpoffice/phpspreadsheet": "~1.2",
         "sentry/sentry": "^1.9@dev",
         "adbario/php-dot-notation": "2.x-dev",
         "bramus/monolog-colored-line-formatter": "~2.0"
