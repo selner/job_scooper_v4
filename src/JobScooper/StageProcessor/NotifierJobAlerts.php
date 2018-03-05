@@ -223,7 +223,7 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @throws \Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	private function _sendResultsNotification($matches, $resultsTitle, User $sendToUser, GeoLocation $geoLocation=null)
+	private function _sendResultsNotification(&$matches, $resultsTitle, User $sendToUser, GeoLocation $geoLocation=null)
 	{
 		//
 		// Output the final files we'll send to the user
