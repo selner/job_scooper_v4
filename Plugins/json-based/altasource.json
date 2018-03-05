@@ -2,7 +2,7 @@
   "JobSiteName": "Altasource",
   "SourceURL": "https://jobs2.smartsearchonline.com/altasource/jobs/process_jobsearch.asp",
   "BaseURL": "https://jobs2.smartsearchonline.com/altasource/jobs/",
-  "AdditionalFlags" : [ "C__JOB_USE_SELENIUM", "C__JOB_ITEMCOUNT_NOTAPPLICABLE__", "C__JOB_PAGECOUNT_NOTAPPLICABLE__"],
+  "AdditionalFlags" : [ "C__JOB_USE_SELENIUM", "C__JOB_ITEMCOUNT_NOTAPPLICABLE__", "C__JOB_PAGECOUNT_NOTAPPLICABLE__", "C__JOB_USE_SITENAME_AS_COMPANY" ],
   "CountryCodes" : ["US"],
   "Collections": [
     {
@@ -31,11 +31,6 @@
           "Selector": "td",
           "Index": 1,
           "Type": "CSS"
-        },
-        {
-          "Name": "Company",
-          "Type": "STATIC",
-          "Value": "Altasource"
         },
         {
           "Name": "JobSitePostId",

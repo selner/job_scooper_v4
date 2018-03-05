@@ -19,21 +19,40 @@ use JobScooper\DataAccess\UserSearchSiteRun;
 
 abstract class AbstractJobviteATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
-    function __construct()
+	/**
+	 * AbstractJobviteATS constructor.
+	 * @throws \Exception
+	 */
+	function __construct()
     {
-        $this->additionalBitFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+	    $this->additionalBitFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+	    $this->additionalBitFlags[] = C__JOB_USE_SITENAME_AS_COMPANY;
         parent::__construct();
     }
-    static function checkNoJobResults($var)
+
+	/**
+	 * @param $var
+	 *
+	 * @return int|null
+	 * @throws \Exception
+	 */
+	static function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "Found 0 jobs");
     }
+
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 */
 	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
 	{
 		$this->_currentSearchDetails = $searchDetails;
 	}
 
-    protected $arrListingTagSetup = array(
+	/**
+	 * @var array
+	 */
+	protected $arrListingTagSetup = array(
 //        'JobPostItem'      => array('frame' => 'jobvite_careersite_iframe', 'selector' => 'table.jv-job-list tr'),
         'JobPostItem'      => array('selector' => 'table.jv-job-list tr'),
         'Title'                 => array('selector' => 'td.jv-job-list-name a'),
@@ -41,6 +60,9 @@ abstract class AbstractJobviteATS extends \JobScooper\BasePlugin\Classes\AjaxHtm
         'Location'              => array('selector' => 'td.jv-job-list-location', 'return_attribute' => 'text'),
         'JobSitePostId'                 => array('selector' => 'td.jv-job-list-name a', 'return_attribute' => 'href', 'return_value_regex' =>  '/job\/(.*)/i'),
     );
+	/**
+	 * @var null
+	 */
 	private $_currentSearchDetails = null;
 
 	/**

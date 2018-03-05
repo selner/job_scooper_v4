@@ -3,6 +3,7 @@
     "BaseURL": "http://www.cybercoders.com",
     "SourceURL": "https://www.cybercoders.com/search/?page=***PAGE_NUMBER***&searchterms=***KEYWORDS***&searchlocation=***LOCATION***&newsearch=true&originalsearch=true&sorttype=date",
     "LocationType": "location-city-comma-statecode",
+    "AdditionalFlags" : [ "C__JOB_USE_SITENAME_AS_COMPANY" ],
     "CountryCodes": [
         "US"
     ],
@@ -57,11 +58,6 @@
                     "Pattern": "/.*?(\\d+)$/",
                     "Index": 0,
                     "Type": "CSS"
-                },
-                {
-                    "Name": "Company",
-                    "Type": "STATIC",
-                    "Value": "CyberCoders"
                 },
                 {
                     "Name": "Location",

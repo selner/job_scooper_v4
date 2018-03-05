@@ -3,6 +3,7 @@
   "SourceURL": "https://www.facebook.com/careers/search/?q=&location=***LOCATION***",
   "LocationType": "location-city",
   "CountryCodes" : ["UK", "CA", "US"],
+  "AdditionalFlags" : [ "C__JOB_USE_SITENAME_AS_COMPANY" ],
   "Collections": [
     {
       "Name": "PageFields",
@@ -38,11 +39,6 @@
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
-        },
-        {
-          "Name": "Company",
-          "Value": "Facebook",
-          "Type": "STATIC"
         },
         {
           "Name": "Location",

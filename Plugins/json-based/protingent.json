@@ -2,7 +2,7 @@
   "JobSiteName": "Protingent",
   "SourceURL": "http://jobs.protingent.com/index.smpl?arg=jb_search_results&view=0",
   "BaseURL": "http://jobs.protingent.com",
-  "AdditionalFlags" : [ "C__JOB_USE_SELENIUM", "C__JOB_ITEMCOUNT_NOTAPPLICABLE__", "C__JOB_PAGECOUNT_NOTAPPLICABLE__"],
+  "AdditionalFlags" : [ "C__JOB_USE_SELENIUM", "C__JOB_ITEMCOUNT_NOTAPPLICABLE__", "C__JOB_PAGECOUNT_NOTAPPLICABLE__", "C__JOB_USE_SITENAME_AS_COMPANY" ],
   "CountryCodes" : ["US"],
   "Collections": [
     {
@@ -38,11 +38,6 @@
           "Index": 0,
           "Attribute": "text",
           "Type": "CSS"
-        },
-        {
-          "Name": "Company",
-          "Type": "STATIC",
-          "Value": "Protingent"
         },
         {
           "Name": "Url",

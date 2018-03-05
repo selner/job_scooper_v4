@@ -2,6 +2,7 @@
   "JobSiteName": "Salesforce",
   "SourceURL": "http://salesforce.careermount.com/candidate/job_search/quick/results/***PAGE_NUMBER***?location=***LOCATION***&sort_dir=desc&sort_field=post_date&relevance=false",
   "LocationType": "location-city",
+  "AdditionalFlags" : [ "C__JOB_USE_SITENAME_AS_COMPANY" ],
   "PluginExtendsClassName" : "AbstractSalesforce",
   "Collections": [
     {
@@ -46,11 +47,6 @@
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
-        },
-        {
-          "Name": "Company",
-          "Value": "Salesforce",
-          "Type": "STATIC"
         },
         {
           "Name": "Location",

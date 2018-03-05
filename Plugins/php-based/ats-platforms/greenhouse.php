@@ -22,6 +22,7 @@ abstract class AbstractGreenhouseATS  extends \JobScooper\BasePlugin\Classes\Aja
 	protected $SiteReferenceKey = null;
 	protected $JobListingsPerPage = 1000;
 	protected $nTotalJobs = null;
+	protected $additionalBitFlags = [C__JOB_USE_SITENAME_AS_COMPANY];
 
 	protected $arrListingTagSetup = array(
 //		'JobPostItem' => array('selector' => 'ul.list-group li.list-group-item'),

@@ -7,6 +7,7 @@
       "CountryCodes": [
         "UK"
       ],
+      "AdditionalFlags" : [ "C__JOB_USE_SITENAME_AS_COMPANY" ],
       "Collections": [
         {
           "Name": "PageFields",
@@ -50,11 +51,6 @@
               "Index": 0,
               "Pattern": "/Reference:\\s*(.*)/",
               "Type": "CSS"
-            },
-            {
-              "Name": "Company",
-              "Value": "Recruiter - Intelligent People",
-              "Type": "STATIC"
             },
             {
               "Name": "PayRange",
