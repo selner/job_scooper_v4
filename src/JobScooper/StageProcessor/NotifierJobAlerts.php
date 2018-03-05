@@ -238,6 +238,8 @@ class NotifierJobAlerts extends JobsMailSender
 			$writer->save($pathExcelResults);
 			$arrFilesToAttach[] = $pathExcelResults;
 
+		} catch (\PhpOffice\PhpSpreadsheet\Writer\Exception $ex) {
+			handleException($ex, "Error writing results to Excel spreadsheet: %s", true);
 		} catch (\PhpOffice\PhpSpreadsheet\Style\Exception $ex) {
 			handleException($ex, "Error writing results to Excel spreadsheet: %s", true);
 		} catch (\PhpOffice\PhpSpreadsheet\Exception $ex) {
