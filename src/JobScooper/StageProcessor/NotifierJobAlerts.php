@@ -465,7 +465,7 @@ class NotifierJobAlerts extends JobsMailSender
 		// If we had a Url or Title array key, then we need to iterate over
 		// all the rows in that column and set the hyperlink
 		//
-		LogMessage("Matching template styles for the data...");
+		LogMessage("Setting clickable URLs...");
 		$nUrlColIndex = array_search("Url", $keys);
 		$nTitleColIndex = array_search("Title", $keys);
 		if ($nUrlColIndex >= 0 && $nUrlColIndex !== false) {

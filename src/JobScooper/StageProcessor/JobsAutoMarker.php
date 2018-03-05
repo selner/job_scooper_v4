@@ -603,6 +603,7 @@ class JobsAutoMarker
 			try {
 
 				$basefile = "mark_titlematches";
+				LogMessage("Exporting updated jobs to JSON file '{$basefile}_src.json' for matching...");
 				$sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $arrJobsList);
 				$resultsfile = generateOutputFileName("{$basefile}_results", "json", true, 'debug');
 

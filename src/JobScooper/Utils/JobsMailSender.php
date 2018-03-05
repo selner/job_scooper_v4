@@ -170,7 +170,7 @@ class JobsMailSender extends PHPMailer
 		    $this->AltBody = $strBodyText;
 		    $this->Subject = $subject;
 
-
+		    LogMessage("Sending final email content to SMTP server...");
 	        $ret = $this->send();
 	        if($ret !== true)
 	        {
