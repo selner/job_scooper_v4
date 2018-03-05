@@ -107,7 +107,9 @@ function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
     if(empty($v)|| !is_string($v))
         return $v;
 
-    if(!empty($prefixRemove))
+	$v = mb_convert_encoding($v, "UTF-8");
+
+	if(!empty($prefixRemove))
         $v = remove_prefix($v, $prefixRemove);
 
     if(!empty($postfixRemove))

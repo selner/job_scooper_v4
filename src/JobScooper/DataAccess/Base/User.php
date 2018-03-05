@@ -549,7 +549,7 @@ abstract class User implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [date_last_notified] column value.
      *
      *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
      * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00

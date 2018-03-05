@@ -600,7 +600,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [last_updated_at] column value.
      *
      *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
      * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
@@ -620,7 +620,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [job_posted_date] column value.
      *
      *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
      * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
@@ -640,7 +640,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [first_seen_at] column value.
      *
      *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
+     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
      * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
@@ -1319,12 +1319,13 @@ abstract class JobPosting implements ActiveRecordInterface
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
                 // timestampable behavior
-
+                $time = time();
+                $highPrecision = \Propel\Runtime\Util\PropelDateTime::createHighPrecision();
                 if (!$this->isColumnModified(JobPostingTableMap::COL_FIRST_SEEN_AT)) {
-                    $this->setFirstSeenAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
+                    $this->setFirstSeenAt($highPrecision);
                 }
                 if (!$this->isColumnModified(JobPostingTableMap::COL_LAST_UPDATED_AT)) {
-                    $this->setUpdatedAt(\Propel\Runtime\Util\PropelDateTime::createHighPrecision());
+                    $this->setUpdatedAt($highPrecision);
                 }
             } else {
                 $ret = $ret && $this->preUpdate($con);

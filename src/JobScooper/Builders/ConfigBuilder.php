@@ -199,6 +199,7 @@ class ConfigBuilder
 
 	/**
 	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	private function _setupPropelForRun()
     {
@@ -242,6 +243,11 @@ class ConfigBuilder
 		    $manager->setName($key);
 		    $serviceContainer->setConnectionManager($key, $manager);
 		    $serviceContainer->setDefaultDatasource($key);
+
+		    $adapter = $serviceContainer->getAdapter($key);
+		    $con = \Propel\Runtime\Propel::getWriteConnection($key);
+		    $adapter->setCharset($con, "utf8mb4");
+		    Propel::getServiceContainer()->setAdapter($key, $adapter);
 	    }
 
     }

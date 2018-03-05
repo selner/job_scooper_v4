@@ -1,3 +1,4 @@
+
 <database name="default" defaultIdMethod="native"
           namespace="JobScooper\DataAccess"
 
@@ -15,6 +16,11 @@
     -->
 
     <table name="job_site" phpName="JobSiteRecord" allowPkInsert="true" heavyIndexing="true">
+
+        <vendor type="mysql">
+            <parameter name="Charset" value="utf8mb4"/>
+            <parameter name="Collate" value="utf8_unicode_ci"/>
+        </vendor>
 
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         PRIMARY KEY
@@ -46,6 +52,12 @@
 
 
     <table name="geolocation" phpName="GeoLocation" allowPkInsert="true" heavyIndexing="true">
+
+        <vendor type="mysql">
+            <parameter name="Charset" value="utf8mb4"/>
+            <parameter name="Collate" value="utf8_unicode_ci"/>
+        </vendor>
+
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         PRIMARY KEY
              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
@@ -93,6 +105,11 @@
 
 
     <table name="jobposting" phpName="JobPosting" allowPkInsert="true" heavyIndexing="true">
+
+        <vendor type="mysql">
+            <parameter name="Charset" value="utf8mb4"/>
+            <parameter name="Collate" value="utf8_unicode_ci"/>
+        </vendor>
 
         <!-- ~~~~~~~~~  PRIMARY KEY  ~~~~~~~~~~~~~~~~~~  -->
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true"
@@ -181,6 +198,12 @@
 
 
     <table name="user" phpName="User" allowPkInsert="true">
+
+        <vendor type="mysql">
+            <parameter name="Charset" value="utf8mb4"/>
+            <parameter name="Collate" value="utf8_unicode_ci"/>
+        </vendor>
+
         <!-- ~~~~~~~~~  PRIMARY KEY  ~~~~~~~~~~~~~~~~~~  -->
         <column name="user_id" phpName="UserId" type="integer" required="true" autoIncrement="true"
                 primaryKey="true"/>
@@ -216,6 +239,12 @@
     -->
 
     <table name="user_search_pair" phpName="UserSearchPair" isCrossRef="true" reloadOnUpdate="true">
+
+        <vendor type="mysql">
+            <parameter name="Charset" value="utf8mb4"/>
+            <parameter name="Collate" value="utf8_unicode_ci"/>
+        </vendor>
+
         <!-- ~~~~~~~~~  PRIMARY KEY  ~~~~~~~~~~~~~~~~~~  -->
         <column name="user_search_pair_id" phpName="UserSearchPairId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
 
@@ -259,6 +288,11 @@
 
 
     <table name="user_search_site_run" phpName="UserSearchSiteRun" isCrossRef="true" reloadOnUpdate="true" heavyIndexing="true">
+
+        <vendor type="mysql">
+            <parameter name="Charset" value="utf8mb4"/>
+            <parameter name="Collate" value="utf8_unicode_ci"/>
+        </vendor>
 
         <!-- Primary Key -->
         <column name="user_search_site_run_id" phpName="UserSearchSiteRunId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
@@ -329,6 +363,11 @@
 
 
     <table name="user_job_match" phpName="UserJobMatch" isCrossRef="true" heavyIndexing="true">
+
+        <vendor type="mysql">
+            <parameter name="Charset" value="utf8mb4"/>
+            <parameter name="Collate" value="utf8_unicode_ci"/>
+        </vendor>
 
         <!-- ~~~~~~~~~  ALTERNATE KEY ~~~~~~~~~~~~~~~~  -->
 

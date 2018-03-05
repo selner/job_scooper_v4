@@ -26,6 +26,10 @@ use Propel\Runtime\Exception\PropelException;
 Use Propel\Runtime\Connection\ConnectionInterface;
 
 
+/**
+ * Class JobPosting
+ * @package JobScooper\DataAccess
+ */
 class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \ArrayAccess
 {
 
@@ -140,14 +144,28 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		if (is_null($val) || strlen($val) == 0)
 			$val = $this->getLocation();
 
+		$val = $this->_cleanupTextValue($val);
 		$this->setLocationDisplayValue($val);
 	}
 
 	/**
 	 *
+	 * @throws \Exception
 	 */
 	public function normalizeJobRecord()
 	{
+		$fields = $this->getModifiedColumns();
+		foreach($fields as $field) {
+			$phpField = JobPostingTableMap::translateFieldName($field, TableMap::TYPE_COLNAME, TableMap::TYPE_PHPNAME);
+			$getFunc = "get{$phpField}";
+			$setFunc = "set{$phpField}";
+			$val = call_user_func(array($this, $getFunc));
+			if (!empty($val) && is_string($val)) {
+				$cleanVal = $this->_cleanupTextValue($val);
+				call_user_func(array($this, $setFunc), $cleanVal);
+			}
+		}
+
 		$this->updateAutoColumns();
 		$this->setJobSiteKey(cleanupSlugPart($this->getJobSiteKey()));
 	}
@@ -155,6 +173,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	/**
 	 * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
 	 *
+	 * @throws \Exception
 	 * @return bool
 	 */
 	public function preSave(\Propel\Runtime\Connection\ConnectionInterface $con = null)
@@ -214,6 +233,8 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	{
 		$oldVal = $this->getLocation();
 
+		$v = $this->_cleanupTextValue($v);
+
 		//
 		// Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
 		//
@@ -226,8 +247,6 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 //        if ($matched !== false && count($arrMatches) == 4) {
 //            $v = $arrMatches[3] . ", " . $arrMatches[2];
 //        }
-
-		$v = $this->_cleanupTextValue($v);
 
 		parent::setLocation(trim($v));
 
