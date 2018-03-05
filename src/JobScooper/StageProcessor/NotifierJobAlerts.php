@@ -275,7 +275,7 @@ class NotifierJobAlerts extends JobsMailSender
 
 		try {
 			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results", $sendToUser);
-			if ($ret !== false || $ret !== null) {
+			if ($ret !== false && $ret !== null) {
 
 				// Only mark the job postings as notified if we are doing a normal "all" run, not a single site subset run
 				// and if we are not running in debug mode

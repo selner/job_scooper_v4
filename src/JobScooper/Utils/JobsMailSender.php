@@ -153,31 +153,32 @@ class JobsMailSender extends PHPMailer
 		    $this->WordWrap = 120;
 
 		    // Add attachments
-		    if(!empty($arrAttachFilePaths) && is_array($arrAttachFilePaths))
-	        {
-	            foreach($arrAttachFilePaths as $attachPath)
+		    if (!empty($arrAttachFilePaths) && is_array($arrAttachFilePaths)) {
+			    foreach ($arrAttachFilePaths as $attachPath) {
+			    	$fileinfo = new \SplFileInfo($attachPath);
+			    	if($fileinfo->getExtension() != "XLSX")
 				    {
+					    $zip = new \ZipArchive();
+					    $zipPath = $fileinfo->getRealPath().".zip";
+					    $zip->open($zipPath, \ZipArchive::CREATE);
+					    $zip->addFile($attachPath);
+					    $zip->close();
+						$attachPath = $zipPath;
+				    }
 				    $this->addAttachment($attachPath);
 			    }
 		    }
 
-		    $this->isHTML(true);                                            // Set email format to HTML
-
-		    if ($this->hasLineLongerThanMax($strBodyHTML)) {
-			    $newHtml = "";
-			    foreach(explode("\n", $strBodyHTML) as $htmlline) {
-				    $newHtml .= wordwrap($htmlline, PHPMailer::MAX_LINE_LENGTH);
-			    }
-			    $strBodyHTML = $newHtml;
-		    }
-
-
-		    if (strlen($strBodyText) == 0 || strlen($strBodyHTML) > 0)
-			    $strBodyText = strip_tags($strBodyHTML);
-
-		    $this->Body = $strBodyHTML;
-		    $this->AltBody = $strBodyText;
 		    $this->Subject = $subject;
+
+		    $this->isHTML(true);                                            // Set email format to HTML
+		    $htmlToSend = PHPMailer::normalizeBreaks($strBodyHTML);
+		    $strBodyHTML = $this->wrapText($htmlToSend, PHPMailer::MAX_LINE_LENGTH - 5);
+		    $this->Body = $strBodyHTML;
+
+		    $this->AltBody = $strBodyText;
+		    if (empty($strBodyText) == 0 && !empty($strBodyHTML))
+			    $this->AltBody = $this->html2text($strBodyHTML);
 
 		    LogMessage("Sending final email content to SMTP server...");
 	        $ret = $this->send();
@@ -185,7 +186,6 @@ class JobsMailSender extends PHPMailer
 	        {
 	            try
 		        {
-
 		            $errorInfo = array(
 		                "phpmailer_error" => $this->ErrorInfo,
 				        "phpmail_settings" => objectToArray($this),
@@ -206,17 +206,20 @@ class JobsMailSender extends PHPMailer
 	            LogError($msg);
 		        $this->SMTPDebug = 1;
 	            $ret = $this->send();
-	            if($ret === true) return $ret;
-
-	            $msg = "Failed second attempt to send notification email.  Debug error details should be logged above.  Error: " . PHP_EOL .$this->ErrorInfo;
-	            LogError($msg);
-	            throw new Exception($msg);
-
+				if($ret !== true)
+				{
+		            $msg = "Failed second attempt to send notification email.  Debug error details should be logged above.  Error: " . PHP_EOL .$this->ErrorInfo;
+		            LogError($msg);
+		            throw new Exception($msg);
+				}
 	        }
-	        else
+
+	        if($ret === true)
 	        {
-	            LogMessage("Email sent to " . getArrayValuesAsString($this->getAllRecipientAddresses()) . " from " . $this->From);
+		        $msgId = $this->getLastMessageID();
+		        LogMessage("Email message ID '{$msgId}' sent to " . getArrayValuesAsString($this->getAllRecipientAddresses()) . " from " . $this->From);
 	        }
+
 	        return $ret;
 	    }
 		catch (Exception $ex)
