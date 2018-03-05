@@ -108,11 +108,11 @@ class JobsAutoMarker
 		        return;
 	        }
 
+	        LogMessage("Clearing old auto-marked facts from jobs we are re-marking...");
 	        foreach ($arrJobs_AutoUpdatable as $jobmatch)
 		        $jobmatch->clearUserMatchState();
 
 	        $this->_markJobsList_KeywordMatches_($arrJobs_AutoUpdatable);
-
 
 	        $this->_markJobsList_SetOutOfArea_($arrJobs_AutoUpdatable);
 
@@ -129,6 +129,7 @@ class JobsAutoMarker
 	        // We'll use this same Save call to store that the record has been automarked
 	        // and is ready for sending.
 	        //
+	        LogMessage("Auto-marking complete. Setting marked jobs to 'ready-to-send'...");
 	        $arrJobs_AutoUpdatable = $this->_getMatches();
 	        foreach ($arrJobs_AutoUpdatable as $jobMatch) {
 		        $jobMatch->setUserNotificationState(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND);
