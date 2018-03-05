@@ -163,6 +163,15 @@ class JobsMailSender extends PHPMailer
 
 		    $this->isHTML(true);                                            // Set email format to HTML
 
+		    if ($this->hasLineLongerThanMax($strBodyHTML)) {
+			    $newHtml = "";
+			    foreach(explode("\n", $strBodyHTML) as $htmlline) {
+				    $newHtml .= wordwrap($htmlline, PHPMailer::MAX_LINE_LENGTH);
+			    }
+			    $strBodyHTML = $newHtml;
+		    }
+
+
 		    if (strlen($strBodyText) == 0 || strlen($strBodyHTML) > 0)
 			    $strBodyText = strip_tags($strBodyHTML);
 
