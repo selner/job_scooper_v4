@@ -85,6 +85,7 @@ class UserJobMatch extends BaseUserJobMatch
 	 *
 	 * @return array
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Exception
 	 */
 	public function toFlatArrayForCSV($limitToKeys=null)
     {

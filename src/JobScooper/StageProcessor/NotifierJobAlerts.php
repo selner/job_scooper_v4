@@ -338,6 +338,7 @@ class NotifierJobAlerts extends JobsMailSender
 			$spreadsheet->setActiveSheetIndexByName($sheetParams[0]);
 			$spreadsheet->getActiveSheet()->getCell("F1")->setValue(getRunDateRange());
 
+			LogMessage("Writing jobs to {$sheetParams[0]} worksheet...");
 			$this->_writeJobMatchesToSheet($spreadsheet, $sheetParams[0], $arrJobsToNotify[$sheetParams[1]], $sheetParams[2]);
 		}
 		$spreadsheet->setActiveSheetIndexByName($sheetFilters[0][0]);
@@ -419,9 +420,9 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @throws \PhpOffice\PhpSpreadsheet\Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	private function _writeJobMatchesToSheet(Spreadsheet &$spreadsheet, $sheetName, &$arrResults, $keys)
+	private function _writeJobMatchesToSheet(Spreadsheet &$spreadsheet, $sheetName, $arrResults, $keys)
 	{
-
+		LogMessage("Reordering the data array to match our column output order...");
 		foreach ($arrResults as $k => $v) {
 			unset($arrResults[$k]);
 			$rowOrder = array_fill_keys($keys, null);
