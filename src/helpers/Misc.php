@@ -97,7 +97,7 @@ function getRunDateRange($configNumDays=null)
 }
 
 
-function combineTextAllChildren($node, $fRecursed = false)
+function combineTextAllChildren($node, $fRecursed = false, $delim=" ")
 {
 
 	if(empty($node))
@@ -114,15 +114,15 @@ function combineTextAllChildren($node, $fRecursed = false)
 
     if ($node->hasChildren()) {
         foreach ($node->children() as $child) {
-            $retStr = $retStr . " " . combineTextAllChildren($child, true);
+        	if($fRecursed)
+	            $retStr = $retStr . $delim . combineTextAllChildren($child, $fRecursed, $delim);
+        	else
+		        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE) . $retStr;
         }
         unset($child);
     }
-
-    if($fRecursed == false)
-    {
-        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE) . $retStr;
-    }
+    else
+        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
 
     return $retStr;
 
