@@ -192,12 +192,13 @@ class NotifierJobAlerts extends JobsMailSender
 
 			LogMessage("Building job match lists for past week");
 			$matches = array();
+			$arrNearbyIds = getGeoLocationsNearby($geoLocation);
+
 			$matches["all"] = getAllMatchesForUserNotification(
-				array([UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT], Criteria::IN),
-				null,
+				[UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
+				$arrNearbyIds,
 				7,
-				$user,
-				$geoLocation
+				$user
 			);
 
 			if (empty($matches["all"]))
