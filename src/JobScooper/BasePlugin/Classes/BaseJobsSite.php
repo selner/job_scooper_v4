@@ -299,7 +299,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			} catch (Exception $ex) {
 				$this->log("Unable to shutdown Selenium remote webdriver successfully while closing down downloads for {$this->JobSiteName}: " . $ex->getMessage(), \Monolog\Logger::WARNING);
 			} finally {
-				$this->selenium = null;
+				unset($this->selenium);
 			}
 		}
 
@@ -968,7 +968,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	{
 		$recursed = true;
 		$delim = "";
-		if(count($var) > 1) {
+		if (count($var) > 1) {
 			$param = $var[1];
 			$var = $var[0];
 		}

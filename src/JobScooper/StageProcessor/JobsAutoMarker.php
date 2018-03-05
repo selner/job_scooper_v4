@@ -187,8 +187,8 @@ class JobsAutoMarker
 			LogMessage("Exporting {$cntJobs} job postings to {$outfile} for deduplication...");
 			writeJson($jsonObj, $outfile );
 
-			$arrRecentJobs = null;
-			$jsonObj = null;
+			unset($arrRecentJobs);
+			unset($jsonObj);
 
 			try {
 				startLogSection("Calling python to dedupe new job postings...");

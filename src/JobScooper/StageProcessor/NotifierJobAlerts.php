@@ -92,6 +92,7 @@ class NotifierJobAlerts extends JobsMailSender
 	/**
 	 * @param \JobScooper\DataAccess\User $user
 	 *
+	 * @throws \Exception
 	 * @return GeoLocation[]
 	 */
 	private function _getSearchPairLocations(User $user)
@@ -162,6 +163,7 @@ class NotifierJobAlerts extends JobsMailSender
 				$subject = countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]) . " New {$geoLocation->getPlace()} Job Postings: " . getRunDateRange();
 
 			$this->_sendResultsNotification($matches, $subject, $user, $geoLocation);
+			unset($matches);
 		}
 	}
 
@@ -293,6 +295,10 @@ class NotifierJobAlerts extends JobsMailSender
 			endLogSection(" Email send failed.");
 			handleException($ex);
 		}
+		finally
+		{
+			unset($messageHtml);
+		}
 
 		//
 		// We only keep interim files around in debug mode, so
@@ -410,6 +416,10 @@ class NotifierJobAlerts extends JobsMailSender
 		catch (Exception $ex)
 		{
 			handleException($ex);
+		}
+		finally
+		{
+			unset($renderer);
 		}
 	}
 

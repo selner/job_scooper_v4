@@ -180,7 +180,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		$hostPage = $searchDetails->getSearchStartUrl();
 		LogMessage("Loading first page for {$this->getJobSiteKey()} from {$hostPage}");
 		$jsonUrl = $this->_getJsonSearchUrl($searchDetails);
-		$retData = null;
+		unset($retData);
 		try {
 			$retData = $this->getJsonResultsPage($jsonUrl, $hostPage);
 			$this->nTotalJobs = $retData->Total;
@@ -266,7 +266,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 				$nOffset = 0;
 				if (!empty($this->lastResponseData) && !empty($this->lastResponseData->Jobs) && count($this->lastResponseData->Jobs) > 0) {
 					$jobs = $this->lastResponseData->Jobs;
-					$this->lastResponseData = null;
+					unset($this->lastResponseData);
 				}
 				else {
 					$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
@@ -279,7 +279,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 //
 				while (!empty($jobs) && $nOffset < $this->nTotalJobs) {
 					$curPageJobs = $this->_parseJsonJobs($jobs);
-					$jobs = null;
+					unset($jobs);
 					$ret = array_merge($ret, $curPageJobs);
 					$nOffset = $nOffset + count($curPageJobs);
 					if ($nOffset < $this->nTotalJobs) {
@@ -349,7 +349,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 			} catch (Exception $ex) {
 			} finally {
 				$this->selenium->done();
-				$this->selenium = null;
+				unset($this->selenium);
 			}
 		}
 	}

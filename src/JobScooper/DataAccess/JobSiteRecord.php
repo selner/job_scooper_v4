@@ -71,7 +71,7 @@ class JobSiteRecord extends BaseJobSiteRecord
 
 	    } catch (\Exception $ex) {
 		    LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() . "]:  " . $ex->getMessage());
-		    $this->_pluginObject = null;
+		    unset($this->_pluginObject);
 	    }
 	    finally
 	    {

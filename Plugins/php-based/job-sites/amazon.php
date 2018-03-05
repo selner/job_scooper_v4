@@ -204,7 +204,7 @@ class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 						$retData = $this->getJsonResultsPage($nOffset);
 						$jobs = $retData['jobs'];
 					} else
-						$jobs = null;
+						unset($jobs);
 				}
 			}
 
