@@ -442,6 +442,8 @@ class PluginCareerJet extends \JobScooper\BasePlugin\Classes\JobsApiPlugin
 					$item['Title'] = $job->title;
 					$item['Location'] = $job->locations;
 					$item['Company'] = $job->company;
+					if(empty($item['Company']))
+						$item['Company'] = "[not-provided]";
 					$item['PayRange'] = $job->salary;
 					$item['PostedAt'] = $job->date;
 					$item['JobSitePostId'] = $job->url;
