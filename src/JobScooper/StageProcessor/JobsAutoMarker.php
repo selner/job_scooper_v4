@@ -131,11 +131,16 @@ class JobsAutoMarker
 	        //
 	        LogMessage("Auto-marking complete. Setting marked jobs to 'ready-to-send'...");
 	        $arrJobs_AutoUpdatable = $this->_getMatches();
+	        $totalMarkedReady = 0;
 	        foreach ($arrJobs_AutoUpdatable as $jobMatch) {
 		        $jobMatch->setUserNotificationState(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND);
 		        $jobMatch->updateUserMatchStatus();
+		        if ($totalMarkedReady % 100 === 0)
+			        LogMessage("... marked {$totalMarkedReady} user job matches as 'ready-to-send'...");
 		        $jobMatch->save();
 	        }
+	        LogMessage("... marked {$totalMarkedReady} user job matches as 'ready-to-send.'");
+
         }
         catch (Exception $ex)
         {
