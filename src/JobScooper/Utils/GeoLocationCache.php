@@ -146,24 +146,32 @@ class GeoLocationCache
 	 * @throws \phpFastCache\Exceptions\phpFastCacheInvalidArgumentException
 	 * @throws \Psr\Cache\InvalidArgumentException
 	 */
-	function cacheGeoLocation(GeoLocation $geolocation, $arrAddlLookups = [])
+	function cacheGeoLocation(GeoLocation $geolocation, $newLookupString = null)
 	{
-		if (isDebug())
-			$this->log(Logger::DEBUG, "... adding new Geolocation {$geolocation->getGeoLocationKey()} / {$geolocation->getGeoLocationId()} to cache ...");
-
-		$lookups = array($geolocation->getDisplayName(), $geolocation->getGeoLocationKey());
-		if (!empty($arrAddlLookups) && is_array($arrAddlLookups)) {
-			$lookups = array_merge($arrAddlLookups);
-		}
+		$lookups = array($newLookupString);
 		$geoLocId = $geolocation->getGeoLocationId();
+		$tags = ["GeoLocationId{$geolocation->getGeoLocationId()}", $geolocation->getGeoLocationKey()];
 
-		$altVars = $geolocation->getVariants();
-		if (!empty($altVars) && is_array($altVars))
-			$lookups = array_merge($lookups, $altVars);
+		$prevCacheItems = $this->_cache->getItemsByTag($geolocation->getGeoLocationKey());
+		if(!empty($prevCacheItems))
+		{
+			LogDebug("{$geolocation->getGeoLocationKey()} already cached; adding additional lookup string '{$newLookupString}...");
+		}
+		else {
+			if (isDebug())
+				$this->log(Logger::DEBUG, "... adding new Geolocation {$geolocation->getGeoLocationKey()} / {$geolocation->getGeoLocationId()} to cache ...");
 
-		$altNames = $geolocation->getAlternateNames();
-		if (!empty($altNames) && is_array($altNames))
-			$lookups = array_merge($lookups, $altNames);
+			$lookups = array_merge($lookups, array($geolocation->getDisplayName(), $geolocation->getGeoLocationKey()));
+
+			$altVars = $geolocation->getVariants();
+			if (!empty($altVars) && is_array($altVars))
+				$lookups = array_merge($lookups, $altVars);
+
+			$altNames = $geolocation->getAlternateNames();
+			if (!empty($altNames) && is_array($altNames))
+				$lookups = array_merge($lookups, $altNames);
+
+		}
 
 		$keys = array();
 		foreach ($lookups as $look)
@@ -172,23 +180,22 @@ class GeoLocationCache
 
 		$strKeys = getArrayDebugOutput($keys);
 		$cntKeys = count($keys);
+		$strTags = getArrayDebugOutput($tags);
 
 		if (isDebug())
-			$this->log(Logger::DEBUG, "... added {$cntKeys} lookups for {$geolocation->getGeoLocationKey()} to the cache:  {$strKeys}.");
+			$this->log(Logger::DEBUG, "... adding {$cntKeys} lookups for {$geolocation->getGeoLocationKey()} to the cache:  {$strKeys}.");
 
-		$tags = ["GeoLocationId{$geolocation->getGeoLocationId()}", $geolocation->getGeoLocationKey()];
 		$newCacheItems = array();
 		foreach ($keys as $k) {
 			$cacheItem = $this->_cache->getItem($k);
+			$cacheItem->addTags($tags);
 			$cacheItem->set($geoLocId);
 			$this->_cache->setItem($cacheItem);
 			$newCacheItems[] = $cacheItem;
 		}
 		$this->_cache->saveMultiple($newCacheItems);
 
-		$strTags = getArrayDebugOutput($tags);
 		$this->log(Logger::DEBUG, "Cached '{$geolocation->getDisplayName()}/{$geolocation->getGeoLocationKey()} under {$cntKeys} lookups with cached tags {$strTags}.");
-
 	}
 
 	/**

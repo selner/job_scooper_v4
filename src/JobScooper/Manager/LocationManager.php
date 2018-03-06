@@ -127,9 +127,6 @@ class LocationManager
 
 		try {
 			$geoloc = $this->geocode($lookupAddress);
-			$this->_geoLocCache->cacheGeoLocation($geoloc, array($lookupAddress));
-		} catch (InvalidArgumentException $e) {
-			throw($e);
 		} catch (Exception $e) {
 			throw($e);
 		} catch (\Psr\Cache\InvalidArgumentException $e) {
@@ -268,7 +265,7 @@ class LocationManager
 		if (!empty($geocodeResult)) {
 			$geolocation = $geocodeResult;
 			try {
-				$this->_geoLocCache->cacheGeoLocation($geolocation, array($strAddress));
+				$this->_geoLocCache->cacheGeoLocation($geolocation, $strAddress);
 			} catch (\InvalidArgumentException $e) {
 				handleException($e);
 			} catch (\Psr\Cache\InvalidArgumentException $e) {
