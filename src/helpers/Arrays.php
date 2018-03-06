@@ -759,6 +759,15 @@ function setAsCacheData($cacheName, $value)
 
 /**
  * @param $cacheName
+ * @param $value
+ */
+function getCacheData($cacheName)
+{
+	return getGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName);
+}
+
+/**
+ * @param $cacheName
  */
 function clearCache($cacheName)
 {

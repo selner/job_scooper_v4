@@ -24,6 +24,8 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 
+const GEOLOCATION_GEOCODE_FAILED = -99999;
+
 class GeoLocation extends BaseGeoLocation
 {
 	static $STATE_CODES = array(

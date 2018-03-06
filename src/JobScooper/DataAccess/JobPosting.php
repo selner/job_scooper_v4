@@ -275,7 +275,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		try {
 			$locmgr = LocationManager::getLocationManager();
 
-			$location = $locmgr->getAddress($loc_str);
+			$location = $locmgr->lookupAddress($loc_str);
 			if (!is_null($location)) {
 				$this->setGeoLocationFromJP($location);
 				$this->_setDenormalizedLocationDisplayValue_();

@@ -117,6 +117,7 @@ Class LoggingManager extends \Monolog\Logger
 	    $this->_loggers[$this->_loggerName] = $this;
 	    $this->_loggers['plugins'] = $this->withName('plugins');
 	    $this->_loggers['database'] = $this->withName('database');
+		$this->_loggers['caches'] = $this->withName('caches');
 
 	    $this->LogRecord(\Psr\Log\LogLevel::INFO,"Logging started from STDIN");
 

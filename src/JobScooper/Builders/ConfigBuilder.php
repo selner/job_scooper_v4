@@ -126,7 +126,7 @@ class ConfigBuilder
 		    throw new \ErrorException("Required value for the output folder {$outputDirectory} was not specified. Exiting.");
 	    }
 
-        $globalDirs = ["debug", "logs"];
+        $globalDirs = ["debug", "logs", "caches"];
         foreach ($globalDirs as $d) {
             $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString("-"), $d));
             $details = parsePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);

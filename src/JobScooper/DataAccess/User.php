@@ -262,7 +262,7 @@ class User extends BaseUser
 
 		foreach ($searchLocations as $lockey => $searchLoc)
 		{
-			$location = $locmgr->getAddress($searchLoc);
+			$location = $locmgr->lookupAddress($searchLoc);
 			if (!empty($location)) {
 				LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}'s keywords");
 				$locId = $location->getGeoLocationId();
