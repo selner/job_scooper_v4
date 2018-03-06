@@ -26,8 +26,9 @@ use InvalidArgumentException;
  * Class JobsMailSender
  * @package JobScooper\Utils
  */
-class JobsMailSender extends PHPMailer
+class JobsMailSender
 {
+	private $phpmailer = null;
     private $alwaysNotify = false;
 
 	/**
@@ -38,7 +39,6 @@ class JobsMailSender extends PHPMailer
 	function __construct($alwaysNotify = false)
     {
         $this->alwaysNotify = $alwaysNotify;
-        parent::__construct();
     }
 
 	/**
@@ -46,6 +46,7 @@ class JobsMailSender extends PHPMailer
 	 */
 	function __destruct()
     {
+    	unset($this->phpmailer);
 
     }
 
@@ -77,18 +78,21 @@ class JobsMailSender extends PHPMailer
 			    }
 		    }
 
+		    $this->phpmailer = new PHPMailer();
+
+
 
 		    $smtpSettings = getConfigurationSetting('alerts.configuration.smtp');
 
 		    if ($smtpSettings != null && is_array($smtpSettings)) {
-			    $this->isSMTP();
+			    $this->phpmailer->isSMTP();
 			    $properties = array_keys($smtpSettings);
 			    foreach ($properties as $property) {
-				    $this->$property = $smtpSettings[$property];
+				    $this->phpmailer->$property = $smtpSettings[$property];
 			    }
 
 		    } else {
-			    $this->isSendmail();
+			    $this->phpmailer->isSendmail();
 		    }
 
 
@@ -96,7 +100,7 @@ class JobsMailSender extends PHPMailer
 		    // Add initial email address header values
 		    //
 		    if (!empty($toUser)) {
-			    $this->addAnAddress("to", $toUser->getEmailAddress(), $toUser->getName());
+			    $this->phpmailer->addAddress($toUser->getEmailAddress(), $toUser->getName());
 		    }
 
 		    $alerts_users = getConfigurationSetting("alerts." . $emailKind);
@@ -104,9 +108,9 @@ class JobsMailSender extends PHPMailer
 			    //
 			    // hardcoded in the case where we were unable to load the email addresses for some reason
 			    //
-			    $this->addAnAddress("to", "dev@bryanselner.com", "JobScooper Deveopers");
-			    $this->setFrom("dev@bryanselner.com", "JobScooper Deveopers");
-			    $this->addReplyTo("dev@bryanselner.com", "JobScooper Deveopers");
+			    $this->phpmailer->addAddress("dev@bryanselner.com", "JobScooper Deveopers");
+			    $this->phpmailer->setFrom("dev@bryanselner.com", "JobScooper Deveopers");
+			    $this->phpmailer->addReplyTo("dev@bryanselner.com", "JobScooper Deveopers");
 
 		    } else {
 			    foreach ($alerts_users as $kind => $user) {
@@ -130,18 +134,31 @@ class JobsMailSender extends PHPMailer
 				    switch ($kind) {
 
 					    case "from":
-						    $this->setFrom($email, $name);
+						    $this->phpmailer->setFrom($email, $name);
 						    break;
 
+					    case "cc":
+						    $this->phpmailer->addCC($email, $name);
+						    break;
+
+					    case "bcc":
+						    $this->phpmailer->addBCC($email, $name);
+						    break;
+					    case "replyto":
+						    $this->phpmailer->addReplyTo($email, $name);
+						    break;
+
+					    case "to":
 					    default:
-						    $this->addAnAddress($kind, $email, $name);
+						    $this->phpmailer->addAddress($email, $name);
+					    break;
 
 				    }
 			    }
 		    }
 
-		    $this->addReplyTo("dev@bryanselner.com", "JobScooper Deveopers");
-		    $this->SMTPOptions = array(
+		    $this->phpmailer->addReplyTo("dev@bryanselner.com", "JobScooper Deveopers");
+		    $this->phpmailer->SMTPOptions = array(
 			    'ssl' => array(
 				    'verify_peer'       => false,
 				    'verify_peer_name'  => false,
@@ -150,7 +167,7 @@ class JobsMailSender extends PHPMailer
 		    );
 
 		    // Set word wrap to 120 characters
-		    $this->WordWrap = 120;
+		    $this->phpmailer->WordWrap = 120;
 
 		    // Add attachments
 		    if (!empty($arrAttachFilePaths) && is_array($arrAttachFilePaths)) {
@@ -165,29 +182,29 @@ class JobsMailSender extends PHPMailer
 					    $zip->close();
 						$attachPath = $zipPath;
 				    }
-				    $this->addAttachment($attachPath);
+				    $this->phpmailer->addAttachment($attachPath);
 			    }
 		    }
 
-		    $this->Subject = $subject;
+		    $this->phpmailer->Subject = $subject;
 
-		    $this->isHTML(true);                                            // Set email format to HTML
+		    $this->phpmailer->isHTML(true);                                            // Set email format to HTML
 		    $htmlToSend = PHPMailer::normalizeBreaks($strBodyHTML);
-		    $strBodyHTML = $this->wrapText($htmlToSend, PHPMailer::MAX_LINE_LENGTH - 5);
-		    $this->Body = $strBodyHTML;
+		    $strBodyHTML = $this->phpmailer->wrapText($htmlToSend, PHPMailer::MAX_LINE_LENGTH - 5);
+		    $this->phpmailer->Body = $strBodyHTML;
 
-		    $this->AltBody = $strBodyText;
+		    $this->phpmailer->AltBody = $strBodyText;
 		    if (empty($strBodyText) == 0 && !empty($strBodyHTML))
-			    $this->AltBody = $this->html2text($strBodyHTML);
+			    $this->phpmailer->AltBody = $this->phpmailer->html2text($strBodyHTML);
 
 		    LogMessage("Sending final email content to SMTP server...");
-	        $ret = $this->send();
+	        $ret = $this->phpmailer->send();
 	        if($ret !== true)
 	        {
 	            try
 		        {
 		            $errorInfo = array(
-		                "phpmailer_error" => $this->ErrorInfo,
+		                "phpmailer_error" => $this->phpmailer->ErrorInfo,
 				        "phpmail_settings" => objectToArray($this),
 				        "alerts_users" => $alerts_users
 			        );
@@ -198,17 +215,17 @@ class JobsMailSender extends PHPMailer
 		            // enabled so we have any idea what the issue might be in the log.
 		            // If we don't do this, we just get "failed" without any useful details.
 		            //
-		            $msg = "Failed to send notification email with error = {$this->ErrorInfo}.   ". PHP_EOL . PHP_EOL . "Full details = {$jsonErrorInfo} ". PHP_EOL . PHP_EOL . "Retrying email send with debug enabled to log error details...";
+		            $msg = "Failed to send notification email with error = {$this->phpmailer->ErrorInfo}.   ". PHP_EOL . PHP_EOL . "Full details = {$jsonErrorInfo} ". PHP_EOL . PHP_EOL . "Retrying email send with debug enabled to log error details...";
 		        } catch (\Exception $ex)
 		        {
-			        $msg = "Failed to send notification email with error = {$this->ErrorInfo}.   Retrying email send with debug enabled to log error details...";
+			        $msg = "Failed to send notification email with error = {$this->phpmailer->ErrorInfo}.   Retrying email send with debug enabled to log error details...";
 		        }
 	            LogError($msg);
-		        $this->SMTPDebug = 1;
-	            $ret = $this->send();
+		        $this->phpmailer->SMTPDebug = 1;
+	            $ret = $this->phpmailer->send();
 				if($ret !== true)
 				{
-		            $msg = "Failed second attempt to send notification email.  Debug error details should be logged above.  Error: " . PHP_EOL .$this->ErrorInfo;
+		            $msg = "Failed second attempt to send notification email.  Debug error details should be logged above.  Error: " . PHP_EOL .$this->phpmailer->ErrorInfo;
 		            LogError($msg);
 		            throw new Exception($msg);
 				}
@@ -216,8 +233,8 @@ class JobsMailSender extends PHPMailer
 
 	        if($ret === true)
 	        {
-		        $msgId = $this->getLastMessageID();
-		        LogMessage("Email message ID '{$msgId}' sent to " . getArrayValuesAsString($this->getAllRecipientAddresses()) . " from " . $this->From);
+		        $msgId = $this->phpmailer->getLastMessageID();
+		        LogMessage("Email message ID '{$msgId}' sent to " . getArrayValuesAsString($this->phpmailer->getAllRecipientAddresses()) . " from " . $this->phpmailer->From);
 	        }
 
 	        return $ret;
@@ -225,6 +242,10 @@ class JobsMailSender extends PHPMailer
 		catch (Exception $ex)
 		{
 			handleException($ex, "Failed to send notification email with error = %s", true);
+		}
+		finally
+		{
+			unset($this->phpmailer);
 		}
     }
 
