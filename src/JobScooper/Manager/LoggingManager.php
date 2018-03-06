@@ -461,6 +461,7 @@ Class LoggingManager extends \Monolog\Logger
 			}
 		}
 
+		$context['memory_usage'] = getPhpMemoryUsage();
 
 		return $context;
 	}
