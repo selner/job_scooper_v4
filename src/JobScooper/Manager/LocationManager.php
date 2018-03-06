@@ -69,13 +69,9 @@ class LocationManager
 		return $loc;
 	}
 
-
-	/**
-	 * @throws \Exception
-	 * @return GeoLocation|null
-	 */
-	function lookupAddress($strAddress)
+	function scrubLocationValue($strAddress)
 	{
+
 		$lookupAddress = $strAddress;
 
 		// Strip out any zip code (aka a 5 digit set) from the string
@@ -103,6 +99,17 @@ class LocationManager
 		$lookupAddress = preg_replace("/greater\s(\w+\s)area/i", "\\1", $lookupAddress, -1);
 		$lookupAddress = preg_replace("/greater\s(\w+\s)/i", "\\1", $lookupAddress);
 		$lookupAddress = cleanupTextValue($lookupAddress);
+
+		return $lookupAddress;
+	}
+
+	/**
+	 * @throws \Exception
+	 * @return GeoLocation|null
+	 */
+	function lookupAddress($strAddress)
+	{
+		$lookupAddress = $this->scrubLocationValue($strAddress);
 
 		//
 		// Generate the cache key and do a lookup for that item
