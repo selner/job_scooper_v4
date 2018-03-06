@@ -67,6 +67,13 @@ function loadSqlite3MathExtensions()
  *
  ******************************************************************************/
 
+
+/**
+ * @param array $arrJobItem
+ *
+ * @return \JobScooper\DataAccess\JobPosting|null
+ * @throws \Exception
+ */
 function updateOrCreateJobPosting($arrJobItem)
 {
     if(is_null($arrJobItem) || !is_array($arrJobItem))
@@ -160,7 +167,9 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 
 	$results =  $query->find()->toKeyIndex("UserJobMatchId");
 
-    return $results;
+	unset($query);
+
+	return $results;
 }
 
 /**
