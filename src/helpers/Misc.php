@@ -44,6 +44,13 @@ function getPhpMemoryUsage()
     return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
 }
 
+function do_gc()
+{
+	LogMessage("Kicking off a PHP memory and garbage collection cycle...");
+	gc_collect_cycles();
+	LogMessage("Memory and garbage collection cycle started.");
+}
+
 function exportToDebugJSON($obj, $strBaseFileName)
 {
     $saveArr = array();

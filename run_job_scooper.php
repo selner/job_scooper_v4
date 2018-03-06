@@ -20,6 +20,7 @@ ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 $lineEnding = ini_get('auto_detect_line_endings');
 ini_set('auto_detect_line_endings', true);
 date_default_timezone_set("America/Los_Angeles");
+gc_enable();
 
 const C__APPNAME__ = "jobs_scooper";
 const __APP_VERSION__ = "v4.1.0-use-propel-orm";

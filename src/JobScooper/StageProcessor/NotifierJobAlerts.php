@@ -19,9 +19,9 @@ namespace JobScooper\StageProcessor;
 
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\GeoLocation;
+use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
-use JobScooper\DataAccess\UserSearchPair;
 use JobScooper\Utils\JobsMailSender;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -102,6 +102,7 @@ class NotifierJobAlerts extends JobsMailSender
 		foreach ($searchPairs as $searchPair) {
 			$locs[$searchPair->getGeoLocationId()] = $searchPair->getGeoLocationFromUS();
 		}
+		unset($searchPairs);
 		return $locs;
 	}
 
@@ -132,12 +133,15 @@ class NotifierJobAlerts extends JobsMailSender
 		// Send a separate notification for each GeoLocation the user had set
 		//
 		foreach ($this->_getSearchPairLocations($user) as $geoLocation) {
+			if(isset($matches))
+				unset($matches);
 			$matches = array( "all" => array());
-			$dbMatches = array();
 
 			LogMessage("Building job notification list for {$user->getName()}'s keyword matches in {$geoLocation->getDisplayName()}...");
-
+			$place = $geoLocation->getDisplayName();
 			$arrNearbyIds = getGeoLocationsNearby($geoLocation);
+			$geoLocationId = $geoLocation->getGeoLocationId();
+			unset($geoLocation);
 
 			$dbMatches = getAllMatchesForUserNotification(
 				[UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
@@ -151,19 +155,25 @@ class NotifierJobAlerts extends JobsMailSender
 			else {
 				LogMessage("Converting " . countAssociativeArrayValues($dbMatches) . " UserJobMatch objects to array data for use in notifications...");
 				foreach ($dbMatches as $userMatchId => $item) {
-					$item = $dbMatches[$userMatchId]->toFlatArrayForCSV();
-					$matches["all"][$userMatchId] = $item;
+					$matches["all"][$userMatchId] = $dbMatches[$userMatchId]->toFlatArrayForCSV();
 				}
 			}
+			unset($dbMatches);
+
+			LogMessage("Converting " . countAssociativeArrayValues($matches["all"]) . " UserJobMatch objects to array data for use in notifications...");
+
 			$matches["isUserJobMatchAndNotExcluded"] = array_filter($matches["all"], "isUserJobMatchAndNotExcluded");
 
 			if (countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]) == 0)
 				$subject = "No New Job Postings Found for " . getRunDateRange();
 			else
-				$subject = countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]) . " New {$geoLocation->getPlace()} Job Postings: " . getRunDateRange();
+				$subject = countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]) . " New {$place} Job Postings: " . getRunDateRange();
 
-			$this->_sendResultsNotification($matches, $subject, $user, $geoLocation);
+
+			$this->_sendResultsNotification($matches, $subject, $user, $geoLocationId);
+
 			unset($matches);
+
 		}
 	}
 
@@ -193,6 +203,9 @@ class NotifierJobAlerts extends JobsMailSender
 			LogMessage("Building job match lists for past week");
 			$matches = array();
 			$arrNearbyIds = getGeoLocationsNearby($geoLocation);
+			$place = $geoLocation->getPlace();
+			$geoLocationId = $geoLocation->getGeoLocationId();
+			unset($geoLocation);
 
 			$matches["all"] = getAllMatchesForUserNotification(
 				[UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
@@ -207,13 +220,17 @@ class NotifierJobAlerts extends JobsMailSender
 				LogMessage("Converting " . countAssociativeArrayValues($matches["all"]) . " UserJobMatch objects to array data for use in notifications...");
 				foreach ($matches["all"] as $userMatchId => $item) {
 					$item = $matches["all"][$userMatchId]->toFlatArrayForCSV();
+					unset($matches["all"][$userMatchId]);
 					$matches["all"][$userMatchId] = $item;
 				}
 			}
 			$matches["isUserJobMatchAndNotExcluded"] = array_filter($matches["all"], "isUserJobMatchAndNotExcluded");
 
-			$subject = "Weekly {$geoLocation->getPlace()} Roundup for " . getRunDateRange(7);
-			$this->_sendResultsNotification($matches, $subject, $user, $geoLocation);
+			$subject = "Weekly {$place} Roundup for " . getRunDateRange(7);
+			$this->_sendResultsNotification($matches, $subject, $user, $geoLocationId);
+
+			unset($matches);
+
 		}
 	}
 
@@ -223,8 +240,11 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @throws \Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	private function _sendResultsNotification(&$matches, $resultsTitle, User $sendToUser, GeoLocation $geoLocation=null)
+	private function _sendResultsNotification(&$matches, $resultsTitle, User $sendToUser, $geoLocationId=null)
 	{
+		do_gc();
+		$allJobMatchIds = array_keys($matches['all']);
+
 		//
 		// Output the final files we'll send to the user
 		//
@@ -233,10 +253,12 @@ class NotifierJobAlerts extends JobsMailSender
 		startLogSection("Generating Excel file for user's job match results...");
 		try {
 			$spreadsheet = $this->_generateMatchResultsExcelFile($matches);
+			unset($matches['all']);
 
 			$pathExcelResults = getDefaultJobsOutputFileName("", "JobMatches", "XLSX", "_", 'debug');
 			LogMessage("Writing final workbook for user notifications to {$pathExcelResults}...");
 			$writer = IOFactory::createWriter($spreadsheet, "Xlsx");
+			$writer->setPrecalculatedFormulas(false);
 
 			$writer->save($pathExcelResults);
 			$arrFilesToAttach[] = $pathExcelResults;
@@ -254,7 +276,10 @@ class NotifierJobAlerts extends JobsMailSender
 				$spreadsheet->disconnectWorksheets();
 				unset($spreadsheet);
 			}
+			unset($writer);
 			endLogSection("Generating Excel file.");
+			unset($matches['all']);
+
 		}
 
 		//
@@ -263,7 +288,8 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		startLogSection("Generating HTML & text email content for user ");
 
-		$messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, $sendToUser, $geoLocation);
+		try {
+			$messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, count($allJobMatchIds), $sendToUser, $geoLocationId);
 		if(empty($messageHtml))
 			throw new Exception("Failed to generate email notification content for email {$resultsTitle} to sent to user {$sendToUser}.");
 
@@ -274,7 +300,6 @@ class NotifierJobAlerts extends JobsMailSender
 		//
 		startLogSection("Sending email to user " . $sendToUser->getEmailAddress() ."...");
 
-		try {
 			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results", $sendToUser);
 			if ($ret !== false && $ret !== null) {
 
@@ -285,8 +310,7 @@ class NotifierJobAlerts extends JobsMailSender
 						$now = new \DateTime();
 						$sendToUser->setLastNotifiedAt($now);
 						$sendToUser->save();
-						$ids = array_keys($matches['all']);
-						updateUserJobMatchesStatus($ids, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT);
+						updateUserJobMatchesStatus($allJobMatchIds, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT);
 					}
 				}
 			}
@@ -299,6 +323,7 @@ class NotifierJobAlerts extends JobsMailSender
 		finally
 		{
 			unset($messageHtml);
+			unset($matches);
 		}
 
 		//
@@ -344,11 +369,12 @@ class NotifierJobAlerts extends JobsMailSender
 				$newSheet = $spreadsheet->createSheet();
 				$newSheet->setTitle($sheetParams[0]);
 			}
-			$spreadsheet->setActiveSheetIndexByName($sheetParams[0]);
-			$spreadsheet->getActiveSheet()->getCell("F1")->setValue(getRunDateRange());
+			$wsheet = $spreadsheet->setActiveSheetIndexByName($sheetParams[0]);
+			$wsheet->getCell("F1")->setValue(getRunDateRange());
 
-			LogMessage("Writing jobs to {$sheetParams[0]} worksheet...");
-			$this->_writeJobMatchesToSheet($spreadsheet, $sheetParams[0], $arrJobsToNotify[$sheetParams[1]], $sheetParams[2]);
+
+			LogMessage("Writing jobs to {$wsheet->getTitle()} worksheet...");
+			$this->_writeJobMatchesToSheet($spreadsheet, $wsheet->getTitle(), $arrJobsToNotify[$sheetParams[1]], $sheetParams[2]);
 		}
 		$spreadsheet->setActiveSheetIndexByName($sheetFilters[0][0]);
 
@@ -363,7 +389,7 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function _generateHTMLEmailContent($subject, &$matches, User $user, GeoLocation $geoLocation=null)
+	private function _generateHTMLEmailContent($subject, &$matches, $totalJobs, User $user, $geoLocationId=null)
 	{
 		try {
 
@@ -379,7 +405,7 @@ class NotifierJobAlerts extends JobsMailSender
 					"IntroText"              => "",
 					"PreHeaderText"          => "",
 					"TotalJobMatchCount"     => countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]),
-					"TotalJobsReviewedCount" => countAssociativeArrayValues($matches["all"]),
+					"TotalJobsReviewedCount" => $totalJobs,
 					"PostFooterText"         => "generated by " . __APP_VERSION__ . " on " . gethostname()
 				),
 				"Search"     => array(
@@ -392,8 +418,14 @@ class NotifierJobAlerts extends JobsMailSender
 			$kwds = $user->getSearchKeywords();
 			$data['Search']['Keywords'] = join(", ", $kwds);
 
-			if (!empty($geoLocation)) {
+			if (!empty($geoLocationId)) {
+				$geoLocation = GeoLocationQuery::create()
+					->findByGeoLocationId($geoLocationId)
+					->getData();
+				if(!empty($geoLocation))
 				$data['Search']['Locations'] = $geoLocation->getDisplayName();
+				else
+					$data['Search']['Locations'] = "[unknown]";
 			} else {
 				$locations = $user->getSearchGeoLocations();
 
@@ -410,8 +442,8 @@ class NotifierJobAlerts extends JobsMailSender
 			$html = call_user_func($renderer, $data);
 			file_put_contents(getDefaultJobsOutputFileName("email", "notification", "html", "_", "debug"), $html);
 
-//			if (isDebug())
-
+			unset($renderer);
+			unset($data);
 			return $html;
 		}
 		catch (Exception $ex)
