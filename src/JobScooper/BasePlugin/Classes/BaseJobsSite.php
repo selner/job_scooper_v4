@@ -1755,6 +1755,7 @@ JSCODE;
 			                        if (!empty($v) && array_key_exists("JobSitePostId", $v) && array_key_exists($v["JobSitePostId"], $arrJsonLDJobs))
 				                        $arrPageJobsList[$k] = array_merge($v, $arrJsonLDJobs[$v["JobSitePostId"]]);
 		                        }
+		                        unset($arrJsonLDJobs);
 	                        }
                         }
 
@@ -1771,6 +1772,7 @@ JSCODE;
 	                        }
 
                             $nCountNewJobsInDb = 0;
+	                        $cntPageJobsReturned = countAssociativeArrayValues($arrPageJobsList);
                             $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails, $nCountNewJobsInDb);
                             $nJobsFound = count($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]);
 
@@ -1785,7 +1787,7 @@ JSCODE;
                             // if we did not get the max number of job listings from the last page.  Basically, if we couldn't
                             // fill up a page with our search, then they must not be that many listings avaialble.
                             //
-                            if ($totalPagesCount > 1 && $nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && countAssociativeArrayValues($arrPageJobsList) < $this->JobListingsPerPage) {
+                            if ($totalPagesCount > 1 && $nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && $cntPageJobsReturned  < $this->JobListingsPerPage) {
                                 $totalPagesCount = $nPageCount;
                                 $nTotalListings = countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]);
                             }
@@ -1804,7 +1806,7 @@ JSCODE;
                                 $this->isBitFlagSet(C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER) &&
                                 $nJobsFound < $nTotalListings)
                             {
-                                $this->log("All " . count($arrPageJobsList) . " job listings downloaded for this page have been seen before.  Skipping remaining job downloads since they are likely to be repeats.");
+                                $this->log("All {$cntPageJobsReturned} job listings downloaded for this page have been seen before.  Skipping remaining job downloads since they are likely to be repeats.");
                                 return;
 
                             }
@@ -1898,9 +1900,14 @@ JSCODE;
                                     break;
 
                             }
+	                        unset($objSimpleHTML);
 
                         } catch (Exception $ex) {
                             handleException($ex, "Failed to get dynamic HTML via Selenium due to error:  %s", true, $extraData=$searchDetails->toLoggedContext());
+                        }
+                        finally
+                        {
+	                        unset($arrPageJobsList);
                         }
                     }
                 }
@@ -1913,6 +1920,10 @@ JSCODE;
             $this->_setSearchResult_($searchDetails, false, $ex, false, $objSimpleHTML);
             handleException($ex, null, true, $extraData=$searchDetails->toLoggedContext());
 	        $this->log("Failed to download new job postings for search run " . $searchDetails->getUserSearchSiteRunKey() . ".  Continuing to next search.   Error details: " . $ex->getMessage(), \Monolog\Logger::WARNING);
+        }
+        finally
+        {
+	        unset($objSimpleHTML);
         }
 
         return null;
