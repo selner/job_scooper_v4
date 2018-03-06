@@ -96,59 +96,6 @@
     </table>
 
 
-    <!--
-        *************************************************
-
-                        Location Lookup
-
-        *************************************************
-    -->
-
-    <table name="location_lookup" phpName="LocationLookup" allowPkInsert="true">
-
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8mb4"/>
-            <parameter name="Collate" value="utf8mb4_unicode_ci"/>
-        </vendor>
-
-        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        PRIMARY KEY
-             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
-        <column name="lookup_value" phpName="Lookup" type="varchar" size="100" required="true"
-                primaryString="true"/>
-
-        <column name="geolocation_id" phpName="GeoLocationId" type="integer" required="true" primaryKey="true"
-                autoIncrement="true"/>
-
-        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        OTHER COLUMNS
-             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
-
-        <column name="geolocation_key" phpName="GeoLocationKey" type="varchar" size="100" required="true"/>
-
-        <column name="place" phpName="Place" type="varchar" size="100"/>
-        <column name="county" phpName="County" type="varchar" size="100"/>
-        <column name="region" phpName="Region" type="varchar" size="100"/>
-        <column name="regioncode" phpName="RegionCode" type="varchar" size="50"/>
-        <column name="country" phpName="Country" type="varchar" size="100"/>
-        <column name="countrycode" phpName="CountryCode" type="varchar" size="5"/>
-
-        <column name="latitude" phpName="Latitude" type="float"/>
-        <column name="longitude" phpName="Longitude" type="float"/>
-        <behavior name="geocodable">
-            <parameter name="auto_update" value="false"/>
-            <parameter name="latitude_column" value="latitude"/>
-            <parameter name="longitude_column" value="longitude"/>
-            <parameter name="type" value="DOUBLE"/>
-            <parameter name="size" value="11"/>
-            <parameter name="scale" value="8"/>
-        </behavior>
-
-        <column name="alternate_names" phpName="AlternateNames" type="array"/>
-
-    </table>
-
-
 
     <!--
         *************************************************
