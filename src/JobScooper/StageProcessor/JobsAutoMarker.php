@@ -676,7 +676,7 @@ class JobsAutoMarker
 				if (array_key_exists('negative_keywords', $arrRec)) {
 					$kwd = trim(strtolower($arrRec['negative_keywords']));
 					if(!empty($kwd))
-					$arrNegKwds[$kwd] = $kwd;
+						$arrNegKwds[$kwd] = $kwd;
 				}
 			}
 		}
