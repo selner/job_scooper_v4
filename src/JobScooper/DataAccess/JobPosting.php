@@ -79,31 +79,6 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	}
 
 	/**
-	 * @return int
-	 */
-	public function checkAndMarkDuplicatePosting()
-	{
-		if (is_null($this->getDuplicatesJobPostingId())) {
-			$this->updateAutoColumns();
-			$sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string('7 days ago'));
-
-			$masterPost = JobPostingQuery::create()
-				->filterByDuplicatesJobPostingId(null)
-				->filterByKeyCompanyAndTitle($this->getKeyCompanyAndTitle())
-				->filterByPostedAt(array('max' => $sinceWhen))
-				->filterByJobPostingId($this->getJobPostingId(), Criteria::NOT_EQUAL)
-				->orderByPostedAt('asc')
-				->findOne();
-
-			if (!is_null($masterPost) && $masterPost !== false) {
-				$this->setDuplicatesJobPostingId($masterPost->getJobPostingId());
-
-				return $masterPost->getJobPostingId();
-			}
-		}
-	}
-
-	/**
 	 *
 	 */
 	protected function updateAutoColumns()
