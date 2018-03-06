@@ -139,6 +139,13 @@ class NotifierDevAlerts extends JobsMailSender
 			{
 				handleException($ex);
 			}
+			finally
+			{
+				unset($mailer);
+			}
+			unset($renderer);
+			unset($reportJobSites);
+			unset($returnedJobSites);
 		}
 		endLogSection(" Dev Plugin Failure Notification.");
 	}
