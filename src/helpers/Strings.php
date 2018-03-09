@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
+use JBZoo\Utils\Slug;
 
 /******************************************************************************
  *
@@ -102,12 +102,15 @@ function remove_postfix($text, $postfix) {
     return $text;
 }
 
+
 function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
 {
     if(empty($v)|| !is_string($v))
         return $v;
 
 	$v = mb_convert_encoding($v, "UTF-8");
+
+	$v = Slug::downcode($v);
 
 	if(!empty($prefixRemove))
         $v = remove_prefix($v, $prefixRemove);
@@ -126,7 +129,6 @@ function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
     return $v;
 }
 
-
 /**
  * Cleanup a string to make a slug of it
  * Removes special characters, replaces blanks with a separator, and trim it
@@ -135,8 +137,10 @@ function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
  * @param     string $replacement the separator used by slug
  * @return    string               the slugified text
  */
-function cleanupSlugPart($slug, $replacement = '-')
+function cleanupSlugPart($slug, $replacement = '_')
 {
+	$slug = cleanupTextValue($slug);
+
 	$slug = clean_utf8($slug);
 
     // transliterate
@@ -149,11 +153,7 @@ function cleanupSlugPart($slug, $replacement = '-')
         $slug = strtolower($slug);
     }
 
-    // remove accents resulting from OSX's iconv
-    $slug = str_replace(array('\'', '`', '^'), '', $slug);
-
-    // replace non letter or digits with separator
-    $slug = preg_replace('/\W+/', $replacement, $slug);
+	$slug = Slug::filter($slug, $replacement, $cssMode = false);
 
     // trim
     $slug = trim($slug, $replacement);
