@@ -4,6 +4,7 @@
   "LocationType": "location-city",
   "CountryCodes" : ["UK", "CA", "US"],
   "AdditionalFlags" : [ "C__JOB_USE_SITENAME_AS_COMPANY" ],
+  "PluginExtendsClassName" : "AbstractFacebook",
   "Collections": [
     {
       "Name": "PageFields",
@@ -45,7 +46,7 @@
           "Selector": "div._72 div div",
           "Attribute": "collection",
           "Type": "CSS",
-          "Callback": "combineTextAllNodes"
+          "Callback": "getLocations"
         },
         {
           "Name": "Department",

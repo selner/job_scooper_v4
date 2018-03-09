@@ -103,10 +103,45 @@ function getRunDateRange($configNumDays=null)
     return $strDateRange;
 }
 
-
-function combineTextAllChildren($node, $fRecursed = false, $delim=" ")
+function combineTextAllChildren($node, $fRecursed = false, $delim=" ", &$arrChildStrings=[])
 {
+	if(empty($node))
+		return null;
 
+	if (is_array($node) && count($node) > 1) {
+		$strError = sprintf("Warning:  " . count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
+		LogWarning($strError);
+	}
+
+	if(is_array($node) && count($node) >= 1)
+		$node = $node[0];
+
+	$nodeKey = $node->getNode()->getNodePath();
+	if ($node->hasChildren()) {
+		foreach ($node->children() as $child) {
+			if($fRecursed)
+				combineTextAllChildren($child, $fRecursed, $delim, $arrChildStrings);
+			else
+				$arrChildStrings[$nodeKey] = strScrub($node->text(), HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+			unset($child);
+		}
+	}
+	else
+		$arrChildStrings[$nodeKey] = strScrub($node->text(), HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+
+
+	LogDebug("... combining these node parent & children for the node:  " . getArrayDebugOutput($arrChildStrings));
+
+	ksort($arrChildStrings);
+	array_unique($arrChildStrings);
+	$retStr = join($delim, $arrChildStrings);
+
+	return $retStr;
+
+}
+
+function combineTextAllChildrenString($node, $fRecursed = false, $delim=" ")
+{
 	if(empty($node))
 		return null;
 
@@ -135,22 +170,24 @@ function combineTextAllChildren($node, $fRecursed = false, $delim=" ")
 
 }
 
-function combineTextAllNodes($nodes)
+function combineTextAllNodes($nodes, $delim=" ")
 {
     $retStr = "";
+    $arrNodeStrings = array();
+
 	if(!empty($nodes))
 	{
         foreach ($nodes as $node) {
-            if($retStr != "")
-                $retStr = $retStr . ", ";
-
-            $retStr = $retStr . strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
-            if(!is_null($node->children())) {
-                foreach ($node->children() as $child) {
-                    $retStr = $retStr . " " . combineTextAllChildren($child, true);
-                }
-            }
+	        if($node->hasChildren()) {
+	        	combineTextAllChildren($node, true, $delim, $arrNodeStrings);
+	        }
+	        else {
+		        $nodeKey = $node->getNode()->getNodePath();
+		        $arrNodeStrings[$nodeKey] = $node->text();
+	        }
         }
+
+        $retStr = join($delim, $arrNodeStrings);
     }
     return $retStr;
 

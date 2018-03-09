@@ -956,7 +956,13 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	function combineTextAllNodes($var)
 	{
-		return combineTextAllNodes($var);
+		$delim = " ";
+		if (count($var) > 1) {
+			$var = $var[0];
+			$delim = $var[1];
+		}
+
+		return combineTextAllNodes($var, $delim);
 	}
 
 	/**
