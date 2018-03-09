@@ -159,6 +159,13 @@ function array_unique_multidimensional($input)
     return array_intersect_key($input, $unique);
 }
 
+function array_iunique($array) {
+
+	$lowered = array_map('strtolower', $array);
+	return array_intersect_key($array, array_unique($lowered));
+}
+
+
 /**
  * @param        $arrDetails
  * @param string $strDelimiter
