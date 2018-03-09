@@ -68,6 +68,9 @@ class GeoLocationFormatter
             self::COUNTRY_CODE => $location->getCountryCode()
         ];
 
+        foreach($replace as $k => $v)
+            $replace[$k] = cleanupTextValue($v);
+
         return strtr($format, $replace);
     }
 }
