@@ -210,6 +210,7 @@ class GeoLocation extends BaseGeoLocation
         }
 
     }
+
     function preSave(ConnectionInterface $con = null)
     {
         return parent::preSave($con);
@@ -237,7 +238,13 @@ class GeoLocation extends BaseGeoLocation
         parent::postSave($con);
     }
 
-    public function setRegion($v)
+    public function setGeoLocationKey($v)
+    {
+    	$v = cleanupSlugPart($v);
+	    return parent::setGeoLocationKey($v);
+    }
+
+	public function setRegion($v)
     {
         parent::setRegion($v);
 
