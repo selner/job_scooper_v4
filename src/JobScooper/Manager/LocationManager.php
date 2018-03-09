@@ -22,6 +22,7 @@ use Geocoder\Geocoder;
 
 use \Exception;
 use JobScooper\DataAccess\GeoLocation;
+use JobScooper\DataAccess\GeoLocationQuery;
 use \JobScooper\Utils\GeoLocationCache;
 use const JobScooper\DataAccess\GEOLOCATION_GEOCODE_FAILED;
 use JobScooper\Logging\CSVLogHandler;
@@ -69,7 +70,12 @@ class LocationManager
 		return $loc;
 	}
 
-	function scrubLocationValue($strAddress)
+	/**
+	 * @param $strAddress
+	 *
+	 * @return mixed|null|string|string[]
+	 */
+	static function scrubLocationValue($strAddress)
 	{
 
 		$lookupAddress = $strAddress;
@@ -100,16 +106,18 @@ class LocationManager
 		$lookupAddress = preg_replace("/greater\s(\w+\s)/i", "\\1", $lookupAddress);
 		$lookupAddress = cleanupTextValue($lookupAddress);
 
+		$lookupAddress = preg_replace("/\s{2,}/", " ", $lookupAddress);
 		return $lookupAddress;
 	}
 
 	/**
 	 * @throws \Exception
 	 * @return GeoLocation|null
+	 * @throws \Psr\Cache\InvalidArgumentException
 	 */
 	function lookupAddress($strAddress)
 	{
-		$lookupAddress = $this->scrubLocationValue($strAddress);
+		$lookupAddress = LocationManager::scrubLocationValue($strAddress);
 
 		//
 		// Generate the cache key and do a lookup for that item
@@ -124,7 +132,19 @@ class LocationManager
 		//
 		// Cache miss
 		//
-		LogMessage("... Geolocation cache miss for " . $lookupAddress . ".  Calling Geocoder...");
+		LogMessage("... Geolocation cache miss for " . $lookupAddress . ".  Checking database for match...");
+
+		$geolocation = $this->_queryDBForLocation($lookupAddress);
+		if(!empty($geolocation))
+		{
+			$this->_geoLocCache->cacheGeoLocation($geolocation, $lookupAddress);
+			return $geolocation;
+		}
+
+		//
+		// Cache miss
+		//
+		LogMessage("... Geolocation database miss for " . $lookupAddress . ".  Calling Geocoder...");
 
 		if ($GLOBALS['CACHES']['GEOCODER_ENABLED'] !== true) {
 			LogMessage("Geocoder current disabled as a result of too many error results.");
@@ -141,6 +161,21 @@ class LocationManager
 		}
 
 		return $geoloc;
+	}
+
+	/**
+	 * @param $lookupAddress
+	 *
+	 * @return \JobScooper\DataAccess\GeoLocation|null
+	 */
+	private function _queryDBForLocation($lookupAddress)
+	{
+		$geoloc = GeoLocationQuery::create()
+			->findOneByAlternateNames(array($lookupAddress));
+		if(!empty($geoloc))
+			return $geoloc;
+
+		return null;
 	}
 
 	/**
@@ -272,7 +307,8 @@ class LocationManager
 		if (!empty($geocodeResult)) {
 			$geolocation = $geocodeResult;
 			try {
-				$this->_geoLocCache->cacheGeoLocation($geolocation, $strAddress);
+				$lookup = LocationManager::scrubLocationValue($strAddress);
+				$this->_geoLocCache->cacheGeoLocation($geolocation, $lookup);
 			} catch (\InvalidArgumentException $e) {
 				handleException($e);
 			} catch (\Psr\Cache\InvalidArgumentException $e) {
@@ -281,7 +317,8 @@ class LocationManager
 
 			return $geolocation;
 		} else {
-			$this->_geoLocCache->cacheUnknownLocation($strAddress);
+			$lookup = LocationManager::scrubLocationValue($strAddress);
+			$this->_geoLocCache->cacheUnknownLocation($lookup);
 
 			return null;
 		}

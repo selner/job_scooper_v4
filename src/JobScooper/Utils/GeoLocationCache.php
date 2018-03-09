@@ -21,6 +21,7 @@ use JobScooper\DataAccess\GeoLocation;
 use const JobScooper\DataAccess\GEOLOCATION_GEOCODE_FAILED;
 
 use JobScooper\DataAccess\GeoLocationQuery;
+use JobScooper\Manager\LocationManager;
 use Monolog\Logger;
 use Psr\Log\LogLevel;
 
@@ -173,10 +174,16 @@ class GeoLocationCache
 
 		}
 
+		foreach($lookups as $k => $l)
+		{
+			$lookups[$k] = LocationManager::scrubLocationValue($l);
+		}
+		$lookups = array_iunique(array_values($lookups));
+
 		$keys = array();
 		foreach ($lookups as $look)
 			$keys[] = $this->getCacheKey($look);
-		$keys = array_unique($keys);
+		$keys = array_iunique($keys);
 
 		$strKeys = getArrayDebugOutput($keys);
 		$cntKeys = count($keys);
@@ -195,7 +202,8 @@ class GeoLocationCache
 		}
 		$this->_cache->saveMultiple($newCacheItems);
 
-		$this->log(Logger::DEBUG, "Cached '{$geolocation->getDisplayName()}/{$geolocation->getGeoLocationKey()} under {$cntKeys} lookups with cached tags {$strTags}.");
+		$strLookups = getArrayDebugOutput($lookups);
+		$this->log(Logger::DEBUG, "Added {$cntKeys} lookups ({$strLookups}) to cache for data '{$geolocation->getDisplayName()}/{$geolocation->getGeoLocationKey()} with tags {$strTags}.");
 	}
 
 	/**
@@ -247,39 +255,40 @@ class GeoLocationCache
 	/**
 	 * @param $lookupAddress
 	 *
-	 * @return \JobScooper\DataAccess\GeoLocation|null
+	 * @return \JobScooper\DataAccess\GeoLocation|int|false
 	 * @throws \Exception
 	 */
 	function get($lookupAddress)
 	{
+		$geolocation = null;
+
 		//
 		// Generate the cache key and do a lookup for that item
 		//
 		$itemKey = $this->getCacheKey($lookupAddress);
-
 		try {
 			$itemExists = $this->_cache->hasItem($itemKey);
 			$geoLocId = null;
-			if($itemExists === true)
-			{
+			if($itemExists === true) {
 				$cacheItem = $this->_cache->getItem($itemKey);
-				if($cacheItem->isHit()  === true)
+				if ($cacheItem->isHit() === true)
 					$geoLocId = $cacheItem->get();
-				if(!is_null($geoLocId) && $geoLocId !== false && $geoLocId != GEOLOCATION_GEOCODE_FAILED)
-				{
+				if (!is_null($geoLocId) && $geoLocId !== false && $geoLocId != GEOLOCATION_GEOCODE_FAILED) {
 					$geolocation = GeoLocationQuery::create()
 						->findOneByGeoLocationId($geoLocId);
+
 					return $geolocation;
-				}
-				elseif($geoLocId == GEOLOCATION_GEOCODE_FAILED)
-				{
-					return null;
+				} elseif ($geoLocId == GEOLOCATION_GEOCODE_FAILED) {
+					return GEOLOCATION_GEOCODE_FAILED;
 				}
 			}
+			$this->_cache->deleteItem($itemKey);
+			$this->_cache->commit();
+			return false;
 		} catch (\Psr\Cache\InvalidArgumentException $e) {
 			handleException($e, null, false);
 		}
-
-
+		return false;
 	}
+
 }

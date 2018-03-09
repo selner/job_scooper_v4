@@ -148,6 +148,19 @@ function array_mapk($callback, $array)
 }
 
 /**
+ * @param $array
+ *
+ * @return array
+ */
+function array_iunique($array) {
+
+	$lowered = array_map('strtolower', $array);
+	return array_intersect_key($array, array_unique($lowered));
+}
+
+
+
+/**
  * @param $input
  *
  * @return array
@@ -343,6 +356,12 @@ function array_subset_keys(array $haystack, array $keys)
 	return array_intersect_key($haystack, $arrKeys);
 }
 
+/**
+ * @param      $coll
+ * @param null $limitToKeys
+ *
+ * @return array
+ */
 function collectionToArray($coll, $limitToKeys=null)
 {
 	if(!empty($limitToKeys) && !is_array($limitToKeys))
