@@ -258,7 +258,7 @@ class NotifierJobAlerts extends JobsMailSender
 			$pathExcelResults = getDefaultJobsOutputFileName("", "JobMatches", "XLSX", "_", 'debug');
 			LogMessage("Writing final workbook for user notifications to {$pathExcelResults}...");
 			$writer = IOFactory::createWriter($spreadsheet, "Xlsx");
-			$writer->setPrecalculatedFormulas(false);
+			$writer->setPrecalculateFormulas(false);
 
 			$writer->save($pathExcelResults);
 			$arrFilesToAttach[] = $pathExcelResults;
