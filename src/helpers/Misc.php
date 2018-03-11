@@ -16,6 +16,11 @@
  */
 
 
+/**
+ * @param Object $obj
+ *
+ * @return array
+ */
 function object_to_array($obj)
 {
     $arr = is_object($obj) ? get_object_vars($obj) : $obj;
@@ -28,6 +33,12 @@ function object_to_array($obj)
 }
 
 
+/**
+ * @param null $flagSettings
+ * @param null $flagToCheck
+ *
+ * @return bool
+ */
 function isBitFlagSet($flagSettings = null, $flagToCheck= null)
 {
     $ret = ($flagSettings & $flagToCheck);
@@ -35,6 +46,9 @@ function isBitFlagSet($flagSettings = null, $flagToCheck= null)
     return false;
 }
 
+/**
+ * @return string
+ */
 function getPhpMemoryUsage()
 {
     $size = memory_get_usage(true);
@@ -44,13 +58,12 @@ function getPhpMemoryUsage()
     return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
 }
 
-function do_gc()
-{
-	LogMessage("Kicking off a PHP memory and garbage collection cycle...");
-	gc_collect_cycles();
-	LogMessage("Memory and garbage collection cycle started.");
-}
-
+/**
+ * @param Object $obj
+ * @param string $strBaseFileName
+ *
+ * @return string
+ */
 function exportToDebugJSON($obj, $strBaseFileName)
 {
     $saveArr = array();
@@ -69,6 +82,13 @@ function exportToDebugJSON($obj, $strBaseFileName)
 
 }
 
+/**
+ * @param string $var
+ * @param string $matchString
+ *
+ * @return int|null
+ * @throws \Exception
+ */
 function noJobStringMatch($var, $matchString)
 {
     if(is_null($matchString) || strlen($matchString) == 0)
@@ -81,6 +101,11 @@ function noJobStringMatch($var, $matchString)
 }
 
 
+/**
+ * @param int|null $configNumDays
+ *
+ * @return string
+ */
 function getRunDateRange($configNumDays=null)
 {
 	if(empty($configNumDays))
@@ -103,6 +128,14 @@ function getRunDateRange($configNumDays=null)
     return $strDateRange;
 }
 
+/**
+ * @param        $node
+ * @param bool   $fRecursed
+ * @param string $delim
+ * @param array  $arrChildStrings
+ *
+ * @return null|string
+ */
 function combineTextAllChildren($node, $fRecursed = false, $delim=" ", &$arrChildStrings=[])
 {
 	if(empty($node))
@@ -140,6 +173,13 @@ function combineTextAllChildren($node, $fRecursed = false, $delim=" ", &$arrChil
 
 }
 
+/**
+ * @param        $node
+ * @param bool   $fRecursed
+ * @param string $delim
+ *
+ * @return mixed|null|string
+ */
 function combineTextAllChildrenString($node, $fRecursed = false, $delim=" ")
 {
 	if(empty($node))
@@ -170,6 +210,12 @@ function combineTextAllChildrenString($node, $fRecursed = false, $delim=" ")
 
 }
 
+/**
+ * @param        $nodes
+ * @param string $delim
+ *
+ * @return string
+ */
 function combineTextAllNodes($nodes, $delim=" ")
 {
     $retStr = "";
@@ -194,6 +240,11 @@ function combineTextAllNodes($nodes, $delim=" ")
 }
 
 
+/**
+ * @param $cmd
+ *
+ * @return array|mixed|string
+ */
 function doExec($cmd)
 {
     $cmdOutput = array();
@@ -220,6 +271,12 @@ if ( ! function_exists('glob_recursive'))
 {
 	// Does not support flag GLOB_BRACE
 
+	/**
+	 * @param     $pattern
+	 * @param int $flags
+	 *
+	 * @return array
+	 */
 	function glob_recursive($pattern, $flags = 0)
 	{
 		$files = glob($pattern, $flags);

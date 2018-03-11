@@ -242,7 +242,6 @@ class NotifierJobAlerts extends JobsMailSender
 	 */
 	private function _sendResultsNotification(&$matches, $resultsTitle, User $sendToUser, $geoLocationId=null)
 	{
-		do_gc();
 		$allJobMatchIds = array_keys($matches['all']);
 
 		//
