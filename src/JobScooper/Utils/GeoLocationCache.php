@@ -23,6 +23,9 @@ use const JobScooper\DataAccess\GEOLOCATION_GEOCODE_FAILED;
 use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\Manager\LocationManager;
 use Monolog\Logger;
+use \Psr\Cache\InvalidArgumentException;
+use phpFastCache\Exceptions\phpFastCacheInvalidArgumentException;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Psr\Log\LogLevel;
 
 use phpFastCache\CacheManager;
@@ -80,10 +83,12 @@ class GeoLocationCache
 	/**
 	 * phpFastCache constructor.
 	 *
-	 * @param string $driver
-	 * @param array  $config
+	 * @param string $cacheName
 	 *
 	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \phpFastCache\Exceptions\phpFastCacheInvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function __construct($cacheName = "geolocation_id_lookup")
 	{
@@ -96,6 +101,7 @@ class GeoLocationCache
 		$this->_cache = CacheManager::getInstance('files', $config);
 		$this->_logger = getChannelLogger("caches");
 
+		$this->_warmUpCache();
 	}
 
 	/**
@@ -128,7 +134,7 @@ class GeoLocationCache
 	 * @param $strLocationName
 	 *
 	 * @throws \phpFastCache\Exceptions\phpFastCacheInvalidArgumentException
-	 * @throws \Psr\Cache\InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	function cacheUnknownLocation($strLocationName)
 	{
@@ -142,10 +148,10 @@ class GeoLocationCache
 
 	/**
 	 * @param \JobScooper\DataAccess\GeoLocation $geolocation
-	 * @param array                              $arrAddlLookups
+	 * @param string $newLookupString
 	 *
 	 * @throws \phpFastCache\Exceptions\phpFastCacheInvalidArgumentException
-	 * @throws \Psr\Cache\InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	function cacheGeoLocation(GeoLocation $geolocation, $newLookupString = null)
 	{
@@ -209,47 +215,42 @@ class GeoLocationCache
 	/**
 	 * @throws \Exception
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \phpFastCache\Exceptions\phpFastCacheInvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
-	/*	private function _warmUpCache()
-		{
-			LogDebug("... adding missing locations from JobPosting table ...");
-			$allLocsWithoutGeoLocs = \JobScooper\DataAccess\JobPostingQuery::create()
-				->filterByGeoLocationId($geoLocationId = null, Criteria::ISNULL)
-				->filterByLocation(null, Criteria::ISNOTNULL)
-				->addGroupByColumn("Location")
-				->select(array("jobposting.location"))
-				->find()
-				->getData();
+	private function _warmUpCache()
+	{
+		LogDebug("... adding missing locations from JobPosting table ...");
+		$allLocsWithoutGeoLocs = \JobScooper\DataAccess\JobPostingQuery::create()
+			->filterByGeoLocationId($geoLocationId = null, Criteria::ISNULL)
+			->filterByLocation(null, Criteria::ISNOTNULL)
+			->addGroupByColumn("Location")
+			->select(array("jobposting.location"))
+			->find()
+			->getData();
 
-			LogDebug("... " . count($allLocsWithoutGeoLocs) . " missing locations found and being added to cache...");
+		LogDebug("... " . count($allLocsWithoutGeoLocs) . " missing locations found and being added to cache...");
 
-			foreach ($allLocsWithoutGeoLocs as $name) {
-				if(!empty($name)) {
-					$key = $this->getCacheKey($name);
-					$item = $this->getItem($key);
-					$item->set(LocationManager::UNABLE_TO_GEOCODE_ADDRESS);
-					$this->save($item);
-
-					$this->setCacheItem($key, LocationManager::UNABLE_TO_GEOCODE_ADDRESS);
-				}
-			}
-
-			LogDebug("... adding Geolocations to cache ...");
-			$allGeoLocs = \JobScooper\DataAccess\GeoLocationQuery::create()
-				->find();
-
-			foreach ($allGeoLocs as $loc) {
-				try {
-					$this->cacheGeoLocation($loc);
-				} catch (phpFastCacheInvalidArgumentException $e) {
-					handleException($e);
-				} catch (\Psr\Cache\InvalidArgumentException $e) {
-					handleException($e);
-				}
+		foreach ($allLocsWithoutGeoLocs as $name) {
+			if(!empty($name)) {
+				$this->cacheUnknownLocation($name);
 			}
 		}
-	*/
 
+//		LogDebug("... adding Geolocations to cache ...");
+//		$allGeoLocs = GeoLocationQuery::create()
+//			->find();
+//
+//		foreach ($allGeoLocs as $loc) {
+//			try {
+//				$this->cacheGeoLocation($loc);
+//			} catch (phpFastCacheInvalidArgumentException $e) {
+//				handleException($e);
+//			} catch (InvalidArgumentException $e) {
+//				handleException($e);
+//			}
+//		}
+	}
 
 
 	/**
@@ -285,7 +286,7 @@ class GeoLocationCache
 			$this->_cache->deleteItem($itemKey);
 			$this->_cache->commit();
 			return false;
-		} catch (\Psr\Cache\InvalidArgumentException $e) {
+		} catch (InvalidArgumentException $e) {
 			handleException($e, null, false);
 		}
 		return false;
