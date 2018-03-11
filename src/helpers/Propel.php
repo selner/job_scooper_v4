@@ -74,7 +74,7 @@ function loadSqlite3MathExtensions()
  * @return \JobScooper\DataAccess\JobPosting|null
  * @throws \Exception
  */
-function updateOrCreateJobPosting($arrJobItem)
+function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocation $searchLoc = null)
 {
     if(is_null($arrJobItem) || !is_array($arrJobItem))
         return null;
@@ -95,6 +95,10 @@ function updateOrCreateJobPosting($arrJobItem)
                 ->findOneOrCreate();
         }
 
+        if(!empty($searchLoc))
+        {
+	        $jobRecord->setSearchLocation($searchLoc->getGeoLocationId());
+        }
         $jobRecord->fromArray($arrJobItem);
         $jobRecord->save();
         return $jobRecord;

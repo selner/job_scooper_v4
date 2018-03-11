@@ -32,6 +32,12 @@ Use Propel\Runtime\Connection\ConnectionInterface;
  */
 class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \ArrayAccess
 {
+	private $_searchLocId = null;
+
+	public function setSearchLocation($geoLocId)
+	{
+		$this->_searchLocId = $geoLocId;
+	}
 
 	/**
 	 * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
@@ -248,8 +254,22 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		}
 
 		try {
+			$searchLoc = null;
+			$countryCode = null;
+			if(!empty($this->_searchLocId))
+			{
+				$searchLoc = GeoLocationQuery::create()
+					->findOneByGeoLocationId($this->_searchLocId);
+				if(!empty($searchLoc)) {
+					$countryCode = $searchLoc->getCountryCode();
+				}
+
+			}
+
 			$locmgr = LocationManager::getLocationManager();
 
+			if(false === stristr($loc_str, " {$countryCode}"))
+				$loc_str = "{$loc_str} {$countryCode}";
 			$location = $locmgr->lookupAddress($loc_str);
 			if (!is_null($location)) {
 				$this->setGeoLocationFromJP($location);

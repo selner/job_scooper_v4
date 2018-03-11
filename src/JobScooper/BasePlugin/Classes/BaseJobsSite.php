@@ -1227,6 +1227,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	/**
 	 * @param $arrItem
 	 *
+	 * @throws \Exception
 	 * @return array
 	 */
 	function cleanupJobItemFields($arrItem)
@@ -1280,11 +1281,11 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @return \JobScooper\DataAccess\JobPosting|null
 	 * @throws \Exception
 	 */
-	function saveJob($arrItem)
+	function saveJob($arrItem, GeoLocation $searchLoc = null)
 	{
 		$arrJob = $this->cleanupJobItemFields($arrItem);
 		try {
-			$job = updateOrCreateJobPosting($arrJob);
+			$job = updateOrCreateJobPosting($arrJob, $searchLoc);
 
 			return $job;
 		} catch (Exception $ex) {
@@ -1303,13 +1304,21 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	function saveSearchReturnedJobs($arrJobList, UserSearchSiteRun $searchDetails, &$nCountNewJobs = 0)
 	{
+		$searchLoc = null;
+		if(!empty($searchDetails)) {
+			$searchPair = $searchDetails->getUserSearchPairFromUSSR();
+			if (!empty($searchPair)) {
+				$searchLoc = $searchPair->getGeoLocationFromUS();
+			}
+		}
+
 		try {
 			$nCountNewJobs = 0;
 			if (!array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs))
 				$this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()] = array();
 
 			foreach ($arrJobList as $jobitem) {
-				$job = $this->saveJob($jobitem);
+				$job = $this->saveJob($jobitem, $searchLoc);
 				if (!empty($job)) {
 					$this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()][$job->getJobPostingId()] = array('JobPostingId' => $job->getJobPostingId(), 'JobSitePostId' => $job->getJobSitePostId());
 
@@ -1345,7 +1354,8 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	}
 
 	/**
-	 * @param $searchDetails
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
@@ -1355,23 +1365,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 			$this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]), $searchDetails);
 	}
 
-	/**
-	 * @param \JobScooper\DataAccess\JobPosting[] $arrJobs
-	 *
-	 * @return int[]
-	 * @throws \Exception
-	 */
-	function saveJobList($arrJobs)
-	{
-		$addedJobIds = array();
-		foreach ($arrJobs as $job) {
-			$savedJob = $this->saveJob($job);
-			if (!is_null($savedJob))
-				$addedJobIds[] = $savedJob->getJobPostingId();
-		}
-
-		return $addedJobIds;
-	}
 
 	/**
 	 * @param \JobScooper\DataAccess\JobPosting[] $arrJobs
