@@ -987,6 +987,30 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		return combineTextAllChildren($var, $recursed, $delim);
 	}
 
+	/**
+	 * @param $var
+	 *
+	 * @return string
+	 */
+	protected function parseOneOrMoreLocations($var)
+	{
+		$reDelim = "[&,;\|~]|(\s+-+)";
+//		$reDelim = "[[:punct:]]+";
+		if (is_array($var) && count($var) > 1) {
+			$param = $var[1];
+			$var = $var[0];
+		}
+		if (!empty($param) && is_array($param)) {
+			if (array_key_exists("delimiter", $param))
+				$reDelim = $param['delimiter'];
+		}
+
+		$splitLocs = preg_split("/{$reDelim}/", $var);
+		foreach($splitLocs as $k => $v)
+			$splitLocs[$k] = trim($v);
+		return join("|~", $splitLocs);
+	}
+
 
 	//************************************************************************
 	//
@@ -1228,11 +1252,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @param $arrItem
 	 *
 	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 * @return array
 	 */
 	function cleanupJobItemFields($arrItem)
 	{
-		if($this->isBitFlagSet(C__JOB_USE_SITENAME_AS_COMPANY)) {
+		if ($this->isBitFlagSet(C__JOB_USE_SITENAME_AS_COMPANY)) {
 			if (!array_key_exists('Company', $arrItem) || empty($ret['Company']))
 				$arrItem['Company'] = $this->getJobSiteKey();
 		}
@@ -1270,6 +1295,23 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 		$arrItem['JobSitePostId'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['JobSitePostId']);
 		$arrItem ['JobSitePostId'] = strScrub($arrItem['JobSitePostId'], FOR_LOOKUP_VALUE_MATCHING);
+
+
+		if ($this->isBitFlagSet(C__JOB_SUPPORTS_MULTIPLE_LOCS_PER_JOB)) {
+			if (array_key_exists("Location", $arrItem)) {
+				$splitLocs = preg_split("/\|~/", $arrItem['Location']);
+				if (count($splitLocs) > 1) {
+					$arrItem["Location"] = array_shift($splitLocs);
+					foreach ($splitLocs as $loc) {
+						$newJob = array_copy($arrItem);
+						$newJob["Location"] = $loc;
+						$locSlug = cleanupSlugPart($loc);
+						$newJob["JobSitePostId"] = "{$arrItem["JobSitePostId"]}-{$locSlug}";
+						updateOrCreateJobPosting($newJob);
+					}
+				}
+			}
+		}
 
 		return $arrItem;
 
