@@ -603,7 +603,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -623,7 +623,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -643,7 +643,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -931,7 +931,7 @@ abstract class JobPosting implements ActiveRecordInterface
     {
         $dt = PropelDateTime::newInstance($v, null, 'DateTime');
         if ($this->last_updated_at !== null || $dt !== null) {
-            if ($this->last_updated_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->last_updated_at->format("Y-m-d H:i:s.u")) {
+            if ($this->last_updated_at === null || $dt === null || $dt->format("Y-m-d") !== $this->last_updated_at->format("Y-m-d")) {
                 $this->last_updated_at = $dt === null ? null : clone $dt;
                 $this->modifiedColumns[JobPostingTableMap::COL_LAST_UPDATED_AT] = true;
             }
@@ -951,7 +951,7 @@ abstract class JobPosting implements ActiveRecordInterface
     {
         $dt = PropelDateTime::newInstance($v, null, 'DateTime');
         if ($this->job_posted_date !== null || $dt !== null) {
-            if ($this->job_posted_date === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->job_posted_date->format("Y-m-d H:i:s.u")) {
+            if ($this->job_posted_date === null || $dt === null || $dt->format("Y-m-d") !== $this->job_posted_date->format("Y-m-d")) {
                 $this->job_posted_date = $dt === null ? null : clone $dt;
                 $this->modifiedColumns[JobPostingTableMap::COL_JOB_POSTED_DATE] = true;
             }
@@ -971,7 +971,7 @@ abstract class JobPosting implements ActiveRecordInterface
     {
         $dt = PropelDateTime::newInstance($v, null, 'DateTime');
         if ($this->first_seen_at !== null || $dt !== null) {
-            if ($this->first_seen_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->first_seen_at->format("Y-m-d H:i:s.u")) {
+            if ($this->first_seen_at === null || $dt === null || $dt->format("Y-m-d") !== $this->first_seen_at->format("Y-m-d")) {
                 $this->first_seen_at = $dt === null ? null : clone $dt;
                 $this->modifiedColumns[JobPostingTableMap::COL_FIRST_SEEN_AT] = true;
             }
@@ -1138,19 +1138,19 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->category = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : JobPostingTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
-            if ($col === '0000-00-00 00:00:00') {
+            if ($col === '0000-00-00') {
                 $col = null;
             }
             $this->last_updated_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 12 + $startcol : JobPostingTableMap::translateFieldName('PostedAt', TableMap::TYPE_PHPNAME, $indexType)];
-            if ($col === '0000-00-00 00:00:00') {
+            if ($col === '0000-00-00') {
                 $col = null;
             }
             $this->job_posted_date = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 13 + $startcol : JobPostingTableMap::translateFieldName('FirstSeenAt', TableMap::TYPE_PHPNAME, $indexType)];
-            if ($col === '0000-00-00 00:00:00') {
+            if ($col === '0000-00-00') {
                 $col = null;
             }
             $this->first_seen_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;

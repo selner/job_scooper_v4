@@ -631,7 +631,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -651,7 +651,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
      *                            If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
@@ -1005,7 +1005,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     {
         $dt = PropelDateTime::newInstance($v, null, 'DateTime');
         if ($this->last_updated_at !== null || $dt !== null) {
-            if ($this->last_updated_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->last_updated_at->format("Y-m-d H:i:s.u")) {
+            if ($this->last_updated_at === null || $dt === null || $dt->format("Y-m-d") !== $this->last_updated_at->format("Y-m-d")) {
                 $this->last_updated_at = $dt === null ? null : clone $dt;
                 $this->modifiedColumns[UserJobMatchTableMap::COL_LAST_UPDATED_AT] = true;
             }
@@ -1025,7 +1025,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     {
         $dt = PropelDateTime::newInstance($v, null, 'DateTime');
         if ($this->first_matched_at !== null || $dt !== null) {
-            if ($this->first_matched_at === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->first_matched_at->format("Y-m-d H:i:s.u")) {
+            if ($this->first_matched_at === null || $dt === null || $dt->format("Y-m-d") !== $this->first_matched_at->format("Y-m-d")) {
                 $this->first_matched_at = $dt === null ? null : clone $dt;
                 $this->modifiedColumns[UserJobMatchTableMap::COL_FIRST_MATCHED_AT] = true;
             }
@@ -1108,13 +1108,13 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->user_notification_state = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : UserJobMatchTableMap::translateFieldName('UpdatedAt', TableMap::TYPE_PHPNAME, $indexType)];
-            if ($col === '0000-00-00 00:00:00') {
+            if ($col === '0000-00-00') {
                 $col = null;
             }
             $this->last_updated_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : UserJobMatchTableMap::translateFieldName('FirstMatchedAt', TableMap::TYPE_PHPNAME, $indexType)];
-            if ($col === '0000-00-00 00:00:00') {
+            if ($col === '0000-00-00') {
                 $col = null;
             }
             $this->first_matched_at = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;

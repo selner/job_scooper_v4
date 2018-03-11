@@ -232,8 +232,8 @@ class UserJobMatchTableMap extends TableMap
   1 => 'marked-ready-to-send',
   2 => 'sent',
 ));
-        $this->addColumn('last_updated_at', 'UpdatedAt', 'TIMESTAMP', true, null, null);
-        $this->addColumn('first_matched_at', 'FirstMatchedAt', 'TIMESTAMP', true, null, null);
+        $this->addColumn('last_updated_at', 'UpdatedAt', 'DATE', true, null, null);
+        $this->addColumn('first_matched_at', 'FirstMatchedAt', 'DATE', true, null, null);
     } // initialize()
 
     /**

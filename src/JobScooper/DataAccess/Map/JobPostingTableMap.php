@@ -222,9 +222,9 @@ class JobPostingTableMap extends TableMap
         $this->addColumn('location', 'Location', 'VARCHAR', false, 255, null);
         $this->addColumn('department', 'Department', 'VARCHAR', false, 255, null);
         $this->addColumn('category', 'Category', 'VARCHAR', false, 100, null);
-        $this->addColumn('last_updated_at', 'UpdatedAt', 'TIMESTAMP', true, null, null);
-        $this->addColumn('job_posted_date', 'PostedAt', 'TIMESTAMP', false, null, null);
-        $this->addColumn('first_seen_at', 'FirstSeenAt', 'TIMESTAMP', true, null, null);
+        $this->addColumn('last_updated_at', 'UpdatedAt', 'DATE', true, null, null);
+        $this->addColumn('job_posted_date', 'PostedAt', 'DATE', false, null, null);
+        $this->addColumn('first_seen_at', 'FirstSeenAt', 'DATE', true, null, null);
         $this->addColumn('location_display_value', 'LocationDisplayValue', 'VARCHAR', false, 255, null);
         $this->addForeignKey('geolocation_id', 'GeoLocationId', 'INTEGER', 'geolocation', 'geolocation_id', false, null, null);
         $this->addForeignKey('duplicates_posting_id', 'DuplicatesJobPostingId', 'INTEGER', 'jobposting', 'jobposting_id', false, null, null);
