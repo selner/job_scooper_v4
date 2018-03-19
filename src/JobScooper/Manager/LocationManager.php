@@ -31,7 +31,6 @@ use JobScooper\Utils\GoogleGeocoderHttpAdapter;
 use JobScooper\Utils\GoogleMapsLoggedProvider;
 
 use Monolog\Logger;
-use phpFastCache\Exceptions\phpFastCacheInvalidArgumentException as InvalidArgumentException;
 
 
 

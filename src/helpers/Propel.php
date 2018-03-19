@@ -178,6 +178,16 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 // User Job Match List Functions
 //
 
+/**
+ * @param                                  $callback
+ * @param                                  $userNotificationState
+ * @param null                             $arrGeoIds
+ * @param null                             $nNumDaysBack
+ * @param \JobScooper\DataAccess\User|null $user
+ *
+ * @throws \Exception
+ * @throws \Propel\Runtime\Exception\PropelException
+ */
 function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null )
 {
 	$moreResults = true;

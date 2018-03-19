@@ -160,8 +160,6 @@ class NotifierJobAlerts extends JobsMailSender
 			}
 			unset($dbMatches);
 
-			LogMessage("Converting " . countAssociativeArrayValues($matches["all"]) . " UserJobMatch objects to array data for use in notifications...");
-
 			$matches["isUserJobMatchAndNotExcluded"] = array_filter($matches["all"], "isUserJobMatchAndNotExcluded");
 
 			if (countAssociativeArrayValues($matches["isUserJobMatchAndNotExcluded"]) == 0)
