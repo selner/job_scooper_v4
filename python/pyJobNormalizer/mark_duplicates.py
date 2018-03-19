@@ -47,9 +47,6 @@ import json
 from processfile import tokenizeStrings
 import helpers
 
-import itertools
-from operator import itemgetter
-
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):
@@ -71,30 +68,31 @@ class TaskDedupeJobPostings:
         self.inputFile = inputfile
         self.outputfile = outputfile
 
-        print "Processing job postings for duplicates from input file {}".format(self.inputFile)
+        print("Processing job postings for duplicates from input file {}".format(self.inputFile))
 
-        print "Loading job list to match..."
+        print("Loading job list to match...")
         self.load_jobpostings()
 
-        print "Deduping job postings..."
-        self.dedupe_jobs()
+        if self.jobs:
+            print("Deduping job postings...")
+            self.dedupe_jobs()
 
-        self.export_results()
-        print "Matching completed."
+            self.export_results()
+            print("Matching completed.")
 
     def dedupe_jobs(self):
         dfJobs = pandas.DataFrame.from_records(self.jobs.values(), index="JobPostingId")
         dfJobs["JobPostingId"] = dfJobs.index
         dfJobs.sort_values('JobPostingId', ascending=True)
 
-        print "Marking jobs as duplicate..."
+        print("Marking jobs as duplicate...")
         dfJobs["is_duplicate"] = dfJobs.duplicated({"Company", "TitleTokensString", "GeoLocationId"}, keep="first")
         dfJobs["is_duplicate_stringver"] = dfJobs.duplicated("CompanyTitleGeoLocation", keep="first")
         dictOrigPosts = dfJobs[(dfJobs["is_duplicate"] == False)].to_dict(orient="index")
         dictDupePosts = dfJobs[(dfJobs["is_duplicate"] == True)].to_dict(orient="index")
         dictOrigByCompTitle = { v["CompanyTitleGeoLocation"]:v["JobPostingId"] for (n,v) in dictOrigPosts.items() if ("CompanyTitleGeoLocation") in v.keys()}
 
-        print "Preparing duplicate job post results for export..."
+        print("Preparing duplicate job post results for export...")
         retDupesByJobId = {}
         for jobid in dictDupePosts:
             item = dictDupePosts[jobid]
@@ -108,17 +106,17 @@ class TaskDedupeJobPostings:
                 # "SourceJob" : dictOrigPosts[dictOrigByCompTitle[strCompTitle]]
             }
 
-        print "{} / {} job postings have been marked as duplicate".format(len(retDupesByJobId), len(self.jobs))
+        print("{} / {} job postings have been marked as duplicate".format(len(retDupesByJobId), len(self.jobs)))
         self.output_data = { "duplicate_job_postings" : retDupesByJobId }
 
     def export_results(self):
-        print "Exporting final match results to {}".format(self.outputfile)
+        print("Exporting final match results to {}".format(self.outputfile))
 
         outf = open(self.outputfile, "w")
         json.dump(self.output_data, outf, indent=4, encoding='utf-8', cls=SetEncoder)
         outf.close()
 
-        print "Job post duplicates exported to {}".format(self.outputfile)
+        print("Job post duplicates exported to {}".format(self.outputfile))
 
         return self.outputfile
 
@@ -128,11 +126,11 @@ class TaskDedupeJobPostings:
         jobsdata = {}
         input_data = {}
         if str(self.inputFile).endswith(".csv"):
-            print "Loading jobs from CSV file {}".format(self.inputFile)
+            print("Loading jobs from CSV file {}".format(self.inputFile))
 
             jobsdata = helpers.load_ucsv(self.inputFile, fieldnames=None, delimiter=",", quotechar="\"", keyfield=DATA_KEY_JOBPOSTINGS_KEYFIELD)
         elif str(self.inputFile).endswith(".json"):
-            print "Loading jobs from JSON file {}".format(self.inputFile)
+            print("Loading jobs from JSON file {}".format(self.inputFile))
             inputData = json.load(inf)
             if inputData:
                 if isinstance(inputData, dict):
@@ -142,12 +140,12 @@ class TaskDedupeJobPostings:
         else:
             raise Exception("Unknown input data file format: {}".format(self.inputFile))
 
-        print "Loaded {} total jobs to deduplicate.".format(len(jobsdata))
+        print("Loaded {} total jobs to deduplicate.".format(len(jobsdata)))
 
-        print "Tokenizing job titles for duplicate matching"
+        print("Tokenizing job titles for duplicate matching")
         jobsdata = tokenizeStrings(jobsdata, u'Title', u'TitleTokens', u'set')
 
-        print "Reorganizing source data for duplicate matching..."
+        print("Reorganizing source data for duplicate matching...")
         for rowkey in jobsdata.keys():
             item = jobsdata[rowkey]
             subitem = {}
@@ -164,10 +162,13 @@ class TaskDedupeJobPostings:
                 self.jobs[rowkey] = subitem
         jobsdata = None
 
-        print "{} job postings loaded and ready for deduplication.".format(len(self.jobs))
+        print("{} job postings loaded.".format(len(self.jobs)))
 
 
 if __name__ == '__main__':
     arguments = docopt(cli_usage, version='0.1.1rc')
 
-    matcher = TaskDedupeJobPostings(arguments["--input"].replace("'", ""), arguments["--output"].replace("'", ""))
+    if not arguments["--input"] or not arguments["--output"]:
+        print("Unable to deduplicate job postings.  Missing script arguments.")
+    else:
+        matcher = TaskDedupeJobPostings(arguments["--input"].replace("'", ""), arguments["--output"].replace("'", ""))
