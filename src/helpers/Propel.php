@@ -114,14 +114,11 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
 }
 
 
-//
-// User Job Match List Functions
-//
-
-
 /**
- * @param null $jobsiteKey
- * @param null $usrTitleKeywordSets
+ * @param null $userNotificationState
+ * @param array|null $arrGeoLocIds
+ * @param int|null $nNumDaysBack
+ * @param \JobScooper\DataAccess\User|null $user
  *
  * @return \JobScooper\DataAccess\UserJobMatch[]
  *
@@ -142,6 +139,7 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create()
 	    ->filterByUserNotificationState($userStateCriteria[0], $userStateCriteria[1])
         ->filterByUserFromUJM($user)
+	    ->limit(10000)
         ->joinWithJobPostingFromUJM();
 
 	if(!empty($nNumDaysBack) && is_integer($nNumDaysBack))
@@ -174,6 +172,36 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 	unset($query);
 
 	return $results;
+}
+
+//
+// User Job Match List Functions
+//
+
+function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null )
+{
+	$moreResults = true;
+
+	$nResults = 1;
+	while ($moreResults)
+	{
+		$results = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $user);
+		if (!empty($results))
+		{
+			$nSetResults = $nResults + count($results) - 1;
+			LogMessage("Processing user match results #{$nResults} - {$nSetResults} through function {$callback}...");
+			call_user_func($callback, $results);
+		}
+		else
+		{
+			if(count($results) <= 0)
+				LogMessage("No user job matches found to auto-mark.");
+			$moreResults = false;
+		}
+		$nResults = $nResults + $nSetResults;
+
+	}
+
 }
 
 /**
