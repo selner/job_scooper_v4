@@ -43,7 +43,7 @@
         },
         {
             "JobSiteName": "Discovia",
-            "SourceURL": "https://jobs.jobvite.com/discovia/?nl=1",
+            "SourceURL": "https://jobs.jobvite.com/lighthouseediscovery/?nl=1",
             "PluginExtendsClassName": "AbstractJobviteATS"
         },
         {

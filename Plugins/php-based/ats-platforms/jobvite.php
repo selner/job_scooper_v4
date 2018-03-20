@@ -88,7 +88,7 @@ abstract class AbstractJobviteATS extends \JobScooper\BasePlugin\Classes\AjaxHtm
         }
         $retItems = parent::parseJobsListForPage($objSimpHTML);
 
-	    foreach(array_keys($retItems) as $k => $ret)
+	    foreach($retItems as $k => $ret)
 	    {
 	    	if(!array_key_exists('Company', $ret) || empty($ret['Company']))
 			    $retItems[$k]['Company'] = $this->getJobSiteKey();
