@@ -199,7 +199,7 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
 		if (!empty($results))
 		{
 			$nSetResults = $nResults + count($results) - 1;
-			LogMessage("Processing user match results #{$nResults} - {$nSetResults} through function {$callback}...");
+			LogMessage("Processing user match results #{$nResults} - {$nSetResults} through callback...");
 			call_user_func($callback, $results);
 		}
 		else
