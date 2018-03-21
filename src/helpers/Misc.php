@@ -243,26 +243,35 @@ function combineTextAllNodes($nodes, $delim=" ")
 /**
  * @param $cmd
  *
- * @return array|mixed|string
+ * @throws \Exception
+ * @return null|string
  */
 function doExec($cmd)
 {
-    $cmdOutput = array();
-    $cmdRet = "";
+	if (stristr($cmd, "2>&1") !== true)
+		$cmd = "{$cmd} 2>&1";
 
-    exec($cmd, $cmdOutput, $cmdRet);
-    foreach ($cmdOutput as $resultLine)
-        if (!is_null($GLOBALS['logger'])) LogMessage($resultLine);
-    unset($resultLine);
+	$cmdArrOutput = array();
+	$cmdRet = null;
+	$lastResultLine = null;
 
-    if (is_array($cmdOutput))
-    {
-        if (count($cmdOutput) >= 1)
-            return $cmdOutput[0];
-        else
-            return "";
-    }
-    return $cmdOutput;
+	$lastOutput = exec($cmd, $cmdArrOutput, $cmdRet);
+	$cmdStrOutput = join(PHP_EOL, $cmdArrOutput);
+	if($cmdRet !== 0)
+		throw new Exception("Command '{$cmd}' returned non-zero result code.  Output: {$cmdStrOutput}");
+
+	foreach ($cmdArrOutput as $resultLine) {
+		LogMessage($resultLine);
+		$lastResultLine = $resultLine;
+	}
+
+	if (empty($lastOutput))
+		$lastOutput = $lastResultLine;
+
+	LogMessage("Command '{$cmd}' returned code={$cmdRet}; last_line='{$lastOutput}'.");
+
+
+    return $lastOutput;
 }
 
 

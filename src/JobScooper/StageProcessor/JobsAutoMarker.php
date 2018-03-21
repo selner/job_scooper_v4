@@ -129,6 +129,7 @@ class JobsAutoMarker
 			$this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($results);
 		} catch (Exception $ex) {
 			LogError($ex->getMessage(), null, $ex);
+			throw($ex);
 		}
 
 
@@ -625,45 +626,38 @@ class JobsAutoMarker
 	 */
 	private function _markJobsList_KeywordMatches_(&$arrJobsList)
 	{
+		startLogSection("Automarker: Starting matching of " . count($arrJobsList) . " job role titles against user search keywords ...");
+
 		try {
-			startLogSection("Automarker: Starting matching of " . count($arrJobsList) . " job role titles against user search keywords ...");
+			$basefile = "mark_titlematches";
+			LogMessage("Exporting updated jobs to JSON file '{$basefile}_src.json' for matching...");
+			$sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $arrJobsList);
+			$resultsfile = generateOutputFileName("{$basefile}_results", "json", true, 'debug');
 
 			try {
-
-				$basefile = "mark_titlematches";
-				LogMessage("Exporting updated jobs to JSON file '{$basefile}_src.json' for matching...");
-				$sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $arrJobsList);
-				$resultsfile = generateOutputFileName("{$basefile}_results", "json", true, 'debug');
-
-				try {
-					startLogSection("Calling python to do work of job title matching.");
-					$PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/matchTitlesToKeywords.py");
-					$cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($sourcefile) . " -o " . escapeshellarg($resultsfile);
+				startLogSection("Calling python to do work of job title matching.");
+				$PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/matchTitlesToKeywords.py");
+				$cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($sourcefile) . " -o " . escapeshellarg($resultsfile);
 
 #					$cmd = "source " . realpath(__ROOT__) . "/python/pyJobNormalizer/venv/bin/activate; " . $cmd;
 
-					LogMessage(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL);
-					doExec($cmd);
-				} catch (Exception $ex)
-				{
-					throw $ex;
-				}
-				finally
-				{
-					endLogSection("Python command call finished.");
-				}
+				LogMessage(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL);
+				doExec($cmd);
 
 				LogMessage("Updating database with new match results...");
 				$this->_updateUserJobMatchesFromJson($resultsfile);
 
-			} catch (Exception $ex) {
-				handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s', isDebug());
+			} catch (Exception $ex)
+			{
+				throw $ex;
 			}
-			LogMessage("Completed matching user keyword phrases against job titles.");
-		}
-		catch (Exception $ex)
-		{
-			handleException($ex, null, true);
+			finally
+			{
+				endLogSection("Python command call finished.");
+			}
+
+		} catch (Exception $ex) {
+			handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s');
 		}
 		finally
 		{
