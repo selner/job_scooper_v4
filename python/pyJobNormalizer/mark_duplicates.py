@@ -21,9 +21,6 @@
 import pandas
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 cli_usage = """
 Usage:
   mark_duplicates.py -i <file> -o <file>

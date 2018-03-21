@@ -21,9 +21,6 @@
 
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 cli_usage = """
 Usage:
   matchTitlesToKeywords.py -i <file> -o <file>
@@ -68,22 +65,22 @@ class MatchJobsToKeywordsTask:
         self.inputFile = inputfile
         self.outputfile = outputfile
 
-        print "Processing job title matching with input file {}".format(self.inputFile)
+        print("Processing job title matching with input file {}".format(self.inputFile))
 
-        print "Loading user keywords for matching..."
+        print("Loading user keywords for matching...")
         self.load_keywords()
 
-        print "Loading job list to match..."
+        print("Loading job list to match...")
         self.loadJobs()
 
-        print "Matching job list titles vs. user search keywords ..."
+        print("Matching job list titles vs. user search keywords ...")
         self.mark_positive_matches()
 
-        print "Matching job list titles vs. user negative keyword matches..."
+        print("Matching job list titles vs. user negative keyword matches...")
         self.mark_negative_matches()
 
         self.exportResultsData()
-        print "Matching completed."
+        print("Matching completed.")
 
     def get_output_data(self):
         return {
@@ -93,7 +90,7 @@ class MatchJobsToKeywordsTask:
         }
 
     def exportResultsData(self):
-        print "Exporting final match results to {}".format(self.outputfile)
+        print("Exporting final match results to {}".format(self.outputfile))
 
         outf = open(self.outputfile, "w")
         outData = self.get_output_data()
@@ -134,7 +131,7 @@ class MatchJobsToKeywordsTask:
         return matched_groups
 
     def mark_positive_matches(self):
-        print "Marking jobs that match {} positive title keywords...".format(len(self.keywords))
+        print( "Marking jobs that match {} positive title keywords...".format(len(self.keywords)))
 
         matched_groups = self.match_keywords(self.keywords)
         group_keys = matched_groups.keys()
@@ -169,11 +166,11 @@ class MatchJobsToKeywordsTask:
                     terms = " ".join(list(grp[u'token_match']))
             self.jobs[jobid][u'MatchedUserKeywords'] = terms
 
-        print "Positive Search Keywords: {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids))
+        print( "Positive Search Keywords: {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids)))
 
     def mark_negative_matches(self):
 
-        print "Marking jobs that match {} negative title keywords...".format(len(self.negative_keywords))
+        print( "Marking jobs that match {} negative title keywords...".format(len(self.negative_keywords)))
         matched_groups = self.match_keywords(self.negative_keywords)
         group_keys = matched_groups.keys()
         #
@@ -205,7 +202,7 @@ class MatchJobsToKeywordsTask:
                     terms = " ".join(list(grp[u'token_match']))
             self.jobs[jobid][u'MatchedNegativeTitleKeywords'] = terms
 
-        print "Negative Title Keywords:  {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids))
+        print("Negative Title Keywords:  {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids)))
 
     def load_keywords(self):
         fp = open(self.inputFile, "rU")
@@ -237,7 +234,7 @@ class MatchJobsToKeywordsTask:
             self.negative_keywords = outData
 
         fp.close()
-        print "Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords), len(self.negative_keywords))
+        print("Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords), len(self.negative_keywords)))
 
 
 if __name__ == '__main__':

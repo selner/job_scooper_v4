@@ -20,8 +20,6 @@
 
 import sys
 import uuid
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 cli_usage = """
 Usage:
