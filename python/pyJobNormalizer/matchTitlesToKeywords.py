@@ -19,7 +19,7 @@
 ###########################################################################
 
 
-import sys
+import helpers
 
 cli_usage = """
 Usage:
@@ -44,12 +44,6 @@ from processfile import tokenizeStrings
 
 import itertools
 from operator import itemgetter
-
-class SetEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, set):
-            return list(obj)
-        return json.JSONEncoder.default(self, obj)
 
 
 class MatchJobsToKeywordsTask:
@@ -91,16 +85,12 @@ class MatchJobsToKeywordsTask:
 
     def exportResultsData(self):
         print("Exporting final match results to {}".format(self.outputfile))
+        helpers.write_json(self.outputfile, self.get_output_data())
 
-        outf = open(self.outputfile, "w")
-        outData = self.get_output_data()
-        json.dump(outData, outf, indent=4, encoding='utf-8', cls=SetEncoder)
-        outf.close()
         return self.outputfile
 
     def loadJobs(self):
-        inf = open(self.inputFile, "rU")
-        inputData = json.load(inf)
+        inputData = helpers.load_json(self.inputFile)
         if inputData:
             if isinstance(inputData, dict):
                 if (JSON_KEY_JOBMATCHES in inputData and isinstance(inputData[JSON_KEY_JOBMATCHES], dict) and len(
@@ -205,9 +195,7 @@ class MatchJobsToKeywordsTask:
         print("Negative Title Keywords:  {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids)))
 
     def load_keywords(self):
-        fp = open(self.inputFile, "rU")
-        data = json.load(fp, encoding="utf-8")
-
+        data = helpers.load_json(self.inputFile)
         if JSON_KEY_USER in data and 'UserId' in data[JSON_KEY_USER]:
             self.user_id = data[JSON_KEY_USER]['UserId']
 
@@ -233,7 +221,6 @@ class MatchJobsToKeywordsTask:
             outData = tokenizeStrings(self.negative_keywords, 'keyword', 'tokens')
             self.negative_keywords = outData
 
-        fp.close()
         print("Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords), len(self.negative_keywords)))
 
 

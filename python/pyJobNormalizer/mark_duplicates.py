@@ -19,7 +19,7 @@
 ###########################################################################
 
 import pandas
-import sys
+import helpers
 
 cli_usage = """
 Usage:
@@ -43,13 +43,6 @@ from docopt import docopt
 import json
 from processfile import tokenizeStrings
 import helpers
-
-class SetEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, set):
-            return list(obj)
-        return json.JSONEncoder.default(self, obj)
-
 
 class TaskDedupeJobPostings:
     inputfile = None
@@ -108,27 +101,21 @@ class TaskDedupeJobPostings:
 
     def export_results(self):
         print("Exporting final match results to {}".format(self.outputfile))
-
-        outf = open(self.outputfile, "w")
-        json.dump(self.output_data, outf, indent=4, encoding='utf-8', cls=SetEncoder)
-        outf.close()
-
+        helpers.write_json(self.outputfile, self.output_data)
         print("Job post duplicates exported to {}".format(self.outputfile))
 
         return self.outputfile
 
     def load_jobpostings(self):
-        inf = open(self.inputFile, "rU")
 
         jobsdata = {}
         input_data = {}
         if str(self.inputFile).endswith(".csv"):
             print("Loading jobs from CSV file {}".format(self.inputFile))
-
             jobsdata = helpers.load_ucsv(self.inputFile, fieldnames=None, delimiter=",", quotechar="\"", keyfield=DATA_KEY_JOBPOSTINGS_KEYFIELD)
         elif str(self.inputFile).endswith(".json"):
             print("Loading jobs from JSON file {}".format(self.inputFile))
-            inputData = json.load(inf)
+            inputData = helpers.load_json(self.inputFile)
             if inputData:
                 if isinstance(inputData, dict):
                     if (DATA_KEY_JOBPOSTINGS in inputData and isinstance(inputData[DATA_KEY_JOBPOSTINGS], dict) and len(
@@ -155,7 +142,7 @@ class TaskDedupeJobPostings:
                     loc = subitem["GeoLocationId"]
                 else:
                     loc = "NoLocation"
-                subitem["CompanyTitleGeoLocation"] = "{}_{}_{}".format(subitem["Company"], subitem["TitleTokensString"], loc)
+                subitem["CompanyTitleGeoLocation"] = u"{}_{}_{}".format(subitem["Company"], subitem["TitleTokensString"], loc)
                 self.jobs[rowkey] = subitem
         jobsdata = None
 

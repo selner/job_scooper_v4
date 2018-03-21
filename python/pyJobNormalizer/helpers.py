@@ -1,12 +1,30 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
 import codecs
-import re
+import json
 import unicodecsv
+
+
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 xstr = lambda s: str(s) or ""
 
+def load_json(filepath):
+    f = codecs.open(filepath, 'rb', encoding='utf-8')
+    result = json.load(f)
+    f.close()
+    return result
+
+def write_json(filepath, data):
+    outf = codecs.open(filepath, 'w', encoding='utf-8')
+
+    json.dump(data, outf, indent=4, encoding='utf-8', cls=SetEncoder)
+    outf.close()
 
 
 def load_ucsv(filePath, fieldnames=None, delimiter=",", quotechar="\"", keyfield=None):
