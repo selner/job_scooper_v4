@@ -44,6 +44,8 @@ class ConfigBuilder
 	 * ConfigBuilder constructor.
 	 *
 	 * @param null $iniFile
+	 *
+	 * @throws \PHLAK\Config\Exceptions\InvalidContextException
 	 */
 	public function __construct($iniFile = null)
     {
@@ -184,6 +186,7 @@ class ConfigBuilder
 
 	/**
 	 * @return \JobScooper\Manager\LocationManager
+	 * @throws \Exception
 	 */
 	private function _instantiateLocationManager()
     {
@@ -203,52 +206,66 @@ class ConfigBuilder
 	 */
 	private function _setupPropelForRun()
     {
-	    $cfgDatabase = null;
+	    $cfgDBConns = null;
 	    $cfgSettingsFile = $this->_getSetting("propel.configuration_file");
 	    if(!empty($cfgSettingsFile)) {
 		    LogMessage("Loading Propel configuration file: " . $cfgSettingsFile);
 		    $propelCfg = new ConfigurationManager($cfgSettingsFile);
-		    $cfgDatabase = $propelCfg->getConfigProperty('database.connections');
-		    if (!empty($cfgDatabase)) {
-			    LogMessage("Using Propel Connection Settings from Propel config: " . getArrayDebugOutput($cfgDatabase));
+		    $cfgDBConns = $propelCfg->getConfigProperty('database.connections');
+		    if (!empty($cfgDBConns)) {
+			    LogMessage("Using Propel Connection Settings from Propel config: " . getArrayDebugOutput($cfgDBConns));
 		    }
 	    }
 
-	    if (empty($cfgDatabase))
+	    if (empty($cfgDBConns))
 	    {
-		    $cfgDatabase = $this->_getSetting("propel.database.connections");
-		    if(!empty($cfgDatabase))
-			    LogMessage("Using Propel Connection Settings from Jobscooper Config: " . getArrayDebugOutput($cfgDatabase));
+		    $cfgDBConns = $this->_getSetting("propel.database.connections");
+		    if(!empty($cfgDBConns))
+			    LogMessage("Using Propel Connection Settings from Jobscooper Config: " . getArrayDebugOutput($cfgDBConns));
 	    }
 
-	    if (empty($cfgDatabase))
+	    if (empty($cfgDBConns))
 		    throw new InvalidArgumentException("No Propel database connection definitions were found in the config files.  You must define at least one connection's settings under propel.database.connections.");
-
-	    foreach ($cfgDatabase as $key => $setting) {
-		    $serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
-		    $serviceContainer->checkVersion('2.0.0-dev');
-		    $serviceContainer->setAdapterClass($key, $setting['adapter']);
-		    $manager = new \Propel\Runtime\Connection\ConnectionManagerSingle();
-		    $manager->setConfiguration(array(
-			    'dsn'         => $setting['dsn'],
-			    'user'        => $setting['user'],
-			    'password'    => $setting['password'],
-			    'classname'   => '\\Propel\\Runtime\\Connection\\ConnectionWrapper',
-			    'model_paths' =>
-				    array(
-					    0 => 'src',
-					    1 => 'vendor',
-				    ),
-		    ));
-		    $manager->setName($key);
-		    $serviceContainer->setConnectionManager($key, $manager);
-		    $serviceContainer->setDefaultDatasource($key);
-
-		    $adapter = $serviceContainer->getAdapter($key);
-		    $con = \Propel\Runtime\Propel::getWriteConnection($key);
-		    $adapter->setCharset($con, "utf8mb4");
-		    Propel::getServiceContainer()->setAdapter($key, $adapter);
+	    else if(count($cfgDBConns) > 1)
+	    {
+	    	LogWarning("More than one database connection was defined for Propel.  Using 'default' if exists; otherwise using first connection found.");
 	    }
+
+	    $dbConnSettings = null;
+	    foreach ($cfgDBConns as $connKey => $setting) {
+	    	if(strtoupper($connKey) === "DEFAULT")
+	    		$dbConnSettings = $setting;
+	    }
+	    if(empty($dbConnSettings))
+		    $dbConnSettings = array_shift($cfgDBConns);
+
+	    assert(!empty($dbConnSettings));
+
+
+		if(stristr($dbConnSettings['dsn'], "charset") !== true)
+		{
+			$dbConnSettings['dsn'] = "{$dbConnSettings['dsn']};charset=utf8mb4";
+		}
+
+	    $serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
+	    $serviceContainer->checkVersion('2.0.0-dev');
+	    $serviceContainer->setAdapterClass($connKey, $dbConnSettings['adapter']);
+	    $manager = new \Propel\Runtime\Connection\ConnectionManagerSingle();
+	    $manager->setConfiguration(array(
+		    'dsn'         => $dbConnSettings['dsn'],
+		    'user'        => $dbConnSettings['user'],
+		    'password'    => $dbConnSettings['password'],
+		    'classname'   => '\\Propel\\Runtime\\Connection\\ConnectionWrapper',
+		    'model_paths' =>
+			    array(
+				    0 => 'src',
+				    1 => 'vendor',
+			    ),
+	    ));
+	    $manager->setName($connKey);
+	    $serviceContainer->setConnectionManager($connKey, $manager);
+	    $serviceContainer->setDefaultDatasource($connKey);
+	    \Propel\Runtime\Propel::setServiceContainer($serviceContainer);
 
     }
 
