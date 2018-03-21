@@ -28,7 +28,7 @@ class PluginAuthenticJobs extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
 	private $_currentSearchDetails = null;
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'ul#listings li#no-results', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
+        'NoPostsFound'    => array('selector' => 'ul#listings li#no-results h1', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
         'JobPostItem'      => array('selector' => 'ul#listings li'),
         'Title'                 =>  array('selector' => 'a div h3', 'return_attribute' => 'text'),
         'Url'                  =>  array('selector' => 'a', 'return_attribute' => 'href'),
