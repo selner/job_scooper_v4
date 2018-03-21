@@ -1443,6 +1443,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 				handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
 			}
 		}
+
 		try {
 			$driver = $this->getActiveWebdriver();
 			$this->log("Getting host page for JSON query {$hostPageUri}");
@@ -1451,17 +1452,29 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 			$this->log("Downloading JSON data from {$apiUri} using page at {$hostPageUri} ...");
 
+			$jsCode = /** @lang javascript */ <<<JSCODE
+			window.JSCOOP_API_RETURN = null;
+			var callback = arguments[arguments.length-1], // webdriver async script callback
+			
+			nIntervalId; // setInterval id to stop polling
 
-			$jsCode = /** @lang javascript */
-				<<<JSCODE
-            var callback = arguments[arguments.length - 1];
-			function setScriptDataObject(data) {
+			function checkDone() {
+			  if( window.JSCOOP_API_RETURN ) {
+			    window.clearInterval(nIntervalId); // stop polling
+			    callback(window.JSCOOP_API_RETURN );
+			  }
+			}
+
+
+			function setScriptDataObject(jsonText) {
+				window.JSCOOP_API_RETURN = jsonText;
+				
 				API_ELEM_ID = "jobs_api_data";
 
 				var myScriptTag = null;
 				try {
 					myScriptTag = document.getElementById(API_ELEM_ID);
-					myScriptTag.text = "";
+					myScriptTag.text = jsonText;
 				}
 				catch (err) {
 				}
@@ -1473,61 +1486,32 @@ abstract class BaseJobsSite implements IJobSitePlugin
 				}
 
 				myScriptTag.id = API_ELEM_ID;
-				var tagData = null;
-				try {
-					tagData = JSON.parse(data);
-				}
-				catch (err) {
-					tagData = data;
-				}
-				myScriptTag.text = JSON.stringify({
-    			    "api_data": tagData
-    			});
-
-			    return data;	
-			}
-	
-			function httpGet(url) {
-				return new Promise(
-					function (resolve, reject) {
-						const request = new XMLHttpRequest();
-						request.onload = function () {
-							if (this.status === 200) {
-								// Success
-								resolve(this.response);
-							} else {
-								// Something went wrong (404 etc.)
-								reject(new Error(this.statusText));
-							}
-						};
-						request.onerror = function () {
-							reject(new Error(
-								'XMLHttpRequest Error: ' + this.statusText));
-						};
-						request.open('GET', url);
-						request.send();
-					});
+				myScriptTag.text = jsonText;
 			}
 
-			httpGet('{$apiUri}')
-			.then(
-				function (value) {
-					console.log('Contents: ' + value);
-					setScriptDataObject(value);
-					callback(value);
-				},
-				function (reason) {
-					console.error('Something went wrong', reason);
-					value = reason;
-					setScriptDataObject(value);
-					callback(value);
-	        });
+			// The parameters we are gonna pass to the fetch function
+			fetchData = { 
+			    method: 'GET', 
+			    headers: new Headers({'Content-Type' : 'application/json'})
+			};
+			
+			fetch('{$apiUri}', fetchData)
+				.then( 
+					function(resp) {
+						setScriptDataObject(resp.text());  
+					}
+				);
+				
+				
+			nIntervalId = window.setInterval( checkDone, 150 ); // start polling
 
 JSCODE;
 
 			$this->log("Executing JavaScript: ".PHP_EOL ." {$jsCode}");
-			$driver->manage()->timeouts()->setScriptTimeout(30);
-			$response = $driver->executeAsyncScript($jsCode, array());
+//			$driver->manage()->timeouts()->setScriptTimeout(30);
+			$driver->executeAsyncScript($jsCode);
+
+			$response = $driver->executeScript("return window.JSCOOP_API_RETURN;");
 			if (empty($response)) {
 				$simpHtml = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
 				$node = $simpHtml->find("script#{$apiNodeId}");
