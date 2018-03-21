@@ -19,16 +19,9 @@ namespace JobScooper\Manager;
 use Exception;
 use Facebook\WebDriver\Exception\WebDriverCurlException;
 use Facebook\WebDriver\Exception\WebDriverException;
-use Facebook\WebDriver\Firefox\FirefoxDriver;
-use Facebook\WebDriver\Firefox\FirefoxProfile;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\WebDriverCapabilityType;
-use Facebook\WebDriver\WebDriverBy;
-use Facebook\WebDriver\WebDriverCapabilities;
-use Facebook\WebDriver\WebDriverDimension;
-use Facebook\WebDriver\WebDriverKeys;
 use JobScooper\Utils\PropertyObject;
-use JobScooper\Utils\SimpleHTMLHelper;
 
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 
@@ -43,7 +36,6 @@ class SeleniumManager extends PropertyObject
 	 */
 	private $remoteWebDriver = null;
     private $additionalLoadDelaySeconds = null;
-    private $_seleniumIsRunning = false;
     private $_settings = null;
 
 	/**
@@ -59,10 +51,6 @@ class SeleniumManager extends PropertyObject
         $this->_settings = getConfigurationSetting('selenium');
 		if(empty($this->_settings))
 			$this->_settings = array();
-		
-        if ($this->_settings['autostart'] == true) {
-            $this->startSeleniumServer();
-        }
     }
 
 	/**
@@ -73,10 +61,6 @@ class SeleniumManager extends PropertyObject
     {
         $this->doneWithRemoteWebDriver();
 
-        if ($this->_settings['autostart'] == true) {
-            $this->shutdownSelenium();
-        }
-        $this->_seleniumIsRunning = false;
     }
 
 	/**
@@ -94,20 +78,6 @@ class SeleniumManager extends PropertyObject
             $this->loadPage($url);
 
             $src = $driver->getPageSource();
-
-
-            // BUGBUG:  Firefox has started to return "This tab has crashed" responses often as of late February 2017.
-            //          Adding check for that case and a session kill/reload when it happens
-            if (stristr($src, "tab has crashed") != false) {
-                LogWarning("Error in Firefox WebDriver:  tab has crashed retrieving page at " . $url . ".  Killing WebDriver and trying one more time...");
-                // We found "tab has crashed" in the response, so we can't use it.
-                if ($recursed != true) {
-                    $this->killAllAndRestartSelenium();
-                    return $this->getPageHTML($url, $recursed = true);
-                } else {
-                    handleException(new Exception("Error in Firefox WebDriver:  tab has crashed getting " . $url . " a second time.  Cannot load correct results so aborting..."), "%s", $raise = true);
-                }
-            }
 
             return $src;
         } catch (WebDriverCurlException $ex) {
@@ -148,7 +118,6 @@ class SeleniumManager extends PropertyObject
 	function done()
     {
         $this->doneWithRemoteWebDriver();
-        $this->shutdownSelenium();
     }
 
 	/**
@@ -178,68 +147,7 @@ class SeleniumManager extends PropertyObject
 	}
 
 
-	/**
-	 * @throws \Exception
-	 */
-	function killAllAndRestartSelenium()
-    {
-        try {
-            $this->doneWithRemoteWebDriver();
-        } catch (Exception $ex) {
-            LogError("Error stopping active Selenium sessions: " . $ex);
-        }
 
-        $webdriver = $this->getWebDriverKind();
-        $pscmd = doExec("pkill -i " . $webdriver);
-
-        $this->shutdownSelenium();
-
-        $this->startSeleniumServer();
-
-    }
-
-	/**
-	 *
-	 */
-	function shutdownSelenium()
-    {
-        $canStop = false;
-        $settings = $this->_settings;
-        if(array_key_exists('autostart', $settings))
-            $canStop = ($settings['autostart'] === True);
-
-        if($canStop)
-        {
-            if(array_key_exists('stop_command', $settings) && !is_null($settings['stop_command']) && !empty($settings['stop_command']))
-            {
-                LogMessage("Attempting to stop Selenium server with command \"" . $settings['stop_command'] . "\"");
-                $res = doExec($settings['stop_command']);
-                LogMessage("Stopping Selenium server result: "  . $res);
-            }
-            else {
-
-                try {
-                    // The only way to shutdown standalone server in 3.0 is by killing the local process.
-                    // Details: https://github.com/SeleniumHQ/selenium/issues/2852
-                    //
-                    $cmd = 'pid=`ps -eo pid,args | grep selenium-server | grep -v grep | cut -c1-6`; if [ "$pid" ]; then kill -9 $pid; echo "Killed Selenium process #"$pid; else echo "Selenium server is not running."; fi';
-                    LogMessage("Killing Selenium server process with command \"" . $cmd . "\"");
-
-                    $res = doExec($cmd);
-                    LogMessage("Killing Selenium server result: " . $res);
-                } catch (Exception $ex) {
-                    $pscmd = doExec("pkill -i selenium");
-                    LogMessage("Killing Selenium server result: " . $res);
-                    LogError("Failed to send shutdown to Selenium server.  Attempted to kill process, however you may need to manually shut it down.");
-                }
-            }
-        }
-        else
-        {
-            LogDebug("Did not attempt Selenium server shutdown since we didn't and can't autostart it.");
-        }
-
-    }
 
 	/**
 	 * @throws \Exception
@@ -272,106 +180,6 @@ class SeleniumManager extends PropertyObject
         }
     }
 
-	/**
-	 * @return bool
-	 * @throws \Exception
-	 */
-	function startSeleniumServer()
-    {
-
-        $settings = $this->_settings;
-
-        $autostart = false;
-        if(array_key_exists('autostart', $settings))
-        {
-            $autostart = ($settings['autostart'] === True);
-        }
-        $canStop = $autostart;
-
-        if($autostart) {
-            $seleniumStarted = $this->isServerUp();
-            if ($seleniumStarted == false) {
-                if ($canStop === True && array_key_exists('start_command', $settings) && !is_null($settings['start_command'])) {
-                    LogMessage("Attempting to start Selenium server with command \"" . $settings['start_command'] . "\"");
-                    $res = doExec($settings['start_command']);
-                    LogMessage("Starting Selenium server result: " . $res);
-
-                    sleep(10);
-                    $seleniumStarted = true;
-                } else if ($canStop && stripos($settings['host_location'], "localhost") != false || (stripos($settings['host_location'], "127.0.0.1") != false)) {
-
-                    $strCmdToRun = "java ";
-                    if (array_key_exists('prefix_switches', $settings))
-                        $strCmdToRun .= $settings['prefix_switches'];
-
-                    $strCmdToRun .= " -jar \"" . $settings['jar'] . "\" -port " . $settings['port'] . " ";
-                    if (array_key_exists('prefix_switches', $settings))
-                        $strCmdToRun .= $settings['postfix_switches'];
-
-                    $strCmdToRun .= " >/dev/null &";
-
-                    LogMessage("Starting Selenium with command: '" . $strCmdToRun . "'");
-                    $res = doExec($strCmdToRun);
-                    sleep(10);
-                    LogMessage("Starting Selenium server result: " . $res);
-                    $seleniumStarted = true;
-                } else {
-                    $seleniumStarted = false;
-                    throw new Exception("Selenium is not running and was not set to autostart. Cannot continue without an instance of Selenium running.");
-                }
-            } else {
-                $seleniumStarted = true;
-                LogWarning("Selenium is already running; skipping startup of server.");
-            }
-            return $seleniumStarted;
-        }
-
-        return $this->isServerUp();
-    }
-
-	/**
-	 * @return bool
-	 */
-	function isServerUp()
-    {
-
-        $hostHubPageURL = $this->_settings['host_location'] . '/wd/hub';
-        $msg = "Checking Selenium server up.... ";
-        LogMessage("Checking if Selenium is running at " . $hostHubPageURL);
-
-        $ret = false;
-
-        try{
-            $objSimplHtml = new SimpleHtmlHelper($$hostHubPageURL);
-            if ($objSimplHtml === false)
-            {
-                $ret = false;
-                return $ret;
-            }
-
-            $tag = $objSimplHtml->find("title");
-            if (is_null($tag) != true && count($tag) >= 1)
-            {
-                $title = $tag[0]->text();
-                $msg = $msg . " Found hub server page '" . $title . "' as expected.  Selenium server is up.'";
-                $ret = true;
-            }
-
-        } catch (WebDriverCurlException $ex) {
-            $msg = "Selenium not yet running (failed to access the hub page.)";
-        } catch (WebDriverException $ex) {
-            $msg = " Selenium not yet running (failed to access the hub page.)";
-        } catch (Exception $ex) {
-            $msg = " Selenium not yet running (failed to access the hub page.)";
-        }
-        finally
-        {
-            LogMessage($msg);
-        }
-
-        return $ret;
-    }
-
     /**
      * Get the current webdriver or create a new one if needed.
      *
@@ -382,33 +190,22 @@ class SeleniumManager extends PropertyObject
     function get_driver()
     {
         try {
+            if (is_null($this->remoteWebDriver))
+                $this->create_remote_webdriver();
+            return $this->remoteWebDriver;
 
-                try {
-                    if (is_null($this->remoteWebDriver))
-                        $this->create_remote_webdriver();
-                    return $this->remoteWebDriver;
-
-                } catch (WebDriverCurlException $ex) {
-                    $this->killAllAndRestartSelenium();
-                    $this->create_remote_webdriver();
-                    return $this->remoteWebDriver;
-
-                } catch (WebDriverException $ex) {
-                    $this->killAllAndRestartSelenium();
-                    $this->create_remote_webdriver();
-                    return $this->remoteWebDriver;
-
-                } catch (Exception $ex) {
-                    $this->killAllAndRestartSelenium();
-                    $this->create_remote_webdriver();
-                    return $this->remoteWebDriver;
-
-                }
         } catch (WebDriverCurlException $ex) {
-            handleException($ex, "Failed to get Selenium remote webdriver: ", true);
-        }
+            $this->create_remote_webdriver();
+            return $this->remoteWebDriver;
 
-        return null;
+        } catch (WebDriverException $ex) {
+            $this->create_remote_webdriver();
+            return $this->remoteWebDriver;
+
+        } catch (Exception $ex) {
+            $this->create_remote_webdriver();
+            return $this->remoteWebDriver;
+        }
     }
 
 	/**

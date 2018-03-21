@@ -378,9 +378,6 @@ class ConfigBuilder
         LogDebug("Loading Selenium settings from config file...");
         $settings = $this->_getSetting("selenium");
 
-
-	    $settings['autostart'] = filter_var($settings['autostart'], FILTER_VALIDATE_BOOLEAN);
-
         if (!array_key_exists('server', $settings)) {
             throw new \ErrorException("Configuration missing for [selenium] [server] in the config INI files.");
         }
@@ -395,7 +392,6 @@ class ConfigBuilder
 	    $settings['host_location'] = 'http://' . $settings['server'] . ":" . $settings['port'];
 
 	    setConfigurationSetting("selenium", $settings);
-
     }
 
 	/**
