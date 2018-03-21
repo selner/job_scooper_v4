@@ -201,14 +201,14 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
 			$nSetResults = $nResults + count($results) - 1;
 			LogMessage("Processing user match results #{$nResults} - {$nSetResults} through callback...");
 			call_user_func($callback, $results);
+			$nResults = $nResults + $nSetResults;
 		}
 		else
 		{
-			if(count($results) <= 0)
+			if($nResults == 1 && $nSetResults !== 1)
 				LogMessage("No user job matches found to auto-mark.");
-			$moreResults = false;
+			return;
 		}
-		$nResults = $nResults + $nSetResults;
 
 	}
 
