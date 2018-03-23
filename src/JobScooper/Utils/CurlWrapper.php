@@ -133,8 +133,22 @@ class CurlWrapper
     }
 
 
-
-    function cURL($full_url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = null)
+	/**
+	 * @param        $full_url
+	 * @param null   $json
+	 * @param string $action
+	 * @param null   $content_type
+	 * @param null   $pagenum
+	 * @param null   $onbehalf
+	 * @param null   $fileUpload
+	 * @param null   $secsTimeout
+	 * @param null   $cookies
+	 * @param null   $referrer
+	 *
+	 * @return array
+	 * @throws \ErrorException
+	 */
+	function cURL($full_url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = null)
     {
         if(!isset($secsTimeout))
         {
@@ -238,7 +252,7 @@ class CurlWrapper
             $curl_object['http_error_number'] = $httpCode;
             $curl_object['error_number'] = -1;
             curl_close($ch);
-            throw new \ErrorException($strErr, E_RECOVERABLE_ERROR );
+            throw new \ErrorException($strErr, $httpCode,E_RECOVERABLE_ERROR );
         }
         elseif (curl_errno($ch))
         {
