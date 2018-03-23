@@ -23,6 +23,8 @@ use Geocoder\Geocoder;
 use \Exception;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\GeoLocationQuery;
+use JobScooper\Utils\GeocodeApiHttpAdapter;
+use JobScooper\Utils\GeocodeApiLoggedProvider;
 use \JobScooper\Utils\GeoLocationCache;
 use const JobScooper\DataAccess\GEOLOCATION_GEOCODE_FAILED;
 use JobScooper\Logging\CSVLogHandler;
@@ -238,20 +240,38 @@ class LocationManager
 			$regionBias = $country_codes[0];
 		}
 
-		$curl = new GoogleGeocoderHttpAdapter();
 		$geocoder = new Geocoder();
-		$geocoder->registerProviders(array(
-			new GoogleMapsLoggedProvider(
-				$adapter = $curl,
-				$locale = "en",
-				$region = $regionBias,
-				$useSsl = true,
-				$apiKey = $googleApiKey,
-				$logger = $this->logger
-			)
-		));
-		$geocoder->setResultFactory(new GeoLocationResultsFactory());
 
+		$geoapi_srvr = getConfigurationSetting("geocodeapi_server");
+		if (!empty($geoapi_srvr))
+		{
+			$curl = new GeocodeApiHttpAdapter();
+			$geocoder->registerProviders(array(
+				new GeocodeApiLoggedProvider(
+					$adapter = $curl,
+					$locale = "en",
+					$region = $regionBias,
+					$apiKey = $googleApiKey,
+					$server = $geoapi_srvr,
+					$logger = $this->logger
+				)
+			));
+		}
+		else
+		{
+			$curl = new GoogleGeocoderHttpAdapter();
+			$geocoder->registerProviders(array(
+				new GoogleMapsLoggedProvider(
+					$adapter = $curl,
+					$locale = "en",
+					$region = $regionBias,
+					$useSsl = true,
+					$apiKey = $googleApiKey,
+					$logger = $this->logger
+				)
+			));
+		}
+		$geocoder->setResultFactory(new GeoLocationResultsFactory());
 		return $geocoder;
 	}
 
