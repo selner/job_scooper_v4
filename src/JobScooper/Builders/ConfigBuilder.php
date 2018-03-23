@@ -324,6 +324,7 @@ class ConfigBuilder
 
 	/**
 	 *
+	 * @throws \Exception
 	 */
 	private function _parseGlobalSearchParameters()
     {
