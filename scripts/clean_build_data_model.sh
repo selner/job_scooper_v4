@@ -19,7 +19,7 @@ else
     CONFIGDIR=$1
 fi
 
-CODEDIR="$PROJDIR/src"
+CODEDIR="$PROJDIR/"
 PROPEL="$PROJDIR/vendor/bin/propel"
 OUTDIR=`echo $JOBSCOOPER_OUTPUT`
 NOW=$(date "+%F-%H-%M-%S")
