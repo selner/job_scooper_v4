@@ -50,7 +50,7 @@ class ConfigBuilder
 	public function __construct($iniFile = null)
     {
 	    if(empty($iniFile))
-		    $iniFile = getConfigurationSetting("command_line_args.configfile");
+		    $iniFile = getConfigurationSetting("command_line_args.config");
 
 	    if(empty($iniFile))
 		    throw new \InvalidArgumentException("Missing user configuration settings file definition.  You must specify the configuration file on the command line.  Aborting.");

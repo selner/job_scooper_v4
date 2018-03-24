@@ -42,7 +42,11 @@ $arguments = $cmdline->getAll();
 
 setConfigurationSetting('command_line_args', $arguments);
 
-$config = new \JobScooper\Builders\ConfigBuilder($arguments["configfile"]);
+try {
+	$config = new \JobScooper\Builders\ConfigBuilder($arguments["config"]);
+} catch (\PHLAK\Config\Exceptions\InvalidContextException $e) {
+	print("Could not load {$cfgfile}: " . $e->getMessage());
+}
 
 $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
 

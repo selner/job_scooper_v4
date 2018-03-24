@@ -29,19 +29,17 @@ If you're looking at job listings across many sites, Job Scooper has some built-
 That's just the start of [what Jobs Scooper can do...](../../wiki).
 
 ## Running Jobs_Scooper
-To run Jobs Scooper, first set an environment variable named JOBSCOOPER_OUTPUT to your output directory on disk.
+To run Jobs Scooper, set the following environment variables
+```
+JOBSCOOPER_HOST_VOLDIR=/private/var/local/jobs_scooper
+JOBSCOOPER_CONFIG=/private/var/local/jobs_scooper/configs/jobscooper.ini
+JOBSCOOPER_OUTPUT=/private/var/local/jobs_scooper/output
+```
+
 
 Then type:
 ```
-/usr/bin/php runJobs.php -all -days 3 -ini myconfig.ini
-```
-
-```bash
-Required Parameters:
-
--ini : Path to your configuration ini file (see examples/example_config.ini)
--days X:  number of days before today to download listings for.
--all:  run all the searches found in the .ini file.  Alternatively, you can specify the name of a single job site to run only that site's searches.  e.g. ``-amazon``
+/usr/bin/php run_job_scooper.php
 ```
 
 ## Requirements: 
@@ -49,9 +47,9 @@ Required Parameters:
 * Python 2.7
 * pip:  To install the other required Python modules, run "pip install -r ./python/pyJobNormalizer/requirements.txt"
 * NTLK for Python:  You will also need the NTLK data available at http://www.nltk.org/data.html.
-* Selenium server standalone:  required for dynamic/client-side websites.  
- * You can configure the app to run selenium locally or pointing to a Selenium instance running on another host or in Docker.  Check out scripts/start_selenium.sh for an example. 
- * To run as part of app:  download [selenium-server-standalone-3.0.1.jar](http://selenium-release.storage.googleapis.com/index.html?path=3.0.1) and copy it to the /lib directory. Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  Selenium Standalone Server requires Java 8 on macOS 10.12. 
+* Selenium server standalone:  required for dynamic/client-side websites.    
+ * You can configure the app to run selenium locally, in Docker or pointing to a Selenium instance running on another host or in Docker.  Check out scripts/start_selenium.sh for an example. 
+ * To run standalone manually:  download [selenium-server-standalone-3.0.1.jar](http://selenium-release.storage.googleapis.com/index.html?path=3.0.1) and copy it to the /lib directory. Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)  Selenium Standalone Server requires Java 8 on macOS 10.12. 
 
 
 ## What's New in JobScooper V4

@@ -24,14 +24,15 @@ class DocOptions extends PropertyObject
 private $doc = "{APP_RUN_COMMAND}
 
 Usage:
-  {APP_RUN_COMMAND} <configfile> [--user=<config_user_key>] [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--recap] [--delete] [--debug] [--disable-notifications] 
-  {APP_RUN_COMMAND} <configfile> [--debug] [--disable-notifications]
+  {APP_RUN_COMMAND} [--config=<config_file_path>] [--user=<config_user_key>] [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--recap] [--delete] [--debug] [--disable-notifications] 
+  {APP_RUN_COMMAND} [--config=<config_file_path>] [--debug] [--disable-notifications]
   {APP_RUN_COMMAND} (-h | --help)
   {APP_RUN_COMMAND} --version
 
 Options:
   -h --help                 Show this screen.
   --version                 Show version.
+  --config=<config_file_path>  Full path to the configuration setting file to load.  
   --user=<config_user_key>  Which set of user configuration settings should we run.  
   --stages=<stage_numbers>  Comma-separated list of stage numbers to run from 1 - 4. [default: 1,2,3]
   --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey. [default: all]
@@ -49,10 +50,23 @@ Options:
         $args = \Docopt::handle($opts, array('version'=>__APP_VERSION__));
         foreach($args->args as $k => $v) {
             $argkey = $k;
-            $argkey = cleanupTextValue($argkey, "<", ">");
-            $argkey = cleanupTextValue($argkey, "--", "");
+	        $argkey = cleanupTextValue($argkey, "<", ">");
+	        $argkey = cleanupTextValue($argkey, "--", "");
 
-            $argval = $v;
+	        $argval = $v;
+
+
+	        // If the command line option was empty, check for a matching environment variable
+	        // and use the value from it if it exists.  All environment setting values start
+	        // with JOBSCOOPER_ and then the all caps name of the command line switch.
+	        // e.g.  JOBSCOOPER_CONFIG or JOBSCOOPER_USER
+	        if(empty($argval))
+            {
+	            $envkey = strtoupper("JOBSCOOPER_" . strtoupper($argkey));
+	            $envval = getenv($envkey);
+	            if(!empty($envval))
+		            $argval = $envval;
+            }
 
             if(is_array($argval) && in_array($argkey, array("jobsite", "stages")))
 	            $argval = strtolower(join(",", $argval));
