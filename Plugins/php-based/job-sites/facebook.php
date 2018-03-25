@@ -28,6 +28,7 @@ class AbstractFacebook  extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlu
 	{
 		$ret = parent::parseJobsListForPage($objSimpHTML);
 
+
 		foreach($ret as $k => $job)
 		{
 			if(array_key_exists("Location", $job))
@@ -37,11 +38,13 @@ class AbstractFacebook  extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlu
 				}
 				elseif(count($job["Location"]) > 1)
 				{
+					$jobSiteId = $job["JobSitePostId"];
 					foreach($job["Location"] as $loc)
 					{
 						$newJob = array_copy($job);
 						$newJob["Location"] = $loc;
-						$ret["{$k}-{$loc}"] = $newJob;
+						$newJob["JobSitePostId"] = "{$jobSiteId}-{$loc}";
+						$ret[] = $newJob;
 					}
 					unset($ret[$k]);
 				}
