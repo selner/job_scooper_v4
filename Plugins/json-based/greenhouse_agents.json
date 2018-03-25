@@ -69,7 +69,7 @@
         {
             "JobSiteName": "generalassembly",
             "SiteReferenceKey" : "generalassembly",
-            "SourceURL": "https://www.generalassembly.com/careers",
+            "SourceURL": "https://generalassemb.ly/careers#openings",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
