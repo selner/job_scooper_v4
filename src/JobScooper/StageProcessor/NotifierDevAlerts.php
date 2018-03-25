@@ -95,10 +95,13 @@ class NotifierDevAlerts extends JobsMailSender
 
 			foreach(array_keys($failedJobSites) as $jsKey)
 			{
-				$reportJobSites[$jsKey] = array_merge($reportJobSites[$jsKey], $failedJobSites[$jsKey]);
+				if(!in_array($jsKey, array_keys($reportJobSites)))
+					$reportJobSites[$jsKey] = array();
+
+					$reportJobSites[$jsKey] = array_merge($reportJobSites[$jsKey], $failedJobSites[$jsKey]);
 				$reportJobSites[$jsKey]['RunErrorDetails'] = nl2br(htmlentities($reportJobSites[$jsKey]['RunErrorDetails']));
 			}
-
+			ksort($reportJobSites);
 			$renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_plugin_error_alert.tmpl")));
 			$subject = "Plugin Failures[" . gethostname() . "]: for " . getRunDateRange(5);
 			$data = array(
