@@ -224,7 +224,7 @@ class SearchBuilder
 		$nTotalPairs = countAssociativeArrayValues($userSearchPairs);
 	    $nTotalSearches = $nKeywords * $nLocations * count($sites);
 
-        LogMessage(" Creating search runs for {$nTotalPairs} search pairs X " . count($sites) . " jobsites = up to {$nTotalSearches} total seraches, from {$nKeywords} search keywords and {$nLocations} search locations.");
+        LogMessage(" Creating search runs for {$nTotalPairs} search pairs X " . count($sites) . " jobsites = up to {$nTotalSearches} total searches, from {$nKeywords} search keywords and {$nLocations} search locations.");
 
         $searchRuns = array();
 	    $ntotalSearchRuns = 0;

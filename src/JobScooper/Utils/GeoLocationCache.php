@@ -50,6 +50,7 @@ class GeoLocationCache
 	/**
 	 * @return null|\phpFastCache\Core\Pool\ExtendedCacheItemPoolInterface
 	 * @throws \Exception
+	 * @throws \Psr\Cache\InvalidArgumentException
 	 */
 	static function getCacheInstance()
 	{
