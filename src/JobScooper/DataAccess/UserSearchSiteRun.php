@@ -365,7 +365,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 			return $ret;
 
 		if (!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-			return $this->_getKeywordStringsForUrl_();
+			return $this->getKeywordStringsForUrl();
 		}
 
 		return "";
@@ -437,7 +437,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 *
 	 * @return string
 	 */
-	private function _getKeywordStringsForUrl_()
+	function getKeywordStringsForUrl()
 	{
 		$strRetCombinedKeywords = $this->getUserKeyword();
 
@@ -462,6 +462,9 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 				$strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
 				$strRetCombinedKeywords = str_replace("+", "-", $strRetCombinedKeywords);
 			}
+
+			if($this->isBitFlagSet(C__JOB_KEYWORD_REQUIRES_LOWERCASE))
+				$strRetCombinedKeywords = strtolower($strRetCombinedKeywords);
 		}
 
 		return $strRetCombinedKeywords;

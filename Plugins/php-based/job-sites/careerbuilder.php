@@ -27,7 +27,7 @@ class PluginCareerBuilder extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
     protected $JobPostingBaseUrl = 'http://www.careerbuilder.com';
 #	protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***&sc=date_desc&sort=date_desc";
 	protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&posted=3&sort=date_desc";
-    protected $additionalBitFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
+    protected $additionalBitFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER, C__JOB_KEYWORD_REQUIRES_LOWERCASE];
     protected $LocationType = 'location-city-dash-statecode';
     protected $additionalLoadDelaySeconds = 5;
     protected $JobListingsPerPage = 25;
@@ -45,11 +45,6 @@ class PluginCareerBuilder extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
         'PostedAt' =>  array('selector' => 'div.time-posted div em', 'index' => 0, 'return_attribute' => 'text'),
         'NextButton' =>  array('selector' => 'a#next-button'),
     );
-
-    function getKeywordURLValue(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails) {
-        $keywordval = parent::getKeywordURLValue($searchDetails);
-        return strtolower($keywordval);
-    }
 
 	/**
 	 * @return bool
@@ -101,7 +96,7 @@ class PluginCareerBuilderUK extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpl
     protected $JobListingsPerPage = 20;
     protected $JobPostingBaseUrl = 'http://https://www.careerbuilder.co.uk';
     protected $SearchUrlFormat = "https://www.careerbuilder.co.uk/search?q=***KEYWORDS***&sc=1&loc=***LOCATION***&pg=***PAGE_NUMBER***&sc=1";
-    protected $additionalBitFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
+    protected $additionalBitFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER, C__JOB_KEYWORD_REQUIRES_LOWERCASE];
     protected $LocationType = 'location-city';
     protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
     protected $CountryCodes = array("UK");
@@ -139,9 +134,4 @@ class PluginCareerBuilderUK extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpl
 		$this->runJavaScriptSnippet($jsCode);
 
 	}
-
-    function getKeywordURLValue(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails) {
-        return strtolower(parent::getKeywordURLValue($searchDetails));
-    }
-
 }

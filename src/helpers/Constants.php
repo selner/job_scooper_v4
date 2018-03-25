@@ -79,6 +79,10 @@ const C__JOB_DAYS_VALUE_NOTAPPLICABLE__ = 0x2000;
 const C__JOB_ITEMCOUNT_NOTAPPLICABLE__ = 0x4000;
 const C__JOB_ITEMCOUNT_STARTSATZERO__ = 0x8000;
 
+const C__JOB_KEYWORD_REQUIRES_LOWERCASE = 0x10000;
+
+//define("f24", 0x10000000); // 2^24
+
 //************************************************************************
 //
 //
