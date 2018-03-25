@@ -34,6 +34,10 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 {
 	private $_searchLocId = null;
 
+
+	/**
+	 * @param $geoLocId
+	 */
 	public function setSearchLocation($geoLocId)
 	{
 		$this->_searchLocId = $geoLocId;
