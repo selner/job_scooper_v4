@@ -65,11 +65,11 @@ services:
         target: /private/var/local/jobs_scooper
     links:
       - "selenium"
-      - "geocodeapi"
+#      - "geocodeapi"
 #     - "mysql"   # Uncomment this line if also instantiating mysql container in the early section
     depends_on:
       - "selenium"
-      - "geocodeapi"
+#      - "geocodeapi"
 #     - "mysql"   # Uncomment this line if also instantiating mysql container in the early section
     networks:
       container_net:
