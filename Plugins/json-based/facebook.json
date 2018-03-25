@@ -59,7 +59,7 @@
 
         {
           "Name": "JobSitePostId",
-          "Pattern": "/.*?id=([0-9]+).*/",
+          "Pattern": "/careers\\/jobs\\/(\\w+)\\/.*/",
           "Type": "SOURCEFIELD",
           "Field": "Url"
         }
