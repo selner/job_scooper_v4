@@ -128,9 +128,12 @@
             <reference local="jobsite_key" foreign="jobsite_key"/>
         </foreign-key>
 
-
         <column name="jobsite_post_id" phpName="JobSitePostId" type="varchar" size="1024" required="true"/>
 
+        <unique name="jobposting_alt_key">
+            <unique-column name="jobsite_key" size="25"/>
+            <unique-column name="jobsite_post_id" size="190"/>
+        </unique>
         <!--
             Job posting facts
         -->

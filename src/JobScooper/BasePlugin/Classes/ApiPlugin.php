@@ -19,13 +19,13 @@ namespace JobScooper\BasePlugin\Classes;
 
 
 /**
- * Class JobsApiPlugin
+ * Class ApiPlugin
  * @package JobScooper\BasePlugin\Classes
  */
-class JobsApiPlugin extends BaseJobsSite
+class ApiPlugin extends BaseSitePlugin
 {
 	/**
-	 * JobsApiPlugin constructor.
+	 * ApiPlugin constructor.
 	 *
 	 * @param null $strBaseDir
 	 */

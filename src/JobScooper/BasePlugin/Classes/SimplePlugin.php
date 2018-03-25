@@ -26,7 +26,7 @@ use Psr\Log\LogLevel;
  * Class SimplePlugin
  * @package JobScooper\BasePlugin\Classes
  */
-class SimplePlugin extends BaseJobsSite
+abstract class SimplePlugin extends BaseSitePlugin
 {
     protected $JobSiteName = '';
     protected $JobPostingBaseUrl = '';

@@ -386,13 +386,17 @@ function collectionToArray($coll, $limitToKeys=null)
  *
  * @return array
  */
-function array_from_orm_object_list_by_array_keys(array $list, array $keysToReturn)
+function array_from_orm_object_list_by_array_keys(array $list, array $keysToReturn, $keyIndex=null)
 {
     $ret = array_map(function ($v) use ($keysToReturn) {
     	return array_subset($v->toArray(), $keysToReturn);}
     , $list);
     if(count($keysToReturn) == 1)
         $ret = array_column($ret, $keysToReturn[0], $keysToReturn[0]);
+    else if(!empty($keyIndex) && is_array($ret) && in_array($keyIndex, array_keys($keysToReturn)))
+    {
+    	$ret = array_column($ret, null, $keyIndex);
+    }
     return $ret;
 }
 

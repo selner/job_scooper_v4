@@ -22,27 +22,35 @@ namespace JobScooper\BasePlugin\Classes;
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
+use JobScooper\DataAccess\Map\JobPostingTableMap;
+use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\DataAccess\UserSearchSiteRun;
 use JobScooper\BasePlugin\Interfaces\IJobSitePlugin;
 use JobScooper\Manager\SeleniumManager;
 
-const VALUE_NOT_SUPPORTED = -1;
 const BASE_URL_TAG_LOCATION = "***LOCATION***";
 const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 use Exception;
 use JobScooper\Utils\CurlWrapper;
 use JobScooper\Utils\SimpleHTMLHelper;
+use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Collection\Collection;
+use Propel\Runtime\Collection\ObjectCollection;
+use Propel\Runtime\Propel;
+use Psr\Log\LogLevel;
 
 /**
- * Class BaseJobsSite
+ * Class BaseSitePlugin
  * @package JobScooper\BasePlugin\Classes
  */
-abstract class BaseJobsSite implements IJobSitePlugin
+abstract class BaseSitePlugin implements IJobSitePlugin
 {
+	const VALUE_NOT_SUPPORTED = -1;
+
 	/**
-	 * BaseJobsSite constructor.
+	 * BaseSitePlugin constructor.
 	 *
 	 * @throws \Exception
 	 */
@@ -70,7 +78,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		// Now based on what we find in the Search Format URL, unset the default
 		// unsupported value (making them supported for this site)
 		//
-		$tokenFmtStrings = $this->_getUrlTokenList($this->SearchUrlFormat);
+		$tokenFmtStrings = getUrlTokenList($this->SearchUrlFormat);
 		if (!empty($tokenFmtStrings)) {
 			foreach ($tokenFmtStrings as $token) {
 				switch (strtoupper($token['type'])) {
@@ -137,6 +145,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 	/**
 	 * @return null|string
+	 * @throws \Exception
 	 */
 	function getJobSiteKey()
 	{
@@ -331,6 +340,15 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	protected $secsPageTimeout = null;
 	protected $nextPageScript = null;
 	protected $selectorMoreListings = null;
+
+	/**
+	 * @return null
+	 */
+	public function getSearchUrlFormat()
+	{
+		return $this->SearchUrlFormat;
+	}
+
 	protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
 	protected $arrSearchReturnedJobs = array();
 	protected $SearchUrlFormat = null;
@@ -341,12 +359,10 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	protected $_otherPluginSettings = null;
 
 
-	protected $detailsMyFileOut = "";
 	protected $prevCookies = "";
 	protected $prevURL = null;
 
 	protected $resultsFilterType = "user-filtered";
-	protected $strKeywordDelimiter = null;
 	protected $additionalLoadDelaySeconds = 0;
 	protected $_flags_ = null;
 	protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
@@ -413,194 +429,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	}
 
 	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 * @param string                                   $fmt
-	 *
-	 * @return null|string
-	 * @throws \ErrorException
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	protected function getGeoLocationURLValue(UserSearchSiteRun $searchDetails, $fmt = null)
-	{
-
-		if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
-			throw new \ErrorException($this->JobSiteName . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for " . $this->JobSiteName);
-		}
-
-		$searchpair = $searchDetails->getUserSearchPairFromUSSR();
-		$loc = $searchpair->getGeoLocationFromUS();
-		if (empty($loc)) {
-			LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' is missing the search location.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
-
-			return null;
-		}
-
-		if (!empty($fmt)) {
-			$strLocationValue = replaceTokensInString($fmt, $loc->toArray());
-		} else {
-			$locTypeNeeded = $this->getGeoLocationSettingType($loc);
-			if (empty($locTypeNeeded)) {
-				LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
-
-				return null;
-			}
-
-			$strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
-			if (empty($strLocationValue) || $strLocationValue == VALUE_NOT_SUPPORTED) {
-				LogMessage("Plugin for '" . $searchDetails->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $searchDetails->getUserSearchSiteRunKey() . ".");
-
-				return "";
-			}
-		}
-
-		if ($this->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE))
-			$strLocationValue = strtolower($strLocationValue);
-
-		if (!isValueURLEncoded($strLocationValue)) {
-			$strLocationValue = urlencode($strLocationValue);
-		}
-
-		return $strLocationValue;
-	}
-
-	/**
-	 * @param string $strUrl
-	 *
-	 * @return array[]
-	 * @throws \Exception
-	 */
-
-	private function _getUrlTokenList($strUrl)
-	{
-		$arrTokens = array();
-		preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strUrl, $tokenlist, PREG_SET_ORDER);
-		if (!empty($tokenlist) && is_array($tokenlist)) {
-			foreach ($tokenlist as $item) {
-				if (count($item) >= 3) {
-					$tokenType = $item[1];
-					$srcValue = $item[0];
-					$tokFmt = $item[2];
-					$arrTokens[$srcValue] = array(
-						"type"          => strtoupper($tokenType),
-						"source_string" => $srcValue,
-						"format_value"  => $tokFmt
-					);
-				}
-			}
-		}
-
-		return $arrTokens;
-
-	}
-
-	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 * @param null                                     $nPage
-	 * @param null                                     $nItem
-	 *
-	 * @return string|null
-	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
-	{
-		$strURL = $this->SearchUrlFormat;
-
-		$tokenFmtStrings = $this->_getUrlTokenList($strURL);
-//	    $count = preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strURL, $tokenlist);
-//	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3)
-//	    {
-//		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
-		if (!empty($tokenFmtStrings)) {
-			foreach ($tokenFmtStrings as $tokFound) {
-				$replaceVal = "";
-				$replaceStr = $tokFound['source_string'];
-				switch ($tokFound['type']) {
-					case "LOCATION":
-						$replaceVal = $this->getGeoLocationURLValue($searchDetails, $tokFound['format_value']);
-						break;
-
-					case "KEYWORDS":
-						$replaceVal = $this->getKeywordURLValue($searchDetails);
-
-						break;
-
-					case "PAGE_NUMBER":
-						$replaceVal = $this->getPageURLValue($nPage);
-						break;
-
-					case "ITEM_NUMBER":
-						$replaceVal = $this->getItemURLValue($nItem);
-						break;
-				}
-
-				$strURL = str_ireplace($replaceStr, $replaceVal, $strURL);
-
-			}
-
-		}
-
-		return $strURL;
-	}
-
-	//************************************************************************
-	//
-	//
-	//
-	//  Utility Functions
-	//
-	//
-	//
-	//************************************************************************
-
-	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun|null $searchDetails
-	 * @param null                                          $nPage
-	 * @param null                                          $nItem
-	 *
-	 * @return string
-	 */
-	protected function _getSearchUrlFormat_(UserSearchSiteRun $searchDetails = null, $nPage = null, $nItem = null)
-	{
-		return $this->SearchUrlFormat;
-	}
-
-	/**
-	 * @param null $nDays
-	 *
-	 * @return int
-	 */
-	protected function getDaysURLValue($nDays = null)
-	{
-		return ($nDays == null || $nDays == "") ? 1 : $nDays;
-	}
-
-	/**
-	 * @param $nPage
-	 *
-	 * @return string
-	 */
-	protected function getPageURLValue($nPage)
-	{
-		return ($nPage == null || $nPage == "") ? "" : $nPage;
-	}
-
-	/**
-	 * @param $nItem
-	 *
-	 * @return int
-	 */
-	protected function getItemURLValue($nItem)
-	{
-
-		if ($this->isBitFlagSet(C__JOB_ITEMCOUNT_STARTSATZERO__) && $nItem > 0) {
-			$nItem = $nItem - 1;
-		}
-
-		return ($nItem == null || $nItem == "") ? 0 : $nItem;
-	}
-
-	/**
 	 * @param $objSimpHTML
 	 *
 	 * @return int|string|null
@@ -625,21 +453,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 		sleep($this->additionalLoadDelaySeconds + 1);
 
-	}
-
-
-	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 *
-	 * @return string
-	 */
-	protected function getKeywordURLValue(UserSearchSiteRun $searchDetails)
-	{
-		if (!$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-			return $this->_getKeywordStringsForUrl_($searchDetails);
-		}
-
-		return "";
 	}
 
 	/**
@@ -883,7 +696,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	private function _addSearch_(UserSearchSiteRun $searchDetails)
 	{
-		$this->_setStartingUrlForSearch_($searchDetails);
+		$searchDetails->setStartingUrlForSearch();
 
 		$searchDetails->save();
 
@@ -896,58 +709,12 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	}
 
 	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 *
-	 * @return string
+	 * @return null|string
 	 */
-	private function _getKeywordStringsForUrl_(UserSearchSiteRun $searchDetails)
+	public function getJobPostingBaseUrl()
 	{
-		$strRetCombinedKeywords = $searchDetails->getUserKeyword();
-
-		// if we don't support keywords in the URL at all for this
-		// plugin or we don't have any keywords, return empty string
-		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) ||
-			empty($strRetCombinedKeywords)) {
-			$strRetCombinedKeywords = "";
-		} else {
-			if ($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS)) {
-				$strRetCombinedKeywords = "\"{$strRetCombinedKeywords}\"";
-			}
-
-			if (!isValueURLEncoded($strRetCombinedKeywords)) {
-				if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE))
-					$strRetCombinedKeywords = rawurlencode($strRetCombinedKeywords);
-				else
-					$strRetCombinedKeywords = urlencode($strRetCombinedKeywords);
-			}
-
-			if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES)) {
-				$strRetCombinedKeywords = str_replace("%22", "-", $strRetCombinedKeywords);
-				$strRetCombinedKeywords = str_replace("+", "-", $strRetCombinedKeywords);
-			}
-		}
-
-		return $strRetCombinedKeywords;
+		return $this->JobPostingBaseUrl;
 	}
-
-	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 *
-	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	private function _setStartingUrlForSearch_(UserSearchSiteRun $searchDetails)
-	{
-
-		$searchStartURL = $this->getPageURLfromBaseFmt($searchDetails, 1, 1);
-		if (is_null($searchStartURL) || strlen($searchStartURL) == 0)
-			$searchStartURL = $this->JobPostingBaseUrl;
-
-		$searchDetails->setSearchStartUrl($searchStartURL);
-		$this->log("Setting start URL for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] to: " . PHP_EOL . $searchDetails->getSearchStartUrl());
-
-	}
-
 
 	/**
 	 * @param $var
@@ -1034,7 +801,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		try {
 
 			// get the url for the first page/items in the results
-			if ($this->_checkInvalidURL_($searchDetails, $searchDetails->getSearchStartUrl()) == VALUE_NOT_SUPPORTED) return;
+			if ($this->_checkInvalidURL_($searchDetails, $searchDetails->getSearchStartUrl()) == self::VALUE_NOT_SUPPORTED) return;
 			startLogSection("Starting data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]");
 
 			if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
@@ -1103,6 +870,7 @@ abstract class BaseJobsSite implements IJobSitePlugin
 
 
 	/**
+	 * @param UserSearchSiteRun &$searchDetails
 	 * @param string $filePath
 	 * @param string $strURL
 	 * @param null   $optTimeout
@@ -1252,7 +1020,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @param $arrItem
 	 *
 	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
 	 * @return array
 	 */
 	function cleanupJobItemFields($arrItem)
@@ -1318,26 +1085,6 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	}
 
 	/**
-	 * @param $arrItem
-	 *
-	 * @return \JobScooper\DataAccess\JobPosting|null
-	 * @throws \Exception
-	 */
-	function saveJob($arrItem, GeoLocation $searchLoc = null)
-	{
-		$arrJob = $this->cleanupJobItemFields($arrItem);
-		try {
-			$job = updateOrCreateJobPosting($arrJob, $searchLoc);
-
-			return $job;
-		} catch (Exception $ex) {
-			handleException($ex, "Unable to save job to database due to error. Continuing to next job.  Error details: %S", false);
-		}
-
-
-	}
-
-	/**
 	 * @param                   $arrJobList
 	 * @param UserSearchSiteRun $searchDetails
 	 * @param int               $nCountNewJobs Returns number of jobs that were new database records.
@@ -1346,31 +1093,49 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 */
 	function saveSearchReturnedJobs($arrJobList, UserSearchSiteRun $searchDetails, &$nCountNewJobs = 0)
 	{
-		$searchLoc = null;
-		if(!empty($searchDetails)) {
-			$searchPair = $searchDetails->getUserSearchPairFromUSSR();
-			if (!empty($searchPair)) {
-				$searchLoc = $searchPair->getGeoLocationFromUS();
-			}
-		}
 
+		foreach($arrJobList as $k => $item)
+			$arrJobList[$k] = $this->cleanupJobItemFields($item);
+
+		$arrJobsToAdd = array_unique_multidimensional($arrJobList);
+		$siteRunKey = $searchDetails->getUserSearchSiteRunKey();
 		try {
 			$nCountNewJobs = 0;
-			if (!array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs))
-				$this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()] = array();
+			if (!array_key_exists($siteRunKey, $this->arrSearchReturnedJobs))
+				$this->arrSearchReturnedJobs[$siteRunKey] = array();
 
-			foreach ($arrJobList as $jobitem) {
-				$job = $this->saveJob($jobitem, $searchLoc);
-				if (!empty($job)) {
-					$this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()][$job->getJobPostingId()] = array('JobPostingId' => $job->getJobPostingId(), 'JobSitePostId' => $job->getJobSitePostId());
+			$arrJobSitePostIds = array_column($arrJobsToAdd, "JobSitePostId", "JobSitePostId");
 
-					// if this posting was saved within the last hour , then assume it's a new post
-					$hoursSince = date_diff($job->getFirstSeenAt(), new \DateTime());
-					if ($hoursSince->h < 1)
-						$nCountNewJobs += 1;
-				} else
-					$this->log("Failed to save job to database.  Job details = " . getArrayDebugOutput($jobitem), \Monolog\Logger::WARNING);
+			$alreadyExist = JobPostingQuery::create()
+				->filterByJobSiteKey($this->getJobSiteKey())
+				->filterByJobSitePostId($arrJobSitePostIds, Criteria::IN)
+				->find()
+				->toKeyIndex("JobSitePostId");
+			if (!empty($alreadyExist)) {
+				$arrExistJobCols = array_from_orm_object_list_by_array_keys($alreadyExist, array("JobPostingId", "JobSitePostId", "FirstSeenAt"), "JobPostingId");
+				$arrExistJobSitePostIds = array_column($arrExistJobCols, "JobSitePostId");
+				$this->arrSearchReturnedJobs[$siteRunKey] = $this->arrSearchReturnedJobs[$siteRunKey] + $arrExistJobCols;
+
+				$arrJobsToAdd = array_filter($arrJobsToAdd, function ($var) use ($arrExistJobSitePostIds) {
+					return !(in_array($var['JobSitePostId'], $arrExistJobSitePostIds));
+				});
 			}
+
+			if(!empty($arrJobsToAdd)) {
+				$conWrite = Propel::getServiceContainer()->getWriteConnection(JobPostingTableMap::DATABASE_NAME);
+
+				$bulkUpsert = new ObjectCollection();
+				$bulkUpsert->setModel('\JobScooper\DataAccess\JobPosting');
+				$bulkUpsert->fromArray($arrJobsToAdd);
+				$bulkUpsert->save($conWrite);
+
+				$insertedJobs = $bulkUpsert->toKeyIndex("JobPostingId");
+				$arrJobCols = array_from_orm_object_list_by_array_keys($insertedJobs, array("JobPostingId", "JobSitePostId", "FirstSeenAt"), "JobPostingId");
+
+				$this->arrSearchReturnedJobs[$siteRunKey] = $this->arrSearchReturnedJobs[$siteRunKey] + $arrJobCols;
+			}
+
+			$nCountNewJobs = count($arrJobsToAdd);
 		} catch (Exception $ex) {
 			handleException($ex, "Unable to save job search results to database.", true);
 		}
@@ -1380,26 +1145,43 @@ abstract class BaseJobsSite implements IJobSitePlugin
 	 * @param                                          $arrJobIds
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Exception
 	 */
 	private function _addJobMatchIdsToUser($arrJobIds, UserSearchSiteRun $searchDetails)
 	{
-		foreach ($arrJobIds as $jobId) {
-			$newMatch = UserJobMatchQuery::create()
-				->filterByUserId($this->_currentUserForSearches->getUserId())
-				->filterByJobPostingId($jobId)
-				->findOneOrCreate();
+		$userId = $this->_currentUserForSearches->getUserId();
 
-			$newMatch->setUserId($this->_currentUserForSearches->getUserId());
-			$newMatch->save();
+		$alreadyMatched = UserJobMatchQuery::create()
+			->filterByUserId($userId)
+			->filterByJobPostingId($arrJobIds, Criteria::IN)
+			->find()
+			->toKeyIndex("JobPostingId");
+
+		$arrTemp = array_combine($arrJobIds, $arrJobIds);
+		if(!empty($alreadyMatched))
+		{
+			$arrIdsToAdd = array_diff($arrJobIds, array_keys($alreadyMatched));
+			$arrTemp = array_combine($arrIdsToAdd, $arrIdsToAdd);
+		}
+
+		if(!empty($arrTemp)) {
+			$arrUserMatches = array_map(function ($value) use ($userId) {
+				return array('JobPostingId' => $value, 'UserId' => $userId);
+			}, $arrTemp);
+			$conWrite = Propel::getServiceContainer()->getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+
+			$bulkUpsert = new ObjectCollection();
+			$bulkUpsert->setModel('\JobScooper\DataAccess\UserJobMatch');
+			$bulkUpsert->fromArray($arrUserMatches);
+			$bulkUpsert->save($conWrite);
 		}
 	}
 
 	/**
-	/**
+	 * /**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Exception
 	 */
 	private function _addJobMatchesToUser(UserSearchSiteRun $searchDetails)
 	{
@@ -1427,8 +1209,17 @@ abstract class BaseJobsSite implements IJobSitePlugin
 		return $jobResults;
 	}
 
+	public function getObjectProperties() {
+		return $this->getArray();
+	}
+
+	public function getArray() {
+		return get_object_vars($this);
+	}
+
 	/**
 	 * @param string $apiUri
+	 * @param UserSearchSiteRun &$searchDetails
 	 * @param string $hostPageUri
 	 *
 	 * @return mixed|null
@@ -1539,8 +1330,9 @@ JSCODE;
 
 	/**
 	 * @param $msg
-	 * @param \Psr\Log\LogLevel $level
-	 * @param array $context
+	 * @param $logLevel
+	 * @param array $extras
+	 * @param Exception $ex
 	 */
 	function log($msg, $logLevel=\Monolog\Logger::INFO, $extras=array(), $ex=null)
 	{
@@ -1549,10 +1341,10 @@ JSCODE;
 
 
 	/**
-	 * @param null $url
-	 *
-	 * @return \JobScooper\Utils\SimpleHTMLHelper|null
+	 * @param UserSearchSiteRun &$searchDetails
+	 * @param string|null $url
 	 * @throws \Exception
+	 * @return SimpleHTMLHelper
 	 */
 	protected function getSimpleHtmlDomFromSeleniumPage(UserSearchSiteRun &$searchDetails, $url=null)
     {
@@ -1750,7 +1542,7 @@ JSCODE;
                         }
                     } else {
                         $strURL = $this->setResultPageUrl($searchDetails, $nPageCount, $nItemCount);
-                        if ($this->_checkInvalidURL_($searchDetails, $strURL) == VALUE_NOT_SUPPORTED)
+                        if ($this->_checkInvalidURL_($searchDetails, $strURL) == self::VALUE_NOT_SUPPORTED)
                             return null;
 
                         $objSimpleHTML = $this->getSimpleObjFromPathOrURL($searchDetails, null, $strURL, $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
@@ -1884,8 +1676,9 @@ JSCODE;
                             switch (strtoupper($this->PaginationType)) {
                                 case C__PAGINATION_PAGE_VIA_URL:
                                     $strURL = $this->setResultPageUrl($searchDetails, $nPageCount, $nItemCount);
-                                    if (empty($strURL))
-                                        return $strURL;
+                                    if (empty($strURL)) {
+	                                    throw(new Exception("Plugin " . $this->JobSiteName . " did not generate url for next page result."));
+                                    }
                                     $this->selenium->loadPage($strURL);
                                     break;
 
@@ -1915,7 +1708,7 @@ JSCODE;
                                         // otherwise we're out of results so end the loop here.
                                         //
                                         try {
-                                            $this->takeNextPageAction($this->getItemURLValue($nItemCount), $this->getPageURLValue($nPageCount));
+                                            $this->takeNextPageAction($searchDetails->getItemURLValue($nItemCount), $searchDetails->getPageURLValue($nPageCount));
                                             sleep($this->additionalLoadDelaySeconds + 2);
                                         } catch (Exception $ex) {
                                             handleException($ex, ("Failed to take nextPageAction on page " . $nPageCount . ".  Error:  %s"), true, $extraData=$searchDetails->toLoggedContext());
@@ -1969,12 +1762,11 @@ JSCODE;
 	 *
 	 * @return null|string
 	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	protected function setResultPageUrl($searchDetails, $nPageCount, $nItemCount)
     {
-	    $searchDetails->nextResultsPageUrl = $this->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
-	    if ($this->_checkInvalidURL_($searchDetails, $searchDetails->nextResultsPageUrl) == VALUE_NOT_SUPPORTED)
+	    $searchDetails->nextResultsPageUrl = $searchDetails->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
+	    if ($this->_checkInvalidURL_($searchDetails, $searchDetails->nextResultsPageUrl) == self::VALUE_NOT_SUPPORTED)
 		    return $searchDetails->nextResultsPageUrl;
 
 	    return $searchDetails->nextResultsPageUrl;
@@ -1988,7 +1780,9 @@ JSCODE;
 	 *
 	 * This does the heavy lifting of parsing job records from
 	 * LD+JSON found in the page
-	 * *
+	 *
+	 * @param $objSimpHTML
+	 * @throws \Exception
 	 */
 	function parseJobsFromLdJson($objSimpHTML)
 	{

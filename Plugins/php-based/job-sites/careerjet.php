@@ -369,7 +369,7 @@ class Careerjet_API {
 /**
  * Class PluginCareerJet
  */
-class PluginCareerJet extends \JobScooper\BasePlugin\Classes\JobsApiPlugin
+class PluginCareerJet extends \JobScooper\BasePlugin\Classes\ApiPlugin
 {
 //	protected $JobPostingBaseUrl = 'http://search.digitalgov.gov/developer/jobs.html';
 //	protected $SearchUrlFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';

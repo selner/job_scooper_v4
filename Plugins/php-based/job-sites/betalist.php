@@ -37,7 +37,7 @@ class PluginBetalist extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 	 *
 	 * @return int|string
 	 */
-	protected function getPageURLValue($nPage)
+	function getPageURLValue($nPage)
 	{
 		return ($nPage - 1);
 	}

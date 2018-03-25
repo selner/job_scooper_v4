@@ -61,6 +61,7 @@ abstract class AbstractTaleo extends \JobScooper\BasePlugin\Classes\ServerHtmlPl
 	/**
 	 * @param $objSimpHTML
 	 *
+	 * @throws \Exception
 	 * @return array|null|string|void
 	 */
 	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)

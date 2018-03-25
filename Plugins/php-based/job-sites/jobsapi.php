@@ -18,9 +18,9 @@
 
 use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
-use \JobScooper\BasePlugin\Classes\JobsApiPlugin;
+use \JobScooper\BasePlugin\Classes\ApiPlugin;
 
-class PluginUSAJobs extends JobsApiPlugin
+class PluginUSAJobs extends ApiPlugin
 {
     protected $JobPostingBaseUrl = 'http://search.digitalgov.gov/developer/jobs.html';
     protected $SearchUrlFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';

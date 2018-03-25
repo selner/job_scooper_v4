@@ -71,7 +71,7 @@ class AbstractIcimsATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlug
 	 * @return int|string
 	 * @throws \Exception
 	 */
-	protected function getPageURLValue($nPage)
+	function getPageURLValue($nPage)
 	{
 		return ($nPage - 1);
 	}

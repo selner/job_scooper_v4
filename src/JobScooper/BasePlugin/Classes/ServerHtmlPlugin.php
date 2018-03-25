@@ -22,7 +22,7 @@ namespace JobScooper\BasePlugin\Classes;
  * Class ServerHtmlPlugin
  * @package JobScooper\BasePlugin\Classes
  */
-abstract class ServerHtmlPlugin extends BaseJobsSite
+abstract class ServerHtmlPlugin extends BaseSitePlugin
 {
 	/**
 	 * ServerHtmlPlugin constructor.

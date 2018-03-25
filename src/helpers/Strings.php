@@ -299,3 +299,35 @@ function replaceTokensInString($formatString, $arrVariables)
 
     return $ret;
 }
+
+
+
+/**
+ * @param string $strUrl
+ *
+ * @return array[]
+ * @throws \Exception
+ */
+
+ function getUrlTokenList($strUrl)
+{
+	$arrTokens = array();
+	preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strUrl, $tokenlist, PREG_SET_ORDER);
+	if (!empty($tokenlist) && is_array($tokenlist)) {
+		foreach ($tokenlist as $item) {
+			if (count($item) >= 3) {
+				$tokenType = $item[1];
+				$srcValue = $item[0];
+				$tokFmt = $item[2];
+				$arrTokens[$srcValue] = array(
+					"type"          => strtoupper($tokenType),
+					"source_string" => $srcValue,
+					"format_value"  => $tokFmt
+				);
+			}
+		}
+	}
+
+	return $arrTokens;
+
+}
