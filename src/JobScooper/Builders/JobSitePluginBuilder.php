@@ -68,9 +68,37 @@ class JobSitePluginBuilder
     }
 
 	/**
+	 * @param string $strJobSiteKey
+	 * @return \JobScooper\DataAccess\JobSiteRecord|null
+	 * @throws \Exception
+	 */
+	static function getJobSite($strJobSiteKey)
+	{
+		if (empty($strJobSiteKey))
+			throw new \InvalidArgumentException("Error: no job site key specified.");
+
+		$allSites = JobSitePluginBuilder::getAllJobSites();
+		if (in_array($strJobSiteKey, array_keys($allSites)))
+			return $allSites[$strJobSiteKey];
+
+		return null;
+	}
+
+	/**
+	 * @param string $strJobSiteKey
+	 * @throws \Exception
+	 */
+	static function getJobSitePlugin($strJobSiteKey)
+	{
+		$site = JobSitePluginBuilder::getJobSite($strJobSiteKey);
+		return $site->getPlugin();
+	}
+
+	/**
 	 * @param bool $fOptimizeBySiteRunOrder
 	 *
 	 * @return array|mixed
+	 * @throws \Exception
 	 */
 	static function getIncludedJobSites($fOptimizeBySiteRunOrder=false)
 	{
