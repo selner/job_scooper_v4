@@ -256,6 +256,9 @@ class ConfigBuilder
 		    'user'        => $dbConnSettings['user'],
 		    'password'    => $dbConnSettings['password'],
 		    'classname'   => '\\Propel\\Runtime\\Connection\\ConnectionWrapper',
+		    'attributes'  => array(
+		    	'ATTR_TIMEOUT' => 360
+		    ),
 		    'model_paths' =>
 			    array(
 				    0 => 'src',
