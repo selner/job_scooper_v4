@@ -1,7 +1,7 @@
 {
   "JobSiteName": "Glassdoor",
   "BaseURL": "http://www.glassdoor.com/",
-  "SourceURL": "https://www.glassdoor.com/Job/jobs.htm?suggestCount=0&suggestChosen=false&clickSource=searchBtn&typedKeyword=***KEYWORDS***&sc.keyword=***KEYWORDS***&locT=&locId=&jobType=",
+  "SourceURL": "https://www.glassdoor.com/Job/jobs.htm?suggestCount=0&suggestChosen=false&clickSource=searchBtn&typedKeyword=***KEYWORDS***&sc.keyword=***KEYWORDS***&locT=&locId=&jobType=&fromAge=7",
   "PluginExtendsClassName" : "AbstractGlassdoor",
   "LocationType": "location-city-comma-statecode",
   "CountryCodes" : ["US"],

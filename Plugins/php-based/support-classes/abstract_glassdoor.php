@@ -17,28 +17,39 @@
  */
 
 
-
 /**
- * Class AbstractDice
+ * Class AbstractGlassdoor
  *
- *       Used by dice.json plugin configuration to override single method
+ *       Used by glassdoor.json plugin configuration to override single method
  */
 abstract class AbstractGlassdoor extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
-    function __construct()
-    {
+	/**
+	 * AbstractGlassdoor constructor.
+	 * @throws \Exception
+	 */
+	function __construct()
+	{
 
-        parent::__construct();
-        $this->_flags_ &= ~C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+		parent::__construct();
+		$this->_flags_ &= ~C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
 
-    }
+	}
 
 
+	/**
+	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+	 *
+	 * @return string
+	 * @throws \ErrorException
+	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
 	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
-    {
-
-        $js = "
-            fetch('https://www.glassdoor.com/findPopularLocationAjax.htm?term=" . $this->getGeoLocationURLValue($searchDetails) . "&maxLocationsToReturn=10').then(function(response) {
+	{
+		LogMessage("Setting search location via JavaScript on load of first page...");
+		$jsCode = /** @lang javascript */ <<<JSCODE
+            fetch('https://www.glassdoor.com/findPopularLocationAjax.htm?term=" . $searchDetails->getGeoLocationURLValue() . "&maxLocationsToReturn=10').then(function(response) {
               if(response.ok) {
                 response.json().then(function(json) {
                   if(json.length > 0)
@@ -47,24 +58,26 @@ abstract class AbstractGlassdoor extends \JobScooper\BasePlugin\Classes\AjaxHtml
                     document.getElementById('sc.location').value = json[0]['longName'];
                     document.getElementById('HeroSearchButton').click();
                   }
-                  else 
-                    console.log('No location was found.'); 
+                  else
+                    console.log('No location was found.');
                 })
             }
-            else 
-                console.log('location query failed.'); 
+            else
+                console.log('location query failed.');
         });
-        ";
+JSCODE;
 
-        $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
+		$this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
 
-        $this->runJavaScriptSnippet($js, false);
-        sleep($this->additionalLoadDelaySeconds + 2);
+		$retval = $this->runJavaScriptSnippet($jsCode, false);
+		LogDebug("Found and set location '{$retval}'");
+		sleep($this->additionalLoadDelaySeconds + 2);
 
-        $html = $this->getActiveWebdriver()->getPageSource();
-        return $html;
+		$html = $this->getActiveWebdriver()->getPageSource();
 
-    }
+		return $html;
+
+	}
 
 
 }
