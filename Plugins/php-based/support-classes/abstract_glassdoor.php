@@ -68,11 +68,30 @@ abstract class AbstractGlassdoor extends \JobScooper\BasePlugin\Classes\AjaxHtml
 JSCODE;
 
 		$this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
+		$jsonApi = "https://www.glassdoor.com/findPopularLocationAjax.htm?term={$searchDetails->getGeoLocationURLValue()}&LocationsToReturn=10";
+		$locations = $this->getJsonApiResult($jsonApi, $searchDetails, $searchDetails->getSearchStartUrl());
+		if (empty($locations))
+			throw new Exception("Could not find and set search location for Glassdoor search {$searchDetails->getUserSearchSiteRunKey()}.");
 
-		$retval = $this->runJavaScriptSnippet($jsCode, false);
-		LogDebug("Found and set location '{$retval}'");
-		sleep($this->additionalLoadDelaySeconds + 2);
+		$searchLoc = $locations[0];
+		$driver = $this->getActiveWebdriver();
 
+		try {
+			$jsCode = /** @lang javascript */ <<<JSCODE
+	            document.getElementById('sc.location').value = "{$searchLoc->longName}";
+	            document.getElementById('HeroSearchButton').click();
+JSCODE;
+			$this->runJavaScriptSnippet($jsCode, false);
+			sleep($this->additionalLoadDelaySeconds + 2);
+		}
+		catch (Exception $ex)
+		{
+			handleException($ex, "Could not find form element to set search location for Glassdoor:");
+		}
+
+		$url = $this->getActiveWebdriver()->getCurrentURL();
+		LogMessage("Search URL changed to {$url}");
+		$searchDetails->setStartingUrlForSearch($url);
 		$html = $this->getActiveWebdriver()->getPageSource();
 
 		return $html;
