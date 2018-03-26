@@ -940,7 +940,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
-	 * @return null
+	 * @return null|array
 	 * @throws \Exception
 	 */
 	protected function _getMyJobsForSearchFromJobsAPI_(UserSearchSiteRun $searchDetails)

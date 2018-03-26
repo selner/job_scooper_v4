@@ -56,7 +56,7 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	 */
 	protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
     {
-        $strURL = parent::getPageURLfromBaseFmt($searchDetails, $nPage, $nItem);
+        $strURL = $searchDetails->getPageURLfromBaseFmt($nPage, $nItem);
 		$searchDetails->setSearchStartUrl($strURL);
 	    if (empty($this->locationid)) {
 		    $this->locationid = $this->getLocationIdFromPage($searchDetails);
@@ -65,7 +65,7 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	    if (!empty($this->locationid))
             $strURL = $strURL. "&LocationID=" . $this->locationid;
 
-//        $page = $nPage == 1 ? "" : "&Page=" . $this->getPageURLValue($nPage);
+//        $page = $nPage == 1 ? "" : "&Page=" . $searchDetails->getPageURLValue($nPage);
 //        $strURL = preg_replace('/&[Pp]age=\d+/', $page, $strURL);
         return $strURL;
 
@@ -97,7 +97,7 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	 */
 	protected function getLocationIdFromPage(UserSearchSiteRun &$searchDetails)
     {
-	    $locValParam = $this->getGeoLocationURLValue($searchDetails, "{Place} {Region}");
+	    $locValParam = $searchDetails->getGeoLocationURLValue("{Place} {Region}");
 	    $locApi = parse_url($searchDetails->getSearchStartUrl(), PHP_URL_SCHEME) . "://" . parse_url($searchDetails->getSearchStartUrl(), PHP_URL_HOST) . "/location-lookup/?term={$locValParam}";
 //	    $locApi = "http://" . parse_url($this->JobPostingBaseUrl, PHP_URL_HOST) . "/location-lookup/?term={$locValParam}";
 

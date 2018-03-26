@@ -28,12 +28,19 @@ class PluginUSAJobs extends ApiPlugin
     protected $JobListingsPerPage = 25;
     protected $LocationType = 'location-city-comma-state';
 
-    function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
+	/**
+	 * @param     $searchDetails
+	 * @param int $pageNumber
+	 *
+	 * @return array|null
+	 * @throws \JobApis\Jobs\Client\Exceptions\MissingParameterException
+	 */
+	function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
     {
         // Add parameters to the query via the constructor
         $options = [
             'AuthorizationKey' => $this->_otherPluginSettings['authorization_key'],
-            'LocationName' => $this->getGeoLocationURLValue($searchDetails),
+            'LocationName' => $searchDetails->getGeoLocationURLValue("{Place} {Region}"),
             'Page' => $pageNumber
         ];
         $query = new UsajobsQuery($options);
