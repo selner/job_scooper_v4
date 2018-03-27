@@ -147,17 +147,25 @@ class JobsAutoMarker
 		LogMessage("Auto-marking complete. Setting marked jobs to 'ready-to-send'...");
 		try
 		{
+			$con = Propel::getWriteConnection("default");
 			$totalMarkedReady = 0;
 			foreach ($results as $jobMatch) {
 				$jobMatch->setUserNotificationState(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND);
 				$jobMatch->updateUserMatchStatus();
-				if ($totalMarkedReady % 100 === 0)
-					LogMessage("... marked {$totalMarkedReady} user job matches as 'ready-to-send'...");
-				$jobMatch->save();
+				$jobMatch->save($con);
 				$totalMarkedReady = $totalMarkedReady + 1;
+				if ($totalMarkedReady % 100 === 0) {
+					$con->commit();
+
+					// fetch a new connection
+					$con = Propel::getWriteConnection("default");
+					$nStartMarked = $totalMarkedReady - 100;
+					LogMessage("... user job matches {$nStartMarked} - {$totalMarkedReady} marked 'ready-to-send.'");
+				}
 			}
 
-			LogMessage("... marked {$totalMarkedReady} user job matches as 'ready-to-send.'");
+			$con->commit();
+
 		} catch (Exception $ex) {
 			LogError($ex->getMessage(), null, $ex);
 		}

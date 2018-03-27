@@ -251,11 +251,16 @@ function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 	$nChunkCounter = 1;
 	foreach (array_chunk($arrUserJobMatchIds, 50) as $chunk) {
 		$nMax = ($nChunkCounter+50);
-		LogMessage("Marking user job matches " . $nChunkCounter . " - " . ($nMax >= count($arrUserJobMatchIds) ? count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
 		\JobScooper\DataAccess\UserJobMatchQuery::create()
 			->filterByUserJobMatchId($chunk)
 			->update(array("UserNotificationState" => $statusInt), $con);
 		$nChunkCounter += 50;
+		if ($nChunkCounter % 100 === 0) {
+			$con->commit();
+			// fetch a new connection
+			$con = \Propel\Runtime\Propel::getWriteConnection("default");
+			LogMessage("Marking user job matches " . $nChunkCounter . " - " . ($nMax >= count($arrUserJobMatchIds) ? count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
+		}
 	}
 
 }
