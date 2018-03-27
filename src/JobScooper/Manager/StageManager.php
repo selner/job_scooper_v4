@@ -40,6 +40,11 @@ class StageManager
     protected $JobSiteName = "StageManager";
     protected $classConfig = null;
 
+    /**
+	 * @var \DateTime
+	 */
+	protected $runStartTime = null;
+
 	/**
 	 * @throws \Exception
 	 */
@@ -50,6 +55,15 @@ class StageManager
 			$this->classConfig = new ConfigBuilder();
 			$this->classConfig->initialize();
 		}
+
+		$runStartTime = getConfigurationSetting('app_run_start_datetime');
+		if (empty($runStartTime))
+		{
+			setConfigurationSetting('app_run_start_datetime', new \DateTime());
+		}
+
+
+
 	}
 
 	/**
@@ -307,8 +321,17 @@ class StageManager
     {
 	    $this->_initConfig();
 
+	    $runStartTime = getConfigurationSetting('app_run_start_datetime');
+
+	    if (!empty($runStartTime))
+	    {
+		    $runtime = $runStartTime->diff(new \DateTime());
+
+		    logMessage("JobScooper runtime was " . $runtime->format("%h hours, %i minutes and %s seconds (%h:%i:%s)."));
+	    }
+
 	    try {
-		    startLogSection("Final Stage: Developer Alerts + Cleanup");
+		    startLogSection("Cleanup: Developer Alerts + Cleanup");
 		    $devNotifier = new NotifierDevAlerts();
 		    $devNotifier->processPluginErrors();
 	    } catch (\Exception $ex) {
@@ -316,8 +339,9 @@ class StageManager
 	    }
 	    finally
 	    {
-		    endLogSection("End of final stage (dev alerts + cleanup)");
+		    endLogSection("End of dev alerts + cleanup");
 	    }
+
 
     }
 }

@@ -44,11 +44,10 @@ setConfigurationSetting('command_line_args', $arguments);
 
 try {
 	$config = new \JobScooper\Builders\ConfigBuilder($arguments["config"]);
+	$config->initialize();
 } catch (\PHLAK\Config\Exceptions\InvalidContextException $e) {
 	print("Could not load {$cfgfile}: " . $e->getMessage());
 }
-
-$GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
 
 $classRunJobs = new \JobScooper\Manager\StageManager();
 $classRunJobs->runAll();

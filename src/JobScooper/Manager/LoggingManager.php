@@ -76,12 +76,17 @@ Class LoggingManager extends \Monolog\Logger
     private $_doLogContext = false;
 	private $_sentryClient = null;
 
+	private $_shouldLogContext = False;
+	private $_defaultLogLevel = self::ERROR;
+
 	/**
 	 * LoggingManager constructor.
 	 *
 	 * @param       $name
 	 * @param array $handlers
 	 * @param array $processors
+	 *
+	 * @throws \Exception
 	 */
 	public function __construct($name, array $handlers = array(), array $processors = array())
     {
@@ -98,7 +103,18 @@ Class LoggingManager extends \Monolog\Logger
         parent::__construct($name, $handlers = $this->_handlersByType);
 
         $logOptions = getConfigurationSetting('logging', array());
-        $this->_doLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
+	    $this->_shouldLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
+	    if (array_key_exists('log_level', $logOptions) and !empty($logOptions['log_level']))
+	    {
+	    	if(strtoupper($logOptions["log_level"]) === "DEBUG")
+	    		setConfigurationSetting('debug', true);
+	    	$this->_defaultLogLevel = self::toMonologLevel($logOptions["log_level"]);
+
+	    }
+	    else
+	    {
+		    $this->_defaultLogLevel = self::ERROR;
+	    }
 
 
         $now = new DateTime('NOW');
@@ -127,7 +143,10 @@ Class LoggingManager extends \Monolog\Logger
         $this->logRecord(LogLevel::INFO,"Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'));
     }
 
-    public function getMainLogFilePath()
+	/**
+	 * @return mixed|null
+	 */
+	public function getMainLogFilePath()
     {
     	$handler = $this->_handlersByType['logfile'];
     	$stream = $handler->getStream();
@@ -179,7 +198,10 @@ Class LoggingManager extends \Monolog\Logger
         }
     }
 
-    private function _addSentryHandler()
+	/**
+	 *
+	 */
+	private function _addSentryHandler()
     {
     	$settings = getConfigurationSetting("config_file_settings.sentry");
     	if(!empty($settings))
@@ -211,10 +233,11 @@ Class LoggingManager extends \Monolog\Logger
 	 * @param $logPath
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Exception
 	 */
 	public function addFileHandlers($logPath)
     {
-        $logLevel = (isDebug() ? Logger::DEBUG : Logger::INFO);
+        $logLevel = (isDebug() ? Logger::DEBUG : $this->_defaultLogLevel);
 
         $today = getTodayAsString("-");
         $mainLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log";
@@ -230,7 +253,7 @@ Class LoggingManager extends \Monolog\Logger
         $now = getNowAsString("-");
         $csvlog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-run_errors.csv";
         $fpcsv = fopen($csvlog, "w");
-        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, Logger::WARNING, $bubble = true);
+        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, $this->_defaultLogLevel, $bubble = true);
         $this->pushHandler($this->_handlersByType['csverrors'] );
         $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started to CSV file at {$csvlog}");
 
@@ -276,25 +299,25 @@ Class LoggingManager extends \Monolog\Logger
 	public function logRecord($level, $message, $extras=array(), $ex=null, $channel=null)
 	{
 		if(empty($level))
-			$level = Logger::INFO;
+			$level = $this->_defaultLogLevel;
 
 		$logger = $this->getChannelLogger($channel);
 
 		$context = array();
 		$monologLevel = \Monolog\Logger::toMonologLevel($level);
-		if(in_array($level, array(
+		if($this->_shouldLogContext === true || in_array($level, array(
 			\Monolog\Logger::WARNING, \Monolog\Logger::EMERGENCY, \Monolog\Logger::ERROR, \Monolog\Logger::DEBUG, \Monolog\Logger::CRITICAL))) {
 			$context = $this->getDebugContext($extras, $ex);
 		}
 
 		if($logger->log($monologLevel, $message, $context) === false)
 			print($message .PHP_EOL . PHP_EOL );
-
-//		if(parent::log($monologLevel, $message, $context) === false)
-//			print($message .PHP_EOL . PHP_EOL );
 	}
 
-    private $_openSections = 0;
+	/**
+	 * @var int
+	 */
+	private $_openSections = 0;
 
 
 	const C__LOG_SECTION_BEGIN = 1;
@@ -371,6 +394,15 @@ Class LoggingManager extends \Monolog\Logger
 		$user = \JobScooper\DataAccess\User::getCurrentUser();
 		$userSlug = empty($user) ? "" : $user->getSlug();
 
+		$runtime_fmt = "";
+		$runStartTime = getConfigurationSetting('app_run_start_datetime');
+		if (!empty($runStartTime))
+		{
+			$runtime = $runStartTime->diff(new \DateTime());
+			$runtime_fmt = $runtime->format("%h:%d:%s");
+		}
+
+
 		$baseContext = [
 			'class_call' => "",
 			'exception_message' => "",
@@ -380,7 +412,8 @@ Class LoggingManager extends \Monolog\Logger
 			'hostname' => gethostname(),
 			'channel' => "",
 			'jobsite' => "",
-			'username' => $userSlug
+			'username' => $userSlug,
+			'runtime' => $runtime_fmt
 		];
 
 		if(is_array($context))

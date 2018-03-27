@@ -137,8 +137,11 @@ class ConfigBuilder
 
 		setConfigurationSetting('output_directories', $arrOututDirs);
 
+	    setConfigurationSetting("logging", $this->_getSetting("logging"));
+
 	    if (!isset($GLOBALS['logger']))
-		    $GLOBALS['logger'] = new LoggingManager(getOutputDirectory('logs'));
+		    $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
+
         $GLOBALS['logger']->addFileHandlers(getOutputDirectory('logs'));
 	    $this->_setupPropelLogging();
     }

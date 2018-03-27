@@ -73,6 +73,8 @@ function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $c
 	}
 	else
 	{
+		if(empty($logLevel))
+			$logLevel = Logger::INFO;
 		$GLOBALS['logger']->logRecord($logLevel, $msg, $extras, $ex, $channel);
 	}
 }
