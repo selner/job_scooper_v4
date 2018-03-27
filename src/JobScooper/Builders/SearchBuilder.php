@@ -29,18 +29,11 @@ use Propel\Runtime\ActiveQuery\Criteria;
  */
 class SearchBuilder
 {
-	private $_cacheCutOffTime = null;
 
-	/**
-	 * SearchBuilder constructor.
-	 */
-	function __construct()
-	{
-		$this->_cacheCutOffTime = date_sub(new \DateTime(), date_interval_create_from_date_string('18 hours'));
-	}
 
 	/**
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Exception
 	 */
 	public function createSearchesForUser(User $user)
     {
@@ -75,6 +68,7 @@ class SearchBuilder
 	private function _filterRecentlyRunJobSites(&$sites, User $user)
 	{
 		$sitesToSkip = array();
+		$siteWaitCutOffTime = date_sub(new \DateTime(), date_interval_create_from_date_string('23 hours'));
 
 		$completedSitesAllOnly = UserSearchSiteRunQuery::create()
 			->useJobSiteFromUSSRQuery()
@@ -83,7 +77,7 @@ class SearchBuilder
 			->endUse()
 			->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
 			->select(array('JobSiteKey', 'ResultsFilterType', 'LastCompleted'))
-			->filterByRunResultCode("successful")
+			->filterByRunResultCode(array("successful", "failed"), Criteria::IN)
 			->groupBy(array("JobSiteKey", "ResultsFilterType"))
 			->find()
 			->getData();
@@ -102,7 +96,7 @@ class SearchBuilder
 				->endUse()
 				->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
 				->select(array('JobSiteKey', 'ResultsFilterType', 'LastCompleted'))
-				->filterByRunResultCode("successful")
+				->filterByRunResultCode(array("successful", "failed"))
 				->useUserSearchPairFromUSSRQuery()
 				->filterByGeoLocationFromUS($location)
 				->endUse()
@@ -124,7 +118,7 @@ class SearchBuilder
 			// ran after our cutoff time
 			//
 			foreach ($sitesToSkip as $key => $result) {
-				if (new \DateTime($result) <= $this->_cacheCutOffTime)
+				if (new \DateTime($result) <= $siteWaitCutOffTime)
 					unset($sitesToSkip[$key]);
 			}
 
@@ -142,8 +136,7 @@ class SearchBuilder
 			}
 
 			if (!empty($skipTheseSearches))
-				LogMessage("Skipping the following sites because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
-
+				LogMessage("Skipping the following sites because they have run, successfully or not, since " . $siteWaitCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
 		}
 	}
 
@@ -155,12 +148,13 @@ class SearchBuilder
 	 */
 	private function _filterRecentlyRunUserSearchRuns(array &$searches, User $user)
 	{
-		$searchesToSkip = array();
+		$skipTheseSearches = array();
+		$siteWaitCutOffTime = date_sub(new \DateTime(), date_interval_create_from_date_string('23 hours'));
 
 		$recordsToSkip = UserSearchSiteRunQuery::create()
 			->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
 			->select(array('JobSiteKey', 'UserSearchPairId', 'LastCompleted'))
-			->filterByRunResultCode("successful")
+			->filterByRunResultCode(array("successful", "failed"))
 			->groupBy(array("JobSiteKey", 'UserSearchPairId'))
 			->find()
 			->getData();
@@ -174,7 +168,7 @@ class SearchBuilder
 			//
 			$searchPairsToSkip= array();
 			foreach ($recordsToSkip as $search) {
-				if (new \DateTime($search['LastCompleted']) >= $this->_cacheCutOffTime)
+				if (new \DateTime($search['LastCompleted']) >= $siteWaitCutOffTime)
 				{
 					if(!array_key_exists($search['JobSiteKey'], $searchPairsToSkip))
 						$searchPairsToSkip[$search['JobSiteKey']] = array();
@@ -196,7 +190,7 @@ class SearchBuilder
 			}
 
 			if (!empty($skipTheseSearches))
-				LogMessage("Skipping the following searches because they have run since " . $this->_cacheCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
+				LogMessage("Skipping the following searches because they have run since " . $siteWaitCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
 
 		}
 	}
@@ -214,7 +208,6 @@ class SearchBuilder
         //
         // let's start with the searches specified with the details in the the config.ini
         //
-	    $userSearchPairs = $user->getUserSearchPairs();
 	    $userSearchPairs = $user->getActiveUserSearchPairs();
 	    if (empty($userSearchPairs) || empty($sites))
 		    return array();

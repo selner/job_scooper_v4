@@ -73,6 +73,7 @@ class User extends BaseUser
 	 *
 	 * @return bool|void
 	 * @throws \Exception
+	 * @throws \Psr\Cache\InvalidArgumentException
 	 */
 	public function postSave(ConnectionInterface $con = null)
     {
@@ -105,6 +106,7 @@ class User extends BaseUser
 	/**
 	 * @param array  $arr
 	 * @param string $keyType
+	 * @throws \Exception
 	 */
 	public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -235,6 +237,8 @@ class User extends BaseUser
 	/**
 	 * @return null
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Exception
+	 * @throws \Psr\Cache\InvalidArgumentException
 	 */
 	private function _updateUserSearchPairs()
 	{
@@ -339,6 +343,7 @@ class User extends BaseUser
 	/**
 	 * @return array
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Exception
 	 */
 	public function createUserSearchSiteRuns()
 	{
@@ -353,11 +358,15 @@ class User extends BaseUser
 	/**
 	 * @return array
 	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws \Exception
 	 */
 	public function getUserSearchSiteRuns()
 	{
 		if(empty($this->_userSearchSiteRunsByJobSite))
 			$this->createUserSearchSiteRuns();
-		return $this->_userSearchSiteRunsByJobSite;
+		$arrSearchesToRun = array_filter($this->_userSearchSiteRunsByJobSite, function($var) {
+			return !empty($var);
+		});
+		return $arrSearchesToRun;
 	}
 }
