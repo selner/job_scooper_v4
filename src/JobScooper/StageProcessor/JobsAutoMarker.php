@@ -238,6 +238,8 @@ class JobsAutoMarker
 			LogMessage("Marking {$cntJobsToMark} jobs as duplicate in the database...");
 
 			$totalMarked = 0;
+			$con = Propel::getWriteConnection("default");
+
 			foreach($jobsToMarkDupe["duplicate_job_postings"] as $key=>$job)
 			{
 				$jobRecord =  \JobScooper\DataAccess\JobPostingQuery::create()
@@ -245,10 +247,14 @@ class JobsAutoMarker
 					->findOneOrCreate();
 				assert($jobRecord->isNew() === False);
 				$jobRecord->setDuplicatesJobPostingId($job["isDuplicateOf"]);
-				$jobRecord->save();
+				$jobRecord->save($con);
 				$totalMarked += 1;
-				if ($totalMarked % 25 === 0)
+				if ($totalMarked % 100 === 0) {
+					$con->commit();
+					// fetch a new connection
+					$con = Propel::getWriteConnection("default");
 					LogMessage("... marked {$totalMarked} duplicate job postings...");
+				}
 			}
 
 			LogMessage("Marked {$totalMarked} job listings as duplicate of an earlier job posting with the same company and job title.");
