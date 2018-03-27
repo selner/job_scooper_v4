@@ -13,7 +13,7 @@
         },
         {
             "JobSiteName": "AnotherSource",
-            "SourceURL": "https://jobs.jobvite.com/anothersource/?nl=1",
+            "SourceURL": "https://jobs.jobvite.com/another-source/?nl=1",
             "PluginExtendsClassName": "AbstractJobviteATS"
         },
         {
