@@ -234,7 +234,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 */
 	function getPageURLfromBaseFmt($nPage = null, $nItem = null)
 	{
-		$ret = $this->_callPluginMethodIfExists("getDaysUrlValue", array($this, $nPage, $nItem));
+		$ret = $this->_callPluginMethodIfExists("getPageURLfromBaseFmt", array($this, $nPage, $nItem));
 		if($ret !== false)
 			return $ret;
 
