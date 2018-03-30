@@ -33,7 +33,7 @@ use JobScooper\Utils\GoogleGeocoderHttpAdapter;
 use JobScooper\Utils\GoogleMapsLoggedProvider;
 
 use Monolog\Logger;
-
+use Psr\Cache\InvalidArgumentException;
 
 
 /**
@@ -214,6 +214,8 @@ class LocationManager
 		try {
 			$this->_geoLocCache = GeoLocationCache::getCacheInstance();
 		} catch (Exception $e) {
+			handleException($e);
+		} catch (InvalidArgumentException $e) {
 			handleException($e);
 		}
 
