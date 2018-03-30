@@ -39,11 +39,7 @@ JSON_KEY_NEG_KEYWORDS = u'negative_title_keywords'
 JSON_KEY_USER = u'user'
 
 from docopt import docopt
-import json
 from processfile import tokenizeStrings
-
-import itertools
-from operator import itemgetter
 
 
 class MatchJobsToKeywordsTask:
@@ -98,101 +94,65 @@ class MatchJobsToKeywordsTask:
                     self.jobs = inputData[JSON_KEY_JOBMATCHES]
                     self.jobs = tokenizeStrings(self.jobs, u'Title', u'TitleTokens', u'set')
 
-    def match_keywords(self, data_keywords):
-        dictKeywords = {}
-        for kwdset in data_keywords:
-            if data_keywords[kwdset]['tokens']:
-                toksstring = data_keywords[kwdset]['tokens']
-                toks = toksstring.split("|")
-                l = [t for t in toks if t != ""]
-                dictKeywords[toksstring] = l
+    def get_unique_keywd_set(self, keywords):
 
-        matches = []
+        all_keyword_sets = [x['tokens'].replace("||", "|")[1:-1].split("|") for x in keywords.values()]
+
+        #
+        # build a unique set of all single keyword sets items
+        #
+        all_single_tok = ["".join(s) for s in all_keyword_sets if len(s) == 1]
+        uniq_single_toks = list(sorted(set(all_single_tok)))
+
+        #
+        # build a dictionary of all multiple keyword sets with a key value
+        # like "vice|president" and a value like ["vice", "presiden"]
+        #
+        all_multi_tok_sets = {"|".join(s): list(set(s)) for s in all_keyword_sets if len(s) > 1}
+
+        return { u'single_tokens' : uniq_single_toks, u'multi_tokens' : all_multi_tok_sets }
+
+    def set_keyword_matches(self, data, keySource, keyResult):
+        if not data or not data.values():
+            return
+        kwds_to_match = self.get_unique_keywd_set(data)
+
+        all_possible_multi_toks = "|".join(kwds_to_match['multi_tokens'].keys()).split("|")
         for jobid in self.jobs:
-            for toks in dictKeywords:
-                if self.jobs[jobid][u'TitleTokens'].issuperset(set(dictKeywords[toks])):
-                     matches.append({u'token_match' : toks, u'jobid' : jobid })
+            matched_toks = []
 
-        matched_groups = {}
-        matched_jobs = sorted(matches, key=itemgetter(u'jobid'))
-        for k, g in itertools.groupby(matched_jobs, key=itemgetter(u'jobid')):
-            matched_groups[k] = list(g)
+            # check if we match any of the single term keywords.  We split
+            # them by single/multi because we can do the single check in one call
+            # but have to iterate for the
+            #
+            matched_singles = self.jobs[jobid][keySource].intersection(kwds_to_match['single_tokens'])
+            if matched_singles:
+                matched_toks.extend(matched_singles)
+            # first, do a quick shortcut check to see if we matched even one of the tokens
+            # in the multi token sets.  if we didn't, we can skip the loop.  Otherwise
+            # we then have to find any set where all the tokens were found in the token list
+            # we are matching against
+            #
+            matched_any_multis = self.jobs[jobid][keySource].intersection(all_possible_multi_toks)
+            if matched_any_multis:
+                for m in kwds_to_match['multi_tokens'].keys():
+                    multitokset = kwds_to_match['multi_tokens'][m]
+                    if self.jobs[jobid][u'TitleTokens'].issuperset(set(multitokset)):
+                        matched_toks.append("|".join(multitokset))
 
-        return matched_groups
+            if matched_toks:
+                self.jobs[jobid][keyResult] = matched_toks
+            else:
+                self.jobs[jobid][keyResult] = None
 
     def mark_positive_matches(self):
         print( "Marking jobs that match {} positive title keywords...".format(len(self.keywords)))
 
-        matched_groups = self.match_keywords(self.keywords)
-        group_keys = matched_groups.keys()
-        #
-        # Since we re-matched all the records, we need to update
-        # all rows to clear out any old values of match/not match
-        # that may be lingering
-        #
-        all_job_ids = self.jobs.keys()
-
-        #
-        #
-        #  First let's mark all the non-matches
-        #
-        not_matched_ids = list(set(all_job_ids) - set(group_keys))
-        for jobid in not_matched_ids:
-            self.jobs[jobid][u'IsJobMatch'] = False
-            self.jobs[jobid][u'MatchedUserKeywords'] = None
-
-        #
-        #  Now mark all the job title matches
-        #
-        for jobid in group_keys:
-            self.jobs[jobid][u'IsJobMatch'] = True
-            terms = None
-            for grp in matched_groups[jobid]:
-                if terms:
-                    terms += "|"
-                if isinstance(grp[u'token_match'], basestring):
-                    terms = grp[u'token_match']
-                else:
-                    terms = " ".join(list(grp[u'token_match']))
-            self.jobs[jobid][u'MatchedUserKeywords'] = terms
-
-        print( "Positive Search Keywords: {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids)))
+        self.set_keyword_matches(self.keywords, "TitleTokens", "MatchedUserKeywords")
 
     def mark_negative_matches(self):
-
         print( "Marking jobs that match {} negative title keywords...".format(len(self.negative_keywords)))
-        matched_groups = self.match_keywords(self.negative_keywords)
-        group_keys = matched_groups.keys()
-        #
-        # Since we re-matched all the records, we need to update
-        # all rows to clear out any old values of match/not match
-        # that may be lingering
-        #
-        all_job_ids = self.jobs.keys()
-
-        #
-        #
-        #  First let's mark all the non-matches
-        #
-        not_matched_ids = list(set(all_job_ids) - set(group_keys))
-        for jobid in not_matched_ids:
-            self.jobs[jobid][u'MatchedNegativeTitleKeywords'] = None
-
-        #
-        #  Now mark all the job title matches
-        #
-        for jobid in group_keys:
-            terms = None
-            for grp in matched_groups[jobid]:
-                if terms:
-                    terms += "|"
-                if isinstance(grp[u'token_match'], basestring):
-                    terms = grp[u'token_match']
-                else:
-                    terms = " ".join(list(grp[u'token_match']))
-            self.jobs[jobid][u'MatchedNegativeTitleKeywords'] = terms
-
-        print("Negative Title Keywords:  {} / {} job titles matched; {} / {} job titles not matched.".format(len(group_keys), len(all_job_ids), len(not_matched_ids), len(all_job_ids)))
+        self.set_keyword_matches(self.negative_keywords, "TitleTokens", "MatchedNegativeTitleKeywords")
 
     def load_keywords(self):
         data = helpers.load_json(self.inputFile)
