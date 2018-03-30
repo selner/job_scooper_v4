@@ -45,31 +45,29 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 
     protected $LocationType = 'location-city-comma-state';
 
+
+
 	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 * @param null                                     $nPage
-	 * @param null                                     $nItem
+	 * @param $searchDetails
 	 *
-	 * @return mixed|null|string|string[]
+	 * @return mixed
 	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	protected function getPageURLfromBaseFmt(UserSearchSiteRun $searchDetails, $nPage = null, $nItem = null)
-    {
-        $strURL = $searchDetails->getPageURLfromBaseFmt($nPage, $nItem);
-		$searchDetails->setSearchStartUrl($strURL);
-	    if (empty($this->locationid)) {
-		    $this->locationid = $this->getLocationIdFromPage($searchDetails);
-	    }
+	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+	{
+		$this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
 
-	    if (!empty($this->locationid))
-            $strURL = $strURL. "&LocationID=" . $this->locationid;
+		$url = $this->getActiveWebdriver()->getCurrentURL();
+		if (empty($this->locationid)) {
+			$this->locationid = $this->getLocationIdFromPage($searchDetails);
+		}
 
-//        $page = $nPage == 1 ? "" : "&Page=" . $searchDetails->getPageURLValue($nPage);
-//        $strURL = preg_replace('/&[Pp]age=\d+/', $page, $strURL);
-        return $strURL;
+		if (!empty($this->locationid))
+			$url = $url . "&LocationID=" . $this->locationid;
 
-    }
+		$searchDetails->setSearchStartUrl($url);
+		$this->selenium->loadPage($url);
+	}
 
     protected $arrListingTagSetup = array(
         'NoPostsFound'          => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_callback' => 'matchesNoResultsPattern', 'callback_parameter' => "Found 0 jobs"),
