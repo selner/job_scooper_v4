@@ -34,7 +34,7 @@ class PluginTesla extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
         'JobPostItem' => array('selector' => "table tr.table-row" ),
         'Title' => array('selector' => 'th.listing-title a', 'return_attribute' => 'text'),
         'Url' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href'),
-        'JobSitePostId' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?-(\d+)/i'),
+        'JobSitePostId' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?([-\d]+)$/'),
         'Department' => array('selector' => 'td.listing-department'),
         'Location' => array('selector' => 'td.listing-location')
     );
