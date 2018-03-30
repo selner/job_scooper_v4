@@ -605,19 +605,22 @@ class JobsAutoMarker
 
 							$arrJobMatchFacts = array_subset_keys($arrItem, array(
 								"UserJobMatchId",
-								"IsJobMatch",
 								"MatchedNegativeTitleKeywords",
 								"MatchedUserKeywords"
 							));
 							if (!empty($arrJobMatchFacts['MatchedUserKeywords'])) {
-								$split = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
-								if(!empty($split))
-									$arrJobMatchFacts['MatchedUserKeywords'] = $split;
+								if(is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
+									$split = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
+									if(!empty($split))
+										$arrJobMatchFacts['MatchedUserKeywords'] = $split;
+								}
 							}
 							if (!empty($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
-								$split = preg_split("/\|/", $arrJobMatchFacts['MatchedNegativeTitleKeywords'], -1, PREG_SPLIT_NO_EMPTY);
-								if(!empty($split))
-									$arrJobMatchFacts['MatchedNegativeTitleKeywords'] = $split;
+								if(is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
+									$split = preg_split("/\|/", $arrJobMatchFacts['MatchedNegativeTitleKeywords'], -1, PREG_SPLIT_NO_EMPTY);
+									if (!empty($split))
+										$arrJobMatchFacts['MatchedNegativeTitleKeywords'] = $split;
+								}
 							}
 							$dbMatch->fromArray($arrJobMatchFacts);
 							$dbMatch->save();
