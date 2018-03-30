@@ -64,6 +64,7 @@ class JobsMailSender
 	 */
 	function sendEmail($strBodyText = null, $strBodyHTML = null, $arrAttachFilePaths = array(), $subject="No subject", $emailKind='results', User $toUser = null)
     {
+    	$ret = false;
 	    LogMessage(PHP_EOL . "Sending email titled '{$subject}'...'" . PHP_EOL);
 
 	    try {
@@ -246,6 +247,7 @@ class JobsMailSender
 		finally
 		{
 			unset($this->phpmailer);
+			return $ret;
 		}
     }
 
