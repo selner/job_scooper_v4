@@ -1094,6 +1094,9 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	function saveSearchReturnedJobs($arrJobList, UserSearchSiteRun $searchDetails, &$nCountNewJobs = 0)
 	{
 
+		if(empty($arrJobList))
+			return;
+
 		foreach($arrJobList as $k => $item)
 			$arrJobList[$k] = $this->cleanupJobItemFields($item);
 
