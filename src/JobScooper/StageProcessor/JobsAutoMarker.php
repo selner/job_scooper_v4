@@ -74,7 +74,6 @@ class JobsAutoMarker
 		LogMessage(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL);
 
 		try {
-
 			// Dupes aren't affected by the user's matches so do that marking first
 			//
 			$this->_findAndMarkRecentDuplicatePostings();
@@ -101,27 +100,28 @@ class JobsAutoMarker
 	}
 
 	/**
-	 * @param $results
+	 * @param UserJobMatch[] $results
 	 *
 	 * @throws \Exception
 	 */
 	function _markJobsListSubset_($results)
 	{
+		$errs = array();
+
 		LogMessage("Clearing old auto-marked facts from jobs we are re-marking...");
 		try {
-			foreach ($results as $jobmatch)
-				$jobmatch->clearUserMatchState();
+			foreach ($results as $jobMatch)
+				$jobMatch->clearUserMatchState();
 		} catch (Exception $ex) {
 			LogError($ex->getMessage(), null, $ex);
+			$errs[] = $ex;
 		}
 
-
 		try {
-			$this->_markJobsList_KeywordMatches_($results);
 			$this->_markJobsList_SetOutOfArea_($results);
 		} catch (Exception $ex) {
 			LogError($ex->getMessage(), null, $ex);
-			throw($ex);
+			$errs[] = $ex;
 		}
 
 		try
@@ -129,7 +129,30 @@ class JobsAutoMarker
 			$this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($results);
 		} catch (Exception $ex) {
 			LogError($ex->getMessage(), null, $ex);
-			throw($ex);
+			$errs[] = $ex;
+		}
+
+		try {
+			$this->_markJobsList_KeywordMatches_($results);
+		} catch (Exception $ex) {
+			LogError($ex->getMessage(), null, $ex);
+			$errs[] = $ex;
+		}
+
+
+		if(!empty($errs))
+		{
+			$err_to_return = "";
+			foreach($errs as $ex)
+			{
+				if(!empty($err_to_return))
+					$err_to_return .= PHP_EOL . PHP_EOL;
+				$err_to_return .= getArrayDebugOutput(object_to_array($ex));
+			}
+
+			$last = array_pop($ex);
+			throw new Exception("AutoMarking Errors Occurred:  {$err_to_return}", $last->getCode(), $last);
+
 		}
 
 
@@ -151,7 +174,6 @@ class JobsAutoMarker
 			$totalMarkedReady = 0;
 			foreach ($results as $jobMatch) {
 				$jobMatch->setUserNotificationState(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND);
-				$jobMatch->updateUserMatchStatus();
 				$jobMatch->save($con);
 				$totalMarkedReady = $totalMarkedReady + 1;
 				if ($totalMarkedReady % 100 === 0) {
@@ -555,17 +577,40 @@ class JobsAutoMarker
 		return $outfile;
 	}
 
+	private function _updateKeywordMatchForSingleJob(UserJobMatch &$job, $arrMatchData)
+	{
+		$arrJobMatchFacts = array_subset_keys($arrMatchData, array(
+			"UserJobMatchId",
+			"MatchedNegativeTitleKeywords",
+			"MatchedUserKeywords"
+		));
+		if (!empty($arrJobMatchFacts['MatchedUserKeywords'])) {
+			if(is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
+				$split = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
+				if(!empty($split))
+					$arrJobMatchFacts['MatchedUserKeywords'] = $split;
+			}
+		}
+		if (!empty($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
+			if(is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
+				$split = preg_split("/\|/", $arrJobMatchFacts['MatchedNegativeTitleKeywords'], -1, PREG_SPLIT_NO_EMPTY);
+				if (!empty($split))
+					$arrJobMatchFacts['MatchedNegativeTitleKeywords'] = $split;
+			}
+		}
+		$job->fromArray($arrJobMatchFacts);
+	}
 
 	/**
 	 * Reads JSON encoded file with an array of UserJobMatch/JobPosting combo records named "jobs"
 	 * and updates the database with the values for each record
 	 *
-	 * @param String $inputFile The input json file to load
+	 * @param String $datafile The input json file to load
+	 * @param UserJobMatch[] &$arrJobsList the job list to update from json
 	 *
-	 * @returns array Returns array of UserJobMatchIds if successful; empty array if not.
 	 * @throws \Exception
 	 */
-	private function _updateUserJobMatchesFromJson($datafile)
+	private function _updateUserJobMatchesFromJson($datafile, &$arrJobsList)
 	{
 
 		if (!is_file($datafile))
@@ -573,62 +618,74 @@ class JobsAutoMarker
 
 		try {
 
-			LogMessage("Loading and updating UserJobMatch records from json file {$datafile}.");
+			LogMessage("Loading json file '{$datafile}'...");
 			$data = loadJSON($datafile);
 			$retUJMIds = array();
 
-			if(empty($data) || !array_key_exists('job_matches', $data))
-			{
+			if (empty($data) || !array_key_exists('job_matches', $data)) {
 				throw new Exception("Unable to load data from {$datafile}.  No records found.");
 			}
 
-				$arrMatchRecs = $data['job_matches'];
-				if (!empty($arrMatchRecs) && is_array($arrMatchRecs)) {
-					$arrUserJobMatchIds = array_keys($arrMatchRecs);
-					$dbRecsById = array();
-					$chunks = array_chunk($arrUserJobMatchIds, 50);
-					foreach ($chunks as $idchunk) {
-						$dbRecsById = UserJobMatchQuery::create()
-							->filterByUserJobMatchId($idchunk, Criteria::IN)
-							->find()
-							->toKeyIndex("UserJobMatchId");
-						foreach ($idchunk as $id) {
-							$arrItem = $arrMatchRecs[$id];
-							if (array_key_exists($id, $dbRecsById)) {
-								$dbMatch = $dbRecsById[$id];
-							} else {
-								$dbMatch = UserJobMatchQuery::create()
-									->filterByUserJobMatchId($id)
-									->findOneOrCreate();
-								$dbMatch->setUserJobMatchId($id);
-							}
+			$arrMatchRecs = $data['job_matches'];
+			LogMessage("Loaded " . count($arrMatchRecs) . " user job matches from JSON file {$datafile} for updating in the DB...");
 
-							$arrJobMatchFacts = array_subset_keys($arrItem, array(
-								"UserJobMatchId",
-								"MatchedNegativeTitleKeywords",
-								"MatchedUserKeywords"
-							));
-							if (!empty($arrJobMatchFacts['MatchedUserKeywords'])) {
-								if(is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
-									$split = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
-									if(!empty($split))
-										$arrJobMatchFacts['MatchedUserKeywords'] = $split;
-								}
-							}
-							if (!empty($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
-								if(is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
-									$split = preg_split("/\|/", $arrJobMatchFacts['MatchedNegativeTitleKeywords'], -1, PREG_SPLIT_NO_EMPTY);
-									if (!empty($split))
-										$arrJobMatchFacts['MatchedNegativeTitleKeywords'] = $split;
-								}
-							}
-							$dbMatch->fromArray($arrJobMatchFacts);
-							$dbMatch->save();
-							$retUJMIds[] = $id;
-						}
+			//
+			// Update any of the passed job records we had in the loaded data set
+			//
+			if (!empty($arrMatchRecs) && is_array($arrMatchRecs)) {
+				$arrUserJobMatchIds = array_keys($arrMatchRecs);
+
+				if (!empty($arrJobsList)) {
+					$jobIdsToUpdate = array_intersect($arrUserJobMatchIds, array_keys($arrJobsList));
+					foreach ($jobIdsToUpdate as $jobid) {
+						$this->_updateKeywordMatchForSingleJob($arrJobsList[$jobid], $arrMatchRecs[$jobid]);
+						unset($arrMatchRecs[$jobid]);
+						$retUJMIds[] = $jobid;
 					}
 				}
-			return $retUJMIds;
+			}
+
+			//
+			// if there were any other user job matches in the loaded JSON
+			// file, we need to pull each one from the DB if exists and update
+			// or insert if missing
+			//
+			if (!empty($arrMatchRecs))
+			{
+				$con = Propel::getWriteConnection("default");
+				$dbRecsById = array();
+				$chunks = array_chunk(array_keys($arrMatchRecs), 50);
+				foreach ($chunks as $idchunk)
+				{
+					$dbRecsById = UserJobMatchQuery::create()
+						->filterByUserJobMatchId($idchunk, Criteria::IN)
+						->find()
+						->toKeyIndex("UserJobMatchId");
+					foreach ($idchunk as $id) {
+						if (array_key_exists($id, $dbRecsById)) {
+							$dbMatch = $dbRecsById[$id];
+						} else {
+							$dbMatch = UserJobMatchQuery::create()
+								->filterByUserJobMatchId($id)
+								->findOneOrCreate();
+							$dbMatch->setUserJobMatchId($id);
+						}
+						$this->_updateKeywordMatchForSingleJob($dbMatch, $arrMatchRecs[$jobid]);
+						$dbMatch->save();
+						$retUJMIds[] = $id;
+					}
+
+					// commit the last 50 to the database and then fetch
+					// a clean connection so we don't trip up the database with long connection times
+					$con->commit();
+					// fetch a new connection
+					$con = Propel::getWriteConnection("default");
+				}
+			}
+
+			$totalMarked = count($retUJMIds);
+
+			LogMessage("... updated {$totalMarked} user job matches loaded from json file '{$datafile}.");
 
 		} catch (Exception $ex) {
 			throw $ex;
@@ -647,7 +704,8 @@ class JobsAutoMarker
 
 		try {
 			$basefile = "mark_titlematches";
-			LogMessage("Exporting updated jobs to JSON file '{$basefile}_src.json' for matching...");
+
+			LogMessage("Exporting " . count($arrJobsList) . " user job matches to JSON file '{$basefile}_src.json' for matching...");
 			$sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $arrJobsList);
 			$resultsfile = generateOutputFileName("{$basefile}_results", "json", true, 'debug');
 
@@ -662,7 +720,7 @@ class JobsAutoMarker
 				doExec($cmd);
 
 				LogMessage("Updating database with new match results...");
-				$this->_updateUserJobMatchesFromJson($resultsfile);
+				$this->_updateUserJobMatchesFromJson($resultsfile, $arrJobsList);
 
 			} catch (Exception $ex)
 			{

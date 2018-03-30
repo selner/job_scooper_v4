@@ -191,16 +191,18 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null )
 {
 	$moreResults = true;
+	$allResults = array();
 
 	$nResults = 1;
+	$nSetResults = $nResults;
 	while ($moreResults)
 	{
-		$results = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $user);
-		if (!empty($results))
+		$chunkResults = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $user);
+		if (!empty($chunkResults))
 		{
-			$nSetResults = $nResults + count($results) - 1;
+			$nSetResults = $nResults + count($chunkResults) - 1;
 			LogMessage("Processing user match results #{$nResults} - {$nSetResults} through callback...");
-			call_user_func($callback, $results);
+			call_user_func($callback, $chunkResults);
 			$nResults = $nResults + $nSetResults;
 		}
 		else
@@ -212,6 +214,7 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
 
 	}
 
+	return ;
 }
 
 /**
