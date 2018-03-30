@@ -136,9 +136,10 @@ function getRunDateRange($configNumDays=null)
  *
  * @return null|string
  */
-function combineTextAllChildren($node, $fRecursed = false, $delim=" ", &$arrChildStrings=[])
+function combineTextAllChildren($node, $fRecursed = false, $delim=" ", $arrChildStrings=[])
 {
-	if(empty($node))
+
+	if (empty($node))
 		return null;
 
 	if (is_array($node) && count($node) > 1) {
@@ -146,69 +147,32 @@ function combineTextAllChildren($node, $fRecursed = false, $delim=" ", &$arrChil
 		LogWarning($strError);
 	}
 
-	if(is_array($node) && count($node) >= 1)
+	if (is_array($node) && count($node) >= 1)
 		$node = $node[0];
 
 	$nodeKey = $node->getNode()->getNodePath();
-	if ($node->hasChildren()) {
-		foreach ($node->children() as $child) {
-			if($fRecursed)
-				combineTextAllChildren($child, $fRecursed, $delim, $arrChildStrings);
-			else
-				$arrChildStrings[$nodeKey] = strScrub($node->text(), HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
-			unset($child);
-		}
-	}
+
+	if ($fRecursed === true)
+		LogDebug("Combining text for all child from node {$nodeKey}");
 	else
-		$arrChildStrings[$nodeKey] = strScrub($node->text(), HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
+		LogDebug("... processing text from {$nodeKey} and related elements...");
 
+	//
+	// By luck, the DiDomElement returns the textContent from all child elements
+	// underneath it already so we can shortcut this to just return that.
+	//
+	try
+	{
+		return $node->text;
+	}
+	catch (Exception $ex)
+	{
+		// do nothing
 
-	LogDebug("... combining these node parent & children for the node:  " . getArrayDebugOutput($arrChildStrings));
-
-	ksort($arrChildStrings);
-	array_unique($arrChildStrings);
-	$retStr = join($delim, $arrChildStrings);
-
-	return $retStr;
-
+	}
+	return "";
 }
 
-/**
- * @param        $node
- * @param bool   $fRecursed
- * @param string $delim
- *
- * @return mixed|null|string
- */
-function combineTextAllChildrenString($node, $fRecursed = false, $delim=" ")
-{
-	if(empty($node))
-		return null;
-
-    $retStr = "";
-    if (is_array($node) && count($node) > 1) {
-        $strError = sprintf("Warning:  " . count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
-        LogWarning($strError);
-    }
-
-    if(is_array($node) && count($node) >= 1)
-        $node = $node[0];
-
-    if ($node->hasChildren()) {
-        foreach ($node->children() as $child) {
-        	if($fRecursed)
-	            $retStr = $retStr . $delim . combineTextAllChildren($child, $fRecursed, $delim);
-        	else
-		        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE) . $retStr;
-        }
-        unset($child);
-    }
-    else
-        $retStr = strScrub($node->text() . " " . $retStr, HTML_DECODE | REMOVE_EXTRA_WHITESPACE);
-
-    return $retStr;
-
-}
 
 /**
  * @param        $nodes
