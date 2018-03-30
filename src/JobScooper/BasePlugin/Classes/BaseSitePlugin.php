@@ -1630,6 +1630,17 @@ JSCODE;
 
                         }
                     } catch (Exception $ex) {
+
+                    	# Attempt to save the jobs we already had grabbed before the error occurred
+	                    try
+	                    {
+	                    	$this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails, $nCountNewJobsInDb);
+	                    }
+	                    catch (Exception $tempEx)
+	                    {
+	                    	// do nothing here since we already had a previous error we are handling.
+	                    }
+
                         throw $ex;
                     }
 
@@ -1765,7 +1776,7 @@ JSCODE;
 	 */
 	protected function setResultPageUrl($searchDetails, $nPageCount, $nItemCount)
     {
-	    $searchDetails->nextResultsPageUrl = $searchDetails->getPageURLfromBaseFmt($searchDetails, $nPageCount, $nItemCount);
+	    $searchDetails->nextResultsPageUrl = $searchDetails->getPageURLfromBaseFmt($nPageCount, $nItemCount);
 	    if ($this->_checkInvalidURL_($searchDetails, $searchDetails->nextResultsPageUrl) == self::VALUE_NOT_SUPPORTED)
 		    return $searchDetails->nextResultsPageUrl;
 
