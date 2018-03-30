@@ -15,6 +15,7 @@
  * under the License.
  */
 
+date_default_timezone_set('America/Los_Angeles');
 
 $files = glob(realpath(dirname(__FILE__))  . '/*.php');
 foreach ($files as $file) {
