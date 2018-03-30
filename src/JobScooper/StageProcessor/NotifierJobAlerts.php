@@ -300,15 +300,18 @@ class NotifierJobAlerts extends JobsMailSender
 			$ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results", $sendToUser);
 			if ($ret !== false && $ret !== null) {
 
-				// Only mark the job postings as notified if we are doing a normal "all" run, not a single site subset run
-				// and if we are not running in debug mode
-				if (!isDebug() && !JobSitePluginBuilder::isSubsetOfSites()) {
-					if (!empty($matches['all'])) {
+				//
+				// Mark the user job matches we just notified the user about as sent unless
+				// we are in debug/developer mode OR we didn't run all job sites.  (The latter is so that
+				// we will notify the users again in a full report run.  Otherwise they would get annoyingly small
+				// separate reports instead.
+				//
+				if (!isDebug() && !JobSitePluginBuilder::isSubsetOfSites() &&
+					!empty($allJobMatchIds)) {
 						$now = new \DateTime();
 						$sendToUser->setLastNotifiedAt($now);
 						$sendToUser->save();
 						updateUserJobMatchesStatus($allJobMatchIds, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT);
-					}
 				}
 			}
 			endLogSection(" Email send completed...");
