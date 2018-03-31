@@ -1,6 +1,14 @@
 {
     "jobsite_plugins": [
         {
+            "JobSiteName": "IndependentUK",
+            "JobPostingBaseUrl" : "http://independentjobs.independent.co.uk",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
             "JobSiteName": "TheGuardian",
             "SiteReferenceKey": "jobs.theguardian",
             "PluginExtendsClassName": "AbstractMadgexATS",

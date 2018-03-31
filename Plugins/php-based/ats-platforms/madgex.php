@@ -29,7 +29,9 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	function __construct()
     {
     	$this->locationid = null;
-	    $this->JobPostingBaseUrl = "https://{$this->SiteReferenceKey}.com";
+    	if(empty($this->JobPostingBaseUrl))
+		    $this->JobPostingBaseUrl = "https://{$this->SiteReferenceKey}.com";
+
 	    $this->SearchUrlFormat = "{$this->JobPostingBaseUrl}/searchjobs?Keywords=***KEYWORDS***&radialtown=***LOCATION:{Place}***+***LOCATION:{Region}***&RadialLocation=50&NearFacetsShown=true&countrycode=***LOCATION:{CountryCode}***&sort=Date&Page=***PAGE_NUMBER***";
         $this->prevURL = $this->JobPostingBaseUrl;
         $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
@@ -50,7 +52,6 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	/**
 	 * @param $searchDetails
 	 *
-	 * @return mixed
 	 * @throws \Exception
 	 */
 	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
@@ -71,7 +72,7 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 
     protected $arrListingTagSetup = array(
         'NoPostsFound'          => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_callback' => 'matchesNoResultsPattern', 'callback_parameter' => "Found 0 jobs"),
-        'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b(\d+)\b/i'),
+        'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b([,\d]+)\b/i'),
 //        'JobPostItem'           => array('selector' => 'li.lister__item'),
         'JobPostItem'           => array('selector' => 'ul#listing li.cf'),
         'Title'                 => array('selector' => 'h3.lister__header a span', 'return_attribute' => 'text', 'index' =>0),
