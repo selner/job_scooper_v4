@@ -1100,7 +1100,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 		foreach($arrJobList as $k => $item)
 			$arrJobList[$k] = $this->cleanupJobItemFields($item);
 
-		$arrJobsToAdd = array_unique_multidimensional($arrJobList);
+		$arrJobsToAdd = array_column($arrJobList, null, "JobSitePostId");
 		$siteRunKey = $searchDetails->getUserSearchSiteRunKey();
 		try {
 			$nCountNewJobs = 0;
@@ -1116,7 +1116,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 				->toKeyIndex("JobSitePostId");
 			if (!empty($alreadyExist)) {
 				$arrExistJobCols = array_from_orm_object_list_by_array_keys($alreadyExist, array("JobPostingId", "JobSitePostId", "FirstSeenAt"), "JobPostingId");
-				$arrExistJobSitePostIds = array_column($arrExistJobCols, "JobSitePostId");
+				$arrExistJobSitePostIds = array_column($arrExistJobCols, "JobSitePostId", "JobSitePostId");
 				$this->arrSearchReturnedJobs[$siteRunKey] = $this->arrSearchReturnedJobs[$siteRunKey] + $arrExistJobCols;
 
 				$arrJobsToAdd = array_filter($arrJobsToAdd, function ($var) use ($arrExistJobSitePostIds) {
