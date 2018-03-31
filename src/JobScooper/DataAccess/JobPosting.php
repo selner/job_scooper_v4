@@ -90,16 +90,19 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
 	/**
 	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	protected function updateAutoColumns()
 	{
 		$this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
+		$this->_updateAutoLocationColumns();
+		$this->_setDenormalizedLocationDisplayValue_();
 	}
 
 	/**
 	 * @param $method
 	 * @param $v
-	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
 	 * @return mixed
 	 */
 	public function setAutoColumnRelatedProperty($method, $v)
@@ -126,10 +129,12 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		}
 
 		$val = $this->_cleanupTextValue($val);
-		if (is_null($val) || strlen($val) == 0)
+		if (empty($val))
+		{
 			$val = $this->getLocation();
+			$val = $this->_cleanupTextValue($val);
+		}
 
-		$val = $this->_cleanupTextValue($val);
 		$this->setLocationDisplayValue($val);
 	}
 
@@ -234,12 +239,6 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 //        }
 
 		parent::setLocation(trim($v));
-
-		// clear any previous job location ID when we set a new location string
-//        if(is_null($oldVal)) strcmp($oldVal, $this->getLocation() != 0))
-//        {
-		$this->_updateAutoLocationColumns();
-//        }
 	}
 
 	/**
