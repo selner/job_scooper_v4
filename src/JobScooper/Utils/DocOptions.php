@@ -24,7 +24,7 @@ class DocOptions extends PropertyObject
 private $doc = "{APP_RUN_COMMAND}
 
 Usage:
-  {APP_RUN_COMMAND} [--config=<config_file_path>] [--user=<config_user_key>] [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--recap] [--delete] [--debug] [--disable-notifications] 
+  {APP_RUN_COMMAND} [--config=<config_file_path>] [--user=<config_user_key>] [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--recap] [--delete] [--debug] [--ignore_recent] [--disable-notifications] 
   {APP_RUN_COMMAND} [--config=<config_file_path>] [--debug] [--disable-notifications]
   {APP_RUN_COMMAND} (-h | --help)
   {APP_RUN_COMMAND} --version
@@ -37,6 +37,7 @@ Options:
   --stages=<stage_numbers>  Comma-separated list of stage numbers to run from 1 - 4. [default: 1,2,3]
   --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey. [default: all]
   --debug  Show debug output. [default: false]
+  --ignore_recent    Run a search regardless of whether it was run recently.
   --delete  Removes the user data associated with specified users.
   --recap  Sends a weekly jobs recap notification to specified users.  
   --disable-notifications   Do not send email alerts for new jobs. [default: false]

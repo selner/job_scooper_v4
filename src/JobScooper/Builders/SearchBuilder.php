@@ -40,7 +40,10 @@ class SearchBuilder
 
 	    $sites = JobSitePluginBuilder::getIncludedJobSites();
 
-	    $this->_filterRecentlyRunJobSites($sites, $user);
+	    $ignoreRecent = filter_var(getConfigurationSetting('command_line_args.ignore_recent'), FILTER_VALIDATE_BOOLEAN);
+
+	    if($ignoreRecent !== true)
+		    $this->_filterRecentlyRunJobSites($sites, $user);
 
 	    $countryCodes = array();
 	    $searchLoc = $user->getSearchGeoLocations();
@@ -54,7 +57,10 @@ class SearchBuilder
 	    // Create searches needed to run all the keyword sets
 	    //
 	    $searchesByJobSite = $this->_generateUserSearchSiteRuns($sites, $user);
-		$this->_filterRecentlyRunUserSearchRuns($searchesByJobSite, $user);
+
+	    if($ignoreRecent !== true)
+			$this->_filterRecentlyRunUserSearchRuns($searchesByJobSite, $user);
+
 	    return $searchesByJobSite;
 
     }
