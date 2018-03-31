@@ -46,26 +46,26 @@ class JobSitePluginBuilder
 	 * @throws \Exception
 	 */
 	static function getAllJobSites()
-    {
-	    $sitesBySiteKey = getGlobalSetting(JOBSCOOPER_CACHES_ROOT, "all_jobsites_and_plugins" );
+	{
+		$sitesBySiteKey = getGlobalSetting(JOBSCOOPER_CACHES_ROOT, "all_jobsites_and_plugins" );
 		if(!empty($sitesBySiteKey)) {
 			$sitesBySiteKey = getCacheAsArray("all_jobsites_and_plugins");
 			return $sitesBySiteKey;
 		}
 
 
-        $query = JobSiteRecordQuery::create();
+		$query = JobSiteRecordQuery::create();
 
-        $sites = $query
-	        ->find()
-	        ->toKeyIndex('JobSiteKey');
+		$sites = $query
+			->find()
+			->toKeyIndex('JobSiteKey');
 
-        setAsCacheData("all_jobsites_and_plugins", $sites);
+		setAsCacheData("all_jobsites_and_plugins", $sites);
 
-	    if(is_null($sitesBySiteKey))
-		    return array();
-	    return $sitesBySiteKey;
-    }
+		if(is_null($sitesBySiteKey))
+			return array();
+		return $sitesBySiteKey;
+	}
 
 	/**
 	 * @param string $strJobSiteKey
@@ -329,6 +329,11 @@ class JobSitePluginBuilder
             foreach (array_keys($plugins) as $agentkey) {
                 LogDebug("Running eval statement for class " . $plugins[$agentkey]['PhpClassName'],null, $channel="plugins");
                 try {
+                	if($type === "Abstract" && array_key_exists("arrListingTagSetup", $plugins[$agentkey]))
+	                {
+		                $plugins[$agentkey]['arrBaseListingTagSetup'] = $plugins[$agentkey]['arrListingTagSetup'];
+		                unset($plugins[$agentkey]['arrListingTagSetup']);
+	                }
                 	if(!in_array($plugins[$agentkey]['PhpClassName'], get_declared_classes()))
 	                {
 	                    $evalStmt = $this->_getClassInstantiationCode($plugins[$agentkey]);
@@ -403,6 +408,9 @@ class JobSitePluginBuilder
         setArrayItem($pluginData, 'PhpClassName', $arrConfigData, 'PhpClassName');
         if (empty($pluginData['PhpClassName']))
             $pluginData['PhpClassName'] = "Plugin" . $arrConfigData['JobSiteName'];
+
+        if (!empty($arrConfigData['PluginExtendsClassName']) && stristr($arrConfigData['PluginExtendsClassName'], "Abstract") === false)
+	        setArrayItem($pluginData, 'PluginExtendsClassName', $arrConfigData, 'PluginExtendsClassName');
 
         setArrayItem($pluginData, 'JobPostingBaseUrl', $arrConfigData, 'BaseURL');
         setArrayItem($pluginData, 'SearchUrlFormat', $arrConfigData, 'SourceURL');
