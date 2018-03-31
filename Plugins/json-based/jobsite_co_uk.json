@@ -12,14 +12,14 @@
             "Fields": [
                 {
                     "Name": "TotalPostCount",
-                    "Selector": "h1.search_result_title",
+                    "Selector": "div.page-title span",
                     "Index": 0,
                     "Pattern": "/([0-9,]+).*/",
                     "Type": "CSS"
                 },
                 {
                     "Name": "JobPostItem",
-                    "Selector": "div.vacancy_search_result",
+                    "Selector": "div.job-results div.job",
                     "Attribute": "collection",
                     "Type": "CSS"
                 }
@@ -30,43 +30,49 @@
             "Fields": [
                 {
                     "Name": "Title",
-                    "Selector": "ul li h3 a",
+                    "Selector": "div.job-title a",
                     "Index": 0,
                     "Attribute": "text",
                     "Type": "CSS"
                 },
                 {
                     "Name": "Url",
-                    "Selector": "ul li h3 a",
+                    "Selector": "div.job-title a",
                     "Attribute": "href",
                     "Index": 0,
                     "Type": "CSS"
                 },
                 {
                     "Name": "JobSitePostId",
-                    "Selector": "ul li h3 a",
-                    "Attribute": "href",
+                    "Selector": "div.job",
+                    "Attribute": "id",
                     "Index": 0,
-                    "Type": "CSS",
-                    "Pattern": "/-(\\w+)\\?/"
+                    "Type": "CSS"
                 },
                 {
                     "Name": "Location",
-                    "Selector": "ul li.location",
+                    "Selector": "li.location",
                     "Index": 0,
                     "Type": "CSS",
                     "Callback" : "parseOneOrMoreLocations"
                 },
                 {
                     "Name": "EmploymentType",
-                    "Selector": "ul li.position_type span",
+                    "Selector": "li.job-type span",
+                    "Index": 0,
+                    "Attribute": "text",
+                    "Type": "CSS"
+                },
+                {
+                    "Name": "PayRange",
+                    "Selector": "li.salary",
                     "Index": 0,
                     "Attribute": "text",
                     "Type": "CSS"
                 },
                 {
                     "Name": "PostedAt",
-                    "Selector": "ul li.date",
+                    "Selector": "li.date-posted span",
                     "Index": 0,
                     "Attribute": "text",
                     "Type": "CSS"
@@ -77,6 +83,6 @@
     "Pagination": {
         "PageDelaySeconds": 4,
         "Type": "PAGE-VIA-URL",
-        "PageLimit": 25
+        "PageLimit": 20
     }
 }
