@@ -140,6 +140,8 @@ class TaskDedupeJobPostings:
                 subitem["TitleTokensString"] = "~".join(item["TitleTokens"])
                 if "GeoLocationId" in subitem and subitem["GeoLocationId"]:
                     loc = subitem["GeoLocationId"]
+                if "LocationDisplayValue" in subitem and subitem["LocationDisplayValue"]:
+                    loc = subitem["LocationDisplayValue"]
                 else:
                     loc = "NoLocation"
                 subitem["CompanyTitleGeoLocation"] = u"{}_{}_{}".format(subitem["Company"], subitem["TitleTokensString"], loc)
