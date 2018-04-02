@@ -232,6 +232,8 @@ abstract class SimplePlugin extends BaseSitePlugin
 	 */
 	protected function _getTagValueFromPage_($node, $tagKey, $item = null)
     {
+	    $ret = null;
+
         if (!(array_key_exists($tagKey, $this->arrListingTagSetup) && count($this->arrListingTagSetup[$tagKey]) >= 1))
             return null;
 
@@ -247,11 +249,11 @@ abstract class SimplePlugin extends BaseSitePlugin
         switch(strtoupper($arrTag['type']))
         {
             case 'CSS':
-                return $this->_getTagMatchValueViaFind_($node, $arrTag, Query::TYPE_CSS);
+                $ret = $this->_getTagMatchValueViaFind_($node, $arrTag, Query::TYPE_CSS);
                 break;
 
 	        case 'XPATH':
-		        return $this->_getTagMatchValueViaFind_($node, $arrTag, Query::TYPE_XPATH);
+		        $ret = $this->_getTagMatchValueViaFind_($node, $arrTag, Query::TYPE_XPATH);
 		        break;
 
 	        case 'STATIC':
@@ -259,7 +261,7 @@ abstract class SimplePlugin extends BaseSitePlugin
 		        break;
 
 	        case 'SOURCEFIELD':
-                return $this->_getTagMatchValueSourceField_($arrTag, $item);
+                $ret = $this->_getTagMatchValueSourceField_($arrTag, $item);
                 break;
 
             case 'MICRODATA':
@@ -269,6 +271,22 @@ abstract class SimplePlugin extends BaseSitePlugin
             default:
                 throw new \Exception("Unknown field definition type of " . $arrTag['type']);
         }
+
+	    if (array_key_exists("return_value_callback", $arrTag) && (strlen($arrTag['return_value_callback']) > 0)) {
+		    $callback = get_class($this) . "::" . $arrTag['return_value_callback'];
+		    if (!method_exists($this, $arrTag['return_value_callback'])) {
+			    $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->JobSiteName, $callback, $returnAttribute);
+			    $this->log($strError, LogLevel::ERROR);
+			    throw new \Exception($strError);
+		    }
+
+		    if (array_key_exists("callback_parameter", $arrTag) && !empty($arrTag['callback_parameter']))
+			    $ret = call_user_func($callback, array($ret, $arrTag['callback_parameter']));
+		    else
+			    $ret = call_user_func($callback, $ret);
+	    }
+
+	    return $ret;
 
     }
 
@@ -458,20 +476,6 @@ abstract class SimplePlugin extends BaseSitePlugin
         else
         {
             $ret = $strMatch;
-        }
-
-        if (array_key_exists("return_value_callback", $arrTag) && (strlen($arrTag['return_value_callback']) > 0)) {
-            $callback = get_class($this) . "::" . $arrTag['return_value_callback'];
-            if (!method_exists($this, $arrTag['return_value_callback'])) {
-                $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->JobSiteName, $callback, $returnAttribute);
-                $this->log($strError, LogLevel::ERROR);
-                throw new \Exception($strError);
-            }
-
-            if (array_key_exists("callback_parameter", $arrTag) && !empty($arrTag['callback_parameter']))
-                $ret = call_user_func($callback, array($ret, $arrTag['callback_parameter']));
-            else
-                $ret = call_user_func($callback, $ret);
         }
 
         return $ret;
