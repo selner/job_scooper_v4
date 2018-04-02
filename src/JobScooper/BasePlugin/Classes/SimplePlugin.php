@@ -273,6 +273,12 @@ abstract class SimplePlugin extends BaseSitePlugin
                 throw new \Exception("Unknown field definition type of " . $arrTag['type']);
         }
 
+	    if (!empty($arrTag['return_attribute']))
+		    $returnAttribute = $arrTag['return_attribute'];
+	    else
+		    $returnAttribute = 'text';
+
+
 	    if (array_key_exists("return_value_callback", $arrTag) && (strlen($arrTag['return_value_callback']) > 0)) {
 		    $callback = get_class($this) . "::" . $arrTag['return_value_callback'];
 		    if (!method_exists($this, $arrTag['return_value_callback'])) {
@@ -612,7 +618,13 @@ abstract class SimplePlugin extends BaseSitePlugin
         return $ret;
     }
 
-    function parseSingleJob(ExtendedDiDomElement $node)
+	/**
+	 * @param \JobScooper\Utils\ExtendedDiDomElement $node
+	 *
+	 * @return array|null
+	 * @throws \Exception
+	 */
+	function parseSingleJob(ExtendedDiDomElement $node)
     {
 	    //
 	    // get a new record with all columns set to null
@@ -632,7 +644,7 @@ abstract class SimplePlugin extends BaseSitePlugin
 	    }
 
 	    if (empty($item['Title']) || strcasecmp($item['Title'], "title") == 0)
-		    continue;
+		    return null;
 
 	    if(empty($item['JobSiteKey']))
 		    $item['JobSiteKey'] = $this->JobSiteName;

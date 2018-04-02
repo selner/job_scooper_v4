@@ -333,6 +333,8 @@ class JobSitePluginBuilder
 	                {
 		                $plugins[$agentkey]['arrBaseListingTagSetup'] = $plugins[$agentkey]['arrListingTagSetup'];
 		                unset($plugins[$agentkey]['arrListingTagSetup']);
+		                unset($plugins[$agentkey]['JobSiteName']);
+		                unset($plugins[$agentkey]['JobSiteKey']);
 	                }
                 	if(!in_array($plugins[$agentkey]['PhpClassName'], get_declared_classes()))
 	                {
@@ -418,10 +420,10 @@ class JobSitePluginBuilder
 		    $pluginData['JobSiteName'] = preg_replace("/^Plugin/", "", $arrConfigData['PhpClassName']);
 	    $jobsitekey = strtolower($pluginData['JobSiteName']);
 
-	    $arrConfigData['PluginExtendsClassName'] = str_replace("\\\\", "\\", $pluginData['PluginExtendsClassName']);
 
         if (!empty($arrConfigData['PluginExtendsClassName']) && stristr($arrConfigData['PluginExtendsClassName'], "Abstract") === false)
 	        setArrayItem($pluginData, 'PluginExtendsClassName', $arrConfigData, 'PluginExtendsClassName');
+	    $pluginData['PluginExtendsClassName'] = str_replace("\\\\", "\\", $pluginData['PluginExtendsClassName']);
 
         setArrayItem($pluginData, 'JobPostingBaseUrl', $arrConfigData, 'BaseURL');
         setArrayItem($pluginData, 'SearchUrlFormat', $arrConfigData, 'SourceURL');
