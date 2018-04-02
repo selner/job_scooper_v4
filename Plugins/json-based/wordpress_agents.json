@@ -1,0 +1,121 @@
+{
+    "jobsite_plugins": [
+        {
+            "PhpClassName": "AbstractWPJobManager",
+            "PluginExtendsClassName": "AbstractWordPress",
+            "AdditionalFlags": [
+                "C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES"
+            ],
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name": "NoPostsFound",
+                            "Selector": "li.no_job_listings_found",
+                            "Index": 0,
+                            "Callback": "matchesNoResultsPattern",
+                            "CallbackParameter": "There are no"
+                        },
+                        {
+                            "Name": "TotalPostCount",
+                            "Selector": "div.showing_jobs span",
+                            "Index": 0,
+                            "Type": "CSS",
+                            "Pattern": "/.*?\\s([\\d,]+)\\s*/"
+                        },
+                        {
+                            "Name": "JobPostItem",
+                            "Selector": "div.job",
+                            "Attribute": "collection",
+                            "Type": "CSS"
+                        }
+                    ]
+                },
+                {
+                    "Name": "ItemFields",
+                    "Fields": [
+                        {
+                            "Name": "Title",
+                            "Selector": "div.position h3",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "Url",
+                            "Selector": "a",
+                            "Attribute": "href",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "JobSitePostId",
+                            "Selector": "li",
+                            "Attribute": "class",
+                            "Pattern": "/.*\\bpost-(\\d+)\\b.*/"
+                        },
+                        {
+                            "Name": "Location",
+                            "Selector": "div.location",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "Company",
+                            "Selector": "div.company strong",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "EmploymentType",
+                            "Selector": "li.job-type span",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "PostedAt",
+                            "Selector": "li.date time",
+                            "Attribute": "datetime",
+                            "Type": "CSS"
+                        }
+                    ]
+                }
+            ],
+            "Pagination": {
+                "PageLimit": 20,
+                "Type": "PAGE-VIA-URL"
+            }
+        },
+        {
+            "JobSiteName": "UKStartupJobs",
+            "SearchUrlFormat": "https://www.ukstartupjobs.com/all-categories/?search_keywords=***KEYWORDS***",
+            "JobPostingBaseUrl": "https://www.ukstartupjobs.com",
+            "PluginExtendsClassName": "AbstractWordPress"
+        },
+        {
+            "JobSiteName": "Geekwire",
+            "SearchUrlFormat": "http://www.geekwire.com/jobs",
+            "JobPostingBaseUrl": "http://www.geekwire.com",
+            "PluginExtendsClassName": "AbstractWordPress",
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name" : "JobListingsPerPage",
+                            "Selector": "div.job_listings",
+                            "Attribute": "data-per_page"
+                        }
+                    ]
+                }
+            ],
+            "Pagination": {
+                "Type": "LOAD-MORE",
+                "Selector" : "a.load_more_jobs"
+            }
+        }
+    ]
+}

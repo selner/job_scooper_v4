@@ -18,7 +18,7 @@
 /**
  * Class AbstractWPJobify
  */
-abstract class AbstractWPJobify extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractWordPress extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
 	protected $additionalLoadDelaySeconds = 20;
 	protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
@@ -42,7 +42,7 @@ abstract class AbstractWPJobify extends \JobScooper\BasePlugin\Classes\AjaxHtmlS
 		return parent::parseJobsListForPage($objSimpHTML);
 	}
 
-	protected $arrListingTagSetup = array(
+	protected $arrBaseListingTagSetup = array(
         'JobPostItem' => array('selector' => 'ul.job_listings li.job_listing'),
         'Title' => array('tag' => 'h3'),
         'Url' => array('tag' => 'a.job_listing-clickbox', 'index' => 0, 'return_attribute' => 'href'),
@@ -57,13 +57,4 @@ abstract class AbstractWPJobify extends \JobScooper\BasePlugin\Classes\AjaxHtmlS
 
 
 
-}
-
-
-
-class PluginGeekwire extends AbstractWPJobify
-{
-	protected $JobSiteName = 'Geekwire';
-	protected $JobPostingBaseUrl = 'http://www.geekwire.com/';
-	protected $SearchUrlFormat = "http://www.geekwire.com/jobs/";
 }
