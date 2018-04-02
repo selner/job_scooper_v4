@@ -1,6 +1,5 @@
 {
   "JobSiteName" : "Cylcon",
-  "PluginExtendsClassName" : "AbstractCylcon",
   "BaseURL" : "http://www.cylcon.com/",
   "SourceURL" : "http://www.cylcon.com/jobs.php?q=***KEYWORDS***&l=***LOCATION***&sort=date&radius=50&start=***ITEM_NUMBER***",
   "LocationType" : "location-city-comma-statecode",
@@ -56,7 +55,8 @@
           "Name": "JobSitePostId",
           "Pattern": "/.*?[Rr]edirect[Ww][Ee][Bb]\\.php\\?q=(.*)/",
           "Type": "SOURCEFIELD",
-          "Field": "Url"
+          "Field": "Url",
+          "Callback" : "hashValue"
         },
 
         {

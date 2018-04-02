@@ -19,6 +19,7 @@ namespace JobScooper\BasePlugin\Classes;
 
 
 
+use JBZoo\Utils\Url;
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
@@ -716,6 +717,17 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 		return $this->JobPostingBaseUrl;
 	}
 
+
+	/**
+	 * @param $var
+	 *
+	 * @return string
+	 */
+	function hashValue($var)
+	{
+		return md5($var);
+	}
+
 	/**
 	 * @param $var
 	 *
@@ -1057,7 +1069,8 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 			$this->log($ex->getMessage(), \Monolog\Logger::WARNING);
 		}
 		if (empty($arrItem['JobSitePostId'])) {
-			$arrItem['JobSitePostId'] = $arrItem['Url'];
+			$urlparts = parse_url($arrItem['url']);
+			$arrItem['JobSitePostId'] = $this->hashValue("{$urlparts['path']}?{$urlparts['query']}");
 		}
 
 		$arrItem['JobSitePostId'] = preg_replace(REXPR_MATCH_URL_DOMAIN, "", $arrItem['JobSitePostId']);
