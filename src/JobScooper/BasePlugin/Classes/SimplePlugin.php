@@ -19,6 +19,7 @@ namespace JobScooper\BasePlugin\Classes;
 
 use DiDom\Query;
 use \Exception;
+use JobScooper\Utils\ExtendedDiDomElement;
 use JobScooper\Utils\SimpleHTMLHelper;
 use Psr\Log\LogLevel;
 
@@ -318,7 +319,12 @@ abstract class SimplePlugin extends BaseSitePlugin
 	 */
 	protected function _getTagMatchValueSourceField_($arrTag, $item)
     {
-        $ret = null;
+	    if (!empty($arrTag['return_attribute']))
+		    $returnAttribute = $arrTag['return_attribute'];
+	    else
+		    $returnAttribute = 'text';
+
+	    $ret = null;
         if (array_key_exists("return_value_regex", $arrTag) && !empty($arrTag['return_value_regex']))
             $arrTag['pattern'] = $arrTag['return_value_regex'];
 
@@ -491,7 +497,6 @@ abstract class SimplePlugin extends BaseSitePlugin
 	 */
 	function getJobFactsFromMicrodata($objSimpHTML, $item=array())
 	{
-
 		if(empty($objSimpHTML) || !method_exists($objSimpHTML, "find"))
 			return $item;
 
@@ -592,31 +597,7 @@ abstract class SimplePlugin extends BaseSitePlugin
 
         if ($nodesJobRows !== false && !is_null($nodesJobRows) && is_array($nodesJobRows) && count($nodesJobRows) > 0) {
             foreach ($nodesJobRows as $node) {
-                //
-                // get a new record with all columns set to null
-                //
-                $item = getEmptyJobListingRecord();
-
-                $item = $this->getJobFactsFromMicrodata($node, $item);
-
-                foreach(array_keys($this->arrListingTagSetup) as $itemKey)
-                {
-                    if(in_array($itemKey, ["JobPostItem", "NextButton", "TotalResultPageCount", "TotalPostCount", "NoPostsFound"]))
-                        continue;
-
-                    $newVal = $this->_getTagValueFromPage_($node, $itemKey, $item);
-                    if(!empty($newVal))
-                        $item[$itemKey] = $newVal;
-                }
-
-                if (empty($item['Title']) || strcasecmp($item['Title'], "title") == 0)
-                    continue;
-
-                if(empty($item['JobSiteKey']))
-                    $item['JobSiteKey'] = $this->JobSiteName;
-
-                $ret[] = $item;
-
+	            $ret[] = $this->parseSingleJob($node);
             }
         }
         else
@@ -629,6 +610,34 @@ abstract class SimplePlugin extends BaseSitePlugin
 	    $this->log($this->JobSiteName . " returned " . countAssociativeArrayValues($ret) . " jobs from page.");
 
         return $ret;
+    }
+
+    function parseSingleJob(ExtendedDiDomElement $node)
+    {
+	    //
+	    // get a new record with all columns set to null
+	    //
+	    $item = getEmptyJobListingRecord();
+
+	    $item = $this->getJobFactsFromMicrodata($node, $item);
+
+	    foreach(array_keys($this->arrListingTagSetup) as $itemKey)
+	    {
+		    if(in_array($itemKey, ["JobPostItem", "NextButton", "TotalResultPageCount", "TotalPostCount", "NoPostsFound"]))
+			    continue;
+
+		    $newVal = $this->_getTagValueFromPage_($node, $itemKey, $item);
+		    if(!empty($newVal))
+			    $item[$itemKey] = $newVal;
+	    }
+
+	    if (empty($item['Title']) || strcasecmp($item['Title'], "title") == 0)
+		    continue;
+
+	    if(empty($item['JobSiteKey']))
+		    $item['JobSiteKey'] = $this->JobSiteName;
+
+	    return $item;
     }
 
 }
