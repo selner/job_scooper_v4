@@ -297,7 +297,7 @@ class JobSitePluginBuilder
         $jobsitesToDisable = array_diff_key($all_jobsites_by_key, $classListBySite);
         if (!empty($jobsitesToDisable))
         {
-	        LogMessage('Disabling ' . array_keys($jobsitesToDisable),null, null, null, $channel="plugins");
+	        LogMessage('Disabling ' . join(", ", array_keys($jobsitesToDisable)),null, null, null, $channel="plugins");
         	foreach($jobsitesToDisable as $jobSiteKey =>$jobsite)
 	        {
 		        $all_jobsites_by_key[$jobSiteKey]->setIsDisabled(true);
@@ -360,11 +360,13 @@ class JobSitePluginBuilder
 	{
 		$this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . "*.json");
 		LogMessage("Loading JSON-based, jobsite plugin configurations from " . count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...", null, null, null, $channel="plugins");
+
 		foreach ($this->_configJsonFiles as $f) {
 			$dataPlugins = loadJSON($f, null, true);
 			if(empty($dataPlugins))
 				throw new \Exception("Unable to load JSON plugin data file from " . $f . ": " . json_last_error_msg());
 			$plugsToInit = array();
+
 			if (array_key_exists('jobsite_plugins', $dataPlugins)) {
 				$plugsToInit = array_values($dataPlugins['jobsite_plugins']);
 			} else {
@@ -404,10 +406,19 @@ class JobSitePluginBuilder
     {
 
         $pluginData = array();
+	    foreach (array_keys($arrConfigData) as $datakey) {
+		    if (!array_key_exists($datakey, $pluginData) && !in_array($datakey, array("Collections", "Fields")))
+			    setArrayItem($pluginData, $datakey, $arrConfigData, $datakey);
+	    }
 
         setArrayItem($pluginData, 'PhpClassName', $arrConfigData, 'PhpClassName');
         if (empty($pluginData['PhpClassName']))
             $pluginData['PhpClassName'] = "Plugin" . $arrConfigData['JobSiteName'];
+	    if (empty($pluginData['JobSiteName']))
+		    $pluginData['JobSiteName'] = preg_replace("/^Plugin/", "", $arrConfigData['PhpClassName']);
+	    $jobsitekey = strtolower($pluginData['JobSiteName']);
+
+	    $arrConfigData['PluginExtendsClassName'] = str_replace("\\\\", "\\", $pluginData['PluginExtendsClassName']);
 
         if (!empty($arrConfigData['PluginExtendsClassName']) && stristr($arrConfigData['PluginExtendsClassName'], "Abstract") === false)
 	        setArrayItem($pluginData, 'PluginExtendsClassName', $arrConfigData, 'PluginExtendsClassName');
@@ -445,10 +456,6 @@ class JobSitePluginBuilder
                         break;
                 }
             }
-        }
-        foreach (array_keys($arrConfigData) as $datakey) {
-            if (!array_key_exists($datakey, $pluginData) && !in_array($datakey, array("Collections", "Fields")))
-                setArrayItem($pluginData, $datakey, $arrConfigData, $datakey);
         }
 
 
