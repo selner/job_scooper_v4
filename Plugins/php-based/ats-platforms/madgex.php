@@ -21,6 +21,7 @@ use JobScooper\DataAccess\UserSearchSiteRun;
  */
 abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
+	protected $SiteSearchBaseUrl = null;
 
 	/**
 	 * AbstractMadgexATS constructor.
@@ -29,10 +30,19 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	function __construct()
     {
     	$this->locationid = null;
-    	if(empty($this->JobPostingBaseUrl))
-		    $this->JobPostingBaseUrl = "https://{$this->SiteReferenceKey}.com";
+	    $searchURL = $this->JobPostingBaseUrl;
+    	if(!empty($this->SiteReferenceKey) ) {
+		    $this->JobPostingBaseUrl = "https://{$this->SiteReferenceKey}.com/searchjobs";
+		    $searchURL = $this->JobPostingBaseUrl;
+	    }
+	    elseif(!empty($this->SiteSearchBaseUrl) ) {
+			$searchURL = $this->SiteSearchBaseUrl;
+			$urlparts = parse_url($this->SiteSearchBaseUrl);
+			if(empty($urlparts['path']))
+				$searchURL = "{$searchURL}/searchjobs";
+		}
 
-	    $this->SearchUrlFormat = "{$this->JobPostingBaseUrl}/searchjobs?Keywords=***KEYWORDS***&radialtown=***LOCATION:{Place}***+***LOCATION:{Region}***&RadialLocation=50&NearFacetsShown=true&countrycode=***LOCATION:{CountryCode}***&sort=Date&Page=***PAGE_NUMBER***";
+	    $this->SearchUrlFormat = "{$searchURL}?Keywords=***KEYWORDS***&radialtown=***LOCATION:{Place}***+***LOCATION:{Region}***&RadialLocation=50&NearFacetsShown=true&countrycode=***LOCATION:{CountryCode}***&sort=Date&Page=***PAGE_NUMBER***";
         $this->prevURL = $this->JobPostingBaseUrl;
         $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
         $this->additionalLoadDelaySeconds = 3;
@@ -43,7 +53,7 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 
     protected $JobSiteName = 'madgexats';
     protected $locationid = null;
-    protected $SiteReferenceKey = "UNKNOWN";
+    protected $SiteReferenceKey = null;
 
     protected $LocationType = 'location-city-comma-state';
 
@@ -70,7 +80,7 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 		$this->selenium->loadPage($url);
 	}
 
-    protected $arrListingTagSetup = array(
+    protected $arrBaseListingTagSetup = array(
         'NoPostsFound'          => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_callback' => 'matchesNoResultsPattern', 'callback_parameter' => "Found 0 jobs"),
         'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b([,\d]+)\b/i'),
 //        'JobPostItem'           => array('selector' => 'li.lister__item'),

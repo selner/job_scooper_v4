@@ -1,8 +1,81 @@
 {
     "jobsite_plugins": [
         {
+
+            "PhpClassName": "AbstractMadgexATSVariant1",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name": "TotalPostCount",
+                            "Selector": "h2",
+                            "Index": 0,
+                            "Pattern": "/.*?\\s([\\d,]+)\\s*/",
+                            "Type": "CSS"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "JobSiteName": "IndependentUK",
-            "JobPostingBaseUrl" : "http://independentjobs.independent.co.uk",
+            "SiteSearchBaseUrl" : "http://independentjobs.independent.co.uk",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "HotelJobs",
+            "SiteSearchBaseUrl" : "https://www.hoteljobs.co.uk/jobs/hotel-jobs/",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ],
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name": "TotalPostCount",
+                            "Selector": "h2",
+                            "Index": 1,
+                            "Pattern": "/.*?\\s([\\d,]+)\\s*/",
+                            "Type": "CSS"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "JobSiteName": "FishFour",
+            "SiteSearchBaseUrl" : "https://www.fish4.co.uk/jobs",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "OnlyDigitalJobs",
+            "SiteSearchBaseUrl": "https://www.onlydigitaljobs.com/jobs",
+            "PluginExtendsClassName": "AbstractMadgexATSVariant1",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "WileyJobNetwork",
+            "SiteReferenceKey": "www.wileyjobnetwork",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "JobsToday",
+            "SiteReferenceKey": "www.jobstoday",
             "PluginExtendsClassName": "AbstractMadgexATS",
             "CountryCodes": [
                 "UK"
@@ -18,7 +91,7 @@
         },
         {
             "JobSiteName": "LocalworkCA",
-            "SiteReferenceKey": "www.localwork.ca/searchjobs",
+            "SiteSearchBaseUrl": "http://www.localwork.ca/searchjobs",
             "PluginExtendsClassName": "AbstractMadgexATS",
             "CountryCodes": [
                 "CA"
@@ -26,7 +99,7 @@
         },
         {
             "JobSiteName": "MediaBistro",
-            "SiteReferenceKey": "www.mediabistro.com/jobs/search",
+            "SiteSearchBaseUrl": "http://www.mediabistro.com/jobs/search",
             "PluginExtendsClassName": "AbstractMadgexATS",
             "CountryCodes": [
                 "S"
