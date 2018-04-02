@@ -270,14 +270,13 @@ class JobSitePluginBuilder
     {
         LogMessage('Adding any missing declared jobsite plugins and jobsite records in database...',null, null, null, $channel="plugins");
 
-        $classListBySite = $this->_getAllPluginClassesByJobSiteKey();
+        $declaredPluginsBySite = $this->_getAllPluginClassesByJobSiteKey();
 
 	    $all_jobsites_by_key = \JobScooper\DataAccess\JobSiteRecordQuery::create()
-            ->filterByIsDisabled(false)
             ->find()
             ->toKeyIndex("JobSiteKey");
 
-        $jobsitesToAdd = array_diff_key($classListBySite, $all_jobsites_by_key);
+        $jobsitesToAdd = array_diff_key($declaredPluginsBySite, $all_jobsites_by_key);
         if (!empty($jobsitesToAdd)) {
 
             LogMessage('Adding ' . getArrayValuesAsString($jobsitesToAdd),null, null, null, $channel="plugins");
@@ -294,8 +293,13 @@ class JobSitePluginBuilder
             }
         }
 
-        $jobsitesToDisable = array_diff_key($all_jobsites_by_key, $classListBySite);
-        if (!empty($jobsitesToDisable))
+
+	    $enabledSites = array_filter($all_jobsites_by_key, function ($v, $k) use ($declaredPluginsBySite) {
+		    return in_array($k, array_keys($declaredPluginsBySite)) && ($v->isDisabled() === false);
+	    }, ARRAY_FILTER_USE_BOTH);
+
+	    $jobsitesToDisable = array_diff_key($all_jobsites_by_key, $enabledSites);
+	    if (!empty($jobsitesToDisable))
         {
 	        LogMessage('Disabling ' . join(", ", array_keys($jobsitesToDisable)),null, null, null, $channel="plugins");
         	foreach($jobsitesToDisable as $jobSiteKey =>$jobsite)
@@ -305,9 +309,9 @@ class JobSitePluginBuilder
 	        }
         }
 
-        $nEnabledSites = count($all_jobsites_by_key)-count($jobsitesToDisable);
+        $nEnabledSites = count($enabledSites);
         LogMessage("Loaded {$nEnabledSites} enabled jobsite plugins.");
-	    setAsCacheData("all_jobsites_and_plugins", $all_jobsites_by_key);
+	    setAsCacheData("all_jobsites_and_plugins", $enabledSites);
 
     }
 
@@ -538,7 +542,6 @@ class JobSitePluginBuilder
 	private function _getClassInstantiationCode($pluginConfig)
     {
 
-        $PluginExtendsClassName = "JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin";
         $evalConfig = array();
         $PhpClassName = "Plugin" . $pluginConfig['JobSiteName'];
 
@@ -547,6 +550,7 @@ class JobSitePluginBuilder
         $numericProps = array();
         $otherProps = array();
 	    $stringProps["JobSiteKey"] = cleanupSlugPart($pluginConfig['JobSiteName']);
+
 
         foreach (array_keys($pluginConfig) as $key) {
             switch ($key) {
@@ -582,6 +586,12 @@ class JobSitePluginBuilder
                     break;
             }
         }
+
+	    $implements = null;
+	    if(empty($PluginExtendsClassName)) {
+		    $PluginExtendsClassName = "JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin";
+        }
+
         $data = array(
             'PhpClassName' => $PhpClassName,
             'PluginExtendsClassName' => $PluginExtendsClassName,
@@ -603,15 +613,19 @@ class JobSitePluginBuilder
 	{
 		$classList = get_declared_classes();
 		sort($classList);
+
 		$pluginClasses = array_filter($classList, function ($class) {
-			return (stripos($class, "Plugin") !== false) && stripos($class, "\\Classes\\") === false && in_array("JobScooper\BasePlugin\Interfaces\IJobSitePlugin", class_implements($class));
+			return preg_match("/^Plugin/", $class) !== 0;
 		});
 
-		$classListBySite = array();
-		foreach($pluginClasses as $class)
-		{
-			$jobsitekey= cleanupSlugPart(str_replace("Plugin", "", $class));
+		$declaredPluginsBySite = array();
+		foreach($pluginClasses as $class) {
+			$jobsitekey = cleanupSlugPart(str_replace("Plugin", "", $class));
 			$classListBySite[$jobsitekey] = $class;
+			if (in_array("JobScooper\BasePlugin\Interfaces\IJobSitePlugin", class_implements($class)))
+				$classListBySite[$jobsitekey] = $class;
+			else
+				LogWarning("{$jobsitekey} does not support iJobSitePlugin: " . getArrayDebugOutput(class_implements($class)));
 		}
 
 		return $classListBySite;
