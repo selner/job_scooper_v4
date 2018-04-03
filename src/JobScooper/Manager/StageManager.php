@@ -141,7 +141,7 @@ class StageManager
         // Let's go get the jobs for those searches
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        if ($arrSearchesToRunBySite != null)
+        if (!empty($arrSearchesToRunBySite))
         {
             LogMessage(PHP_EOL . "**************  Starting Run of Searches for " . count($arrSearchesToRunBySite) . " Job Sites **************  " . PHP_EOL);
 

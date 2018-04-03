@@ -60,7 +60,9 @@ class User extends BaseUser
 	    if(empty($numDays))
 		    $numDays = 1;
 	    $interval = date_interval_create_from_date_string(strval($numDays) . ' days');
-	    $nextNotify = date_add($lastNotify, $interval);
+	    $nextNotify = clone $lastNotify;
+	    $nextNotify->add($interval);
+
 	    if(empty($lastNotify) || $now >= $nextNotify)
 	    	return true;
 
@@ -364,6 +366,10 @@ class User extends BaseUser
 	{
 		if(empty($this->_userSearchSiteRunsByJobSite))
 			$this->createUserSearchSiteRuns();
+
+		if(empty($this->_userSearchSiteRunsByJobSite))
+			return null;
+
 		$arrSearchesToRun = array_filter($this->_userSearchSiteRunsByJobSite, function($var) {
 			return !empty($var);
 		});

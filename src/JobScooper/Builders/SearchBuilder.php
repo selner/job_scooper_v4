@@ -38,6 +38,13 @@ class SearchBuilder
 	public function createSearchesForUser(User $user)
     {
 
+    	/* If we aren't ultimately going to notify the user about the
+    	   updated jobs yet, let's just skip getting them for now.  We'll
+    	   just get them the next time we run instead.  */
+
+	    if ($user->canNotifyUser() === false)
+	    	return null;
+
 	    $sites = JobSitePluginBuilder::getIncludedJobSites();
 
 	    $ignoreRecent = filter_var(getConfigurationSetting('command_line_args.ignore_recent'), FILTER_VALIDATE_BOOLEAN);
