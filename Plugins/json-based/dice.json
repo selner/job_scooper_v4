@@ -1,17 +1,12 @@
 {
     "jobsite_plugins": [
         {
-            "JobSiteName": "Dice",
-            "BaseURL": "http://www.dice.com/",
-            "SourceURL": "https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION:{Place},{RegionCode}***&sort=date&limit=100&radius=50",
-            "CountryCodes": [
-                "US"
-            ],
+            "PhpClassName": "AbstractDice",
+            "PluginExtendsClassName": "AbstractBaseDice",
             "AdditionalFlags": [
                 "C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS",
                 "C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER"
             ],
-            "PluginExtendsClassName": "AbstractDice",
             "Collections": [
                 {
                     "Name": "PageFields",
@@ -50,7 +45,6 @@
                         {
                             "Name": "Url",
                             "Selector": "h3 a.dice-btn-link",
-
                             "Attribute": "href",
                             "Index": 0,
                             "Type": "CSS"
@@ -78,6 +72,7 @@
                             "Name": "PostedAt",
                             "Selector": "span[itemprop=datePosted]",
                             "Index": 0,
+                            "IncludeHidden" : 1,
                             "Attribute": "text",
                             "Type": "CSS"
                         }
@@ -86,18 +81,29 @@
             ],
             "Pagination": {
                 "PageLimit": 100,
-                "Type": "PAGE-CALLBACK",
+                "Type": "NEXT-BUTTON",
+                "Selector": "a[title='Go to next page']",
+                "Index" : 0,
                 "PageDelaySeconds": 5
             }
         },
         {
+            "JobSiteName": "Dice",
+            "BaseURL": "http://www.dice.com/",
+            "SourceURL": "https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION:{Place},{RegionCode}***&sort=date&limit=100&radius=50&postedDate=3",
+            "CountryCodes": [
+                "US"
+            ],
+            "PluginExtendsClassName": "AbstractDice"
+        },
+        {
             "JobSiteName": "DiceUK",
             "BaseURL": "http://www.dice.com/",
-            "SourceURL": "https://uk.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=***LOCATION:&for_loc={Place},{RegionCode}***&sort=date&limit=100&radius=50",
+            "SourceURL": "https://uk.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION:{Place},{Region}***&sort=date&limit=100&radius=20&postedDate=3&limit=100&radius=20&postedDate=3",
             "CountryCodes": [
                 "UK"
             ],
-            "PluginExtendsClassName": "PluginDice"
+            "PluginExtendsClassName": "AbstractDice"
         }
     ]
 }

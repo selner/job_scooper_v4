@@ -17,21 +17,32 @@
  */
 
 
+Use JBZoo\Utils\Url;
 
 /**
  * Class AbstractDice
  *
  *       Used by dice.json plugin configuration to override single method
  */
-abstract class AbstractDice extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractBaseDice extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
 {
-    function takeNextPageAction($nItem=null, $nPage=null)
-    {
 
-        $js = "
-            nextPagingData(" . $nPage . ");
-        ";
+	/**
+	 * @param $searchDetails
+	 *
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+	{
+		$urlInfo = parse_url($searchDetails->getSearchStartUrl());
+		if(array_key_exists("query", $urlInfo))
+			unset($urlInfo['query']);
+		if(array_key_exists("fragment", $urlInfo))
+			unset($urlInfo['fragment']);
+		$url = JBZoo\Utils\Url::buildAll($urlInfo);
+		$this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $url);
 
-        $this->runJavaScriptSnippet($js, false);
-   }
+		return $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
+	}
 }
