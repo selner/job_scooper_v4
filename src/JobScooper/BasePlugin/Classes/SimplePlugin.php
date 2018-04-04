@@ -176,7 +176,7 @@ abstract class SimplePlugin extends BaseSitePlugin
         } else if (array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalResultPageCount']) && count($this->arrListingTagSetup['TotalResultPageCount']) > 0) {
             $retPageCount = $this->_getTagValueFromPage_($objSimpHTML, 'TotalResultPageCount');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
-                throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalResultPageCount']));
+                throw new \Exception("Unable to determine number of pages for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalResultPageCount']));
 
             $retJobCount = $retPageCount * $this->JobListingsPerPage;
         } elseif ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
