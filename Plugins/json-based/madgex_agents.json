@@ -55,6 +55,26 @@
             "PluginExtendsClassName": "AbstractMadgexATS",
             "CountryCodes": [
                 "UK"
+            ],
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name": "TotalPostCount",
+                            "Selector": "h1",
+                            "Index": 0,
+                            "Pattern": "/.*?\\s([\\d,]+)\\s*/",
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "JobPostItem",
+                            "Selector": "//li[contains(concat(' ', normalize-space(@class), ' '), ' cf ')] ",
+                            "Attribute": "collection",
+                            "Type": "XPATH"
+                        }
+                    ]
+                }
             ]
         },
         {
