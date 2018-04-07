@@ -43,12 +43,6 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "huge",
-            "SiteReferenceKey" : "huge",
-            "SourceURL": "https://www.huge.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "coursehero",
             "SiteReferenceKey" : "coursehero",
             "SourceURL": "https://www.coursehero.com/careers",
@@ -103,12 +97,6 @@
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
-            "JobSiteName": "oscar",
-            "SiteReferenceKey" : "oscar",
-            "SourceURL": "https://www.oscar.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
             "JobSiteName": "squarespace",
             "SiteReferenceKey" : "squarespace",
             "SourceURL": "https://www.squarespace.com/careers",
@@ -160,12 +148,6 @@
             "JobSiteName": "bigcommerce",
             "SiteReferenceKey" : "bigcommerce",
             "SourceURL": "https://www.bigcommerce.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "jumptrading",
-            "SiteReferenceKey" : "jumptrading",
-            "SourceURL": "https://www.jumptrading.com/careers",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
@@ -232,12 +214,6 @@
             "JobSiteName": "trunkclub",
             "SiteReferenceKey" : "trunkclub",
             "SourceURL": "https://www.trunkclub.com/careers",
-            "PluginExtendsClassName": "AbstractGreenhouseATS"
-        },
-        {
-            "JobSiteName": "renttherunway",
-            "SiteReferenceKey" : "renttherunway",
-            "SourceURL": "https://www.renttherunway.com/careers",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
         {
