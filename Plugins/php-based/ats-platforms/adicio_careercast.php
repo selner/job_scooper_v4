@@ -102,7 +102,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		if(empty($hostPageUri))
 			$hostPageUri = $this->getActiveWebdriver()->getCurrentURL();
 		if(empty($hostPageUri) && !empty($this->currentJsonSearchDetails))
-			$hostPageUri = $this->currentJsonSearchDetails->nextResultsPageUrl;
+			$hostPageUri = $this->currentJsonSearchDetails->searchResultsPageUrl;
 
 		$ret = array();
 		$respdata = $this->getJsonApiResult($apiUri, $this->currentJsonSearchDetails, $hostPageUri);
@@ -159,8 +159,8 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 	 */
 	private function _getJsonSearchUrl(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nOffset=null)
 	{
-		if(!empty($searchDetails->nextResultsPageUrl))
-			$jsonUrl = $searchDetails->nextResultsPageUrl. "&format=json";
+		if(!empty($searchDetails->searchResultsPageUrl))
+			$jsonUrl = $searchDetails->searchResultsPageUrl. "&format=json";
 		else
 			$jsonUrl = $searchDetails->getSearchStartUrl() . "&format=json";
 		return $jsonUrl;
