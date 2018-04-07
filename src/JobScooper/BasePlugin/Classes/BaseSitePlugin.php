@@ -370,7 +370,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 
 	protected $CountryCodes = array("US");
 	private $_curlWrapper = null;
-	protected $nextResultsPageUrl = null;
+	protected $searchResultsPageUrl = null;
 
 	/**
 	 * @var User/null
@@ -896,7 +896,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	{
 		try {
 			if (!empty($strURL))
-				$searchDetails->nextResultsPageUrl = $strURL;
+				$searchDetails->searchResultsPageUrl = $strURL;
 
 			$objSimpleHTML = null;
 
@@ -1368,7 +1368,7 @@ JSCODE;
         try {
             if(!empty($url))
             {
-	            $searchDetails->nextResultsPageUrl = $url;
+	            $searchDetails->searchResultsPageUrl = $url;
                 $this->getActiveWebdriver()->get($url);
             }
 
@@ -1480,7 +1480,7 @@ JSCODE;
                 $this->log("Querying " . $this->JobSiteName . " for " . $totalPagesCount . " pages with " . ($nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of" : $nTotalListings) . " jobs:  " . $searchDetails->getSearchStartUrl());
 
                 $strURL = $searchDetails->getSearchStartUrl();
-                $searchDetails->nextResultsPageUrl = $strURL;
+                $searchDetails->searchResultsPageUrl = $strURL;
                 while ($nPageCount <= $totalPagesCount) {
 
                     $arrPageJobsList = null;
@@ -1792,11 +1792,11 @@ JSCODE;
 	 */
 	protected function setResultPageUrl($searchDetails, $nPageCount, $nItemCount)
     {
-	    $searchDetails->nextResultsPageUrl = $searchDetails->getPageURLfromBaseFmt($nPageCount, $nItemCount);
-	    if ($this->_checkInvalidURL_($searchDetails, $searchDetails->nextResultsPageUrl) == self::VALUE_NOT_SUPPORTED)
-		    return $searchDetails->nextResultsPageUrl;
+	    $searchDetails->searchResultsPageUrl = $searchDetails->getPageURLfromBaseFmt($nPageCount, $nItemCount);
+	    if ($this->_checkInvalidURL_($searchDetails, $searchDetails->searchResultsPageUrl) == self::VALUE_NOT_SUPPORTED)
+		    return $searchDetails->searchResultsPageUrl;
 
-	    return $searchDetails->nextResultsPageUrl;
+	    return $searchDetails->searchResultsPageUrl;
     }
 
 

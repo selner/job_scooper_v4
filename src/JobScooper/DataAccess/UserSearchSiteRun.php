@@ -15,7 +15,7 @@ use JobScooper\BasePlugin\Classes\BaseSitePlugin;
  */
 class UserSearchSiteRun extends BaseUserSearchSiteRun
 {
-	public $nextResultsPageUrl = null;
+	public $searchResultsPageUrl = null;
 	private $_plugin = null;
 	private $_SearchUrlFormat = null;
 	private $_JobPostingBaseUrl = null;
@@ -218,7 +218,10 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 */
 	public function toLoggedContext()
 	{
-		return array_subset($this->toFlatArray(), array("UserSearchSiteRunKey", "GeoLocationId", "SearchStartUrl"));
+		$arr = array_subset($this->toFlatArray(), array("UserSearchSiteRunKey", "GeoLocationId", "SearchStartUrl"));
+		$arr['searchResultsPageUrl'] = $this->searchResultsPageUrl;
+
+		return $arr;
 	}
 
 
