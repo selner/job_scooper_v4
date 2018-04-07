@@ -36,9 +36,24 @@ abstract class SimplePlugin extends BaseSitePlugin
     protected $childSiteListingPage = '';
     protected $additionalLoadDelaySeconds = 2;
     protected $nextPageScript = null;
-    protected $arrListingTagSetup = array();
-    protected $arrBaseListingTagSetup = array();
 
+
+    protected $arrListingTagSetup = array();
+	protected $arrBaseListingTagSetup = array();
+
+
+//	public function getListingTags() {
+//		$arrTags = $this->arrBaseListingTagSetup + $this->arrBaseListingTagSetup;
+//		$parent = get_parent_class($this);
+//		if(!empty($parent))
+//		{
+//			if(in_array("getListingTags", get_class_methods($parent)))
+//			{
+//				$arrTags = $arrTags + parent::getListingTags();
+//			}
+//		}
+//		return $arrTags;
+//	}
 	/**
 	 * SimplePlugin constructor.
 	 * @throws \Exception
@@ -48,7 +63,7 @@ abstract class SimplePlugin extends BaseSitePlugin
         if (empty($this->arrListingTagSetup))
             $this->arrListingTagSetup = array();
 
-        if(!empty($this->arrBaseListingTagSetup))
+	    if(!empty($this->arrBaseListingTagSetup))
             $this->arrListingTagSetup = array_replace($this->arrBaseListingTagSetup, $this->arrListingTagSetup);
 
         if (strlen($this->JobPostingBaseUrl) == 0)
@@ -584,10 +599,14 @@ abstract class SimplePlugin extends BaseSitePlugin
      */
     function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML)
     {
+
+	    if(!array_key_exists('JobPostItem', $this->arrListingTagSetup))
+	    {
+		    throw new Exception("Plugin did not define the tags necessary to find 'JobPostItem' nodes: " . getArrayDebugOutput($this->arrListingTagSetup));
+	    }
+
         $ret = null;
         $item = null;
-
-        assert(array_key_exists('JobPostItem', $this->arrListingTagSetup));
 
         if(array_key_exists('return_attribute', $this->arrListingTagSetup['JobPostItem']) === false)
         {
