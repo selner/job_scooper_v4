@@ -509,12 +509,13 @@ abstract class SimplePlugin extends BaseSitePlugin
     }
 
 	/**
-	 * /**
-	 * parseJobsListForPage
+	 * getJobFactsFromMicrodata
 	 *
-	 * This does the heavy lifting of parsing each job record from the
-	 * page's HTML it was passed.
-	 * *
+	 * @param SimpleHTMLHelper $objSimpHTML
+	 * @param array            $item
+	 *
+	 * @return array
+	 * @throws \Exception
 	 */
 	function getJobFactsFromMicrodata($objSimpHTML, $item=array())
 	{
@@ -622,7 +623,9 @@ abstract class SimplePlugin extends BaseSitePlugin
 
         if ($nodesJobRows !== false && !is_null($nodesJobRows) && is_array($nodesJobRows) && count($nodesJobRows) > 0) {
             foreach ($nodesJobRows as $node) {
-	            $ret[] = $this->parseSingleJob($node);
+	            $job = $this->parseSingleJob($node);
+	            if(!empty($job))
+		            $ret[] = $job;
             }
         }
         else
