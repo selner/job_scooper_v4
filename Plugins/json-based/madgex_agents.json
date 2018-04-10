@@ -95,7 +95,7 @@
         },
         {
             "JobSiteName": "JobsToday",
-            "SiteReferenceKey": "www.jobstoday",
+            "SiteSearchBaseUrl": "https://www.jobstoday.co.uk/searchjobs",
             "PluginExtendsClassName": "AbstractMadgexATS",
             "CountryCodes": [
                 "UK"
@@ -152,6 +152,7 @@
         {
             "JobSiteName": "ExecAppointments",
             "SiteReferenceKey": "www.exec-appointments",
+            "BaseURL": "https://www.exec-appointments.com",
             "PluginExtendsClassName": "AbstractMadgexATS",
             "CountryCodes": [
                 "GB"
