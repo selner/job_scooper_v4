@@ -198,7 +198,17 @@ class StageManager
             } catch (\Exception $ex) {
                 handleException($ex, null, false);
             }
-
+			finally {
+				try {
+					startLogSection("Processing any developer alerts for plugin errors...");
+					$devNotifier = new NotifierDevAlerts();
+					$devNotifier->processPluginErrors();
+				} catch (\Exception $ex) {
+					handleException($ex, null, true);
+				} finally {
+					endLogSection("End of dev alerts for plugin errors");
+				}
+			}
         } else {
             LogWarning("No searches have been set to be run.");
         }
@@ -329,19 +339,5 @@ class StageManager
 
 		    logMessage("JobScooper runtime was " . $runtime->format("%h hours, %i minutes and %s seconds (%h:%i:%s)."));
 	    }
-
-	    try {
-		    startLogSection("Cleanup: Developer Alerts + Cleanup");
-		    $devNotifier = new NotifierDevAlerts();
-		    $devNotifier->processPluginErrors();
-	    } catch (\Exception $ex) {
-		    handleException($ex, null, true);
-	    }
-	    finally
-	    {
-		    endLogSection("End of dev alerts + cleanup");
-	    }
-
-
     }
 }
