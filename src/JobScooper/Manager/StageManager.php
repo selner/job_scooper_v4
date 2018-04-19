@@ -199,15 +199,6 @@ class StageManager
                 handleException($ex, null, false);
             }
 			finally {
-				try {
-					startLogSection("Processing any developer alerts for plugin errors...");
-					$devNotifier = new NotifierDevAlerts();
-					$devNotifier->processPluginErrors();
-				} catch (\Exception $ex) {
-					handleException($ex, null, true);
-				} finally {
-					endLogSection("End of dev alerts for plugin errors");
-				}
 			}
         } else {
             LogWarning("No searches have been set to be run.");
@@ -330,6 +321,15 @@ class StageManager
 	public function doFinalStage()
     {
 	    $this->_initConfig();
+	    try {
+		    startLogSection("Processing any developer alerts for plugin errors...");
+		    $devNotifier = new NotifierDevAlerts();
+		    $devNotifier->processPluginErrorAlert();
+	    } catch (\Exception $ex) {
+		    handleException($ex, null, true);
+	    } finally {
+		    endLogSection("End of dev alerts for plugin errors");
+	    }
 
 	    $runStartTime = getConfigurationSetting('app_run_start_datetime');
 

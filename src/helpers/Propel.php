@@ -125,49 +125,52 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null)
+function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null, $countsOnly=false)
 {
-	if(empty($user))
-	    throw new Exception("No user was specified to query for user job matches.");
+	$results = null;
 
-	$userStateCriteria = [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, \Propel\Runtime\ActiveQuery\Criteria::EQUAL];
-	if(empty(!$userNotificationState) && is_array($userNotificationState))
+    $query = \JobScooper\DataAccess\UserJobMatchQuery::create();
+	$query->joinWithJobPostingFromUJM();
+
+	if($countsOnly !== true)
 	{
-		$userStateCriteria = $userNotificationState;
+		$query->limit(10000);
+
+		$query->useJobPostingFromUJMQuery()
+			->orderByKeyCompanyAndTitle()
+			->endUse();
+
+		$keyResults = "UserJobMatchId";
+	}
+	else {
+
+		$sitekeyColumnName = $query->getAliasedColName(\JobScooper\DataAccess\Map\JobPostingTableMap::COL_JOBSITE_KEY);
+		$query->clearSelectColumns()
+			->addAsColumn('TotalNewUserJobMatches', 'COUNT(DISTINCT(UserJobMatch.UserJobMatchId))')
+			->addAsColumn('TotalNewJobPostings', 'COUNT(DISTINCT(UserJobMatch.JobPostingId))')
+			->select(array($sitekeyColumnName, 'TotalNewUserJobMatches', 'TotalNewJobPostings'))
+			->groupBy(array($sitekeyColumnName));
+
+			$keyResults = null;
+
 	}
 
-    $query = \JobScooper\DataAccess\UserJobMatchQuery::create()
-	    ->filterByUserNotificationState($userStateCriteria[0], $userStateCriteria[1])
-        ->filterByUserFromUJM($user)
-	    ->limit(10000)
-        ->joinWithJobPostingFromUJM();
 
-	if(!empty($nNumDaysBack) && is_integer($nNumDaysBack))
+	$query->filterByUserNotificationStatus($userNotificationState);
+	$query->filterByUser($user);
+	$query->filterByDaysAgo($nNumDaysBack);
+	$query->filterByGeoLocationIds($arrGeoLocIds);
+
+	if(!empty($keyResults))
+		$results = $query->find()->toKeyIndex($keyResults);
+	else
+		$results = $query->find()->getData();
+
+
+	if (!empty($results) && !empty($sitekeyColumnName))
 	{
-		$startDate = new \DateTime();
-		$strMod = "-{$nNumDaysBack} days";
-		$dateDaysAgo = $startDate->modify($strMod);
-		$strDateDaysAgo = $dateDaysAgo->format("Y-m-d");
-
-		$query->filterByFirstMatchedAt($strDateDaysAgo, Criteria::GREATER_EQUAL);
+		$results = array_column($results, null, $sitekeyColumnName);
 	}
-
-    if(!empty($arrGeoLocIds) && is_array($arrGeoLocIds))
-    {
-    	$locIdColumnName = $query->getAliasedColName(\JobScooper\DataAccess\Map\JobPostingTableMap::COL_GEOLOCATION_ID);
-        $query->useJobPostingFromUJMQuery()
-	       ->addCond('locIdsCond1', $locIdColumnName, $arrGeoLocIds, Criteria::IN)
-	       ->addCond('locIdsCond2', $locIdColumnName, null, Criteria::ISNULL)
-	       ->combine(array('locIdsCond1', 'locIdsCond2'), Criteria::LOGICAL_OR)
-	       ->orderByKeyCompanyAndTitle()
-	       ->endUse();
-    }
-    else
-	    $query->useJobPostingFromUJMQuery()
-		    ->orderByKeyCompanyAndTitle()
-		    ->endUse();
-
-	$results =  $query->find()->toKeyIndex("UserJobMatchId");
 
 	unset($query);
 

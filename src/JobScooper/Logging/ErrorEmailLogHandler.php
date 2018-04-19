@@ -23,11 +23,21 @@ use Monolog\Handler\MailHandler;
 
 class ErrorEmailLogHandler extends MailHandler
 {
+	static function getEmailErrorLogContent()
+	{
+		return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, "email_error_log_content");
+	}
+
     /**
      * {@inheritdoc}
-     */
+     * @throws \Exception
+    */
     protected function send($content, array $records)
     {
+	    $newErrContent = $this->getEmailErrorLogContent() . PHP_EOL . $content;
+	    setGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, "email_error_log_content", $newErrContent);
+
+
         $searchParams = $this->_getUserSearchSiteRunContent();
 
         $subject = "JobScooper Error: [" . gethostname() . "] for " . getRunDateRange();
