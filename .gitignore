@@ -13,4 +13,7 @@ vendor/*
 python/pyJobNormalizer/venv
 *.NOTREADY
 .env
+
 docker-compose.override.yml
+**/node_modules
+**/.venv
