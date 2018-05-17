@@ -32,7 +32,7 @@ abstract class AbstractWordPress extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
 	{
 		$this->arrListingTagSetup['JobListingsPerPage'] =  array("selector" => "div.job_listings", "return_attribute" => "data-per_page");
-		$count = $this->_getTagValueFromPage_($objSimpHTML,'JobListingsPerPage' );
+		$count = \JobScooper\Utils\DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobListingsPerPage']);
 		if(!empty($count))
 		{
 			$this->JobListingsPerPage = intval($count);
