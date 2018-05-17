@@ -49,7 +49,11 @@ Class JobsErrorHandler extends ErrorHandler
 	 * @throws \Exception
 	 */
 	public function handleException($e)
-    {
+	{
+		if (is_a($e, \Error::class)) {
+			$e = new \ErrorException($e->getMessage(), $e->getCode(), $severity = 1, $e->getFile(), $e->getLine(), $e->getPrevious());
+		}
+
 	    if(empty($GLOBALS['logger']))
 		    $GLOBALS['logger'] = getChannelLogger("default");
 
