@@ -25,6 +25,17 @@ use Monolog\Logger;
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
+function getLogger($channel=null)
+{
+	if (array_key_exists('logger', $GLOBALS)) {
+		if (!empty($channel))
+			return getChannelLogger($channel);
+
+		return $GLOBALS['logger'];
+	}
+
+	return null;
+}
 /**
  * @param $headerText
  * @param $nSectionLevel
@@ -32,13 +43,14 @@ use Monolog\Logger;
  */
 function startLogSection($headerText)
 {
-	if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+	$logger = getLogger();
+	if(empty($logger))
 	{
 		print($headerText. "\r\n");
 	}
 	else
 	{
-		$GLOBALS['logger']->startLogSection($headerText);
+		$logger->startLogSection($headerText);
 	}
 }
 
@@ -49,13 +61,14 @@ function startLogSection($headerText)
  */
 function endLogSection($headerText)
 {
-	if(is_null($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+	$logger = getLogger();
+	if(empty($logger))
 	{
 		print($headerText. "\r\n");
 	}
 	else
 	{
-		$GLOBALS['logger']->endLogSection($headerText);
+		$logger->endLogSection($headerText);
 	}
 }
 
@@ -67,7 +80,8 @@ function endLogSection($headerText)
  */
 function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $channel=null)
 {
-	if(empty($GLOBALS['logger']) || !isset($GLOBALS['logger']))
+	$logger = getLogger();
+	if(empty($logger))
 	{
 		print($msg . "\r\n");
 	}
@@ -75,7 +89,7 @@ function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $c
 	{
 		if(empty($logLevel))
 			$logLevel = Logger::INFO;
-		$GLOBALS['logger']->logRecord($logLevel, $msg, $extras, $ex, $channel);
+		$logger->logRecord($logLevel, $msg, $extras, $ex, $channel);
 	}
 }
 
@@ -134,7 +148,12 @@ function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $channel=
  */
 function getChannelLogger($channel)
 {
-	return $GLOBALS['logger']->getChannelLogger($channel);
+	$logger = getLogger();
+	if(empty($logger)) {
+		return $logger->getChannelLogger($channel);
+	}
+
+	return null;
 }
 
 /**
