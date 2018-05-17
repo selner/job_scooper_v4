@@ -80,9 +80,6 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		else
 			$this->arrListingTagSetup = $this->arrBaseListingTagSetupNationalSearch;
 
-		$this->JobPostingBaseUrl = $this->childSiteURLBase;
-		$this->SearchUrlFormat = $this->childSiteURLBase . $this->strBaseURLPathSection . $this->strBaseURLPathSuffix;
-
 		parent::__construct();
 
 		if($fDoNotRemoveSetup !== true)
@@ -190,10 +187,14 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 			//
 		}
 
-		if(is_null($this->nTotalJobs))
+		if(null === $this->nTotalJobs)
 		{
-			$this->setLayoutIfNeeded($searchDetails);
+			$this->setLayoutIfNeeded();
 		}
+
+		if(empty($this->arrListingTagSetup))
+			$this->setLayoutIfNeeded();
+
 	}
 
 	/**
@@ -236,20 +237,7 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 		return parent::parseTotalResultsCount($objSimpHTML);
 	}
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return array|null
-	 * @throws \Exception
-	 */
-	function getLayoutAndParseJobs(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
-	{
-		if(empty($this->arrListingTagSetup))
-			$this->setLayoutIfNeeded();
 
-		return $this->parseJobsListForPage($objSimpHTML);
-
-	}
 	/**
 	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
 	 *
@@ -293,11 +281,11 @@ abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSim
 			} catch (Exception $ex) {
 				LogWarning("Failed to download " . $this->getJobSiteKey() . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
 
-				return $this->getLayoutAndParseJobs($objSimpHTML);
+				return parent::parseJobsListForPage($objSimpHTML);
 			}
 		}
 
-		return $this->getLayoutAndParseJobs($objSimpHTML);
+		return parent::parseJobsListForPage($objSimpHTML);
 	}
 
 	/**
