@@ -87,6 +87,7 @@ class JobSitePluginBuilder
 	/**
 	 * @param string $strJobSiteKey
 	 * @throws \Exception
+	 * @return \JobScooper\BasePlugin\Interfaces\IJobSitePlugin
 	 */
 	static function getJobSitePlugin($strJobSiteKey)
 	{
@@ -179,6 +180,7 @@ class JobSitePluginBuilder
 
 	/**
 	 * @param array $setExcluded
+	 * @throws \Exception
 	 */
 	static function setSitesAsExcluded($setExcluded=array())
 	{
@@ -194,6 +196,7 @@ class JobSitePluginBuilder
 
 	/**
 	 * @param string[] $countryCodes
+	 * @throws \Exception
 	 */
 	static function filterJobSitesByCountryCodes(&$sites, $countryCodes)
 	{

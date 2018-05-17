@@ -19,7 +19,6 @@ namespace JobScooper\BasePlugin\Classes;
 
 
 
-use JBZoo\Utils\Url;
 use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
@@ -37,7 +36,6 @@ use Exception;
 use JobScooper\Utils\CurlWrapper;
 use JobScooper\Utils\SimpleHTMLHelper;
 use Propel\Runtime\ActiveQuery\Criteria;
-use Propel\Runtime\Collection\Collection;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel;
@@ -232,7 +230,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 		if (count($this->arrSearchesToReturn) == 0) {
 			LogMessage($this->JobSiteName . ": no searches set. Skipping...");
 
-			return array();
+			return;
 		}
 
 		try {
@@ -313,6 +311,8 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 			}
 		}
 
+
+		return;
 	}
 
 	//************************************************************************
@@ -946,13 +946,14 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 			handleException($ex, null, true);
 		}
 
+
+		return null;
 	}
 
 
 	/**
 	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
 	 *
-	 * @return null|array
 	 * @throws \Exception
 	 */
 	protected function _getMyJobsForSearchFromJobsAPI_(UserSearchSiteRun $searchDetails)
@@ -1001,6 +1002,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 
 		$this->log($this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL);
 
+		return;
 	}
 
 
@@ -1225,10 +1227,16 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 		return $jobResults;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getObjectProperties() {
 		return $this->getArray();
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getArray() {
 		return get_object_vars($this);
 	}
@@ -1473,7 +1481,7 @@ JSCODE;
 
             if ($nTotalListings <= 0) {
                 $this->log("No new job listings were found on " . $this->JobSiteName . " for search '" . $searchDetails->getUserSearchSiteRunKey() . "'.");
-                return array();
+                return;
             } else {
                 $nJobsFound = 0;
 
@@ -1559,7 +1567,7 @@ JSCODE;
                     } else {
                         $strURL = $this->setResultPageUrl($searchDetails, $nPageCount, $nItemCount);
                         if ($this->_checkInvalidURL_($searchDetails, $strURL) == self::VALUE_NOT_SUPPORTED)
-                            return null;
+                            return;
 
                         $objSimpleHTML = $this->getSimpleObjFromPathOrURL($searchDetails, null, $strURL, $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
                     }
@@ -1771,7 +1779,7 @@ JSCODE;
 	        unset($objSimpleHTML);
         }
 
-        return null;
+        return;
     }
 
 	/**
@@ -1800,15 +1808,10 @@ JSCODE;
     }
 
 
-
 	/**
-	 * /**
-	 * getJobsFromLdJson
-	 *
-	 * This does the heavy lifting of parsing job records from
-	 * LD+JSON found in the page
-	 *
 	 * @param $objSimpHTML
+	 *
+	 * @return array|null
 	 * @throws \Exception
 	 */
 	function parseJobsFromLdJson($objSimpHTML)
