@@ -40,7 +40,7 @@ abstract class AbstractBaseDice extends \JobScooper\BasePlugin\Classes\AjaxHtmlS
 			unset($urlInfo['query']);
 		if(array_key_exists("fragment", $urlInfo))
 			unset($urlInfo['fragment']);
-		$url = JBZoo\Utils\Url::buildAll($urlInfo);
+		$url = Url::buildAll($urlInfo);
 		$this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $url);
 
 		return $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
