@@ -131,7 +131,7 @@ class NotifierDevAlerts extends JobsMailSender
 		foreach ($returnedJobSites as $jobsite) {
 			$jsKey = $jobsite['JobSiteKey'];
 			if (!(array_key_exists($jsKey, $lastJobsiteSuccess) && $jobsite['LastCompletedAt'] < $lastJobsiteSuccess[$jsKey]['LastCompletedAt'])) {
-				if ($jobsite['CountFailedRuns'] >= 3) {
+				if($jobsite['CountFailedRuns'] >= 3) {
 					$failedJobSites[$jsKey] = $jobsite;
 				}
 			}
@@ -148,7 +148,7 @@ class NotifierDevAlerts extends JobsMailSender
 				->toArray("JobSiteKey");
 
 			foreach (array_keys($failedJobSites) as $jsKey) {
-				if (!in_array($jsKey, array_keys($reportJobSites)))
+				if (!array_key_exists($jsKey, $reportJobSites))
 					$reportJobSites[$jsKey] = array();
 
 				$reportJobSites[$jsKey] = array_merge($reportJobSites[$jsKey], $failedJobSites[$jsKey]);
@@ -157,6 +157,8 @@ class NotifierDevAlerts extends JobsMailSender
 			ksort($reportJobSites);
 		}
 
+		if(null === $reportJobSites)
+			$reportJobSites = array();
 		return $reportJobSites;
 	}
 

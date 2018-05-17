@@ -78,7 +78,7 @@ class JobSitePluginBuilder
 			throw new \InvalidArgumentException("Error: no job site key specified.");
 
 		$allSites = JobSitePluginBuilder::getAllJobSites();
-		if (in_array($strJobSiteKey, array_keys($allSites)))
+		if (array_key_exists($strJobSiteKey, $allSites))
 			return $allSites[$strJobSiteKey];
 
 		return null;
@@ -104,7 +104,7 @@ class JobSitePluginBuilder
 	static function getIncludedJobSites($fOptimizeBySiteRunOrder=false)
 	{
 		$sites = getCacheAsArray("included_jobsites");
-		if (is_null($sites))
+		if (empty($sites))
 		{
 			$sites = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
 
@@ -243,7 +243,7 @@ class JobSitePluginBuilder
 
 		if ($this->_pluginsLoaded !== true) {
 			$pathPluginDirectory = join(DIRECTORY_SEPARATOR, array(__ROOT__, "Plugins"));
-			if (is_null($pathPluginDirectory) || strlen($pathPluginDirectory) == 0)
+			if (empty($pathPluginDirectory))
 				throw new Exception("Path to plugins source directory was not set.");
 
 			if (!is_dir($pathPluginDirectory))
@@ -298,7 +298,7 @@ class JobSitePluginBuilder
 
 
 	    $enabledSites = array_filter($all_jobsites_by_key, function ($v, $k) use ($declaredPluginsBySite) {
-		    return in_array($k, array_keys($declaredPluginsBySite)) && ($v->isDisabled() === false);
+		    return array_key_exists($k, $declaredPluginsBySite) && ($v->isDisabled() === false);
 	    }, ARRAY_FILTER_USE_BOTH);
 
 	    $jobsitesToDisable = array_diff_key($all_jobsites_by_key, $enabledSites);
@@ -517,8 +517,8 @@ class JobSitePluginBuilder
 	 */
 	private function _getArrayItemForEval($pluginConfig, $key, $quoteItems = true)
     {
-        $flags = null;
-        if (array_key_exists($key, $pluginConfig) && !is_null($pluginConfig[$key]) && is_array($pluginConfig[$key]) && count($pluginConfig[$key]) >= 1) {
+        $flags = "";
+        if (array_key_exists($key, $pluginConfig) && !empty($pluginConfig[$key]) && is_array($pluginConfig[$key])) {
             $flags = "array()";
 
             $start = "[";
@@ -531,8 +531,9 @@ class JobSitePluginBuilder
                 $end = "\"]";
             }
 
-            $flags = $start . join($glue, array_values($pluginConfig[$key])) . $end;
+            $flags = $start . implode($glue, array_values($pluginConfig[$key])) . $end;
         }
+
         return $flags;
 
     }
