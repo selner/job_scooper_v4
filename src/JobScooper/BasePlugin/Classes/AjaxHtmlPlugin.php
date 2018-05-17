@@ -28,6 +28,7 @@ abstract class AjaxHtmlPlugin extends BaseSitePlugin
 	 * AjaxHtmlPlugin constructor.
 	 *
 	 * @param null $strBaseDir
+	 * @throws \Exception
 	 */
 	function __construct($strBaseDir = null)
     {

@@ -28,6 +28,7 @@ class ApiPlugin extends BaseSitePlugin
 	 * ApiPlugin constructor.
 	 *
 	 * @param null $strBaseDir
+	 * @throws \Exception
 	 */
 	function __construct($strBaseDir = null)
     {

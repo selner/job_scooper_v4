@@ -28,6 +28,7 @@ abstract class ServerHtmlPlugin extends BaseSitePlugin
 	 * ServerHtmlPlugin constructor.
 	 *
 	 * @param null $strBaseDir
+	 * @throws \Exception
 	 */
 	function __construct($strBaseDir = null)
     {
