@@ -86,7 +86,7 @@ class DomItemParser
 	}
 
 	/**
-	 * @param null $itemData
+	 * @param array|null $itemData
 	 */
 	public function setItemData($itemData)
 	{
@@ -103,13 +103,13 @@ class DomItemParser
 	}
 
 	/**
-	 * @param null $domNodeData
+	 * @param ExtendedDiDomElement|SimpleHTMLHelper|null $domNodeData
 	 * @throws \Exception
 	 */
 	public function setDomNode($domNodeData)
 	{
-		if(!(is_a($domNodeData, 'JobScooper\Utils\ExtendedDiDomELement') ||
-			is_a($domNodeData, 'JobScooper\Utils\SimpleHtmlHelper')))
+		if(!(is_a($domNodeData, ExtendedDiDomElement::class) ||
+			is_a($domNodeData, SimpleHtmlHelper::class)))
 		{
 			try
 			{
@@ -169,13 +169,13 @@ class DomItemParser
 		$val = $var[0];
 		$match_value = $var[1];
 
-		if(is_null($match_value))
+		if(null === $match_value)
 			throw new \Exception('Tag parser missing pattern match value for matchesNoResultsPattern callback.');
 		return noJobStringMatch($val, $match_value);
 	}
 
 	/**
-	 * @param $arrTag
+	 * @param array $arrTag
 	 *
 	 * @return null|string
 	 * @throws \Exception
@@ -284,10 +284,10 @@ class DomItemParser
 	protected function _getTagMatchValueStatic_($arrTag)
 	{
 		$ret = null;
-		if (array_key_exists('value', $arrTag) && !is_null($arrTag['value'])) {
+		if (array_key_exists('value', $arrTag) && null !== $arrTag['value']) {
 			$value  = $arrTag['value'];
 
-			if(is_null($value) || strlen($value) == 0)
+			if(null === $value)
 				$ret = null;
 			else
 				$ret = $value;
@@ -318,7 +318,7 @@ class DomItemParser
 				$value = $this->getItemDataValue($arrTag['field']);
 			}
 
-			if(empty($value))
+			if(null === $value)
 				$ret = null;
 			else
 			{
@@ -343,7 +343,7 @@ class DomItemParser
 	private function _getReturnValueByIndex($arr, $indexValue)
 	{
 		$index = $this->translateTagIndexValue($arr, $indexValue);
-		if(is_null($index))
+		if(null === $index)
 			return null;
 
 		return $arr[$index];
@@ -372,7 +372,7 @@ class DomItemParser
 				break;
 
 			case $indexValue > count($arr):
-				$strError = sprintf('%s plugin failed to find index #%d in the %d matching nodes. ', $this->JobSiteName, $indexValue, count($arr));
+				$strError = sprintf('Failed to find index #%d in the %d matching nodes. ', $indexValue, count($arr));
 				$this->log($strError, LogLevel::WARNING);
 				$ret = null;
 				break;
@@ -414,7 +414,7 @@ class DomItemParser
 		}
 
 		$strMatch = $this->getTagSelector();
-		if (is_null($strMatch)) {
+		if (null === $strMatch) {
 			return $ret;
 		}
 		elseif(strlen($strMatch) > 0)
@@ -426,7 +426,7 @@ class DomItemParser
 				// do nothing.  We already have the node set correctly
 			} elseif (!empty($nodeMatches) && array_key_exists('index', $arrTag) && is_array($nodeMatches))
 			{
-				$index = intval($arrTag['index']);
+				$index = (int)$arrTag['index'];
 				if ( $index > count($nodeMatches) - 1) {
 					$this->log("Tag specified index {$index} but only " . count($nodeMatches) . " were matched.  Defaulting to first node.", LogLevel::WARNING);
 					$index = 0;
@@ -447,10 +447,10 @@ class DomItemParser
 			if (!empty($ret) && !in_array($returnAttribute, ['collection', 'node'])) {
 				$ret = $ret->$returnAttribute;
 
-				if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
+				if (null !== $propertyRegEx && is_string($ret) && strlen($ret) > 0) {
 					$match = array();
-					$propertyRegEx = str_replace("\\\\", '\\", $propertyRegEx);
-					$retTemp = str_replace("\n', ' ', $ret);
+					$propertyRegEx = str_replace("\\\\", "\\", $propertyRegEx);
+					$retTemp = str_replace('\n', ' ', $ret);
 					if (preg_match($propertyRegEx, $retTemp, $match) !== false && count($match) >= 1)
 					{
 						$ret = $match[1];
