@@ -22,7 +22,7 @@ namespace JobScooper\BasePlugin\Classes;
  * Class ServerHtmlSimplePlugin
  * @package JobScooper\BasePlugin\Classes
  */
-abstract class ServerHtmlSimplePlugin extends SimplePlugin
+abstract class ServerHtmlSimplePlugin extends BaseSitePlugin
 {
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
 }
