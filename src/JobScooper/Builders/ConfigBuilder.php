@@ -99,7 +99,7 @@ class ConfigBuilder
 	    $this->_setupPropelForRun();
 
         // Now setup all the output folders
-        $this->__setupOutputFolders__();
+        $this->setupOutputFolders();
 
         $strOutfileArrString = getArrayValuesAsString(getConfigurationSetting('output_directories'));
         LogMessage('Output folders configured: ' . $strOutfileArrString);
@@ -120,12 +120,13 @@ class ConfigBuilder
 	 * @throws \ErrorException
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function __setupOutputFolders__()
+	private function setupOutputFolders()
     {
 	    $arrOututDirs = getConfigurationSetting('output_directories');
 	    $outputDirectory = $arrOututDirs['root'];
 	    if (empty($outputDirectory)) {
-		    throw new \ErrorException('Required value for the output folder {$outputDirectory} was not specified. Exiting.');
+		    throw new \ErrorException("Required value for the output folder {$outputDirectory} was not specified. Exiting.");
+		    
 	    }
 
         $globalDirs = ['debug', 'logs', 'caches'];
@@ -450,11 +451,11 @@ class ConfigBuilder
 			$user_recs = array($cmd_line_user_to_run => $currentUser);
 			setConfigurationSetting('users_for_run', $user_recs);
 
-			LogMessage('Limiting users run to single, specified user: {$cmd_line_user_to_run}');
+			LogMessage("Limiting users run to single, specified user: {$cmd_line_user_to_run}");
 		}
 		elseif(!empty($cmd_line_user_to_run))
 		{
-			throw new \Exception('Unable to find user matching {$cmd_line_user_to_run} that was specified for the run.');
+			throw new \Exception("Unable to find user matching {$cmd_line_user_to_run} that was specified for the run.");
 		}
 
 		if (empty($user_recs))

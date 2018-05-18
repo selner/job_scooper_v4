@@ -261,7 +261,7 @@ class DomItemParser
 		if (array_key_exists('return_value_callback', $this->_tagParseInfo) && (strlen($this->_tagParseInfo['return_value_callback']) > 0)) {
 			$callback = get_class($this) . '::' . $this->_tagParseInfo['return_value_callback'];
 			if (!method_exists($this, $this->_tagParseInfo['return_value_callback'])) {
-				$strError = sprintf('Failed to execute callback method \'{$callback}\' for attribute name \'{$returnAttribute}\'.', $callback, $returnAttribute);
+				$strError = sprintf("Failed to execute callback method \'{$callback}\' for attribute name \'{$returnAttribute}\'.", $callback, $returnAttribute);
 				$this->log($strError, LogLevel::ERROR);
 				throw new \Exception($strError);
 			}
@@ -428,11 +428,11 @@ class DomItemParser
 			{
 				$index = intval($arrTag['index']);
 				if ( $index > count($nodeMatches) - 1) {
-					$this->log('Tag specified index {$index} but only ' . count($nodeMatches) . ' were matched.  Defaulting to first node.', LogLevel::WARNING);
+					$this->log("Tag specified index {$index} but only " . count($nodeMatches) . " were matched.  Defaulting to first node.", LogLevel::WARNING);
 					$index = 0;
 				} elseif(empty($index) && $index !== 0)
 				{
-					$this->log('Tag specified index value was invalid ' . $arrTag['index'] . '.  Defaulting to first node.', LogLevel::WARNING);
+					$this->log("Tag specified index value was invalid {$arrTag['index']}.  Defaulting to first node.", LogLevel::WARNING);
 					$index = 0;
 				}
 				$ret = $this->_getReturnValueByIndex($nodeMatches, $index);
