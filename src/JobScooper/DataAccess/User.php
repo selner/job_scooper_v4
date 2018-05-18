@@ -193,7 +193,7 @@ class User extends BaseUser
 			    }
 
 			    if(null === $tempFileDetails || $tempFileDetails->isFile() !== true) {
-				    throw new \Exception('Specified input file \'{$path}\' was not found.  Aborting.');
+				    throw new \Exception("Specified input file \'{$path}\' was not found.  Aborting.");
 			    }
 
 			    $key = $fileinfo->getBasename('.csv');
@@ -254,13 +254,13 @@ class User extends BaseUser
 
 		$searchLocations = $this->getSearchLocations();
 		if (empty($searchLocations)) {
-			LogWarning('No search locations have been set for {$slug}. Unable to create any search pairings for user.');
+			LogWarning("No search locations have been set for {$slug}. Unable to create any search pairings for user.");
 			return ;
 		}
 
 		$searchKeywords = $this->getSearchKeywords();
 		if (empty($searchKeywords)) {
-			LogWarning('No user search keywords have been configuredfor {$slug}. Unable to create any search pairings for user');
+			LogWarning("No user search keywords have been configuredfor {$slug}. Unable to create any search pairings for user");
 			return ;
 		}
 
@@ -275,7 +275,7 @@ class User extends BaseUser
 		{
 			$location = $locmgr->lookupAddress($searchLoc);
 			if (!empty($location)) {
-				LogMessage('Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}\'s keywords');
+				LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}\'s keywords");
 				$locId = $location->getGeoLocationId();
 				$searchGeoLocIds[$locId] = $locId;
 
@@ -296,7 +296,7 @@ class User extends BaseUser
 				}
 			}
 			else
-				LogError('Could not create user searches for the \'{$searchLoc}\' search location.');
+				LogError("Could not create user searches for the \'{$searchLoc}\' search location.");
 		}
 
 		try {
@@ -314,7 +314,7 @@ class User extends BaseUser
 				->combine(array('condUserKwds', 'condUserLocs'), Criteria::LOGICAL_OR)
 				->update(array('IsActive' => false), $con);
 
-			LogMessage('Marked {$oldPairUpdate} previous user search pairs as inactive.');
+			LogMessage("Marked {$oldPairUpdate} previous user search pairs as inactive.");
 
 		} catch (PropelException $ex) {
 			handleException($ex, null, false);
@@ -326,7 +326,7 @@ class User extends BaseUser
 			LogMessage('Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.');
 			return ;
 		}
-		LogMessage('Updated or created ' . count($userSearchPairs) . ' user search pairs for {$slug}.');
+		LogMessage('Updated or created ' . count($userSearchPairs) . " user search pairs for {$slug}.");
 
 	}
 
@@ -354,10 +354,10 @@ class User extends BaseUser
 	 */
 	public function createUserSearchSiteRuns()
 	{
-		startLogSection('Initializing search runs for user " . $this->getUserSlug());
+		startLogSection('Initializing search runs for user ' . $this->getUserSlug());
 		$srchmgr = new SearchBuilder();
 		$this->_userSearchSiteRunsByJobSite = $srchmgr->createSearchesForUser($this);
-		endLogSection(" User search site runs initialization.');
+		endLogSection(' User search site runs initialization.');
 
 		return $this->_userSearchSiteRunsByJobSite;
 	}
