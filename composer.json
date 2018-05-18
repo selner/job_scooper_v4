@@ -34,7 +34,8 @@
         "adbario/php-dot-notation": "2.x-dev",
         "bramus/monolog-colored-line-formatter": "~2.0",
         "phpFastCache/phpFastCache": "6.1.1",
-        "hassankhan/config": "dev-master"
+        "hassankhan/config": "dev-master",
+        "curl/curl": "dev-master"
     },
     "autoload": {
         "psr-4": {
