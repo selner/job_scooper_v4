@@ -40,7 +40,7 @@ class GeocodeApiHttpAdapter extends CurlWrapper  implements \Geocoder\HttpAdapte
 		}
 		catch (\ErrorException $ex)
 		{
-			throw new HttpException('GeocodeApi server error [#{$ex->getCode()}]: {$ex->getMessage()}.', $ex->getCode(), $ex);
+			throw new HttpException("GeocodeApi server error [#{$ex->getCode()}]: {$ex->getMessage()}.", $ex->getCode(), $ex);
 		}
 
 		if(array_key_exists('body', $curl_output))

@@ -130,7 +130,8 @@ class ConfigBuilder
 	    $arrOututDirs = Settings::getValue('output_directories');
 	    $outputDirectory = $arrOututDirs['root'];
 	    if (empty($outputDirectory)) {
-		    throw new \ErrorException('Required value for the output folder {$outputDirectory} was not specified. Exiting.');
+		    throw new \ErrorException("Required value for the output folder {$outputDirectory} was not specified. Exiting.");
+		    
 	    }
 
         $globalDirs = ['debug', 'logs', 'caches'];
@@ -458,11 +459,11 @@ class ConfigBuilder
 			$user_recs = array($cmd_line_user_to_run => $currentUser);
 			Settings::setValue('users_for_run', $user_recs);
 
-			LogMessage('Limiting users run to single, specified user: {$cmd_line_user_to_run}');
+			LogMessage("Limiting users run to single, specified user: {$cmd_line_user_to_run}");
 		}
 		elseif(!empty($cmd_line_user_to_run))
 		{
-			throw new \Exception('Unable to find user matching {$cmd_line_user_to_run} that was specified for the run.');
+			throw new \Exception("Unable to find user matching {$cmd_line_user_to_run} that was specified for the run.");
 		}
 
 		if (empty($user_recs))

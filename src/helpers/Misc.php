@@ -41,9 +41,13 @@ function object_to_array($obj)
  */
 function isBitFlagSet($flagSettings = null, $flagToCheck= null)
 {
+	if(empty($flagToCheck) || empty($flagSettings)) {
+		return false;
+	}
+
     $ret = ($flagSettings & $flagToCheck);
-    if($ret == $flagToCheck) { return true; }
-    return false;
+
+	return $flagToCheck === $ret;
 }
 
 /**
