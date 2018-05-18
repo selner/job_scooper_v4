@@ -44,3 +44,4 @@ abstract class AbstractKellyServices extends ClassClientHTMLJobSitePlugin
     }
 
 }
+
