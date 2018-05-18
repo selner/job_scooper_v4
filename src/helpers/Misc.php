@@ -45,9 +45,7 @@ function isBitFlagSet($flagSettings = null, $flagToCheck= null)
 		return false;
 	}
 
-    $ret = ($flagSettings & $flagToCheck);
-
-	return $flagToCheck === $ret;
+    return ($flagSettings & $flagToCheck);
 }
 
 /**

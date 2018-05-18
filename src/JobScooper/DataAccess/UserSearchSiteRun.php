@@ -26,10 +26,10 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 */
 	public function getJobPostingBaseUrl()
 	{
-		if(empty($this->_JobPostingBaseUrl))
+		if(null === $this->_JobPostingBaseUrl)
 		{
 			$plugin = $this->getSitePlugin();
-			if(!empty($plugin))
+			if(null !== $plugin)
 				$this->_JobPostingBaseUrl = $plugin->getJobPostingBaseUrl();
 		}
 		return $this->_JobPostingBaseUrl;
@@ -43,7 +43,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 */
 	function getSitePlugin()
 	{
-		if (!empty($this->_plugin))
+		if (null !== $this->_plugin)
 			return $this->_plugin;
 
 		$this->_plugin = JobSitePluginBuilder::getJobSitePlugin($this->getJobSiteKey());
@@ -56,10 +56,10 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 */
 	function getSearchUrlFormat()
 	{
-		if (empty($this->_SearchUrlFormat))
+		if (null === $this->_SearchUrlFormat)
 		{
 			$plugin = $this->getSitePlugin();
-			if(!empty($plugin))
+			if(null !== $plugin)
 				$this->_SearchUrlFormat = $plugin->getSearchUrlFormat();
 		}
 
@@ -74,7 +74,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 */
 	function failRunWithErrorMessage($err, SimpleHTMLHelper $objPageHtml=null)
 	{
-		$arrV = "";
+		$arrV = '';
 		if(is_a($err, "\Exception") || is_subclass_of($err, "\Exception"))
 		{
 			$arrV = array(strval($err));
@@ -88,7 +88,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 			$arrV = array($err);
 
 		$this->setRunResultCode("failed");
-		if(!empty($objPageHtml))
+		if(null !== $objPageHtml)
 		{
 			try
 			{
@@ -159,7 +159,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	{
 		$user = null;
 		$user_search = $this->getUserSearchPairFromUSSR();
-		if(!empty($user_search))
+		if(null !== $user_search)
 			$user = $user_search->getUserFromUS();
 
 		if(method_exists($this, $method)) {
@@ -199,9 +199,9 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 		updateColumnsForCSVFlatArray($arrJobPosting, new UserSearchSiteRunTableMap());
 		if ($includeGeolocation === true) {
 			$searchPair = $this->getUserSearchPairFromUSSR();
-			if(!empty($searchPair) && !empty($searchPair->getGeoLocationId())) {
+			if(null !== $searchPair && null !== $searchPair->getGeoLocationId()) {
 				$jobloc = $searchPair->getGeoLocationFromUS();
-				if (!is_null($jobloc))
+				if (null !== $jobloc)
 					$location = $jobloc->toFlatArrayForCSV();
 
 				$arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
@@ -248,9 +248,9 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 //	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3)
 //	    {
 //		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
-		if (!empty($tokenFmtStrings)) {
+		if (null !== $tokenFmtStrings) {
 			foreach ($tokenFmtStrings as $tokFound) {
-				$replaceVal = "";
+				$replaceVal = '';
 				$replaceStr = $tokFound['source_string'];
 				switch ($tokFound['type']) {
 					case "LOCATION":
@@ -300,7 +300,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	private function _callPluginMethodIfExists($method, $arr)
 	{
 		$plugin = $this->getSitePlugin();
-		if(!empty($plugin))
+		if(null !== $plugin)
 			if (method_exists($plugin, $method))
 				return call_user_func_array(array($plugin, $method), $arr);
 
@@ -319,7 +319,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 		if($ret !== false)
 			return $ret;
 
-		return ($nDays == null || $nDays == "") ? 1 : $nDays;
+		return ($nDays == null || $nDays == '') ? 1 : $nDays;
 	}
 
 	/**
@@ -333,7 +333,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 		$ret = $this->_callPluginMethodIfExists("getPageURLValue", array($nPage));
 		if($ret !== false)
 			return $ret;
-		return ($nPage == null || $nPage == "") ? "" : $nPage;
+		return ($nPage == null || $nPage == '') ? '' : $nPage;
 	}
 
 	/**
@@ -352,7 +352,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 			$nItem = $nItem - 1;
 		}
 
-		return ($nItem == null || $nItem == "") ? 0 : $nItem;
+		return ($nItem == null || $nItem == '') ? 0 : $nItem;
 	}
 
 
@@ -371,7 +371,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 			return $this->getKeywordStringsForUrl();
 		}
 
-		return "";
+		return '';
 	}
 
 
@@ -396,30 +396,30 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 		$searchpair = $this->getUserSearchPairFromUSSR();
 		$loc = $searchpair->getGeoLocationFromUS();
-		if (empty($loc)) {
+		if (null === $loc) {
 			LogMessage("Plugin for '" . $this->getJobSiteKey() . "' is missing the search location.   Skipping search '" . $this->getUserSearchSiteRunKey() . ".");
 
 			return null;
 		}
 
 		$locTypeNeeded = null;
-		if (!empty($fmt)) {
+		if (null !== $fmt) {
 			$strLocationValue = replaceTokensInString($fmt, $loc->toArray());
 		} else {
 			$plugin = $this->getSitePlugin();
-			if(!empty($plugin))
+			if(null !== $plugin)
 				$locTypeNeeded = $plugin->getGeoLocationSettingType($loc);
-			if (empty($locTypeNeeded)) {
+			if (null === $locTypeNeeded) {
 				LogMessage("Plugin for '" . $this->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $this->getUserSearchSiteRunKey() . ".");
 
 				return null;
 			}
 
 			$strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
-			if (empty($strLocationValue) || $strLocationValue == BaseSitePlugin::VALUE_NOT_SUPPORTED) {
+			if (null === ($strLocationValue) || $strLocationValue == BaseSitePlugin::VALUE_NOT_SUPPORTED) {
 				LogMessage("Plugin for '" . $this->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $this->getUserSearchSiteRunKey() . ".");
 
-				return "";
+				return '';
 			}
 		}
 
@@ -446,17 +446,18 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 		// if we don't support keywords in the URL at all for this
 		// plugin or we don't have any keywords, return empty string
-		if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) ||
-			empty($strRetCombinedKeywords)) {
-			$strRetCombinedKeywords = "";
+		if (null === $strRetCombinedKeywords ||
+			$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+			$strRetCombinedKeywords = '';
 		} else {
 			if ($this->isBitFlagSet(C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS)) {
 				$strRetCombinedKeywords = "\"{$strRetCombinedKeywords}\"";
 			}
 
 			if (!isValueURLEncoded($strRetCombinedKeywords)) {
-				if ($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE))
+				if($this->isBitFlagSet(C__JOB_KEYWORD_PARAMETER_SPACES_RAW_ENCODE)) {
 					$strRetCombinedKeywords = rawurlencode($strRetCombinedKeywords);
+				}
 				else
 					$strRetCombinedKeywords = urlencode($strRetCombinedKeywords);
 			}
@@ -482,7 +483,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	{
 
 		$searchStartURL = $this->getPageURLfromBaseFmt(1, 1);
-		if (is_null($searchStartURL) || strlen($searchStartURL) == 0)
+		if (null === $searchStartURL)
 			$searchStartURL = $this->getJobPostingBaseUrl();
 
 		$this->setSearchStartUrl($searchStartURL);
@@ -498,7 +499,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	function isBitFlagSet($flagToCheck)
 	{
 		$plugin = $this->getSitePlugin();
-		if (!empty($plugin))
+		if (null !== $plugin)
 			return $plugin->isBitFlagSet($flagToCheck);
 
 		throw new \Exception("Error: could not get job site plugin object for {$this->getJobSiteKey()}.");

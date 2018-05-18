@@ -102,7 +102,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 
 		$this->JobSiteKey = $this->getJobSiteKey();
 
-		if (is_null($this->JobSiteName) || strlen($this->JobSiteName) == 0) {
+		if (null === $this->JobSiteName) {
 			$classname = get_class($this);
 			if (preg_match('/^Plugin(\w+)/', $classname, $matches) > 0) {
 				$this->JobSiteName = $matches[1];
@@ -148,11 +148,11 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 			}
 		}
 
-		if (!is_null($this->selectorMoreListings) && strlen($this->selectorMoreListings) > 0)
+		if (null !== $this->selectorMoreListings)
 			$this->selectorMoreListings = preg_replace("/\\\?[\"']/", "'", $this->selectorMoreListings);
 
 		if (substr($this->JobPostingBaseUrl, strlen($this->JobPostingBaseUrl) - 1, strlen($this->JobPostingBaseUrl)) === "/")
-			$this->JobPostingBaseUrl = substr($this->JobPostingBaseUrl, 0, strlen($this->JobPostingBaseUrl) - 1);
+			$this->JobPostingBaseUrl = substr($this->JobPostingBaseUrl, 0, -1);
 
 		if (empty($this->JobSiteName)) {
 			$this->JobSiteName = str_replace("Plugin", "", get_class($this));
@@ -239,7 +239,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	 */
 	function getJobSiteKey()
 	{
-		if (empty($this->JobSiteKey)) {
+		if (null === $this->JobSiteKey) {
 			$arrSiteList = JobSitePluginBuilder::getAllJobSites();
 			$className = get_class($this);
 			$siteKey = strtolower(str_ireplace("Plugin", "", $className));
@@ -268,12 +268,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	 */
 	public function isBitFlagSet($flagToCheck)
 	{
-		$ret = isBitFlagSet($this->_flags_, $flagToCheck);
-		if ($ret === $flagToCheck) {
-			return true;
-		}
-
-		return false;
+		return isBitFlagSet($this->_flags_, $flagToCheck);
 	}
 
 	/**
@@ -318,8 +313,8 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 		$search = null;
 		$boolSearchSuccess = null;
 
-		if (count($this->arrSearchesToReturn) == 0) {
-			LogMessage($this->JobSiteName . ": no searches set. Skipping...");
+		if (count($this->arrSearchesToReturn) === 0) {
+			LogMessage("{$this->JobSiteName}: no searches set. Skipping...");
 
 			return;
 		}
@@ -332,11 +327,11 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 				$this->_curlWrapper = new CurlWrapper();
 
 				try {
-					if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
+					if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && null === $this->selenium) {
 						try {
 							$this->selenium = new SeleniumManager();
 						} catch (Exception $ex) {
-							handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+							handleException($ex, "Unable to start Selenium to get jobs for plugin '{$this->JobSiteName}'", true);
 						}
 					}
 
@@ -344,7 +339,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 					$this->_addJobMatchesToUser($search);
 					$this->_setSearchResult_($search, true);
 				} catch (Exception $ex) {
-					$this->_setSearchResult_($search, false, new Exception("Unable to download jobs: " . strval($ex)));
+					$this->_setSearchResult_($search, false, new Exception("Unable to download jobs: " . (string)$ex));
 					handleException($ex, null, true, $extraData = $search->toArray());
 				} finally {
 					$search->save();
@@ -358,7 +353,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 			 */
 			if ((strcasecmp($this->resultsFilterType, "all-only") == 0) || (strcasecmp($this->resultsFilterType, "all-by-location") == 0)) {
 				try {
-					LogMessage("Checking for missing " . $this->JobSiteKey . " jobs for user " . $this->_currentUserForSearches->getUserId() . ".");
+					LogMessage("Checking for missing {$this->JobSiteKey} jobs for user {$this->_currentUserForSearches->getUserId()}.");
 					$dataExistingUserJobMatchIds = UserJobMatchQuery::create()
 						->select("JobPostingId")
 						->filterByUserId($this->_currentUserForSearches->getUserId())
@@ -376,7 +371,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 
 					$jobIdsToAddToUser = array_diff($queryAllJobsFromJobSite, $dataExistingUserJobMatchIds);
 
-					if (!is_null($jobIdsToAddToUser) && count($jobIdsToAddToUser) > 0) {
+					if (null !== $jobIdsToAddToUser && count($jobIdsToAddToUser) > 0) {
 						LogMessage("Found " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs not yet assigned to user " . $this->_currentUserForSearches->getUserSlug() . ".");
 						$this->_addJobMatchIdsToUser($jobIdsToAddToUser, $search);
 						LogMessage("Successfully added " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs to user " . $this->_currentUserForSearches->getUserSlug() . ".");
@@ -744,17 +739,17 @@ abstract class BaseSitePlugin implements IJobSitePlugin
         ";
 
 
-		if (is_null($nTotalItems)) {
+		if (null === $nTotalItems) {
 			$nTotalItems = $this->nMaxJobsToReturn;
 		}
 
-		if ($nTotalItems == C__TOTAL_ITEMS_UNKNOWN__) {
+		if ($nTotalItems === C__TOTAL_ITEMS_UNKNOWN__) {
 			$nSleepTimeToLoad = 30 + $this->additionalLoadDelaySeconds;
 		} else {
 			$nSleepTimeToLoad = ($nTotalItems / $this->JobListingsPerPage) * $this->additionalLoadDelaySeconds;
 		}
 
-		LogMessage("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results");
+		LogMessage("Sleeping for {$nSleepTimeToLoad} seconds to allow browser to page down through all the results");
 
 		$this->runJavaScriptSnippet($js, false);
 
@@ -776,8 +771,8 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 		$val = $var[0];
 		$match_value = $var[1];
 
-		if(is_null($match_value))
-			throw new \Exception("Plugin " . $this->JobSiteName  . " definition missing pattern match value for matchesNoResultsPattern callback.");
+		if(null === $match_value)
+			throw new \Exception("Plugin {$this->JobSiteName} definition missing pattern match value for matchesNoResultsPattern callback.");
 		return noJobStringMatch($val, $match_value);
 	}
 
@@ -798,37 +793,37 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	function parseTotalResultsCount(SimpleHTMLHelper $objSimpHTML)
 	{
 		if(empty($this->arrListingTagSetup))
-			throw new \BadMethodCallException(sprintf("Not implemented method  " . __METHOD__ . " called on class \"%s \".", __CLASS__));
+			throw new \BadMethodCallException(sprintf("Not implemented method  %s called on class %s", __METHOD__, __CLASS__));
 
 
-		if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['NoPostsFound']) && count($this->arrListingTagSetup['NoPostsFound']) > 0) {
+		if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && null !== $this->arrListingTagSetup['NoPostsFound'] && count($this->arrListingTagSetup['NoPostsFound']) > 0) {
 			try
 			{
 				$noResultsVal = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['NoPostsFound']);
-				if (!is_null($noResultsVal)) {
-					$this->log("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->JobSiteName);
+				if (null !== $noResultsVal) {
+					$this->log("Search returned { $noResultsVal } and matched expected 'No results' tag for { $this->JobSiteName }");
 					return $noResultsVal;
 				}
 			} catch (\Exception $ex) {
-				$this->log("Warning: Did not find matched expected 'No results' tag for " . $this->JobSiteName . ".  Error:" . $ex->getMessage(), LogLevel::WARNING);
+				$this->log("Warning: Did not find matched expected 'No results' tag for { $this->JobSiteName }.  Error:" . $ex->getMessage(), LogLevel::WARNING);
 			}
 		}
 
 		$retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
 		if (array_key_exists('TotalPostCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalPostCount']) && count($this->arrListingTagSetup['TotalPostCount']) > 0) {
 			$retJobCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalPostCount']);
-			if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
+			if (null === $retJobCount || (is_string($retJobCount) && strlen($retJobCount) == 0))
 				throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalPostCount']));
 		} else if (array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalResultPageCount']) && count($this->arrListingTagSetup['TotalResultPageCount']) > 0) {
 			$retPageCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalResultPageCount']);
-			if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
+			if (null === $retJobCount || (is_string($retJobCount) && strlen($retJobCount) == 0))
 				throw new \Exception("Unable to determine number of pages for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalResultPageCount']));
 
 			$retJobCount = $retPageCount * $this->JobListingsPerPage;
 		} elseif ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
 			$retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
 		else
-			throw new \Exception("Error: plugin is missing either C__JOB_ITEMCOUNT_NOTAPPLICABLE__ flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.");
+			throw new \Exception('Error: plugin is missing either C__JOB_ITEMCOUNT_NOTAPPLICABLE__ flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.');
 
 		return $retJobCount;
 
