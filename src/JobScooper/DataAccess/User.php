@@ -40,7 +40,7 @@ class User extends BaseUser
 	static function setCurrentUser(User $user)
     {
         setConfigurationSetting('current_user', $user);
-	    setConfigurationSetting("alerts.results.to", $user);
+	    setConfigurationSetting('alerts.results.to', $user);
     }
 
 	/**
@@ -112,13 +112,13 @@ class User extends BaseUser
 	 */
 	public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-	    if (array_key_exists("email", $arr)) {
-		    $this->setEmailAddress($arr["email"]);
+	    if (array_key_exists('email', $arr)) {
+		    $this->setEmailAddress($arr['email']);
 		    unset($arr['email']);
 	    }
 
-	    if (array_key_exists("display_name", $arr)) {
-		    $this->setName($arr["display_name"]);
+	    if (array_key_exists('display_name', $arr)) {
+		    $this->setName($arr['display_name']);
 		    unset($arr['display_name']);
 	    }
 
@@ -126,30 +126,35 @@ class User extends BaseUser
 	    {
 			switch(strtolower($k))
 			{
-				case "email":
-					$this->setEmailAddress($arr["email"]);
+				case 'email':
+					$this->setEmailAddress($arr['email']);
 					unset($arr['email']);
 					break;
 
-				case "display_name":
-					$this->setName($arr["display_name"]);
+				case 'display_name':
+					$this->setName($arr['display_name']);
 					unset($arr['display_name']);
 					break;
 
-				case "search_keywords":
-				case "keywords":
+				case 'search_keywords':
+				case 'keywords':
 					$this->setSearchKeywords($arr[strtolower($k)]);
 					unset($arr[strtolower($k)]);
 					break;
 
-				case "search_locations":
-					$this->setSearchLocations($arr["search_locations"]);
+				case 'search_locations':
+					$this->setSearchLocations($arr['search_locations']);
 					unset($arr['search_locations']);
 					break;
 
-				case "inputfiles":
+				case 'inputfiles':
 					$this->_parseConfigUserInputFiles($arr);
 					unset($arr['inputfiles']);
+					break;
+					
+				case 'notification_delay':
+					$this->setNotificationFrequency($arr['notification_delay']);
+					unset($arr['notification_delay']);
 					break;
 
 				default:
@@ -175,9 +180,9 @@ class User extends BaseUser
 	    $verifiedInputFiles = array();
 	    if (array_key_exists('inputfiles', $arrUserFacts) && !empty($arrUserFacts['inputfiles']) && is_array($arrUserFacts['inputfiles'])) {
 		    $inputfiles = $arrUserFacts['inputfiles'];
-		    foreach ($inputfiles as $cfgvalue)
+		    foreach ($inputfiles as $key => $cfgvalue)
 		    {
-			    $split= preg_split("/;/", $cfgvalue);
+			    $split= explode(';', $cfgvalue);
 			    $type = $split[0];
 			    $path = $split[1];
 
@@ -187,11 +192,11 @@ class User extends BaseUser
 				    $tempFileDetails = parsePathDetailsFromString($fileinfo->getRealPath(), C__FILEPATH_FILE_MUST_EXIST);
 			    }
 
-			    if(empty($tempFileDetails) || $tempFileDetails->isFile() !== true) {
-				    throw new \Exception("Specified input file '" . $path . "' was not found.  Aborting.");
+			    if(null === $tempFileDetails || $tempFileDetails->isFile() !== true) {
+				    throw new \Exception('Specified input file \'{$path}\' was not found.  Aborting.');
 			    }
 
-			    $key = $fileinfo->getBasename(".csv");
+			    $key = $fileinfo->getBasename('.csv');
 			    if(!array_key_exists($type, $verifiedInputFiles))
 			        $verifiedInputFiles[$type] = array();
 			    $verifiedInputFiles[$type][$key] = $tempFileDetails->getPathname();
@@ -249,13 +254,13 @@ class User extends BaseUser
 
 		$searchLocations = $this->getSearchLocations();
 		if (empty($searchLocations)) {
-			LogWarning("No search locations have been set for {$slug}. Unable to create any search pairings for user.");
+			LogWarning('No search locations have been set for {$slug}. Unable to create any search pairings for user.');
 			return ;
 		}
 
 		$searchKeywords = $this->getSearchKeywords();
 		if (empty($searchKeywords)) {
-			LogWarning("No user search keywords have been configuredfor {$slug}. Unable to create any search pairings for user");
+			LogWarning('No user search keywords have been configuredfor {$slug}. Unable to create any search pairings for user');
 			return ;
 		}
 
@@ -270,7 +275,7 @@ class User extends BaseUser
 		{
 			$location = $locmgr->lookupAddress($searchLoc);
 			if (!empty($location)) {
-				LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}'s keywords");
+				LogMessage('Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}\'s keywords');
 				$locId = $location->getGeoLocationId();
 				$searchGeoLocIds[$locId] = $locId;
 
@@ -291,7 +296,7 @@ class User extends BaseUser
 				}
 			}
 			else
-				LogError("Could not create user searches for the '{$searchLoc}'' search location.");
+				LogError('Could not create user searches for the \'{$searchLoc}\' search location.');
 		}
 
 		try {
@@ -307,9 +312,9 @@ class User extends BaseUser
 				->addCond('condUserKwds', $kwdColumnName, array_values($searchKeywords), Criteria::NOT_IN)
 				->addCond('condUserLocs', $locIdColumnName, array_values($searchGeoLocIds), Criteria::NOT_IN)
 				->combine(array('condUserKwds', 'condUserLocs'), Criteria::LOGICAL_OR)
-				->update(array("IsActive" => false), $con);
+				->update(array('IsActive' => false), $con);
 
-			LogMessage("Marked {$oldPairUpdate} previous user search pairs as inactive.");
+			LogMessage('Marked {$oldPairUpdate} previous user search pairs as inactive.');
 
 		} catch (PropelException $ex) {
 			handleException($ex, null, false);
@@ -318,10 +323,10 @@ class User extends BaseUser
 		}
 
 		if (empty($userSearchPairs)) {
-			LogMessage("Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.");
+			LogMessage('Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.');
 			return ;
 		}
-		LogMessage("Updated or created " . count($userSearchPairs) . " user search pairs for {$slug}.");
+		LogMessage('Updated or created ' . count($userSearchPairs) . ' user search pairs for {$slug}.');
 
 	}
 
@@ -349,10 +354,10 @@ class User extends BaseUser
 	 */
 	public function createUserSearchSiteRuns()
 	{
-		startLogSection("Initializing search runs for user " . $this->getUserSlug());
+		startLogSection('Initializing search runs for user " . $this->getUserSlug());
 		$srchmgr = new SearchBuilder();
 		$this->_userSearchSiteRunsByJobSite = $srchmgr->createSearchesForUser($this);
-		endLogSection(" User search site runs initialization.");
+		endLogSection(" User search site runs initialization.');
 
 		return $this->_userSearchSiteRunsByJobSite;
 	}

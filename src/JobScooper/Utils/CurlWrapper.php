@@ -2,14 +2,14 @@
 /**
  * Copyright 2014-18 Bryan Selner
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * Licensed under the Apache License, Version 2.0 (the 'License'); you may
  * not use this file except in compliance with the License. You may obtain
  * a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
@@ -60,16 +60,16 @@ class CurlWrapper
         }
     }
 
-    function getObjectsFromAPICall( $baseURL, $objName = "", $fReturnType = C__API_RETURN_TYPE_OBJECT__, $callback = null, $pagenum = 0)
+    function getObjectsFromAPICall( $baseURL, $objName = '', $fReturnType = C__API_RETURN_TYPE_OBJECT__, $callback = null, $pagenum = 0)
     {
         $retData = null;
 
-        $curl_obj = $this->cURL($baseURL, "", "GET", "application/json", $pagenum);
+        $curl_obj = $this->cURL($baseURL, '', 'GET', 'application/json', $pagenum);
 
         $srcdata = json_decode($curl_obj['output']);
         if(isset($srcdata))
         {
-            if($objName == "")
+            if($objName == '')
             {
                 if($callback != null)
                 {
@@ -94,10 +94,10 @@ class CurlWrapper
                 {
                     if($this->fDebugLogging == true) { LogMessage('Multipage results detected. Getting results for ' . $srcdata->next_page . '...' . PHP_EOL); }
 
-                    // $patternPage = "/.*page=([0-9]{1,})/";
-                    $patternPagePrefix = "/.*page=/";
-                    // $pattern = "/(\/api\/v2\/).*/";
-                    $pagenum = preg_replace($patternPagePrefix, "", $srcdata->next_page);
+                    // $patternPage = '/.*page=([0-9]{1,})/";
+                    $patternPagePrefix = '/.*page=/';
+                    // $pattern = '/(\/api\/v2\/).*/';
+                    $pagenum = preg_replace($patternPagePrefix, '', $srcdata->next_page);
                     $retSecondary = $this->getObjectsFromAPICall($baseURL, $objName, null, null, $pagenum);
 
                     //
@@ -159,7 +159,7 @@ class CurlWrapper
 
         if($pagenum > 0)
         {
-            $full_url .= "?page=" . $pagenum;
+            $full_url .= '?page=' . $pagenum;
         }
         $header = array();
         if(!is_null($onbehalf)) $header[] = 'X-On-Behalf-Of: ' . $onbehalf;
@@ -188,7 +188,7 @@ class CurlWrapper
 
         switch($action)
         {
-            case "POST":
+            case 'POST':
 
                 if($fileUpload != null)
                 {
@@ -204,15 +204,15 @@ class CurlWrapper
                     curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
                 }
                 break;
-            case "GET":
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            case 'GET':
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
                 break;
-            case "PUT":
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+            case 'PUT':
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
                 break;
-            case "DELETE":
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+            case 'DELETE':
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
                 break;
             default:
                 break;
@@ -248,7 +248,7 @@ class CurlWrapper
         /* If the document has loaded successfully without any redirection or error */
         if ($httpCode < 200 || $httpCode >= 400)
         {
-            $strErr = "CURL received an HTTP error #". $httpCode;
+            $strErr = 'CURL received an HTTP error #'. $httpCode;
             $curl_object['http_error_number'] = $httpCode;
             $curl_object['error_number'] = -1;
             curl_close($ch);
