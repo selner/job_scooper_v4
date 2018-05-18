@@ -7,6 +7,7 @@ services:
       - 4448:4448
       - 5901:5900
     shm_size: 2g
+    restart: always
     environment:
       - JAVA_OPTS=-Xmx512m -Dwebdriver.enable.native.events=1
       - JOBSCOOPER_OUTPUT
@@ -20,6 +21,7 @@ services:
 #    image: "${REPONAME}selner/geocodeapi:latest"
 #    ports:
 #      - 5000:5000
+#    restart: always
 #    volumes:
 #      - type: bind
 #        source: $GEOCODEAPI_CONFIG
@@ -38,6 +40,7 @@ services:
 #    environment:
 #      - MYSQL_ROOT_PASSWORD
 #    image: mysql
+#    restart: always
 #    volumes:
 #      - type: bind
 #        source: $JOBSCOOPER_HOST_VOLDIR/docker_mysql
@@ -55,7 +58,9 @@ services:
       - JOBSCOOPER_CONFIG
       - NLTK_DATA
       - JOBSCOOPER_GEOCODEAPI_SERVER="http://jobscooperv4_geocodeapi:5000"
-    image: "${REPONAME}selner/js4-${BRANCH}:latest"
+    build:
+      context: ./
+      dockerfile: Dockerfile
     volumes:
       - type: bind
         source: "$JOBSCOOPER_HOST_VOLDIR"
