@@ -2,14 +2,14 @@
 /**
  * Copyright 2014-18 Bryan Selner
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * Licensed under the Apache License, Version 2.0 (the 'License'); you may
  * not use this file except in compliance with the License. You may obtain
  * a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
@@ -108,8 +108,8 @@ class DomItemParser
 	 */
 	public function setDomNode($domNodeData)
 	{
-		if(!(is_a($domNodeData, "JobScooper\Utils\ExtendedDiDomELement") ||
-			is_a($domNodeData, "JobScooper\Utils\SimpleHtmlHelper")))
+		if(!(is_a($domNodeData, 'JobScooper\Utils\ExtendedDiDomELement') ||
+			is_a($domNodeData, 'JobScooper\Utils\SimpleHtmlHelper')))
 		{
 			try
 			{
@@ -118,7 +118,7 @@ class DomItemParser
 			}
 			catch (Exception $ex)
 			{
-				throw new Exception("Unable to get DomElement from passed node data.");
+				throw new Exception('Unable to get DomElement from passed node data.');
 			}
 		}
 
@@ -170,7 +170,7 @@ class DomItemParser
 		$match_value = $var[1];
 
 		if(is_null($match_value))
-			throw new \Exception("Tag parser missing pattern match value for matchesNoResultsPattern callback.");
+			throw new \Exception('Tag parser missing pattern match value for matchesNoResultsPattern callback.');
 		return noJobStringMatch($val, $match_value);
 	}
 
@@ -185,14 +185,14 @@ class DomItemParser
 		if ($this->_tagParseInfo == null) return null;
 
 		$parseKeys = array_keys($this->_tagParseInfo);
-		if (!(in_array("selector", $parseKeys) || in_array("tag", $parseKeys))) {
-			throw (new \Exception("Invalid tag configuration " . getArrayValuesAsString($this->_tagParseInfo)));
+		if (!(in_array('selector', $parseKeys) || in_array('tag', $parseKeys))) {
+			throw (new \Exception('Invalid tag configuration ' . getArrayValuesAsString($this->_tagParseInfo)));
 		}
-		$strMatch = "";
+		$strMatch = '';
 
-		if (array_key_exists("selector", $this->_tagParseInfo)) {
+		if (array_key_exists('selector', $this->_tagParseInfo)) {
 			$strMatch = $strMatch . $this->_tagParseInfo['selector'];
-		} elseif(array_key_exists("tag", $this->_tagParseInfo)) {
+		} elseif(array_key_exists('tag', $this->_tagParseInfo)) {
 			if (strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
 			{
 				$strMatch = $strMatch . $this->_tagParseInfo['tag'];
@@ -222,8 +222,8 @@ class DomItemParser
 			$this->_domNodeData == null)
 			return null;
 
-		if (!array_key_exists("type", $this->_tagParseInfo) || empty($this->_tagParseInfo['type'])) {
-			$this->_tagParseInfo['type'] = "CSS";
+		if (!array_key_exists('type', $this->_tagParseInfo) || empty($this->_tagParseInfo['type'])) {
+			$this->_tagParseInfo['type'] = 'CSS';
 		}
 
 		switch(strtoupper($this->_tagParseInfo['type']))
@@ -249,7 +249,7 @@ class DomItemParser
 				break;
 
 			default:
-				throw new \Exception("Unknown field definition type of " . $this->_tagParseInfo['type']);
+				throw new \Exception('Unknown field definition type of ' . $this->_tagParseInfo['type']);
 		}
 
 		if (!empty($this->_tagParseInfo['return_attribute']))
@@ -258,15 +258,15 @@ class DomItemParser
 			$returnAttribute = 'text';
 
 
-		if (array_key_exists("return_value_callback", $this->_tagParseInfo) && (strlen($this->_tagParseInfo['return_value_callback']) > 0)) {
-			$callback = get_class($this) . "::" . $this->_tagParseInfo['return_value_callback'];
+		if (array_key_exists('return_value_callback', $this->_tagParseInfo) && (strlen($this->_tagParseInfo['return_value_callback']) > 0)) {
+			$callback = get_class($this) . '::' . $this->_tagParseInfo['return_value_callback'];
 			if (!method_exists($this, $this->_tagParseInfo['return_value_callback'])) {
-				$strError = sprintf("Failed to execute callback method '%s' for attribute name '%s'.", $callback, $returnAttribute);
+				$strError = sprintf('Failed to execute callback method \'{$callback}\' for attribute name \'{$returnAttribute}\'.', $callback, $returnAttribute);
 				$this->log($strError, LogLevel::ERROR);
 				throw new \Exception($strError);
 			}
 
-			if (array_key_exists("callback_parameter", $this->_tagParseInfo) && !empty($this->_tagParseInfo['callback_parameter']))
+			if (array_key_exists('callback_parameter', $this->_tagParseInfo) && !empty($this->_tagParseInfo['callback_parameter']))
 				$ret = call_user_func($callback, array($ret, $this->_tagParseInfo['callback_parameter']));
 			else
 				$ret = call_user_func($callback, $ret);
@@ -284,7 +284,7 @@ class DomItemParser
 	protected function _getTagMatchValueStatic_($arrTag)
 	{
 		$ret = null;
-		if (array_key_exists("value", $arrTag) && !is_null($arrTag['value'])) {
+		if (array_key_exists('value', $arrTag) && !is_null($arrTag['value'])) {
 			$value  = $arrTag['value'];
 
 			if(is_null($value) || strlen($value) == 0)
@@ -307,14 +307,14 @@ class DomItemParser
 		$arrTag = $this->getTagParserDetails();
 
 		$ret = null;
-		if (array_key_exists("return_value_regex", $arrTag) && !empty($arrTag['return_value_regex']))
+		if (array_key_exists('return_value_regex', $arrTag) && !empty($arrTag['return_value_regex']))
 			$arrTag['pattern'] = $arrTag['return_value_regex'];
 
-		if (array_key_exists("pattern", $arrTag) && !empty($arrTag['pattern'])) {
+		if (array_key_exists('pattern', $arrTag) && !empty($arrTag['pattern'])) {
 			$pattern = $arrTag['pattern'];
-			$value = "";
+			$value = '';
 
-			if (array_key_exists("field", $arrTag) && !empty($arrTag['field'])) {
+			if (array_key_exists('field', $arrTag) && !empty($arrTag['field'])) {
 				$value = $this->getItemDataValue($arrTag['field']);
 			}
 
@@ -322,7 +322,7 @@ class DomItemParser
 				$ret = null;
 			else
 			{
-				$newPattern = str_replace("\\\\", "\\", $pattern);
+				$newPattern = str_replace('\\\\', '\\', $pattern);
 
 				if (preg_match($newPattern, $value, $matches) > 0) {
 					array_shift($matches);
@@ -363,7 +363,7 @@ class DomItemParser
 				$ret = 0;
 				break;
 
-			case "LAST":
+			case 'LAST':
 				$ret = count($arr) - 1;
 				break;
 
@@ -372,7 +372,7 @@ class DomItemParser
 				break;
 
 			case $indexValue > count($arr):
-				$strError = sprintf("%s plugin failed to find index #%d in the %d matching nodes. ", $this->JobSiteName, $indexValue, count($arr));
+				$strError = sprintf('%s plugin failed to find index #%d in the %d matching nodes. ', $this->JobSiteName, $indexValue, count($arr));
 				$this->log($strError, LogLevel::WARNING);
 				$ret = null;
 				break;
@@ -406,10 +406,10 @@ class DomItemParser
 		else
 			$returnAttribute = 'text';
 
-		if (array_key_exists("return_value_regex", $arrTag)) {
+		if (array_key_exists('return_value_regex', $arrTag)) {
 			$propertyRegEx = $arrTag['return_value_regex'];
 		}
-		elseif (array_key_exists("pattern", $arrTag)) {
+		elseif (array_key_exists('pattern', $arrTag)) {
 			$propertyRegEx = $arrTag['pattern'];
 		}
 
@@ -421,24 +421,24 @@ class DomItemParser
 		{
 			$nodeMatches = $node->find($strMatch, $searchType);
 
-			if ($returnAttribute === "collection") {
+			if ($returnAttribute === 'collection') {
 				$ret = $nodeMatches;
 				// do nothing.  We already have the node set correctly
 			} elseif (!empty($nodeMatches) && array_key_exists('index', $arrTag) && is_array($nodeMatches))
 			{
 				$index = intval($arrTag['index']);
 				if ( $index > count($nodeMatches) - 1) {
-					$this->log("Tag specified index {$index} but only " . count($nodeMatches) . " were matched.  Defaulting to first node.", LogLevel::WARNING);
+					$this->log('Tag specified index {$index} but only ' . count($nodeMatches) . ' were matched.  Defaulting to first node.', LogLevel::WARNING);
 					$index = 0;
 				} elseif(empty($index) && $index !== 0)
 				{
-					$this->log("Tag specified index value was invalid {$arrTag['index']}.  Defaulting to first node.", LogLevel::WARNING);
+					$this->log('Tag specified index value was invalid ' . $arrTag['index'] . '.  Defaulting to first node.', LogLevel::WARNING);
 					$index = 0;
 				}
 				$ret = $this->_getReturnValueByIndex($nodeMatches, $index);
 			} elseif (!empty($nodeMatches) && is_array($nodeMatches)) {
 				if (count($nodeMatches) > 1) {
-					$strError = sprintf("Warning:  %s plugin matched %d nodes to selector '%s' but did not specify an index.  Assuming first node.  Tag = %s", $this->JobSiteName, count($nodeMatches), $strMatch, getArrayDebugOutput($arrTag));
+					$strError = sprintf('Warning:  %s plugin matched %d nodes to selector \'%s\' but did not specify an index.  Assuming first node.  Tag = %s', $this->JobSiteName, count($nodeMatches), $strMatch, getArrayDebugOutput($arrTag));
 					$this->log($strError, LogLevel::WARNING);
 				}
 				$ret = $nodeMatches[0];
@@ -449,14 +449,14 @@ class DomItemParser
 
 				if (!is_null($propertyRegEx) && is_string($ret) && strlen($ret) > 0) {
 					$match = array();
-					$propertyRegEx = str_replace("\\\\", "\\", $propertyRegEx);
-					$retTemp = str_replace("\n", " ", $ret);
+					$propertyRegEx = str_replace("\\\\", '\\", $propertyRegEx);
+					$retTemp = str_replace("\n', ' ', $ret);
 					if (preg_match($propertyRegEx, $retTemp, $match) !== false && count($match) >= 1)
 					{
 						$ret = $match[1];
 					}
 					else
-						$this->log(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->JobSiteName, $propertyRegEx, getArrayDebugOutput($arrTag), $ret), LogLevel::DEBUG);
+						$this->log(sprintf('%s plugin failed to find match for regex \'%s\' for tag \'%s\' with value \'%s\' as expected.', $this->JobSiteName, $propertyRegEx, getArrayDebugOutput($arrTag), $ret), LogLevel::DEBUG);
 				}
 			}
 		}
@@ -476,7 +476,7 @@ class DomItemParser
 	 */
 	function log($msg, $logLevel=\Monolog\Logger::INFO, $extras=array(), $ex=null)
 	{
-		LogMessage($msg, $logLevel, $extras, $ex, $channel="DomElementParser");
+		LogMessage($msg, $logLevel, $extras, $ex, $channel='DomElementParser');
 	}
 
 }

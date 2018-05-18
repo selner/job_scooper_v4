@@ -2,14 +2,14 @@
 /**
  * Copyright 2014-18 Bryan Selner
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * Licensed under the Apache License, Version 2.0 (the 'License'); you may
  * not use this file except in compliance with the License. You may obtain
  * a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
@@ -57,18 +57,18 @@ class ExtendedDiDomElement extends Element
             $parts = explode(";", $style);
             foreach($parts as $part)
             {
-                $kvPair = explode(":", $part);
+                $kvPair = explode(':', $part);
                 if(!empty($kvPair) && count($kvPair) >1) {
                     $key = strtolower($kvPair[0]);
                     $val = strtolower($kvPair[1]);
                     switch ($key) {
-                        case "display":
-                            if (substr_count_multi($val, array("collapse", "none")))
+                        case 'display':
+                            if (substr_count_multi($val, array('collapse', 'none')))
                                 return false;
                             break;
 
-                        case "visibility":
-                            if (substr_count_multi($val, array("collapse", "hidden")))
+                        case 'visibility':
+                            if (substr_count_multi($val, array('collapse', 'hidden')))
                                 return false;
                             break;
                     }
@@ -76,9 +76,9 @@ class ExtendedDiDomElement extends Element
         }
 
         if($elemVisible !== false) {
-            if (method_exists($this, "parent") && !empty($this->parent()))
+            if (method_exists($this, 'parent') && !empty($this->parent()))
             {
-                if(method_exists($this->parent(), "getNode"))
+                if(method_exists($this->parent(), 'getNode'))
                 {
                     $parent = new ExtendedDiDomElement($this->parent()->getNode());
                     $elemVisible = $parent->isVisible();
@@ -135,10 +135,10 @@ class ExtendedDiDomElement extends Element
                 $retExt[] = new ExtendedDiDomElement($elem->getNode());
             }
             return $retExt;
-        } elseif (is_a($ret, "Element", true)) {
+        } elseif (is_a($ret, 'Element', true)) {
             return new ExtendedDiDomElement($ret->getNode());
         }
-        throw new \Exception("Invalid return type from DiDom->Find");
+        throw new \Exception('Invalid return type from DiDom->Find');
     }
 
 }
@@ -219,7 +219,7 @@ class ExtendedDiDomDocument extends Document
                     }
                 }
                 return $retExt;
-            } elseif (is_a($ret, "Element", true)) {
+            } elseif (is_a($ret, 'Element', true)) {
                 $foundNode = new ExtendedDiDomElement($ret->getNode());
                 if($foundNode->isVisible())
                 {
@@ -227,7 +227,7 @@ class ExtendedDiDomDocument extends Document
                 }
 
             }
-            throw new \Exception("Invalid return type from ExtendedDiDomDocument->Find");
+            throw new \Exception('Invalid return type from ExtendedDiDomDocument->Find');
         }
         catch (\Exception $ex)
         {
@@ -243,12 +243,12 @@ class ExtendedDiDomDocument extends Document
     {
         $src = $this->getSource();
         if(empty($src))
-            $basefile = "debug_dump_" . uniqid();
+            $basefile = 'debug_dump_' . uniqid();
         else {
             $parsed_url = parse_url($src);
             $basefile = preg_replace('/[^\w]/', '_', $parsed_url['host'] . $parsed_url['path']);
         }
-        $outfile = generateOutputFileName($basefile, "html", true, 'debug');
+        $outfile = generateOutputFileName($basefile, 'html', true, 'debug');
         file_put_contents($outfile, $this->html());
         return $outfile;
     }
@@ -273,7 +273,7 @@ class SimpleHTMLHelper extends ExtendedDiDomDocument
 
         if(is_string($data))
         {
-            if(strncasecmp($data, "http", strlen("http")) === 0)
+            if(strncasecmp($data, 'http', strlen('http')) === 0)
             {
                 $isFile = true;
                 $string = $data;

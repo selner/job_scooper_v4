@@ -173,14 +173,14 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
 	$msg = $fmtLogMsg;
 	if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0)
 	{
-		if(stristr($fmtLogMsg, "%s") !== false)
+		if(stristr($fmtLogMsg, '%s') !== false)
 		{
 			$msg = sprintf($fmtLogMsg, $toThrow->getMessage());
 			$toThrow = new Exception($msg, null, $ex);
 		}
 		else
 		{
-			$msg = $fmtLogMsg . PHP_EOL . " ~ " . $toThrow->getMessage();
+			$msg = $fmtLogMsg . PHP_EOL . ' ~ ' . $toThrow->getMessage();
 		}
 	}
 	elseif(!is_null($ex))

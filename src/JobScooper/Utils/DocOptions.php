@@ -4,14 +4,14 @@
 /**
  * Copyright 2014-18 Bryan Selner
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * Licensed under the Apache License, Version 2.0 (the 'License'); you may
  * not use this file except in compliance with the License. You may obtain
  * a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
@@ -23,7 +23,7 @@ class DocOptions extends PropertyObject
 {
     public $arguments = array();
 
-private $doc = "{APP_RUN_COMMAND}
+private $doc = '{APP_RUN_COMMAND}
 
 Usage:
   {APP_RUN_COMMAND} [--config=<config_file_path>] [--user=<config_user_key>] [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--recap] [--delete] [--debug] [--ignore_recent] [--disable-notifications] 
@@ -43,7 +43,7 @@ Options:
   --delete  Removes the user data associated with specified users.
   --recap  Sends a weekly jobs recap notification to specified users.  
   --disable-notifications   Do not send email alerts for new jobs. [default: false]
-";
+';
 
     public function __construct($commandfile, $input = array())
     {
@@ -55,8 +55,8 @@ Options:
         $args = \Docopt::handle($opts, array('version'=>__APP_VERSION__));
         foreach($args->args as $k => $v) {
             $argkey = $k;
-	        $argkey = cleanupTextValue($argkey, "<", ">");
-	        $argkey = cleanupTextValue($argkey, "--", "");
+	        $argkey = cleanupTextValue($argkey, '<', '>');
+	        $argkey = cleanupTextValue($argkey, '--', '');
 
 	        $argval = $v;
 
@@ -67,23 +67,23 @@ Options:
 	        // e.g.  JOBSCOOPER_CONFIG or JOBSCOOPER_USER
 	        if(empty($argval))
             {
-	            $envkey = strtoupper("JOBSCOOPER_" . strtoupper($argkey));
+	            $envkey = strtoupper('JOBSCOOPER_' . strtoupper($argkey));
 	            $envval = getenv($envkey);
 	            if(!empty($envval))
 		            $argval = $envval;
             }
 
-            if(is_array($argval) && in_array($argkey, array("jobsite", "stages")))
+            if(is_array($argval) && in_array($argkey, array('jobsite', 'stages')))
 	            $argval = strtolower(join(",", $argval));
             if (is_string($argval)) {
-                $argval = cleanupTextValue($argval, "\"", "\"");
-	            if(in_array($argkey, array("jobsite", "stages")) && is_string($argval))
+                $argval = cleanupTextValue($argval, '\"', '\"');
+	            if(in_array($argkey, array('jobsite', 'stages')) && is_string($argval))
 	                $argval = strtolower($argval);
-                $arrVals = preg_split("/\s*,\s*/", $argval);
+                $arrVals = preg_split('/\s*,\s*/', $argval);
                 if (count($arrVals) > 1)
                     $argval = $arrVals;
 
-                if(in_array($argkey, array("jobsite", "stages")) && !is_array($argval) && !empty($argval))
+                if(in_array($argkey, array('jobsite', 'stages')) && !is_array($argval) && !empty($argval))
                 	$argval = array($argval);
             }
 

@@ -2,14 +2,14 @@
 /**
  * Copyright 2014-18 Bryan Selner
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * Licensed under the Apache License, Version 2.0 (the 'License'); you may
  * not use this file except in compliance with the License. You may obtain
  * a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
@@ -54,7 +54,7 @@ class GeoLocationCache
 	 */
 	static function getCacheInstance()
 	{
-		$name = "geolocation_id_lookup";
+		$name = 'geolocation_id_lookup';
 		$geoLocCache = getCacheData($name);
 		if (empty($geoLocCache)) {
 			$geoLocCache = new GeoLocationCache();
@@ -91,16 +91,16 @@ class GeoLocationCache
 	 * @throws \phpFastCache\Exceptions\phpFastCacheInvalidArgumentException
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct($cacheName = "geolocation_id_lookup")
+	public function __construct($cacheName = 'geolocation_id_lookup')
 	{
-		$cacheDir = join(DIRECTORY_SEPARATOR, array(getOutputDirectory("caches"), $cacheName));
-		$this->log(LogLevel::INFO, "Creating {$cacheName} cache in directory {$cacheDir}...");
+		$cacheDir = join(DIRECTORY_SEPARATOR, array(getOutputDirectory('caches'), $cacheName));
+		$this->log(LogLevel::INFO, 'Creating {$cacheName} cache in directory {$cacheDir}...');
 
 		$config = array(
-			"path" => $cacheDir
+			'path' => $cacheDir
 		);
 		$this->_cache = CacheManager::getInstance('files', $config);
-		$this->_logger = getChannelLogger("caches");
+		$this->_logger = getChannelLogger('caches');
 
 		$this->_warmUpCache();
 	}
@@ -128,7 +128,7 @@ class GeoLocationCache
 	 */
 	function getCacheKey($strAddress)
 	{
-		return cleanupSlugPart($strAddress, $replacement = "_");
+		return cleanupSlugPart($strAddress, $replacement = '_');
 	}
 
 	/**
@@ -140,7 +140,7 @@ class GeoLocationCache
 	function cacheUnknownLocation($strLocationName)
 	{
 		if (isDebug())
-			$this->log(Logger::DEBUG, "... adding unknown location '{$strLocationName}' to cache...");
+			$this->log(Logger::DEBUG, '... adding unknown location \'{$strLocationName}\' to cache...');
 		$k = $this->getCacheKey($strLocationName);
 		$cacheItem = $this->_cache->getItem($k);
 		$cacheItem->set(GEOLOCATION_GEOCODE_FAILED);
@@ -158,16 +158,16 @@ class GeoLocationCache
 	{
 		$lookups = array($newLookupString);
 		$geoLocId = $geolocation->getGeoLocationId();
-		$tags = ["GeoLocationId{$geolocation->getGeoLocationId()}", $geolocation->getGeoLocationKey()];
+		$tags = ['GeoLocationId{$geolocation->getGeoLocationId()}', $geolocation->getGeoLocationKey()];
 
 		$prevCacheItems = $this->_cache->getItemsByTag($geolocation->getGeoLocationKey());
 		if(!empty($prevCacheItems))
 		{
-			LogDebug("{$geolocation->getGeoLocationKey()} already cached; adding additional lookup string '{$newLookupString}...");
+			LogDebug('{$geolocation->getGeoLocationKey()} already cached; adding additional lookup string \'{$newLookupString}\'...');
 		}
 		else {
 			if (isDebug())
-				$this->log(Logger::DEBUG, "... adding new Geolocation {$geolocation->getGeoLocationKey()} / {$geolocation->getGeoLocationId()} to cache ...");
+				$this->log(Logger::DEBUG, '... adding new Geolocation {$geolocation->getGeoLocationKey()} / {$geolocation->getGeoLocationId()} to cache ...');
 
 			$lookups = array_merge($lookups, array($geolocation->getDisplayName(), $geolocation->getGeoLocationKey()));
 
@@ -197,7 +197,7 @@ class GeoLocationCache
 		$strTags = getArrayDebugOutput($tags);
 
 		if (isDebug())
-			$this->log(Logger::DEBUG, "... adding {$cntKeys} lookups for {$geolocation->getGeoLocationKey()} to the cache:  {$strKeys}.");
+			$this->log(Logger::DEBUG, '... adding {$cntKeys} lookups for {$geolocation->getGeoLocationKey()} to the cache:  {$strKeys}.');
 
 		$newCacheItems = array();
 		foreach ($keys as $k) {
@@ -210,7 +210,7 @@ class GeoLocationCache
 		$this->_cache->saveMultiple($newCacheItems);
 
 		$strLookups = getArrayDebugOutput($lookups);
-		$this->log(Logger::DEBUG, "Added {$cntKeys} lookups ({$strLookups}) to cache for data '{$geolocation->getDisplayName()}/{$geolocation->getGeoLocationKey()} with tags {$strTags}.");
+		$this->log(Logger::DEBUG, 'Added {$cntKeys} lookups ({$strLookups}) to cache for data \'{$geolocation->getDisplayName()}/{$geolocation->getGeoLocationKey()}\' with tags {$strTags}.');
 	}
 
 	/**
@@ -221,16 +221,16 @@ class GeoLocationCache
 	 */
 	private function _warmUpCache()
 	{
-		LogDebug("... adding missing locations from JobPosting table ...");
+		LogDebug('... adding missing locations from JobPosting table ...');
 		$allLocsWithoutGeoLocs = \JobScooper\DataAccess\JobPostingQuery::create()
 			->filterByGeoLocationId($geoLocationId = null, Criteria::ISNULL)
 			->filterByLocation(null, Criteria::ISNOTNULL)
-			->addGroupByColumn("Location")
-			->select(array("jobposting.location"))
+			->addGroupByColumn('Location')
+			->select(array('jobposting.location'))
 			->find()
 			->getData();
 
-		LogDebug("... " . count($allLocsWithoutGeoLocs) . " missing locations found and being added to cache...");
+		LogDebug('... ' . count($allLocsWithoutGeoLocs) . ' missing locations found and being added to cache...');
 
 		foreach ($allLocsWithoutGeoLocs as $name) {
 			if(!empty($name)) {
@@ -238,7 +238,7 @@ class GeoLocationCache
 			}
 		}
 
-//		LogDebug("... adding Geolocations to cache ...");
+//		LogDebug("... adding Geolocations to cache ...');
 //		$allGeoLocs = GeoLocationQuery::create()
 //			->find();
 //

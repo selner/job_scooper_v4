@@ -2,14 +2,14 @@
 /**
  * Copyright 2014-18 Bryan Selner
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * Licensed under the Apache License, Version 2.0 (the 'License'); you may
  * not use this file except in compliance with the License. You may obtain
  * a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
@@ -60,7 +60,7 @@ class DBRecordRemover
 
 		try {
 			$queryFilters = array();
-			foreach (["users" => $users, "searchpairs" => $userSearches, "geolocations" => $geolocations, "jobsites" => $jobsites] as $k => $param) {
+			foreach (['users' => $users, 'searchpairs' => $userSearches, 'geolocations' => $geolocations, 'jobsites' => $jobsites] as $k => $param) {
 				if (!empty($param) && !is_array($param)) {
 					$queryFilters[$k] = array($param);
 				} elseif (empty($param)) {
@@ -77,19 +77,19 @@ class DBRecordRemover
 				foreach($v as $itemKey => $item) {
 					if (is_object($item)) {
 						switch ($k) {
-							case "users":
+							case 'users':
 								$queryFilters[$k][$itemKey] = $item->getUserId();
 								break;
 
-							case "searchpairs":
+							case 'searchpairs':
 								$queryFilters[$k][$itemKey] = $item->getUserSearchPairId();
 								break;
 
-							case "geolocations":
+							case 'geolocations':
 								$queryFilters[$k][$itemKey] = $item->getGeolocationId();
 								break;
 
-							case "jobsites":
+							case 'jobsites':
 								$queryFilters[$k][$itemKey] = $item->getJobSiteKey();
 								break;
 						}
@@ -112,10 +112,10 @@ class DBRecordRemover
 
 			if(!isDebug())
 			{
-				throw new \Exception("Removing users in this manner is only allowed if the developer is running in debug mode.  Aborting.");
+				throw new \Exception('Removing users in this manner is only allowed if the developer is running in debug mode.  Aborting.');
 			}
 			else {
-				$con = Propel::getServiceContainer()->getWriteConnection("default");
+				$con = Propel::getServiceContainer()->getWriteConnection('default');
 				$query->delete($con);
 			}
 		}
