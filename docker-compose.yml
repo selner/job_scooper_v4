@@ -62,7 +62,8 @@ services:
       context: ./
       dockerfile: Dockerfile
       args:
-        - GIT_COMMIT_HASH={GIT_COMMIT_HASH}
+        - GIT_COMMIT_HASH=$GIT_COMMIT_HASH
+    image: js4_$GIT_COMMIT_HASH
     volumes:
       - type: bind
         source: "$JOBSCOOPER_HOST_VOLDIR"
