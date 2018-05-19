@@ -68,6 +68,32 @@ class PluginIndeed extends \JobScooper\SitePlugins\AjaxSitePlugin
         return $ret;
     }
 
+
+	/**
+	 * @param $jobs
+	 *
+	 * @return array
+	 */
+	private function _parseJsonJobs($jobs)
+	{
+		$ret = array();
+		foreach($jobs as $job)
+		{
+			$ret[$job->Id] = array(
+				'JobSiteKey' => $this->getJobSiteKey(),
+				'JobSitePostId' => $job->jk,
+				'Company' => $job->cmp,
+				'Title' =>  $job->title,
+				'Url' => "/viewjob?jk={$job->jk}&vjs=3",
+				'Location' => $job->loc,
+				'PostedAt' => $job->PostDate
+			);
+		}
+
+		LogMessage("Loaded " . count($ret) . " jobs from JSON with " . count($jobs));
+		return $ret;
+	}
+
 	/**
 	 * @param $nItem
 	 *
