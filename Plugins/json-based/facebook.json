@@ -29,28 +29,28 @@
       "Fields": [
         {
           "Name": "Title",
-          "Selector": "div._77 div div a",
+          "Selector": "a._5144",
           "Attribute": "text",
           "Index": 0,
           "Type": "CSS"
         },
         {
           "Name": "Url",
-          "Selector": "div._77 div div a",
+          "Selector": "a._5144",
           "Attribute": "href",
           "Index": 0,
           "Type": "CSS"
         },
         {
           "Name": "Location",
-          "Selector": "div._72 div div",
+          "Selector": "div._3k6l",
           "Attribute": "collection",
           "Type": "CSS",
           "Callback": "getLocations"
         },
         {
           "Name": "Department",
-          "Selector": "div._77 div div",
+          "Selector": "div._3k6n",
           "Index" : 1,
           "Attribute": "text",
           "Type": "CSS",

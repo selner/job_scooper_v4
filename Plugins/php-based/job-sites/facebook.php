@@ -28,6 +28,8 @@ class AbstractFacebook  extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlu
 	{
 		$ret = parent::parseJobsListForPage($objSimpHTML);
 
+		if ($ret === null)
+			throw new Exception("Unable to parse any jobs from Facebook site.");
 
 		foreach($ret as $k => $job)
 		{
