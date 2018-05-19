@@ -799,7 +799,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 		if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && null !== $this->arrListingTagSetup['NoPostsFound'] && count($this->arrListingTagSetup['NoPostsFound']) > 0) {
 			try
 			{
-				$noResultsVal = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['NoPostsFound']);
+				$noResultsVal = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['NoPostsFound'], null, $this);
 				if (null !== $noResultsVal) {
 					$this->log("Search returned { $noResultsVal } and matched expected 'No results' tag for { $this->JobSiteName }");
 					return $noResultsVal;
@@ -811,11 +811,11 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 
 		$retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
 		if (array_key_exists('TotalPostCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalPostCount']) && count($this->arrListingTagSetup['TotalPostCount']) > 0) {
-			$retJobCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalPostCount']);
+			$retJobCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalPostCount'], null, $this);
 			if (null === $retJobCount || (is_string($retJobCount) && strlen($retJobCount) == 0))
 				throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalPostCount']));
 		} else if (array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalResultPageCount']) && count($this->arrListingTagSetup['TotalResultPageCount']) > 0) {
-			$retPageCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalResultPageCount']);
+			$retPageCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalResultPageCount'], null, $this);
 			if (null === $retJobCount || (is_string($retJobCount) && strlen($retJobCount) == 0))
 				throw new \Exception("Unable to determine number of pages for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalResultPageCount']));
 
@@ -861,7 +861,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 			$this->arrListingTagSetup['JobPostItem']['return_attribute'] = 'collection';
 		}
 
-		$nodesJobRows = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobPostItem'], $this);
+		$nodesJobRows = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobPostItem'], null, $this);
 
 		if ($nodesJobRows !== false && !is_null($nodesJobRows) && is_array($nodesJobRows) && count($nodesJobRows) > 0) {
 			foreach ($nodesJobRows as $node) {
