@@ -160,23 +160,6 @@ class DomItemParser
 	}
 
 
-
-	/**
-	 * @param $var
-	 *
-	 * @return int|null
-	 * @throws \Exception
-	 */
-	public function matchesNoResultsPattern($var)
-	{
-		$val = $var[0];
-		$match_value = $var[1];
-
-		if(null === $match_value)
-			throw new \Exception('Tag parser missing pattern match value for matchesNoResultsPattern callback.');
-		return noJobStringMatch($val, $match_value);
-	}
-
 	/**
 	 * @param array $arrTag
 	 *
