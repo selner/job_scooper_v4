@@ -94,11 +94,16 @@ Class LoggingManager extends \Monolog\Logger
 	 */
 	public function __construct($name, array $handlers = array(), array $processors = array())
     {
-        $GLOBALS['logger'] = null;
         $GLOBALS['logger'] = $this;
         
         $name = C__APPNAME__;
-        JobsErrorHandler::register($this, array(), LogLevel::ERROR);
+
+	    $logger = new Logger($name);
+
+	    $handler = new JobsErrorHandler($logger);
+	    $handler->registerErrorHandler([], false);
+	    $handler->registerExceptionHandler();
+	    $handler->registerFatalHandler();
 
         $this->_handlersByType = array(
 //            'stderr' => new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO)
