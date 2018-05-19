@@ -829,6 +829,17 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 
 	}
 
+	protected function getDomWindowVariable($var_js_path)
+	{
+		try {
+			return $this->getActiveWebdriver()->executeScript("return {$var_js_path};");
+		}
+		catch (Exception $ex)
+		{
+			throw new \Exception("JavaScript execution failed to return result:  {$ex->getMessage()}");
+		}
+
+	}
 
 	/**
 	 * /**

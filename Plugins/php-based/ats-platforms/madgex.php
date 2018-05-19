@@ -31,24 +31,27 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
     {
     	$this->locationid = null;
 	    $searchURL = $this->JobPostingBaseUrl;
-    	if(!empty($this->SiteReferenceKey) ) {
+    	if(null !== $this->SiteReferenceKey ) {
 		    $this->JobPostingBaseUrl = "https://{$this->SiteReferenceKey}.com/searchjobs";
 		    $searchURL = $this->JobPostingBaseUrl;
 	    }
-	    elseif(!empty($this->SiteSearchBaseUrl) ) {
+	    elseif(null !== $this->SiteSearchBaseUrl ) {
 			$searchURL = $this->SiteSearchBaseUrl;
 			$urlparts = parse_url($this->SiteSearchBaseUrl);
 			if(empty($urlparts['path']))
 				$searchURL = "{$searchURL}/searchjobs";
 		}
 
-	    $this->SearchUrlFormat = "{$searchURL}?Keywords=***KEYWORDS***&radialtown=***LOCATION:{Place}***+***LOCATION:{Region}***&RadialLocation=50&NearFacetsShown=true&countrycode=***LOCATION:{CountryCode}***&sort=Date&Page=***PAGE_NUMBER***";
+		if(null !== $searchURL) {
+			$this->SearchUrlFormat = "{$searchURL}?Keywords=***KEYWORDS***&radialtown=***LOCATION:{Place}***+***LOCATION:{Region}***&RadialLocation=50&NearFacetsShown=true&countrycode=***LOCATION:{CountryCode}***&sort=Date&Page=***PAGE_NUMBER***";
+		}
         $this->prevURL = $this->JobPostingBaseUrl;
         $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
         $this->additionalLoadDelaySeconds = 3;
 
         $this->additionalBitFlags[] = C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER;
         parent::__construct();
+	    $this->_flags_ &= ~C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
     }
 
     protected $JobSiteName = 'madgexats';
@@ -70,14 +73,27 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 
 		$url = $this->getActiveWebdriver()->getCurrentURL();
 		if (empty($this->locationid)) {
-			$this->locationid = $this->getLocationIdFromPage($searchDetails);
+			$callback = "getLocationIdFromPage";
+			if(array_key_exists("LocationCallback", get_object_vars($this))){
+				$callback = $this->LocationCallback;
+			}
+
+			$this->$callback($searchDetails);
+		}
+		else {
+			$url = $url . "&LocationID=" . $this->locationid;
+			$searchDetails->setSearchStartUrl($url);
 		}
 
-		if (!empty($this->locationid))
-			$url = $url . "&LocationID=" . $this->locationid;
+		$this->selenium->loadPage($searchDetails->getSearchStartUrl());
 
-		$searchDetails->setSearchStartUrl($url);
-		$this->selenium->loadPage($url);
+		$jobitemsTarget = $this->getDomWindowVariable("window.MDGX.FacetLoader.pJaxTargetContainer");
+		if(null !== $jobitemsTarget) {
+			$this->arrListingTagSetup['JobPostItem']['selector'] = $jobitemsTarget;
+
+		}
+
+
 	}
 
     protected $arrBaseListingTagSetup = array(
@@ -104,7 +120,7 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	 *
 	 * @throws \Exception
 	 */
-	protected function getLocationIdFromPage(UserSearchSiteRun &$searchDetails)
+	protected function getLocationIdFromPage(UserSearchSiteRun $searchDetails)
     {
 	    $locValParam = $searchDetails->getGeoLocationURLValue("{Place} {Region}");
 	    $locApi = parse_url($searchDetails->getSearchStartUrl(), PHP_URL_SCHEME) . "://" . parse_url($searchDetails->getSearchStartUrl(), PHP_URL_HOST) . "/location-lookup/?term={$locValParam}";
@@ -117,11 +133,34 @@ abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtml
 	    	return null;
 	    }
 
-	    $locId = $objLocChoices[0]->value;
+	    $this->locationid = $objLocChoices[0]->value;
+		$newUrl = $searchDetails->getSearchStartUrl() . "&LocationId={$this->locationid}";
+		$searchDetails->setSearchStartUrl($newUrl);
+    }
 
-	    $newUrl = $searchDetails->getSearchStartUrl() . "&LocationId=" . strval($locId);
-	    $searchDetails->setSearchStartUrl($newUrl);
+    protected function setLocationFromJobTaxonomy(UserSearchSiteRun $searchDetails)
+    {
+    	foreach(array("{Place}", "{Region}") as $locstr)
+	    {
+		    $locValParam = $searchDetails->getGeoLocationURLValue($locstr);
+		    $locApi = parse_url($searchDetails->getSearchStartUrl(), PHP_URL_SCHEME) . "://" . parse_url($searchDetails->getSearchStartUrl(), PHP_URL_HOST) . "/suggestions/JobTaxonomy/?q={$locValParam}";
 
-	    return $locId;
+		    LogMessage("Determining LocationId value for {$locValParam}... from {$locApi} ..." );
+		    $data = $this->getJsonApiResult($locApi, $searchDetails, $searchDetails->getSearchStartUrl());
+		    if(null === $data)
+		    {
+			    continue;
+		    }
+
+		    $arrLocChoices = object_to_array($data);
+		    if (array_key_exists('data', $arrLocChoices['suggestions'][0]) && array_key_exists('url', $arrLocChoices['suggestions'][0]['data'])) {
+
+			    $newUrl = parse_url($searchDetails->getSearchStartUrl(), PHP_URL_SCHEME) . "://" . parse_url($searchDetails->getSearchStartUrl(), PHP_URL_HOST) . $arrLocChoices['suggestions'][0]['data']['url'] .  "?" . parse_url($searchDetails->getSearchStartUrl(), PHP_URL_QUERY);
+
+			    $searchDetails->setSearchStartUrl($newUrl);
+			    return;
+		    }
+	    }
+
     }
 }

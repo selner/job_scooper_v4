@@ -2,7 +2,7 @@
     "jobsite_plugins": [
         {
 
-            "PhpClassName": "AbstractMadgexATSVariant1",
+            "PhpClassName": "AbstractMadgexATSVariantCountH2",
             "PluginExtendsClassName": "AbstractMadgexATS",
             "Collections": [
                 {
@@ -11,6 +11,24 @@
                         {
                             "Name": "TotalPostCount",
                             "Selector": "h2",
+                            "Index": 0,
+                            "Pattern": "/.*?\\s([\\d,]+)\\s*/",
+                            "Type": "CSS"
+                        }
+                    ]
+                }
+            ]
+        },     {
+
+            "PhpClassName": "AbstractMadgexATSVariantCountH1",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name": "TotalPostCount",
+                            "Selector": "div#results h1",
                             "Index": 0,
                             "Pattern": "/.*?\\s([\\d,]+)\\s*/",
                             "Type": "CSS"
@@ -80,7 +98,7 @@
         {
             "JobSiteName": "OnlyDigitalJobs",
             "SiteSearchBaseUrl": "https://www.onlydigitaljobs.com/jobs",
-            "PluginExtendsClassName": "AbstractMadgexATSVariant1",
+            "PluginExtendsClassName": "AbstractMadgexATSVariantCountH2",
             "CountryCodes": [
                 "UK"
             ]
@@ -135,8 +153,9 @@
         },
         {
             "JobSiteName": "JobfinderUSA",
-            "SiteReferenceKey": "www.jobfinderusa",
-            "PluginExtendsClassName": "AbstractMadgexATS",
+            "SearchUrlFormat": "https://www.jobfinderusa.com/jobs/?kw=***KEYWORDS***",
+            "PluginExtendsClassName": "AbstractMadgexATSVariantCountH1",
+            "LocationCallback" : "setLocationFromJobTaxonomy",
             "CountryCodes": [
                 "US"
             ]
