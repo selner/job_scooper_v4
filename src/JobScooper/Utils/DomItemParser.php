@@ -238,34 +238,22 @@ class DomItemParser
 				throw new \Exception('Unknown field definition type of ' . $this->_tagParseInfo['type']);
 		}
 
-		if (!empty($this->_tagParseInfo['return_attribute']))
-			$returnAttribute = $this->_tagParseInfo['return_attribute'];
-		else
-			$returnAttribute = 'text';
-
-
-		if (array_key_exists('return_value_callback', $this->_tagParseInfo) && (strlen($this->_tagParseInfo['return_value_callback']) > 0)) {
-			if(null !== $this->_callbackObject){
-				$callback = array($this->_callbackObject, $this->_tagParseInfo['return_value_callback']);
-			}
-			else
-			{
-				$callback = $this->_tagParseInfo['return_value_callback'];
-			}
-
-//			if (!method_exists($this, $this->_tagParseInfo['return_value_callback'])) {
-//				$strError = sprintf("Failed to execute callback method \'{$callback}\' for attribute name \'{$returnAttribute}\'.", $callback, $returnAttribute);
-//				$this->log($strError, LogLevel::ERROR);
-//				throw new \Exception($strError);
-//			}
-//
-			if (array_key_exists('callback_parameter', $this->_tagParseInfo) && !empty($this->_tagParseInfo['callback_parameter'])){
-				$ret = call_user_func_array($callback, array($ret, $this->_tagParseInfo['callback_parameter']));
-			} else {
-				$ret = call_user_func($callback, $ret);
+		if (null !== $ret) {
+			if(array_key_exists('return_value_callback', $this->_tagParseInfo) && (strlen($this->_tagParseInfo['return_value_callback']) > 0)) {
+				if (null !== $this->_callbackObject) {
+					$callback = array($this->_callbackObject, $this->_tagParseInfo['return_value_callback']);
+				} else {
+					$callback = $this->_tagParseInfo['return_value_callback'];
+				}
+				
+				$params = array('current_value' => $ret);
+				if (array_key_exists('callback_parameter', $this->_tagParseInfo) && null !== $this->_tagParseInfo['callback_parameter']) {
+					$params['parameter'] = $this->_tagParseInfo['callback_parameter'];
+				}
+				
+				$ret = call_user_func_array($callback, $params);
 			}
 		}
-
 		return $ret;
 
 	}
@@ -418,8 +406,7 @@ class DomItemParser
 			if ($returnAttribute === 'collection') {
 				$ret = $nodeMatches;
 				// do nothing.  We already have the node set correctly
-			} elseif (!empty($nodeMatches) && array_key_exists('index', $arrTag) && is_array($nodeMatches))
-			{
+			} elseif (!empty($nodeMatches) && array_key_exists('index', $arrTag) && is_array($nodeMatches)) {
 				$index = (int)$arrTag['index'];
 				if ( $index > count($nodeMatches) - 1) {
 					$this->log("Tag specified index {$index} but only " . count($nodeMatches) . " were matched.  Defaulting to first node.", LogLevel::WARNING);
@@ -440,6 +427,7 @@ class DomItemParser
 
 			if (!empty($ret) && !in_array($returnAttribute, ['collection', 'node'])) {
 				$ret = $ret->$returnAttribute;
+
 
 				if (null !== $propertyRegEx && is_string($ret) && strlen($ret) > 0) {
 					$match = array();
