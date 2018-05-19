@@ -59,29 +59,24 @@ abstract class SitePlugin implements IJobSitePlugin
 	function __construct()
 	{
 
-		if(!empty($this->childSiteURLBase) && null === $this->JobPostingBaseUrl) {
+		if(!is_empty_value($this->childSiteURLBase) && is_empty_value($this->JobPostingBaseUrl)) {
 			$this->JobPostingBaseUrl = $this->childSiteURLBase;
 		}
 
-		if(!empty($this->childSiteURLBase) && null === $this->SearchUrlFormat) {
+		if(!is_empty_value($this->childSiteURLBase) && is_empty_value($this->SearchUrlFormat)) {
 			$this->SearchUrlFormat = $this->childSiteURLBase . $this->strBaseURLPathSection;
 			if (!empty($this->strBaseURLPathSuffix)) {
 				$this->SearchUrlFormat .= $this->strBaseURLPathSuffix;
 			}
 		}
 
-//		if (null === $this->JobPostingBaseUrl)
-//			throw new Exception("JobPostingBaseUrl not defined by plugin " . $this->JobSiteName);
-//		if (null === $this->SearchUrlFormat)
-//			throw new Exception("SearchUrlFormat not defined by plugin " . $this->JobSiteName);
-//
-		if (empty($this->arrListingTagSetup))
+		if (is_empty_value($this->arrListingTagSetup))
 			$this->arrListingTagSetup = array();
 
-		if(!empty($this->arrBaseListingTagSetup))
+		if(!is_empty_value($this->arrBaseListingTagSetup))
 			$this->arrListingTagSetup = array_replace($this->arrBaseListingTagSetup, $this->arrListingTagSetup);
 
-		if(!empty($this->arrListingTagSetup) && is_array($this->arrListingTagSetup)) {
+		if(!is_empty_value($this->arrListingTagSetup) && is_array($this->arrListingTagSetup)) {
 
 			if (array_key_exists('NextButton', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['NextButton']) && count($this->arrListingTagSetup['NextButton'])) {
 				$this->selectorMoreListings = DomItemParser::getSelector($this->arrListingTagSetup['NextButton']);
@@ -102,7 +97,7 @@ abstract class SitePlugin implements IJobSitePlugin
 
 		$this->JobSiteKey = $this->getJobSiteKey();
 
-		if (null === $this->JobSiteName) {
+		if (is_empty_value($this->JobSiteName)) {
 			$classname = get_class($this);
 			if (preg_match('/^Plugin(\w+)/', $classname, $matches) > 0) {
 				$this->JobSiteName = $matches[1];
@@ -239,7 +234,7 @@ abstract class SitePlugin implements IJobSitePlugin
 	 */
 	function getJobSiteKey()
 	{
-		if (null === $this->JobSiteKey) {
+		if (is_empty_value($this->JobSiteKey)) {
 			$arrSiteList = JobSitePluginBuilder::getAllJobSites();
 			$className = get_class($this);
 			$siteKey = strtolower(str_ireplace("Plugin", "", $className));
@@ -327,7 +322,7 @@ abstract class SitePlugin implements IJobSitePlugin
 				$this->_curlWrapper = new CurlWrapper();
 
 				try {
-					if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && null === $this->selenium) {
+					if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_empty_value($this->selenium)) {
 						try {
 							$this->selenium = new SeleniumManager();
 						} catch (Exception $ex) {
@@ -397,8 +392,6 @@ abstract class SitePlugin implements IJobSitePlugin
 			}
 		}
 
-
-		return;
 	}
 
 	//************************************************************************
@@ -739,7 +732,7 @@ abstract class SitePlugin implements IJobSitePlugin
         ";
 
 
-		if (null === $nTotalItems) {
+		if (is_empty_value($nTotalItems)) {
 			$nTotalItems = $this->nMaxJobsToReturn;
 		}
 
@@ -771,7 +764,7 @@ abstract class SitePlugin implements IJobSitePlugin
 		$val = $var[0];
 		$match_value = $var[1];
 
-		if(null === $match_value)
+		if(is_empty_value($match_value))
 			throw new \Exception("Plugin {$this->JobSiteName} definition missing pattern match value for matchesNoResultsPattern callback.");
 		return noJobStringMatch($val, $match_value);
 	}
@@ -812,11 +805,11 @@ abstract class SitePlugin implements IJobSitePlugin
 		$retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
 		if (array_key_exists('TotalPostCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalPostCount']) && count($this->arrListingTagSetup['TotalPostCount']) > 0) {
 			$retJobCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalPostCount'], null, $this);
-			if (null === $retJobCount || (is_string($retJobCount) && strlen($retJobCount) == 0))
+			if (is_empty_value($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
 				throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalPostCount']));
 		} else if (array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalResultPageCount']) && count($this->arrListingTagSetup['TotalResultPageCount']) > 0) {
 			$retPageCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalResultPageCount'], null, $this);
-			if (null === $retJobCount || (is_string($retJobCount) && strlen($retJobCount) == 0))
+			if (is_empty_value($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
 				throw new \Exception("Unable to determine number of pages for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalResultPageCount']));
 
 			$retJobCount = $retPageCount * $this->JobListingsPerPage;
@@ -1206,7 +1199,7 @@ abstract class SitePlugin implements IJobSitePlugin
 	 * @return \JobScooper\Utils\SimpleHTMLHelper|null
 	 * @throws \Exception
 	 */
-	function getSimpleObjFromPathOrURL(UserSearchSiteRun &$searchDetails, $filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
+	function getSimpleObjFromPathOrURL(UserSearchSiteRun $searchDetails, $filePath = "", $strURL = "", $optTimeout = null, $referrer = null, $cookies = null)
 	{
 		try {
 			if (!empty($strURL))
@@ -1315,8 +1308,6 @@ abstract class SitePlugin implements IJobSitePlugin
 		}
 
 		$this->log($this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]" . ": " . $nItemCount . " jobs found." . PHP_EOL);
-
-		return;
 	}
 
 
@@ -1684,9 +1675,9 @@ JSCODE;
 	 * @throws \Exception
 	 * @return SimpleHTMLHelper
 	 */
-	protected function getSimpleHtmlDomFromSeleniumPage(UserSearchSiteRun &$searchDetails, $url=null)
+	protected function getSimpleHtmlDomFromSeleniumPage(UserSearchSiteRun $searchDetails, $url=null)
     {
-        $objSimpleHTML = null;
+	    $objSimpleHTML = null;
         try {
             if(!empty($url))
             {
@@ -2093,7 +2084,6 @@ JSCODE;
 	        unset($objSimpleHTML);
         }
 
-        return;
     }
 
 	/**

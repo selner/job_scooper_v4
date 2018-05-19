@@ -26,7 +26,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 */
 	public function getJobPostingBaseUrl()
 	{
-		if(null === $this->_JobPostingBaseUrl)
+		if(is_empty_value($this->_JobPostingBaseUrl))
 		{
 			$plugin = $this->getSitePlugin();
 			if(null !== $plugin)
@@ -56,7 +56,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	 */
 	function getSearchUrlFormat()
 	{
-		if (null === $this->_SearchUrlFormat)
+		if (is_empty_value($this->_SearchUrlFormat))
 		{
 			$plugin = $this->getSitePlugin();
 			if(null !== $plugin)
@@ -396,27 +396,27 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 		$searchpair = $this->getUserSearchPairFromUSSR();
 		$loc = $searchpair->getGeoLocationFromUS();
-		if (null === $loc) {
+		if (is_empty_value($loc)) {
 			LogMessage("Plugin for '" . $this->getJobSiteKey() . "' is missing the search location.   Skipping search '" . $this->getUserSearchSiteRunKey() . ".");
 
 			return null;
 		}
 
 		$locTypeNeeded = null;
-		if (null !== $fmt) {
+		if (!is_empty_value($fmt)) {
 			$strLocationValue = replaceTokensInString($fmt, $loc->toArray());
 		} else {
 			$plugin = $this->getSitePlugin();
 			if(null !== $plugin)
 				$locTypeNeeded = $plugin->getGeoLocationSettingType($loc);
-			if (null === $locTypeNeeded) {
+			if (is_empty_value($locTypeNeeded)) {
 				LogMessage("Plugin for '" . $this->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $this->getUserSearchSiteRunKey() . ".");
 
 				return null;
 			}
 
 			$strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
-			if (null === ($strLocationValue) || $strLocationValue == SitePlugin::VALUE_NOT_SUPPORTED) {
+			if (is_empty_value($strLocationValue) || $strLocationValue == SitePlugin::VALUE_NOT_SUPPORTED) {
 				LogMessage("Plugin for '" . $this->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $this->getUserSearchSiteRunKey() . ".");
 
 				return '';
@@ -446,7 +446,8 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 		// if we don't support keywords in the URL at all for this
 		// plugin or we don't have any keywords, return empty string
-		if (null === $strRetCombinedKeywords ||
+		if (is_empty_value($strRetCombinedKeywords)
+			||
 			$this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
 			$strRetCombinedKeywords = '';
 		} else {
@@ -483,7 +484,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 	{
 
 		$searchStartURL = $this->getPageURLfromBaseFmt(1, 1);
-		if (null === $searchStartURL)
+		if (is_empty_value($searchStartURL))
 			$searchStartURL = $this->getJobPostingBaseUrl();
 
 		$this->setSearchStartUrl($searchStartURL);

@@ -46,7 +46,7 @@ try {
 	$config = new \JobScooper\Builders\ConfigBuilder($arguments["config"]);
 	$config->initialize();
 } catch (\PHLAK\Config\Exceptions\InvalidContextException $e) {
-	print("Could not load {$cfgfile}: " . $e->getMessage());
+	print("Could not load {$arguments["config"]}: " . $e->getMessage());
 }
 
 $classRunJobs = new \JobScooper\Manager\StageManager();

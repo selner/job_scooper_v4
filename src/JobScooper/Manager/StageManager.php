@@ -38,7 +38,7 @@ const JSON_FILENAME = "-alljobsites.json";
 class StageManager
 {
     protected $JobSiteName = "StageManager";
-    protected $classConfig = null;
+    private $classConfig = null;
 
     /**
 	 * @var \DateTime

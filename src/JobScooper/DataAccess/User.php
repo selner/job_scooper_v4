@@ -336,6 +336,8 @@ class User extends BaseUser
 	 */
 	public function getActiveUserSearchPairs()
 	{
+		$ret = null;
+
 		$searchPairs = $this->getUserSearchPairs();
 		if(!empty($searchPairs))
 		{

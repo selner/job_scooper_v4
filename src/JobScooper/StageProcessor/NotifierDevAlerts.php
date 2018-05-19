@@ -99,6 +99,7 @@ class NotifierDevAlerts extends JobsMailSender
 	{
 
 		startLogSection("Processing plugin error alerts...");
+		$reportJobSites = array();
 
 		$startDate = new \DateTime();
 		$strMod = "-5 days";
@@ -157,7 +158,7 @@ class NotifierDevAlerts extends JobsMailSender
 			ksort($reportJobSites);
 		}
 
-		if(null === $reportJobSites)
+		if(is_empty_value($reportJobSites) )
 			$reportJobSites = array();
 		return $reportJobSites;
 	}

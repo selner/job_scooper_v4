@@ -115,6 +115,7 @@ class NotifierJobAlerts extends JobsMailSender
 	function processRunResultsNotifications(User $user)
 	{
 		startLogSection("Processing user notification alerts");
+		$matches = null;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//
@@ -133,7 +134,7 @@ class NotifierJobAlerts extends JobsMailSender
 		// Send a separate notification for each GeoLocation the user had set
 		//
 		foreach ($this->_getSearchPairLocations($user) as $geoLocation) {
-			if(isset($matches))
+			if($matches !== null)
 				unset($matches);
 			$matches = array( "all" => array());
 
@@ -240,6 +241,8 @@ class NotifierJobAlerts extends JobsMailSender
 	 */
 	private function _sendResultsNotification(&$matches, $resultsTitle, User $sendToUser, $geoLocationId=null)
 	{
+		$ret = false;
+
 		$allJobMatchIds = array_keys($matches['all']);
 
 		//
@@ -322,8 +325,7 @@ class NotifierJobAlerts extends JobsMailSender
 		}
 		finally
 		{
-			unset($messageHtml);
-			unset($matches);
+			unset($messageHtml, $matches);
 		}
 
 		//
@@ -441,8 +443,8 @@ class NotifierJobAlerts extends JobsMailSender
 			$html = call_user_func($renderer, $data);
 			file_put_contents(getDefaultJobsOutputFileName("email", "notification", "html", "_", "debug"), $html);
 
-			unset($renderer);
-			unset($data);
+			unset($renderer, $data);
+
 			return $html;
 		}
 		catch (Exception $ex)
@@ -464,7 +466,7 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @throws \PhpOffice\PhpSpreadsheet\Exception
 	 * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
 	 */
-	private function _writeJobMatchesToSheet(Spreadsheet &$spreadsheet, $sheetName, $arrResults, $keys)
+	private function _writeJobMatchesToSheet(Spreadsheet $spreadsheet, $sheetName, $arrResults, $keys)
 	{
 		LogMessage("Reordering the data array to match our column output order...");
 		foreach ($arrResults as $k => $v) {

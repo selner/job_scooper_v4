@@ -184,7 +184,7 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
 {
     $strReturn = "";
 
-    if (isset($arrDetails) && is_array($arrDetails)) {
+    if (!is_empty_value($arrDetails) && is_array($arrDetails)) {
         foreach (array_keys($arrDetails) as $key) {
             $strReturn .= getArrayItemDetailsAsString($arrDetails, $key, (strlen($strReturn) <= 0), $strDelimiter, $strIntro, $fIncludeKey);
         }

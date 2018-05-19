@@ -235,7 +235,7 @@ class JobSitePluginBuilder
 	protected $_dirPluginsRoot = null;
 	protected $_dirJsonConfigs = null;
 	protected $_configJsonFiles = array();
-	protected $_jsonPluginSetups = array();
+	private $_jsonPluginSetups = array();
 
 	private $_pluginsLoaded = false;
 
@@ -344,9 +344,7 @@ class JobSitePluginBuilder
                 	if($type === "Abstract" && array_key_exists("arrListingTagSetup", $plugins[$agentkey]))
 	                {
 		                $plugins[$agentkey]['arrBaseListingTagSetup'] = $plugins[$agentkey]['arrListingTagSetup'];
-		                unset($plugins[$agentkey]['arrListingTagSetup']);
-		                unset($plugins[$agentkey]['JobSiteName']);
-		                unset($plugins[$agentkey]['JobSiteKey']);
+		                unset($plugins[$agentkey]['arrListingTagSetup'], $plugins[$agentkey]['JobSiteName'], $plugins[$agentkey]['JobSiteKey']);
 	                }
                 	if(!in_array($plugins[$agentkey]['PhpClassName'], get_declared_classes()))
 	                {
@@ -625,6 +623,7 @@ class JobSitePluginBuilder
 	 */
 	private function _getAllPluginClassesByJobSiteKey()
 	{
+		$classListBySite = array();
 		$classList = get_declared_classes();
 		sort($classList);
 

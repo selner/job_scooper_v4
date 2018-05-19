@@ -17,6 +17,45 @@
 
 
 /**
+ * @param $v
+ *
+ * @return bool
+ */
+function is_empty_value($v)
+{
+	if(!isset($v)) {
+		return true;
+	}
+
+	$type = gettype($v);
+
+	switch($type) {
+
+		case 'integer':
+		case 'double':
+		case 'float':
+			return $v === null;
+
+		case 'string':
+			$v = trim($v);
+			return ($v === null || '' === $v);
+
+		case 'array':
+			return $v === null || (is_array($v) && (count($v) === 0 || count(array_keys($v)) === 0));
+
+		case 'object':
+		    return $v === null || (is_object($v) && (count(get_object_vars($v)) === 0));
+
+		case 'boolean':
+			return $v !== null && $v !== false;
+
+		default:
+			return empty($v);
+
+	}
+}
+
+/**
  * @param Object $obj
  *
  * @return array

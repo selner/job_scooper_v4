@@ -45,6 +45,8 @@ use \Propel\Runtime\ActiveQuery\Criteria;
 function loadSqlite3MathExtensions()
 {
 	try {
+		$sql2 = '[UNKNONWN]';
+
 	    $con = \Propel\Runtime\Propel::getConnection();
         $expath = '/opt/sqlite/extensions/libsqlitefunctions';
         if(PHP_OS === 'Darwin')
@@ -80,7 +82,7 @@ function loadSqlite3MathExtensions()
  */
 function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocation $searchLoc = null)
 {
-    if(null === $arrJobItem || !is_array($arrJobItem)) {
+    if(is_empty_value($arrJobItem)  || !is_array($arrJobItem)) {
         return null;
     }
 
@@ -91,7 +93,7 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
                 ->findOneOrCreate();
         }
         else {
-            if(null === $arrJobItem['JobSiteKey']) {
+            if(is_empty_value($arrJobItem['JobSiteKey'])) {
 	            throw new InvalidArgumentException('Attempted to create a new job posting record without a valid JobSiteKey value.');
             }
 

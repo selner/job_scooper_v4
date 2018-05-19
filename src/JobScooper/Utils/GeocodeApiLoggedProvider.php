@@ -170,7 +170,7 @@ class GeocodeApiLoggedProvider extends AbstractProvider implements LocaleAwarePr
 
 		$content = $this->getAdapter()->getContent($query);
 
-		if (null === $content) {
+		if (is_empty_value($content)) {
 			throw new NoResultException(sprintf('No results returned for query %s', $query));
 		}
 

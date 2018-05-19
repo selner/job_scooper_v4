@@ -47,6 +47,7 @@ class SeleniumManager extends PropertyObject
 	 */
 	function __construct($additionalLoadDelaySeconds = 0)
     {
+	    PropertyObject::__construct();
         $this->additionalLoadDelaySeconds = $additionalLoadDelaySeconds;
         $this->_settings = getConfigurationSetting('selenium');
 		if(empty($this->_settings))

@@ -269,7 +269,7 @@ class DomItemParser
 		if (array_key_exists('value', $arrTag) && null !== $arrTag['value']) {
 			$value  = $arrTag['value'];
 
-			if(null === $value)
+			if(is_empty_value($value))
 				$ret = null;
 			else
 				$ret = $value;
@@ -300,7 +300,7 @@ class DomItemParser
 				$value = $this->getItemDataValue($arrTag['field']);
 			}
 
-			if(null === $value)
+			if(is_empty_value($value))
 				$ret = null;
 			else
 			{
@@ -325,7 +325,7 @@ class DomItemParser
 	private function _getReturnValueByIndex($arr, $indexValue)
 	{
 		$index = $this->translateTagIndexValue($arr, $indexValue);
-		if(null === $index)
+		if(is_empty_value($index))
 			return null;
 
 		return $arr[$index];
@@ -396,7 +396,7 @@ class DomItemParser
 		}
 
 		$strMatch = $this->getTagSelector();
-		if (null === $strMatch) {
+		if (is_empty_value($strMatch)) {
 			return $ret;
 		}
 		elseif(strlen($strMatch) > 0)

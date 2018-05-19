@@ -202,7 +202,7 @@ class LocationManager
 	/**
 	 * @var null
 	 */
-	protected $loggerName = null;
+	private $loggerName = null;
 
 
 
@@ -233,7 +233,7 @@ class LocationManager
 		LogMessage('Loading Geolocation cache ...');
 
 		$googleApiKey = getConfigurationSetting('google_maps_api_key');
-		if (null === $googleApiKey || !is_string($googleApiKey)) {
+		if (is_empty_value($googleApiKey) || !is_string($googleApiKey)) {
 			throw new Exception('No Google Geocode API key found in configuration.  Instructions for getting an API key are at https://developers.google.com/maps/documentation/geocoding/get-api-key.');
 		}
 
@@ -327,7 +327,7 @@ class LocationManager
 			throw $ex;
 		}
 
-		if (null === $geocodeResult) {
+		if (is_empty_value($geocodeResult) ) {
 			$geolocation = $geocodeResult;
 			try {
 				$lookup = LocationManager::scrubLocationValue($strAddress);

@@ -33,36 +33,37 @@ abstract class AbstractTaleo extends \JobScooper\SitePlugins\Base\SitePlugin
 
 	/**
 	 * AbstractTaleo constructor.
+	 * @throws \Exception
 	 */
 	function __construct()
     {
 	    $this->additionalBitFlags["COMPANY"] = C__JOB_USE_SITENAME_AS_COMPANY;
         $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
         
-        if(!isset($this->server) or strlen($this->server) <= 0) {
+        if(is_empty_value($this->server)) {
             $this->server = "https://ch.tbe.taleo.net/CH11/ats/careers/searchResults.jsp";
         }
 
-        if(empty($this->SearchUrlFormat) && isset($this->taleoOrgID) and strlen($this->taleoOrgID) > 0)
+        if(is_empty_value($this->SearchUrlFormat) && !is_empty_value($this->taleoOrgID))
         {
             $this->SearchUrlFormat = $this->server.'?org=' . $this->taleoOrgID . '&cws=1***ITEM_NUMBER***';
         }
 
-        if(!isset($this->JobSiteName) && strlen($this->JobSiteName) <= 0)
+        if(is_empty_value($this->JobSiteName))
         {
             $strPluginSite = get_class($this);
             $strPluginSite = str_replace("Plugin", "", $strPluginSite);
             $this->JobSiteName = $strPluginSite;
         }
 
-        return parent::__construct();
+        parent::__construct();
     }
 
 	/**
 	 * @param $objSimpHTML
 	 *
 	 * @throws \Exception
-	 * @return array|null|string|void
+	 * @return array|null|string
 	 */
 	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
@@ -126,7 +127,7 @@ abstract class AbstractTaleo extends \JobScooper\SitePlugins\Base\SitePlugin
             if($item['Title'] == '') continue;
 
             $tds = $node->find("td");
-            if(isset($tds) && isset($tds[1])) $item['Location'] = $node->find("td")[1]->text();
+            if(isset($tds, $tds[1])) $item['Location'] = $node->find("td")[1]->text();
             if(isset($tds) && isset($tds[2]))$item['job_site_category'] = $tds[2]->text();
 
             $ret[] = $item;

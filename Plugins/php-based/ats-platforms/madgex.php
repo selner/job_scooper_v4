@@ -147,7 +147,7 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 
 		    LogMessage("Determining LocationId value for {$locValParam}... from {$locApi} ..." );
 		    $data = $this->getJsonApiResult($locApi, $searchDetails, $searchDetails->getSearchStartUrl());
-		    if(null === $data)
+		    if(is_empty_value($data) )
 		    {
 			    continue;
 		    }

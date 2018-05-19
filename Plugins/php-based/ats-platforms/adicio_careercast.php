@@ -75,7 +75,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 	function __construct()
 	{
 		$fDoNotRemoveSetup = false;
-		if(!empty($this->arrListingTagSetup))
+		if(!is_empty_value($this->arrListingTagSetup))
 			$fDoNotRemoveSetup = true;
 		else
 			$this->arrListingTagSetup = $this->arrBaseListingTagSetupNationalSearch;
@@ -96,14 +96,14 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 	private function getJsonResultsPage($apiUri, $hostPageUri=null)
 	{
 		LogMessage("Downloading JSON listing data from {$apiUri} for " . $this->getJobSiteKey() . "...");
-		if(empty($hostPageUri))
+		if(is_empty_value($hostPageUri))
 			$hostPageUri = $this->getActiveWebdriver()->getCurrentURL();
-		if(empty($hostPageUri) && !empty($this->currentJsonSearchDetails))
+		if(is_empty_value($hostPageUri) && !is_empty_value($this->currentJsonSearchDetails))
 			$hostPageUri = $this->currentJsonSearchDetails->searchResultsPageUrl;
 
 		$ret = array();
 		$respdata = $this->getJsonApiResult($apiUri, $this->currentJsonSearchDetails, $hostPageUri);
-		if(!empty($respdata))
+		if(!is_empty_value($respdata))
 		{
 			$this->lastResponseData = $respdata;
 			try
@@ -156,7 +156,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 	 */
 	private function _getJsonSearchUrl(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nOffset=null)
 	{
-		if(!empty($searchDetails->searchResultsPageUrl))
+		if(!is_empty_value($searchDetails->searchResultsPageUrl))
 			$jsonUrl = $searchDetails->searchResultsPageUrl. "&format=json";
 		else
 			$jsonUrl = $searchDetails->getSearchStartUrl() . "&format=json";
@@ -187,28 +187,28 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 			//
 		}
 
-		if(null === $this->nTotalJobs)
+		if(is_empty_value($this->nTotalJobs))
 		{
-			$this->setLayoutIfNeeded();
+			$this->setLayoutIfNeeded($searchDetails);
 		}
 
-		if(empty($this->arrListingTagSetup))
-			$this->setLayoutIfNeeded();
+		if(is_empty_value($this->arrListingTagSetup))
+			$this->setLayoutIfNeeded($searchDetails);
 
 	}
 
 	/**
 	 * @throws \Exception
 	 */
-	protected function setLayoutIfNeeded()
+	protected function setLayoutIfNeeded(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
 	{
-		if (!empty($this->LastKnownSiteLayout)) {
+		if (!is_empty_value($this->LastKnownSiteLayout)) {
 			$this->setAdicioPageLayout($this->LastKnownSiteLayout);
 		} else {
-			$template = $this->_determinePageLayout();
+			$template = $this->_determinePageLayout($searchDetails);
 
 			$this->setAdicioPageLayout($template);
-			LogDebug("Adicio Template for " . get_class($this) . " with url '{$this->SearchUrlFormat}: " . PHP_EOL . "$template = {$template}," . PHP_EOL . "layout = {$this->_layout},  " . PHP_EOL . "template = {$template},  " . PHP_EOL . "id = {$id}, " . PHP_EOL . "matches = " . getArrayDebugOutput($matches));
+			LogDebug("Adicio Template for " . get_class($this) . " with url '{$this->SearchUrlFormat}: " . PHP_EOL . "$template = {$template}," . PHP_EOL . "layout = {$this->_layout},  " . PHP_EOL . "template = {$template},  " );
 		}
 	}
 
@@ -228,11 +228,8 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 	 */
 	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
 	{
-		if(!is_null($this->nTotalJobs))
+		if(!is_empty_value($this->nTotalJobs))
 			return $this->nTotalJobs;
-
-		if(empty($this->arrListingTagSetup))
-			$this->setLayoutIfNeeded();
 
 		return parent::parseTotalResultsCount($objSimpHTML);
 	}
@@ -247,12 +244,12 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
 	{
 
-		if (!empty($this->lastResponseData) || !empty($this->currentJsonSearchDetails))
+		if (!is_empty_value($this->lastResponseData) || !is_empty_value($this->currentJsonSearchDetails))
 		{
 			try {
 				$ret = array();
 				$nOffset = 0;
-				if (!empty($this->lastResponseData) && !empty($this->lastResponseData->Jobs) && count($this->lastResponseData->Jobs) > 0) {
+				if (!is_empty_value($this->lastResponseData) && !is_empty_value($this->lastResponseData->Jobs) && count($this->lastResponseData->Jobs) > 0) {
 					$jobs = $this->lastResponseData->Jobs;
 					unset($this->lastResponseData);
 				}
@@ -265,14 +262,14 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 				}
 //				return $this->_parseJsonJobs($jobs);
 //
-				while (!empty($jobs) && $nOffset < $this->nTotalJobs) {
+				while (!is_empty_value($jobs) && $nOffset < $this->nTotalJobs) {
 					$curPageJobs = $this->_parseJsonJobs($jobs);
 					unset($jobs);
 					$ret = array_merge($ret, $curPageJobs);
 					$nOffset = $nOffset + count($curPageJobs);
 					if ($nOffset < $this->nTotalJobs) {
 						$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
-						LogMessage("Loading next page of JSON data for {$this->getJobSiteKey()} from {$hostPage}");
+						LogMessage("Loading next page of JSON data for {$this->getJobSiteKey()} from {$this->getActiveWebdriver()->getCurrentURL()}");
 						$respData = $this->getJsonResultsPage($jsonUrl);
 						$jobs = $respData->Jobs;
 					}
@@ -307,13 +304,13 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 			}
 		}
 
-		$baseHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetail, $url);
+		$baseHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $url);
 		$this->_layout = "careersdefault";
 
-		if (!empty($baseHTML)) {
+		if (!is_empty_value($baseHTML)) {
 			try {
 				$head = $baseHTML->find("head");
-				if (!empty($head) && count($head) >= 1) {
+				if (!is_empty_value($head) && count($head) >= 1) {
 					foreach ($head[0]->children() as $child) {
 						if ($child->isCommentNode()) {
 							$template = "unknown";

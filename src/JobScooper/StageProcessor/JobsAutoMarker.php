@@ -236,8 +236,7 @@ class JobsAutoMarker
 			LogMessage("Exporting {$cntJobs} job postings to {$outfile} for deduplication...");
 			writeJson($jsonObj, $outfile );
 
-			unset($arrRecentJobs);
-			unset($jsonObj);
+			unset($arrRecentJobs, $jsonObj);
 
 			try {
 				startLogSection("Calling python to dedupe new job postings...");
@@ -545,6 +544,7 @@ class JobsAutoMarker
 	 */
 	private function _exportJobMatchesToJson($basefile="automarker", $arrJobList)
 	{
+		$jobMatchKeys = array();
 		$arrJobItems = array();
 		if($arrJobList)
 		{
@@ -552,7 +552,6 @@ class JobsAutoMarker
 			$jobMatchKeys = array_keys($item->toArray());
 			$jobMatchKeys[] = "Title";
 			array_unshift($arrJobList, $item);
-
 		}
 		foreach($arrJobList as $job)
 			$arrJobItems[$job->getUserJobMatchId()] = $job->toFlatArrayForCSV($jobMatchKeys);
@@ -577,7 +576,7 @@ class JobsAutoMarker
 		return $outfile;
 	}
 
-	private function _updateKeywordMatchForSingleJob(UserJobMatch &$job, $arrMatchData)
+	private function _updateKeywordMatchForSingleJob(UserJobMatch $job, $arrMatchData)
 	{
 		$arrJobMatchFacts = array_subset_keys($arrMatchData, array(
 			"UserJobMatchId",
@@ -670,7 +669,7 @@ class JobsAutoMarker
 								->findOneOrCreate();
 							$dbMatch->setUserJobMatchId($id);
 						}
-						$this->_updateKeywordMatchForSingleJob($dbMatch, $arrMatchRecs[$jobid]);
+						$this->_updateKeywordMatchForSingleJob($dbMatch, $arrMatchRecs[$id]);
 						$dbMatch->save();
 						$retUJMIds[] = $id;
 					}
@@ -812,18 +811,18 @@ class JobsAutoMarker
      */
     function _loadCompanyRegexesToFilter()
     {
-        if(isset($this->companies_regex_to_filter) && count($this->companies_regex_to_filter) > 0)
+        if(!is_empty_value($this->companies_regex_to_filter))
         {
             // We've already loaded the companies; go ahead and return right away
             LogDebug("Using previously loaded " . count($this->companies_regex_to_filter) . " regexed company strings to exclude." );
             return;
         }
 	    $inputfiles = $this->_userBeingMarked->getInputFiles("regex_filter_companies");
-        if(!isset($inputfiles) ||  !is_array($inputfiles)) { return; }
+        if(is_empty_value($inputfiles) ||  !is_array($inputfiles)) { return; }
 
 	    $regexList = array();
         foreach($inputfiles as $fileItem) {
-	        LogDebug("Loading job Company regexes to filter from " . $inputfiles . ".");
+	        LogDebug("Loading job Company regexes to filter from { $fileItem }.");
 	        $loadedCompaniesRegex = loadCSV($fileItem, "match_regex");
 	        if (!empty($loadedCompaniesRegex)) {
 		        //	        $classCSVFile = new SimpleCSV($fileItem, 'r');

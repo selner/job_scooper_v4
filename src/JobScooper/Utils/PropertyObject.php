@@ -17,7 +17,7 @@
  */
 namespace JobScooper\Utils;
 
-abstract class PropertyObject extends \ArrayObject implements \ArrayAccess
+abstract class PropertyObject extends \ArrayObject
 {
 	public function __get($name)
     {

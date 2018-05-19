@@ -200,7 +200,7 @@ class GeoLocationCache
 		foreach ($keys as $k) {
 			$cacheItem = $this->_cache->getItem($k);
 			$cacheItem->addTags($tags);
-			$cacheItem->set($geoLocId);
+			$cacheItem->set($geolocation->getGeoLocationId());
 			$this->_cache->setItem($cacheItem);
 			$newCacheItems[] = $cacheItem;
 		}

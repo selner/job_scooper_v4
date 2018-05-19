@@ -91,10 +91,9 @@ JSCODE;
 
 		$url = $this->getActiveWebdriver()->getCurrentURL();
 		LogMessage("Search URL changed to {$url}");
-		$searchDetails->setStartingUrlForSearch($url);
-		$html = $this->getActiveWebdriver()->getPageSource();
+		$searchDetails->setSearchStartUrl($url);
 
-		return $html;
+		return $this->getActiveWebdriver()->getPageSource();
 
 	}
 

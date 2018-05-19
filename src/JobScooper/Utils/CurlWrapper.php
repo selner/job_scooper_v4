@@ -67,11 +67,11 @@ class CurlWrapper
         $curl_obj = $this->cURL($baseURL, '', 'GET', 'application/json', $pagenum);
 
         $srcdata = json_decode($curl_obj['output']);
-        if(isset($srcdata))
+        if(!is_empty_value($srcdata))
         {
-            if($objName == '')
+            if(!is_empty_value($objName))
             {
-                if($callback != null)
+                if(!is_empty_value($callback))
                 {
                     $this->__handleCallback__($callback, $srcdata, $fReturnType);
                 }
@@ -150,7 +150,7 @@ class CurlWrapper
 	 */
 	function cURL($full_url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = null)
     {
-        if(!isset($secsTimeout))
+        if(is_empty_value($secsTimeout))
         {
             $secsTimeout= 30;
         }
@@ -162,12 +162,12 @@ class CurlWrapper
             $full_url .= '?page=' . $pagenum;
         }
         $header = array();
-        if(!is_null($onbehalf)) $header[] = 'X-On-Behalf-Of: ' . $onbehalf;
-        if(!is_null($content_type)) $header[] = 'Content-type: ' . $content_type;
-        if(!is_null($content_type)) $header[] = 'Accept: ' . $content_type;
+        if(!is_empty_value($onbehalf)) $header[] = 'X-On-Behalf-Of: ' . $onbehalf;
+        if(!is_empty_value($content_type)) $header[] = 'Content-type: ' . $content_type;
+        if(!is_empty_value($content_type)) $header[] = 'Accept: ' . $content_type;
 
         $ch = curl_init();
-        if(!is_null($referrer)) curl_setopt($ch, CURLOPT_REFERER, $referrer);
+        if(!is_empty_value($referrer)) curl_setopt($ch, CURLOPT_REFERER, $referrer);
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10 );
