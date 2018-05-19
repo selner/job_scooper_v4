@@ -167,7 +167,9 @@ class NotifierDevAlerts extends JobsMailSender
 	 */
 	function processPluginErrorAlert()
 	{
+		// TODO:  finish this email alert for plugin errors.  (Currently reports empty error values.)
 
+		/*
 		$reportJobSites = $this->getPluginErrorData();
 		$countsJobSites = $this->getRunResultData();
 		$monolog_error_content = ErrorEmailLogHandler::getEmailErrorLogContent();
@@ -223,6 +225,6 @@ class NotifierDevAlerts extends JobsMailSender
 		unset($returnedJobSites);
 
 		endLogSection(" Dev Plugin Failure Notification.");
-
+*/
 	}
 }
