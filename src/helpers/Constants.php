@@ -102,3 +102,6 @@ define('NO_TITLE_MATCHES', 'No (Title Did Not Match Search Keywords))');
 define('REXPR_PARTIAL_MATCH_URL_DOMAIN', '^https*.{3}[^\/]*');
 define('REXPR_MATCH_URL_DOMAIN', '/^https*.{3}[^\/]*/');
 
+
+
+define('GEOLOCATION_GEOCODE_FAILED', -99999);

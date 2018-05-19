@@ -26,7 +26,6 @@ use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\Utils\GeocodeApiHttpAdapter;
 use JobScooper\Utils\GeocodeApiLoggedProvider;
 use \JobScooper\Utils\GeoLocationCache;
-use const JobScooper\DataAccess\GEOLOCATION_GEOCODE_FAILED;
 use JobScooper\Logging\CSVLogHandler;
 use JobScooper\Utils\GeoLocationResultsFactory;
 use JobScooper\Utils\GoogleGeocoderHttpAdapter;

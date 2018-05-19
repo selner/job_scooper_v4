@@ -18,13 +18,10 @@
 namespace JobScooper\Utils;
 
 use JobScooper\DataAccess\GeoLocation;
-use const JobScooper\DataAccess\GEOLOCATION_GEOCODE_FAILED;
-
 use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\Manager\LocationManager;
 use Monolog\Logger;
 use \Psr\Cache\InvalidArgumentException;
-use phpFastCache\Exceptions\phpFastCacheInvalidArgumentException;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Psr\Log\LogLevel;
 
