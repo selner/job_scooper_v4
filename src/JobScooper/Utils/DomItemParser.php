@@ -138,6 +138,7 @@ class DomItemParser
 			$this->setDomNode($domNode);
 
 
+		$this->setItemData($itemData);
 	}
 
 	/**
