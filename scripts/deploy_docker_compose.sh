@@ -18,11 +18,13 @@ fi
 
 cd ..
 
+echo "JS_DEPLOY_DATE=$(date +%s)" >> .env
+echo "GIT_COMMIT_HASH=$(git rev-parse --short HEAD)" >> .env
+
 echo "Docker .env variables are set to: "
 cat .env
 BRANCH=`git symbolic-ref --short HEAD`
 echo "BRANCH = $BRANCH"
-echo "CONTAINER_TAG = $CONTAINER_TAG"
 
 
 echo "***************************************************************"

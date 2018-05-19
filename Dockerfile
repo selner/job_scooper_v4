@@ -1,6 +1,9 @@
 FROM php:7.2-cli as php
 
 ENV DEBIAN_FRONTEND=noninteractive
+ARG GIT_COMMIT_HASH
+
+RUN echo "Git Commit Hash = $GIT_COMMIT_HASH"
 
 #######################################################
 ##
@@ -231,6 +234,11 @@ RUN composer install --no-interaction -vv
 ########################################################
 ADD ./python/pyJobNormalizer/requirements.txt /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
+
+
+# Dockerfile
+# add this and below command will run without cache
+ARG GIT_COMMIT_HASH
 
 ########################################################
 ###
