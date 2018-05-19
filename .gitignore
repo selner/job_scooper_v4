@@ -17,3 +17,6 @@ python/pyJobNormalizer/venv
 docker-compose.override.yml
 **/node_modules
 **/.venv
+**/tools
+**/discover_jobsites
+
