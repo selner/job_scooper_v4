@@ -1038,7 +1038,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	 *
 	 * @return string
 	 */
-	function combineTextAllNodes($var)
+	public function combineTextAllNodes($var)
 	{
 		$delim = " ";
 		if (count($var) > 1) {
@@ -1054,7 +1054,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	 *
 	 * @return string
 	 */
-	protected function combineTextAllChildren($var)
+	public function combineTextAllChildren($var)
 	{
 		$recursed = true;
 		$delim = "";
@@ -1076,7 +1076,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	 *
 	 * @return string
 	 */
-	protected function parseOneOrMoreLocations($var)
+	public function parseOneOrMoreLocations($var)
 	{
 		$reDelim = "[&,;\|~]|(\s+-+)";
 //		$reDelim = "[[:punct:]]+";
