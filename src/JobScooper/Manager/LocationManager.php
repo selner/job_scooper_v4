@@ -52,7 +52,7 @@ class LocationManager
 	 */
 	static function getLocationManager()
 	{
-		$loc = getCacheData("LocationManager");
+		$loc = getCacheData('LocationManager');
 		if(empty($loc)) {
 			$loc = LocationManager::create();
 		}
@@ -66,7 +66,7 @@ class LocationManager
 	static function create()
 	{
 		$loc = new LocationManager();
-		setAsCacheData("LocationManager", $loc);
+		setAsCacheData('LocationManager', $loc);
 		return $loc;
 	}
 
@@ -88,9 +88,9 @@ class LocationManager
 		//      Case 3  =  "98102"
 		//
 		$zipSplits = preg_split("/\b\d{5}\b/", $lookupAddress);
-		if (count($zipSplits) == 1 && !empty(trim($zipSplits[0])))
+		if (count($zipSplits) === 1 && !empty(trim($zipSplits[0])))
 			$lookupAddress = $zipSplits[0];  // "Dallas Tx 55555" => "Dallas Tx"
-		elseif (count($zipSplits) == 2) {
+		elseif (count($zipSplits) === 2) {
 			$lookupAddress = str_ireplace(" area", "", $zipSplits[1]) . " " . $zipSplits[0];
 		} elseif (count($zipSplits) > 2)
 			$lookupAddress = join(" ", $zipSplits);
@@ -117,7 +117,7 @@ class LocationManager
 	 */
 	function lookupAddress($strAddress)
 	{
-		$lookupAddress = LocationManager::scrubLocationValue($strAddress);
+		$lookupAddress = self::scrubLocationValue($strAddress);
 
 		//
 		// Generate the cache key and do a lookup for that item
@@ -125,7 +125,9 @@ class LocationManager
 		$geolocation = $this->_geoLocCache->get($lookupAddress);
 		if (!empty($geolocation) && $geolocation != GEOLOCATION_GEOCODE_FAILED) {
 			return $geolocation;
-		} elseif (!empty($geolocation) && $geolocation == GEOLOCATION_GEOCODE_FAILED) {
+		}
+
+		if (!empty($geolocation) && $geolocation == GEOLOCATION_GEOCODE_FAILED) {
 			return null;
 		}
 
@@ -135,7 +137,7 @@ class LocationManager
 		LogMessage("... Geolocation cache miss for " . $lookupAddress . ".  Checking database for match...");
 
 		$geolocation = $this->_queryDBForLocation($lookupAddress);
-		if(!empty($geolocation))
+		if(null !== $geolocation)
 		{
 			$this->_geoLocCache->cacheGeoLocation($geolocation, $lookupAddress);
 			return $geolocation;
@@ -172,7 +174,7 @@ class LocationManager
 	{
 		$geoloc = GeoLocationQuery::create()
 			->findOneByAlternateNames(array($lookupAddress));
-		if(!empty($geoloc))
+		if(null !== $geoloc)
 			return $geoloc;
 
 		return null;
@@ -228,29 +230,29 @@ class LocationManager
 	 */
 	private function _initializeGeocoder()
 	{
-		LogMessage("Loading Geolocation cache ...");
+		LogMessage('Loading Geolocation cache ...');
 
 		$googleApiKey = getConfigurationSetting('google_maps_api_key');
-		if (is_null($googleApiKey) || !is_string($googleApiKey)) {
-			throw new Exception("No Google Geocode API key found in configuration.  Instructions for getting an API key are at https://developers.google.com/maps/documentation/geocoding/get-api-key.");
+		if (null === $googleApiKey || !is_string($googleApiKey)) {
+			throw new Exception('No Google Geocode API key found in configuration.  Instructions for getting an API key are at https://developers.google.com/maps/documentation/geocoding/get-api-key.');
 		}
 
 		$regionBias = null;
 		$country_codes = getConfigurationSetting('country_codes');
-		if (!is_null($country_codes) && is_array($country_codes)) {
+		if (null !== $country_codes && is_array($country_codes)) {
 			$regionBias = $country_codes[0];
 		}
 
 		$geocoder = new Geocoder();
 
-		$geoapi_srvr = getConfigurationSetting("geocodeapi_server");
+		$geoapi_srvr = getConfigurationSetting('geocodeapi_server');
 		if (!empty($geoapi_srvr))
 		{
 			$curl = new GeocodeApiHttpAdapter();
 			$geocoder->registerProviders(array(
 				new GeocodeApiLoggedProvider(
 					$adapter = $curl,
-					$locale = "en",
+					$locale = 'en',
 					$region = $regionBias,
 					$apiKey = $googleApiKey,
 					$server = $geoapi_srvr,
@@ -264,7 +266,7 @@ class LocationManager
 			$geocoder->registerProviders(array(
 				new GoogleMapsLoggedProvider(
 					$adapter = $curl,
-					$locale = "en",
+					$locale = 'en',
 					$region = $regionBias,
 					$useSsl = true,
 					$apiKey = $googleApiKey,
@@ -278,14 +280,15 @@ class LocationManager
 
 	/**
 	 * @return \Monolog\Logger
+	 * @throws \Exception
 	 */
 	private function _initializeLogger()
 	{
-		$this->loggerName = "geocode_calls";
+		$this->loggerName = 'geocode_calls';
 		$logger = new Logger($this->loggerName);
-		$now = getNowAsString("-");
+		$now = getNowAsString('-');
 		$csvlog = getOutputDirectory('logs') . DIRECTORY_SEPARATOR . "{$this->loggerName}-{$now}-geocode_api_calls.csv";
-		$fpcsv = fopen($csvlog, "w");
+		$fpcsv = fopen($csvlog, 'w');
 		$handler = new CSVLogHandler($fpcsv, Logger::INFO);
 		$logger->pushHandler($handler);
 
@@ -305,7 +308,7 @@ class LocationManager
 	private function geocode($strAddress)
 	{
 		if ($this->countGeocodeErrors >= 5) {
-			LogMessage("Google Geocoding is disabled because of too many error results during this run.");
+			LogMessage('Google Geocoding is disabled because of too many error results during this run.');
 			$GLOBALS['CACHES']['GEOCODER_ENABLED'] = false;
 
 			return null;
@@ -316,15 +319,15 @@ class LocationManager
 			$this->countGeocodeCalls += 1;
 			$geocodeResult = $this->_geocoder->geocode($strAddress);
 		} catch (NoResultException $ex) {
-			LogDebug("No geocode result was found for " . $strAddress . ".  Details: " . $ex->getMessage(), null, $this->loggerName);
+			LogDebug("No geocode result was found for {$strAddress}:  " . $ex->getMessage(), null, $this->loggerName);
 			$geocodeResult = null;
 		} catch (Exception $ex) {
 			$this->countGeocodeErrors += 1;
-			LogError("Failed to geocode '" . $strAddress . "''.  Details: " . $ex->getMessage(), null, $ex, $this->loggerName);
+			LogError("Failed to geocode {$strAddress}: " . $ex->getMessage(), null, $ex, $this->loggerName);
 			throw $ex;
 		}
 
-		if (!empty($geocodeResult)) {
+		if (null === $geocodeResult) {
 			$geolocation = $geocodeResult;
 			try {
 				$lookup = LocationManager::scrubLocationValue($strAddress);
