@@ -94,7 +94,7 @@ abstract class AbstractGreenhouseATS  extends \JobScooper\BasePlugin\Classes\Aja
 				while (!empty($jobs)) {
 					$curPageJobs = $this->_parseJsonJobs($jobs);
 					$ret = array_merge($ret, $curPageJobs);
-					$nOffset = $nOffset + count($jobs);
+					$nOffset += count($jobs);
 					if ($nOffset < $nTotal) {
 						$retData = $this->getJsonResultsPage($nOffset);
 						$jobs = $retData['jobs'];
@@ -126,7 +126,7 @@ abstract class AbstractGreenhouseATS  extends \JobScooper\BasePlugin\Classes\Aja
 		$lastCookies = $this->getActiveWebdriver()->manage()->getCookies();
 
 		$retObj = $curl->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = $lastCookies);
-		if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
+		if (null !== $retObj && array_key_exists('output', $retObj) && strlen($retObj['output']) > 0) {
 			$respdata = json_decode($retObj['output']);
 			if(!empty($respdata))
 			{
