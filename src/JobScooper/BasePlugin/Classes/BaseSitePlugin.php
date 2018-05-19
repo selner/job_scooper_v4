@@ -903,7 +903,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 			if(in_array($itemKey, ["JobPostItem", "NextButton", "TotalResultPageCount", "TotalPostCount", "NoPostsFound"]))
 				continue;
 
-			$newVal = DomItemParser::getTagValue($node, $this->arrBaseListingTagSetup[$itemKey], $item);
+			$newVal = DomItemParser::getTagValue($node, $this->arrListingTagSetup[$itemKey], $item);
 			if(!empty($newVal))
 				$item[$itemKey] = $newVal;
 		}
