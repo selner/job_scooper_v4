@@ -23,7 +23,7 @@
  *
  *       Used by dotjobs.json plugin configuration to override single method
  */
-abstract class AbstractDotJobs extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractDotJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected function goToEndOfResultsSetViaLoadMore($nTotalListings)
     {

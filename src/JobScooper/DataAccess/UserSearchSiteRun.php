@@ -7,7 +7,7 @@ use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use JobScooper\Utils\SimpleHTMLHelper;
 use Propel\Runtime\Map\TableMap;
-use JobScooper\BasePlugin\Classes\BaseSitePlugin;
+use JobScooper\SitePlugins\Base\SitePlugin;
 /**
  *
  * @method UserSearchPair get($relation) Adds a LEFT JOIN clause to the query
@@ -38,7 +38,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 
 	/**
-	 * @return \JobScooper\BasePlugin\Classes\BaseSitePlugin|null
+	 * @return \JobScooper\SitePlugins\Base\SitePlugin|null
 	 * @throws \Exception
 	 */
 	function getSitePlugin()
@@ -416,7 +416,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 			}
 
 			$strLocationValue = $loc->formatLocationByLocationType($locTypeNeeded);
-			if (null === ($strLocationValue) || $strLocationValue == BaseSitePlugin::VALUE_NOT_SUPPORTED) {
+			if (null === ($strLocationValue) || $strLocationValue == SitePlugin::VALUE_NOT_SUPPORTED) {
 				LogMessage("Plugin for '" . $this->getJobSiteKey() . "' did not have the required location type of " . $locTypeNeeded . " set.   Skipping search '" . $this->getUserSearchSiteRunKey() . ".");
 
 				return '';

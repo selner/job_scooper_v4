@@ -18,7 +18,7 @@
 
 
 
-class PluginPersonForce extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class PluginPersonForce extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'PersonForce';
     protected $JobPostingBaseUrl = 'http://www.personforce.com';

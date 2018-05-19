@@ -15,10 +15,11 @@
  * under the License.
  */
 
-namespace JobScooper\BasePlugin\Classes;
+namespace JobScooper\SitePlugins\Base;
 
-require_once(__ROOT__. '/src/helpers/Constants.php');
+require_once(__ROOT__ . '/src/helpers/Constants.php');
 
+use JobScooper\SitePlugins\Interfaces\IJobSitePlugin;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
@@ -26,7 +27,6 @@ use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\DataAccess\UserSearchSiteRun;
-use JobScooper\BasePlugin\Interfaces\IJobSitePlugin;
 use JobScooper\Manager\SeleniumManager;
 use JobScooper\Utils\DomItemParser;
 use JobScooper\Utils\ExtendedDiDomElement;
@@ -44,15 +44,15 @@ use JobScooper\Builders\JobSitePluginBuilder;
 
 
 /**
- * Class BaseSitePlugin
+ * Class SitePlugin
  * @package JobScooper\BasePlugin\Classes
  */
-abstract class BaseSitePlugin implements IJobSitePlugin
+abstract class SitePlugin implements IJobSitePlugin
 {
 	const VALUE_NOT_SUPPORTED = -1;
 
 	/**
-	 * BaseSitePlugin constructor.
+	 * SitePlugin constructor.
 	 *
 	 * @throws \Exception
 	 */
@@ -459,7 +459,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 	protected $resultsFilterType = "user-filtered";
 	protected $additionalLoadDelaySeconds = 0;
 	protected $_flags_ = null;
-	protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+	protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
 
 	protected $CountryCodes = array("US");
 	private $_curlWrapper = null;
@@ -1134,9 +1134,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 
 			if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
 				$this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
-			} elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__) {
-				$this->_getMyJobsForSearchFromWebpage_($searchDetails);
-			} elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__) {
+			} elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__) {
 				$this->_getMyJobsForSearchFromWebpage_($searchDetails);
 			} else {
 				throw new \ErrorException("Class " . get_class($this) . " does not have a valid setting for parser.  Cannot continue.");

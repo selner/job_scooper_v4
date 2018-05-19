@@ -15,7 +15,7 @@
  * under the License.
  */
 
-class AbstractFacebook  extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class AbstractFacebook  extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 
 	/**

@@ -24,7 +24,7 @@ Use JBZoo\Utils\Url;
  *
  *       Used by dice.json plugin configuration to override single method
  */
-abstract class AbstractBaseDice extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractBaseDice extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 
 	/**

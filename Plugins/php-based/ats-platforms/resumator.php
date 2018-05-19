@@ -17,7 +17,7 @@
  */
 
 
-abstract class AbstractResumatorFall2017  extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
+abstract class AbstractResumatorFall2017  extends \JobScooper\SitePlugins\Base\SitePlugin
 {
 	protected $arrListingTagSetup = array(
 		'JobPostItem' => array('selector' => 'ul.list-group li.list-group-item'),

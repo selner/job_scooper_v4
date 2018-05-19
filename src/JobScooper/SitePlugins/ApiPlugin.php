@@ -15,28 +15,28 @@
  * under the License.
  */
 
-namespace JobScooper\BasePlugin\Classes;
+namespace JobScooper\SitePlugins;
 
+use JobScooper\SitePlugins\Base\SitePlugin;
 
 /**
- * Class AjaxHtmlPlugin
+ * Class ApiPlugin
  * @package JobScooper\BasePlugin\Classes
  */
-abstract class AjaxHtmlPlugin extends BaseSitePlugin
+class ApiPlugin extends SitePlugin
 {
 	/**
-	 * AjaxHtmlPlugin constructor.
+	 * ApiPlugin constructor.
 	 *
 	 * @param null $strBaseDir
 	 * @throws \Exception
 	 */
 	function __construct($strBaseDir = null)
     {
-        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
-        $this->additionalBitFlags[] = C__JOB_USE_SELENIUM;
+        $this->additionalBitFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
+
         parent::__construct();
 
     }
-
 }
-

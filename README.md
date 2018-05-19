@@ -149,7 +149,7 @@ Job Scooper also now supports running Selenium for AJAX job sites in a Docker co
 Using the new Simple Job Site base plugin classes, developers can now add an entire new plugin for a job site in fewer than 40 lines of code!  Here's a fully-featured job site plugin example of how to do it:
 
  ```php
-class PluginCyberJobs extends AjaxHtmlSimplePlugin
+class PluginCyberJobs extends AjaxSitePlugin
 {
     protected $JobSiteName = 'CyberJobs';
     protected $JobPostingBaseUrl = "https://cyber.jobs";

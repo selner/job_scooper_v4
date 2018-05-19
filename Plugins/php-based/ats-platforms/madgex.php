@@ -19,7 +19,7 @@ use JobScooper\DataAccess\UserSearchSiteRun;
 /**
  * Class AbstractMadgexATS
  */
-abstract class AbstractMadgexATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 	protected $SiteSearchBaseUrl = null;
 

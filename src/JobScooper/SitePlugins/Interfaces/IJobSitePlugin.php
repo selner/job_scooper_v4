@@ -15,7 +15,7 @@
  * under the License.
  */
 
-namespace JobScooper\BasePlugin\Interfaces;
+namespace JobScooper\SitePlugins\Interfaces;
 
 // Declare the interface 'iJobSitePlugin'
 use JobScooper\Utils\SimpleHTMLHelper;

@@ -17,7 +17,7 @@
 
 
 
-class AbstractCraigslist extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class AbstractCraigslist extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 
     function getItemURLValue($nItem)

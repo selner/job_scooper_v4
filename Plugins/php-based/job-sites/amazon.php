@@ -34,7 +34,7 @@
  *
  */
 
-class PluginAmazon extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class PluginAmazon extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 
     protected $JobSiteName = 'Amazon';

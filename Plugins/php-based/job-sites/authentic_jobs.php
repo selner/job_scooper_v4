@@ -17,7 +17,7 @@
  */
 
 
-class PluginAuthenticJobs extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class PluginAuthenticJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'AuthenticJobs';
     protected $JobPostingBaseUrl = "https://authenticjobs.com";
@@ -41,7 +41,7 @@ class PluginAuthenticJobs extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
 
     function checkNoJobResults($var)
     {
-        return noJobStringMatch($var, "No jobs");
+        return noJobStringMatch($var, "No results found");
     }
 
 	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)

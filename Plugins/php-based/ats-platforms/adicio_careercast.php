@@ -21,7 +21,7 @@ use http\Url;
 /**
  * Class AbstractAdicio
  */
-abstract class AbstractAdicio extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 	protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
 	protected $JobListingsPerPage = 50;

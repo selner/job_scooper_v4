@@ -15,27 +15,26 @@
  * under the License.
  */
 
-namespace JobScooper\BasePlugin\Classes;
+namespace JobScooper\SitePlugins;
 
+use JobScooper\Manager\SeleniumManager;
+use JobScooper\SitePlugins\Base\SitePlugin;
 
-/**
- * Class ApiPlugin
- * @package JobScooper\BasePlugin\Classes
- */
-class ApiPlugin extends BaseSitePlugin
-{
-	/**
-	 * ApiPlugin constructor.
-	 *
-	 * @param null $strBaseDir
-	 * @throws \Exception
-	 */
-	function __construct($strBaseDir = null)
-    {
-        $this->additionalBitFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
-        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
+abstract class AjaxSitePlugin extends SitePlugin
+ {
+	 function __construct($strBaseDir = null)
+	 {
+		 $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
+		 try
+	    {
+		    $this->_selenium = new SeleniumManager();
+		} catch (\Exception $ex) {
+			handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+	    }
 
-        parent::__construct();
+	    parent::__construct();
 
-    }
-}
+     }
+
+ }
+

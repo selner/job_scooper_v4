@@ -22,7 +22,7 @@
  * Class PluginZipRecruiter
  * @package JobScooper\Plugins
  */
-class PluginZipRecruiter extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class PluginZipRecruiter extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'ziprecruiter';
     protected $JobPostingBaseUrl = 'www.ziprecruiter.com';

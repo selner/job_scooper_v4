@@ -17,7 +17,7 @@
  */
 
 
-abstract class BaseForceComClass extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class BaseForceComClass extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $additionalLoadDelaySeconds = 3;
     protected $JobListingsPerPage = 25;

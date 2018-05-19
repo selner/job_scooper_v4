@@ -15,12 +15,12 @@
  * under the License.
  */
 
-namespace JobScooper\BasePlugin\Classes;
+namespace JobScooper\SitePlugins;
 
 
 use JobScooper\Utils\SimpleHTMLHelper;
 
-class AjaxMicrodataOnlyPlugin extends AjaxHtmlSimplePlugin
+class AjaxMicrodataOnlyPlugin extends AjaxSitePlugin
 {
 	function __construct()
 	{

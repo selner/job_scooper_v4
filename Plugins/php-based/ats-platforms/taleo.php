@@ -22,7 +22,7 @@ use \JobScooper\Utils\SimpleHTMLHelper;
 /**
  * Class AbstractTaleo
  */
-abstract class AbstractTaleo extends \JobScooper\BasePlugin\Classes\ServerHtmlPlugin
+abstract class AbstractTaleo extends \JobScooper\SitePlugins\Base\SitePlugin
 {
     protected $use1ToTDForCount = False;
     protected $taleoOrgID = null;
@@ -214,7 +214,7 @@ class PluginEntercom extends AbstractTaleoATS
 /**
  * Class AbstractTaleoATS
  */
-class AbstractTaleoATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class AbstractTaleoATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 	protected $use1ToTDForCount = True;
 	protected $JobListingsPerPage = 100;

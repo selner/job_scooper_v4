@@ -18,7 +18,7 @@
 /**
  * Class AbstractWPJobify
  */
-abstract class AbstractWordPress extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractWordPress extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 	protected $additionalLoadDelaySeconds = 20;
 	protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;

@@ -16,7 +16,7 @@
  */
 
 
-class AbstractIcimsATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class AbstractIcimsATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 	protected $additionalBitFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_DAYS_VALUE_NOTAPPLICABLE__, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
 	protected $JobListingsPerPage = 20;

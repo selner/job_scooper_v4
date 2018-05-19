@@ -20,7 +20,8 @@ namespace JobScooper\Builders;
 use Exception;
 use JobScooper\DataAccess\JobSiteRecord;
 use JobScooper\DataAccess\JobSiteRecordQuery;
-use JobScooper\DataAccess\User;
+use JobScooper\SitePlugins\AjaxSitePlugin;
+use JobScooper\SitePlugins\Interfaces\IJobSitePlugin;
 
 /**
  * Class JobSitePluginBuilder
@@ -602,7 +603,7 @@ class JobSitePluginBuilder
 
 	    $implements = null;
 	    if(empty($PluginExtendsClassName)) {
-		    $PluginExtendsClassName = "JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin";
+		    $PluginExtendsClassName = AjaxSitePlugin::class;
         }
 
         $data = array(
@@ -635,7 +636,7 @@ class JobSitePluginBuilder
 		foreach($pluginClasses as $class) {
 			$jobsitekey = cleanupSlugPart(str_replace("Plugin", "", $class));
 			$classListBySite[$jobsitekey] = $class;
-			if (in_array("JobScooper\BasePlugin\Interfaces\IJobSitePlugin", class_implements($class)))
+			if (in_array(IJobSitePlugin::class, class_implements($class)))
 				$classListBySite[$jobsitekey] = $class;
 			else
 				LogWarning("{$jobsitekey} does not support iJobSitePlugin: " . getArrayDebugOutput(class_implements($class)));

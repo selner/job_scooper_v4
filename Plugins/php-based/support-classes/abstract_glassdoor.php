@@ -22,7 +22,7 @@
  *
  *       Used by glassdoor.json plugin configuration to override single method
  */
-abstract class AbstractGlassdoor extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractGlassdoor extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 	/**
 	 * AbstractGlassdoor constructor.
