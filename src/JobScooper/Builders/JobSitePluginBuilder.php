@@ -104,7 +104,7 @@ class JobSitePluginBuilder
 	static function getIncludedJobSites($fOptimizeBySiteRunOrder=false)
 	{
 		$sites = getCacheAsArray("included_jobsites");
-		if (empty($sites))
+		if (is_null($sites))
 		{
 			$sites = JobSitePluginBuilder::getJobSitesCmdLineIncludedInRun();
 
@@ -198,20 +198,24 @@ class JobSitePluginBuilder
 	 * @param string[] $countryCodes
 	 * @throws \Exception
 	 */
-	static function filterJobSitesByCountryCodes(&$sites, $countryCodes)
+	static function filterJobSitesByCountryCodes( $countryCodes)
 	{
 		$ccRun = array_unique($countryCodes);
 		$sitesOutOfSearchArea = array();
 
-		foreach ($sites as $jobsiteKey => $site) {
-			$ccSite = $site->getSupportedCountryCodes();
-			if (empty($ccSite))
-				$sitesOutOfSearchArea[$jobsiteKey] = $sites[$jobsiteKey];
-			else {
-				$matches = null;
-				$ccMatches = array_intersect($ccRun, $ccSite);
-				if (empty($ccMatches)) {
-					$sitesOutOfSearchArea[$jobsiteKey] = $site;
+		$sites = JobSitePluginBuilder::getIncludedJobSites();
+		if(null !== $sites)
+		{
+			foreach ($sites as $jobsiteKey => $site) {
+				$ccSite = $site->getSupportedCountryCodes();
+				if (empty($ccSite))
+					$sitesOutOfSearchArea[$jobsiteKey] = $sites[$jobsiteKey];
+				else {
+					$matches = null;
+					$ccMatches = array_intersect($ccRun, $ccSite);
+					if (empty($ccMatches)) {
+						$sitesOutOfSearchArea[$jobsiteKey] = $site;
+					}
 				}
 			}
 		}

@@ -50,7 +50,7 @@ class SearchBuilder
 	    $ignoreRecent = filter_var(getConfigurationSetting('command_line_args.ignore_recent'), FILTER_VALIDATE_BOOLEAN);
 
 	    if($ignoreRecent !== true)
-		    $this->_filterRecentlyRunJobSites($sites, $user);
+		    $this->_filterRecentlyRunJobSites($user);
 
 	    $countryCodes = array();
 	    $searchLoc = $user->getSearchGeoLocations();
@@ -58,12 +58,12 @@ class SearchBuilder
 	    {
 		    $countryCodes[] = $loc->getCountryCode();
 	    }
-	    JobSitePluginBuilder::filterJobSitesByCountryCodes($sites, $countryCodes);
+	    JobSitePluginBuilder::filterJobSitesByCountryCodes($countryCodes);
 
 	    //
 	    // Create searches needed to run all the keyword sets
 	    //
-	    $searchesByJobSite = $this->_generateUserSearchSiteRuns($sites, $user);
+	    $searchesByJobSite = $this->_generateUserSearchSiteRuns($user);
 
 	    if($ignoreRecent !== true)
 			$this->_filterRecentlyRunUserSearchRuns($searchesByJobSite, $user);
@@ -78,9 +78,9 @@ class SearchBuilder
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _filterRecentlyRunJobSites(&$sites, User $user)
+	private function _filterRecentlyRunJobSites(User $user)
 	{
-		$sitesToSkip = array();
+		$completedSites = array();
 		$siteWaitCutOffTime = date_sub(new \DateTime(), date_interval_create_from_date_string('23 hours'));
 
 		$completedSitesAllOnly = UserSearchSiteRunQuery::create()
@@ -96,7 +96,7 @@ class SearchBuilder
 			->getData();
 
 		if (!empty($completedSitesAllOnly)) {
-			$sitesToSkip = array_merge($sitesToSkip, $completedSitesAllOnly);
+			$completedSites = array_merge($completedSites, $completedSitesAllOnly);
 		}
 
 		$searchLocations = $user->getSearchGeoLocations();
@@ -118,38 +118,28 @@ class SearchBuilder
 				->getData();
 
 			if (!empty($sitesAllLocationOnly)) {
-				$sitesToSkip = array_merge($sitesToSkip, $sitesAllLocationOnly);
+				$completedSites = array_merge($completedSites, $sitesAllLocationOnly);
 			}
 		}
-		$sitesToSkip = array_column($sitesToSkip, "LastCompleted", "JobSiteKey");
+		$completedSites = array_column($completedSites, "LastCompleted", "JobSiteKey");
 
-		if(!empty($sitesToSkip)) {
+		if(!empty($completedSites)) {
 			// Filter sites that can be skipped by date.
 			//
 			// Remove any that ran before the cache cut off time, not since that time.
 			// We are left with only those we should skip, aka the ones that
 			// ran after our cutoff time
 			//
-			foreach ($sitesToSkip as $key => $result) {
+			foreach ($completedSites as $key => $result) {
 				if (new \DateTime($result) <= $siteWaitCutOffTime)
-					unset($sitesToSkip[$key]);
+					unset($completedSites[$key]);
 			}
 
-			JobSitePluginBuilder::setSitesAsExcluded($sitesToSkip);
-			$sites = array_diff_key($sites, $sitesToSkip);
-			JobSitePluginBuilder::setIncludedJobSites($sites);
-
-			$skipTheseSearches = array_intersect_key($sites, $sitesToSkip);
-			foreach ($skipTheseSearches as $siteKey => $siteSearches) {
-				if (!empty($siteSearches))
-					foreach ($siteSearches as $search) {
-						$search->setRunResultCode("skipped");
-						$search->save();
-					}
+			$skipRunJobsites = array_intersect_key($completedSites, $completedSites);
+			if (null !== $skipRunJobsites) {
+				LogMessage("Skipping the following sites because they have run, successfully or not, since " . $siteWaitCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput(array_keys($skipRunJobsites)));
+				JobSitePluginBuilder::setSitesAsExcluded($skipRunJobsites);
 			}
-
-			if (!empty($skipTheseSearches))
-				LogMessage("Skipping the following sites because they have run, successfully or not, since " . $siteWaitCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
 		}
 	}
 
@@ -216,8 +206,12 @@ class SearchBuilder
 	 * @return array
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	private function _generateUserSearchSiteRuns($sites, User $user)
+	private function _generateUserSearchSiteRuns(User $user)
     {
+		// Get the list of sites still included after filtering the list
+	    //
+	    $sites = JobSitePluginBuilder::getIncludedJobSites();
+
         //
         // let's start with the searches specified with the details in the the config.ini
         //
@@ -225,12 +219,14 @@ class SearchBuilder
 	    if (empty($userSearchPairs) || empty($sites))
 		    return array();
 
+
+
 	    $nKeywords = count($user->getSearchKeywords());
 	    $nLocations = countAssociativeArrayValues($user->getSearchGeoLocations());
 		$nTotalPairs = countAssociativeArrayValues($userSearchPairs);
 	    $nTotalSearches = $nKeywords * $nLocations * count($sites);
 
-        LogMessage(" Creating search runs for {$nTotalPairs} search pairs X " . count($sites) . " jobsites = up to {$nTotalSearches} total searches, from {$nKeywords} search keywords and {$nLocations} search locations.");
+        LogMessage(" dCreating search runs for {$nTotalPairs} search pairs X " . count($sites) . " jobsites = up to {$nTotalSearches} total searches, from {$nKeywords} search keywords and {$nLocations} search locations.");
 
         $searchRuns = array();
 	    $ntotalSearchRuns = 0;
