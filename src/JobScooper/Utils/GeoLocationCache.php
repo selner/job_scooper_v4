@@ -74,7 +74,7 @@ class GeoLocationCache
 		if (!empty($cache) && method_exists($cache, $name)) {
 			return call_user_func_array([$cache, $name], $args);
 		} else {
-			throw new \BadMethodCallException(sprintf('Method %s does not exists', $name));
+			throw new \BadMethodCallException(sprintf("Method {$name} does not exists"));
 		}
 	}
 
@@ -144,6 +144,7 @@ class GeoLocationCache
 		$this->_cache->setItem($cacheItem);
 	}
 
+
 	/**
 	 * @param \JobScooper\DataAccess\GeoLocation $geolocation
 	 * @param string $newLookupString
@@ -154,8 +155,7 @@ class GeoLocationCache
 	function cacheGeoLocation(GeoLocation $geolocation, $newLookupString = null)
 	{
 		$lookups = array($newLookupString);
-		$geoLocId = $geolocation->getGeoLocationId();
-		$tags = ["GeoLocationId{$geolocation->getGeoLocationId()}", $geolocation->getGeoLocationKey()];
+		$tags = [$geolocation->getGeoLocationKey()];
 
 		$prevCacheItems = $this->_cache->getItemsByTag($geolocation->getGeoLocationKey());
 		if(!empty($prevCacheItems))

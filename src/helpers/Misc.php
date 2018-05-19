@@ -172,7 +172,7 @@ function combineTextAllChildren($node, $fRecursed = false, $delim=" ", $arrChild
 		// do nothing
 
 	}
-	return "";
+	return '';
 }
 
 
