@@ -32,6 +32,7 @@ class DomItemParser
 	private $_tagParseInfo = null;
 	private $_domNodeData = null;
 	private $_itemData = null;
+	private $_callbackObject = null;
 
 	/**
 	 * @param \JobScooper\Utils\SimpleHTMLHelper|ExtendedDiDomElement $nodeData
@@ -41,9 +42,9 @@ class DomItemParser
 	 * @return mixed|null|string
 	 * @throws \Exception
 	 */
-	static function getTagValue($nodeData, $tagInfo, $itemData=null)
+	static function getTagValue($nodeData, $tagInfo, $itemData=null, $callbackObject=null)
 	{
-		$parser = new DomItemParser($nodeData, $tagInfo, $itemData);
+		$parser = new DomItemParser($nodeData, $tagInfo, $itemData, $callbackObject);
 		return $parser->getParsedValue();
 	}
 
@@ -129,7 +130,7 @@ class DomItemParser
 	 * Constructor
 	 * @throws \Exception
 	 */
-	function __construct($domNode=null, $parseInfo=array(), $itemData=array())
+	function __construct($domNode=null, $parseInfo=array(), $itemData=array(), $callbackObject=null)
 	{
 		if (!empty($parseInfo))
 			$this->setTagParserDetails($parseInfo);
@@ -137,6 +138,7 @@ class DomItemParser
 		if (!empty($domNode))
 			$this->setDomNode($domNode);
 
+		$this->_callbackObject = $callbackObject;
 
 		$this->setItemData($itemData);
 	}
@@ -260,17 +262,25 @@ class DomItemParser
 
 
 		if (array_key_exists('return_value_callback', $this->_tagParseInfo) && (strlen($this->_tagParseInfo['return_value_callback']) > 0)) {
-			$callback = get_class($this) . '::' . $this->_tagParseInfo['return_value_callback'];
-			if (!method_exists($this, $this->_tagParseInfo['return_value_callback'])) {
-				$strError = sprintf("Failed to execute callback method \'{$callback}\' for attribute name \'{$returnAttribute}\'.", $callback, $returnAttribute);
-				$this->log($strError, LogLevel::ERROR);
-				throw new \Exception($strError);
+			if(null !== $this->_callbackObject){
+				$callback = array($this->_callbackObject, $this->_tagParseInfo['return_value_callback']);
+			}
+			else
+			{
+				$callback = $this->_tagParseInfo['return_value_callback'];
 			}
 
-			if (array_key_exists('callback_parameter', $this->_tagParseInfo) && !empty($this->_tagParseInfo['callback_parameter']))
-				$ret = call_user_func($callback, array($ret, $this->_tagParseInfo['callback_parameter']));
-			else
+//			if (!method_exists($this, $this->_tagParseInfo['return_value_callback'])) {
+//				$strError = sprintf("Failed to execute callback method \'{$callback}\' for attribute name \'{$returnAttribute}\'.", $callback, $returnAttribute);
+//				$this->log($strError, LogLevel::ERROR);
+//				throw new \Exception($strError);
+//			}
+//
+			if (array_key_exists('callback_parameter', $this->_tagParseInfo) && !empty($this->_tagParseInfo['callback_parameter'])){
+				$ret = call_user_func_array($callback, array($ret, $this->_tagParseInfo['callback_parameter']));
+			} else {
 				$ret = call_user_func($callback, $ret);
+			}
 		}
 
 		return $ret;

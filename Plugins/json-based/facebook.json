@@ -43,14 +43,14 @@
         },
         {
           "Name": "Location",
-          "Selector": "div._3k6l",
+          "Selector": "div._3k6n",
           "Attribute": "collection",
           "Type": "CSS",
           "Callback": "getLocations"
         },
         {
           "Name": "Department",
-          "Selector": "div._3k6n",
+          "Selector": "div._3k6l",
           "Index" : 1,
           "Attribute": "text",
           "Type": "CSS",

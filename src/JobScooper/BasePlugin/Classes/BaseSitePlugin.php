@@ -861,11 +861,11 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 			$this->arrListingTagSetup['JobPostItem']['return_attribute'] = 'collection';
 		}
 
-		$nodesJobRows = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobPostItem']);
+		$nodesJobRows = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobPostItem'], $this);
 
 		if ($nodesJobRows !== false && !is_null($nodesJobRows) && is_array($nodesJobRows) && count($nodesJobRows) > 0) {
 			foreach ($nodesJobRows as $node) {
-				$job = $this->parseSingleJob($node);
+ 				$job = $this->parseSingleJob($node);
 				if(!empty($job))
 					$ret[] = $job;
 			}
@@ -903,7 +903,7 @@ abstract class BaseSitePlugin implements IJobSitePlugin
 			if(in_array($itemKey, ["JobPostItem", "NextButton", "TotalResultPageCount", "TotalPostCount", "NoPostsFound"]))
 				continue;
 
-			$newVal = DomItemParser::getTagValue($node, $this->arrListingTagSetup[$itemKey], $item);
+			$newVal = DomItemParser::getTagValue($node, $this->arrListingTagSetup[$itemKey], $item, $this);
 			if(!empty($newVal))
 				$item[$itemKey] = $newVal;
 		}

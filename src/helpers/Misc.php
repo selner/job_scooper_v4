@@ -190,11 +190,11 @@ function combineTextAllNodes($nodes, $delim=" ")
 	if(!empty($nodes))
 	{
         foreach ($nodes as $node) {
+	        $nodeKey = $node->getNode()->getNodePath();
 	        if($node->hasChildren()) {
-	        	combineTextAllChildren($node, true, $delim, $arrNodeStrings);
+		        $arrNodeStrings[$nodeKey] = combineTextAllChildren($node, true, $delim, $arrNodeStrings);
 	        }
 	        else {
-		        $nodeKey = $node->getNode()->getNodePath();
 		        $arrNodeStrings[$nodeKey] = $node->text();
 	        }
         }
