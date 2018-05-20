@@ -65,7 +65,7 @@ class JobsMailSender
 	function sendEmail($strBodyText = null, $strBodyHTML = null, $arrAttachFilePaths = array(), $subject='No subject', $emailKind='results', User $toUser = null)
     {
     	$ret = false;
-	    LogMessage(PHP_EOL . "Sending email titled \'{$subject}\'..." . PHP_EOL);
+	    LogMessage(PHP_EOL . "Sending email titled '{$subject}'..." . PHP_EOL);
 
 	    try {
 
@@ -235,7 +235,7 @@ class JobsMailSender
 	        if($ret === true)
 	        {
 		        $msgId = $this->phpmailer->getLastMessageID();
-		        LogMessage("Email message ID \'{$msgId}\' sent to :" . getArrayValuesAsString($this->phpmailer->getAllRecipientAddresses()) . ' from ' . $this->phpmailer->From);
+		        LogMessage("Email message ID '{$msgId}' sent to :" . getArrayValuesAsString($this->phpmailer->getAllRecipientAddresses()) . ' from ' . $this->phpmailer->From);
 	        }
 
 	        return $ret;

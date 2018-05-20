@@ -23,9 +23,7 @@ function getGlobalConfigOptionBoolean($key)
 
 function isDebug() {
     $cmdDebugEnabled = \JobScooper\Utils\DocOptions::equalsTrue('debug');
-    $dbgSettings = getGlobalConfigOptionBoolean('debug');
-    if(empty($dbgSettings)) $dbgSettings = false;
-    return $dbgSettings || $cmdDebugEnabled;
+    return $cmdDebugEnabled || getGlobalConfigOptionBoolean('debug');
 }
 
 function is_OptionIncludedSite($JobSiteKey)

@@ -137,9 +137,8 @@ class GeoLocationCache
 	 */
 	function cacheUnknownLocation($strLocationName)
 	{
-		if (isDebug())
-			$this->log(Logger::DEBUG, "... adding unknown location \'{$strLocationName}\' to cache...");
 		$k = $this->getCacheKey($strLocationName);
+		LogDebug("... adding unknown location {$k} = '{$strLocationName}' to cache ");
 		$cacheItem = $this->_cache->getItem($k);
 		$cacheItem->set(GEOLOCATION_GEOCODE_FAILED);
 		$cacheItem->expiresAfter(C_CACHE_ITEM_EXPIRATION_SECS);
@@ -163,7 +162,7 @@ class GeoLocationCache
 		$prevCacheItems = $this->_cache->getItemsByTag($geolocation->getGeoLocationKey());
 		if(!empty($prevCacheItems))
 		{
-			LogDebug("{$geolocation->getGeoLocationKey()} already cached; adding additional lookup string \'{$newLookupString}\'...");
+			LogDebug("{$geolocation->getGeoLocationKey()} already cached; adding additional lookup string '{$newLookupString}'...");
 		}
 		else {
 			if (isDebug())
@@ -211,7 +210,7 @@ class GeoLocationCache
 		$this->_cache->saveMultiple($newCacheItems);
 
 		$strLookups = getArrayDebugOutput($lookups);
-		$this->log(Logger::DEBUG, "Added {$cntKeys} lookups ({$strLookups}) to cache for data \'{$geolocation->getDisplayName()}/{$geolocation->getGeoLocationKey()}\' with tags {$strTags}.");
+		$this->log(Logger::DEBUG, "Added {$cntKeys} lookups ({$strLookups}) to cache for data '{$geolocation->getDisplayName()}/{$geolocation->getGeoLocationKey()}' with tags {$strTags}.");
 	}
 
 	/**

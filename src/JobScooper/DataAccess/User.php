@@ -193,7 +193,7 @@ class User extends BaseUser
 			    }
 
 			    if(null === $tempFileDetails || $tempFileDetails->isFile() !== true) {
-				    throw new \Exception("Specified input file \'{$path}\' was not found.  Aborting.");
+				    throw new \Exception("Specified input file '{$path}' was not found.  Aborting.");
 			    }
 
 			    $key = $fileinfo->getBasename('.csv');
@@ -275,7 +275,7 @@ class User extends BaseUser
 		{
 			$location = $locmgr->lookupAddress($searchLoc);
 			if (!empty($location)) {
-				LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}\'s keywords");
+				LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}'s keywords");
 				$locId = $location->getGeoLocationId();
 				$searchGeoLocIds[$locId] = $locId;
 
@@ -296,7 +296,7 @@ class User extends BaseUser
 				}
 			}
 			else
-				LogError("Could not create user searches for the \'{$searchLoc}\' search location.");
+				LogError("Could not create user searches for the '{$searchLoc}' search location.");
 		}
 
 		try {
