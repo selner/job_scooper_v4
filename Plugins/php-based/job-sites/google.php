@@ -26,7 +26,7 @@ class PluginGoogle extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $JobPostingBaseUrl = 'https://careers.google.com/jobs';
     protected $prevURL = 'https://careers.google.com/jobs';
     protected $additionalBitFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
-	protected $SearchUrlFormat = "https://careers.google.com/jobs#j=***KEYWORDS***&t=sq&q=j&so=dt_pd&li=20&l=false&jlo=en-US&***LOCATION:&jl={Latitude}%3A{Longitude}%3A{Place}%2C+{CountryCode}%3A%3ALOCALITY&jld=10***";
+    protected $SearchUrlFormat = "https://careers.google.com/jobs#j=***KEYWORDS***&t=sq&q=j&so=dt_pd&li=20&l=false&jlo=en-US&***LOCATION:&jl={Latitude}%3A{Longitude}%3A{Place}%2C+{CountryCode}%3A%3ALOCALITY&jld=10***";
 
     protected $CountryCodes = ["US", "UK"];
 
@@ -38,48 +38,48 @@ class PluginGoogle extends \JobScooper\SitePlugins\AjaxSitePlugin
     );
 
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return array|null
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    /**
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
 
         $nodesJobs= $objSimpHTML->find("*[role='listitem']");
 
-        if(!$nodesJobs) return null;
+        if (!$nodesJobs) {
+            return null;
+        }
 
-        foreach($nodesJobs as $node)
-        {
+        foreach ($nodesJobs as $node) {
             $item = getEmptyJobListingRecord();
 
-	        $item = $this->getJobFactsFromMicrodata($node, $item);
+            $item = $this->getJobFactsFromMicrodata($node, $item);
 
-	        $item['JobSitePostId'] = $node->getAttribute("data-job-id");
+            $item['JobSitePostId'] = $node->getAttribute("data-job-id");
 
             $subNode = $node->find("h2 a");
-            if(!empty($subNode))
-            {
+            if (!empty($subNode)) {
                 $item['Url'] = empty($item['Url']) ? $subNode[0]->getAttribute("href") : $item['Url'];
                 $item['Title'] = empty($item['Title']) ? $subNode[0]->getAttribute("title") : $item['Title'];
             }
 
             $subNode = $node->find("div.summary span.location");
-	        if(!empty($subNode) && !empty($locval = $subNode[0]->text()))
+            if (!empty($subNode) && !empty($locval = $subNode[0]->text())) {
                 $item['Location'] = $locval;
+            }
 
             $subNode = $node->find("div.summary span[class='secondary-text']");
-            if(!empty($subNode) && !empty($coval = $subNode[0]->text()))
-                 $item['Company'] = $coval;
+            if (!empty($subNode) && !empty($coval = $subNode[0]->text())) {
+                $item['Company'] = $coval;
+            }
 
             $ret[] = $item;
-
         }
 
         return $ret;
     }
-
 }

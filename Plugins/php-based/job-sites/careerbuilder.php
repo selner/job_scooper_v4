@@ -25,8 +25,8 @@ class PluginCareerBuilder extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'CareerBuilder';
     protected $JobPostingBaseUrl = 'http://www.careerbuilder.com';
-#	protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***&sc=date_desc&sort=date_desc";
-	protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&posted=3&sort=date_desc";
+    #	protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&page_number=***PAGE_NUMBER***&posted=***NUMBER_DAYS***&sc=date_desc&sort=date_desc";
+    protected $SearchUrlFormat = "http://www.careerbuilder.com/jobs-***KEYWORDS***-in-***LOCATION***?keywords=***KEYWORDS***&location=***LOCATION***&radius=50&posted=3&sort=date_desc";
     protected $additionalBitFlags = [C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES, C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER, C__JOB_KEYWORD_REQUIRES_LOWERCASE];
     protected $LocationType = 'location-city-dash-statecode';
     protected $additionalLoadDelaySeconds = 5;
@@ -46,19 +46,20 @@ class PluginCareerBuilder extends \JobScooper\SitePlugins\AjaxSitePlugin
         'NextButton' =>  array('selector' => 'a#next-button'),
     );
 
-	/**
-	 * @return bool
-	 * @throws \Exception
-	 */
-	protected function goToNextPageOfResultsViaNextButton()
-	{
-		$secs = $this->additionalLoadDelaySeconds * 1000;
-		if ($secs <= 0)
-			$secs = 1000;
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    protected function goToNextPageOfResultsViaNextButton()
+    {
+        $secs = $this->additionalLoadDelaySeconds * 1000;
+        if ($secs <= 0) {
+            $secs = 1000;
+        }
 
-		LogMessage("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...");
+        LogMessage("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...");
 
-		$js = "
+        $js = "
             scroll = setTimeout(doNextPage, 5000);
             function doNextPage() 
             {
@@ -79,14 +80,12 @@ class PluginCareerBuilder extends \JobScooper\SitePlugins\AjaxSitePlugin
 
         ";
 
-		$this->runJavaScriptSnippet($js, false);
+        $this->runJavaScriptSnippet($js, false);
 
-		sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
+        sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
 
-		return true;
-	}
-
-
+        return true;
+    }
 }
 
 
@@ -115,23 +114,22 @@ class PluginCareerBuilderUK extends \JobScooper\SitePlugins\AjaxSitePlugin
         'JobSitePostId' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/\/([^\/]*)\/\?.*/'),
     );
 
-	/**
-	 * @param $searchDetails
-	 *
-	 * @return mixed
-	 * @throws \Exception
-	 */
-	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
-	{
-		$jsCode = "
+    /**
+     * @param $searchDetails
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+    {
+        $jsCode = "
 			var elem = document.querySelector(\"a.close-reveal-modal\");
 			if(elem != null)
 			{
 				elem.click();
 			}
 		";
-		$this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
-		$this->runJavaScriptSnippet($jsCode);
-
-	}
+        $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
+        $this->runJavaScriptSnippet($jsCode);
+    }
 }

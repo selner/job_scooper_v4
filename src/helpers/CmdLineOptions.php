@@ -21,7 +21,8 @@ function getGlobalConfigOptionBoolean($key)
     return filter_var(getConfigurationSetting($key), FILTER_VALIDATE_BOOLEAN);
 }
 
-function isDebug() {
+function isDebug()
+{
     $cmdDebugEnabled = \JobScooper\Utils\DocOptions::equalsTrue('debug');
     return $cmdDebugEnabled || getGlobalConfigOptionBoolean('debug');
 }

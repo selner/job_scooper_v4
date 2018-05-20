@@ -16,5 +16,4 @@ use JobScooper\DataAccess\Base\GeoLocationQuery as BaseGeoLocationQuery;
  */
 class GeoLocationQuery extends BaseGeoLocationQuery
 {
-
 }

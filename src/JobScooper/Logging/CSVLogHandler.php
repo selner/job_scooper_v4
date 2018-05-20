@@ -16,7 +16,6 @@
  */
 namespace JobScooper\Logging;
 
-
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -28,12 +27,11 @@ class CSVLogHandler extends StreamHandler
     /**
      * {@inheritdoc}
      */
-    function __construct($stream, $level = Logger::DEBUG, $bubble = true, $filePermission = null, $useLocking = false)
+    public function __construct($stream, $level = Logger::DEBUG, $bubble = true, $filePermission = null, $useLocking = false)
     {
         parent::__construct($stream, $level, $bubble, $filePermission, $useLocking);
         $this->_streamUri = stream_get_meta_data($this->stream)['uri'];
         $this->_formatter = new CSVLogFormatter();
-
     }
 
     private function _rewriteStreamWithHeader($fileUrl)
@@ -46,19 +44,17 @@ class CSVLogHandler extends StreamHandler
     /**
      * {@inheritdoc}
      */
-    function close()
+    public function close()
     {
-
         parent::close();
 
-        if($this->_streamUri !== false) {
+        if ($this->_streamUri !== false) {
             LogMessage("Writing final CSV error log to {$this->_streamUri}... ");
             $this->_rewriteStreamWithHeader($this->_streamUri);
         }
-
     }
 
-    function getDefaultFormatter()
+    public function getDefaultFormatter()
     {
         return $this->_formatter;
     }

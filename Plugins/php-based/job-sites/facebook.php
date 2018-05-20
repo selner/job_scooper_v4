@@ -15,56 +15,53 @@
  * under the License.
  */
 
-class AbstractFacebook  extends \JobScooper\SitePlugins\AjaxSitePlugin
+class AbstractFacebook extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return array|null
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
-	{
-		$ret = parent::parseJobsListForPage($objSimpHTML);
+    /**
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    {
+        $ret = parent::parseJobsListForPage($objSimpHTML);
 
-		if ($ret === null)
-			throw new Exception("Unable to parse any jobs from Facebook site.");
+        if ($ret === null) {
+            throw new Exception("Unable to parse any jobs from Facebook site.");
+        }
 
-		foreach($ret as $k => $job)
-		{
-			if(array_key_exists("Location", $job))
-				if (count($job["Location"]) == 1)
-				{
-					$ret[$k]["Location"] = $job["Location"][0];
-				}
-				elseif(count($job["Location"]) > 1)
-				{
-					$jobSiteId = $job["JobSitePostId"];
-					foreach($job["Location"] as $loc)
-					{
-						$newJob = array_copy($job);
-						$newJob["Location"] = $loc;
-						$newJob["JobSitePostId"] = "{$jobSiteId}-{$loc}";
-						$ret[] = $newJob;
-					}
-					unset($ret[$k]);
-				}
-		}
+        foreach ($ret as $k => $job) {
+            if (array_key_exists("Location", $job)) {
+                if (count($job["Location"]) == 1) {
+                    $ret[$k]["Location"] = $job["Location"][0];
+                } elseif (count($job["Location"]) > 1) {
+                    $jobSiteId = $job["JobSitePostId"];
+                    foreach ($job["Location"] as $loc) {
+                        $newJob = array_copy($job);
+                        $newJob["Location"] = $loc;
+                        $newJob["JobSitePostId"] = "{$jobSiteId}-{$loc}";
+                        $ret[] = $newJob;
+                    }
+                    unset($ret[$k]);
+                }
+            }
+        }
 
-		return $ret;
-	}
+        return $ret;
+    }
 
-	/**
-	 * @param $var
-	 *
-	 * @return array[]|false|string[]
-	 */
-	function getLocations($var)
-	{
-		$delim = "~";
-		$strLocations = combineTextAllNodes($var, $delim);
-		$arrLocations = preg_split("/{$delim}/", $strLocations);
-		return $arrLocations;
-	}
+    /**
+     * @param $var
+     *
+     * @return array[]|false|string[]
+     */
+    public function getLocations($var)
+    {
+        $delim = "~";
+        $strLocations = combineTextAllNodes($var, $delim);
+        $arrLocations = preg_split("/{$delim}/", $strLocations);
+        return $arrLocations;
+    }
 }

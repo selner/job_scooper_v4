@@ -27,13 +27,13 @@ class PluginGroupon extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $LocationType = 'location-city';
 
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return array|null|void
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    /**
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null|void
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
 
@@ -42,11 +42,9 @@ class PluginGroupon extends \JobScooper\SitePlugins\AjaxSitePlugin
 
         $nCounter = -1;
 
-        foreach($nodesJobs as $node)
-        {
+        foreach ($nodesJobs as $node) {
             $nCounter += 1;
-            if($nCounter < 2)
-            {
+            if ($nCounter < 2) {
                 continue;
             }
 
@@ -56,12 +54,12 @@ class PluginGroupon extends \JobScooper\SitePlugins\AjaxSitePlugin
             $item['Url'] = $node->href;
             $item['Company'] = $this->JobSiteName;
             $item['JobSitePostId'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['Url']);
-            if($item['Title'] == '') continue;
+            if ($item['Title'] == '') {
+                continue;
+            }
             $ret[] = $item;
-
         }
 
         return $ret;
     }
-
 }

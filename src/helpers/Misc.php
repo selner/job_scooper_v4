@@ -23,34 +23,34 @@
  */
 function is_empty_value($v)
 {
-	if(!isset($v)) {
-		return true;
-	}
+    if (!isset($v)) {
+        return true;
+    }
 
-	$type = gettype($v);
+    $type = gettype($v);
 
-	switch($type) {
+    switch ($type) {
 
-		case 'integer':
-		case 'double':
-		case 'float':
-			return $v === null;
+        case 'integer':
+        case 'double':
+        case 'float':
+            return $v === null;
 
-		case 'string':
-			$v = trim($v);
-			return ($v === null || '' === $v);
+        case 'string':
+            $v = trim($v);
+            return ($v === null || '' === $v);
 
-		case 'array':
-			return $v === null || (is_array($v) && (count($v) === 0 || count(array_keys($v)) === 0));
+        case 'array':
+            return $v === null || (is_array($v) && (count($v) === 0 || count(array_keys($v)) === 0));
 
-		case 'boolean':
-			return $v !== null && $v !== false;
+        case 'boolean':
+            return $v !== null && $v !== false;
 
-		case 'object':
-		default:
-			return empty($v);
+        case 'object':
+        default:
+            return empty($v);
 
-	}
+    }
 }
 
 /**
@@ -78,9 +78,9 @@ function object_to_array($obj)
  */
 function isBitFlagSet($flagSettings = null, $flagToCheck= null)
 {
-	if(empty($flagToCheck) || empty($flagSettings)) {
-		return false;
-	}
+    if (empty($flagToCheck) || empty($flagSettings)) {
+        return false;
+    }
 
     return ($flagSettings & $flagToCheck);
 }
@@ -118,7 +118,6 @@ function exportToDebugJSON($obj, $strBaseFileName)
     file_put_contents($debugJSONFile, $jsonSelf);
 
     return $debugJSONFile;
-
 }
 
 /**
@@ -130,11 +129,13 @@ function exportToDebugJSON($obj, $strBaseFileName)
  */
 function noJobStringMatch($var, $matchString)
 {
-    if(is_empty_value($matchString))
+    if (is_empty_value($matchString)) {
         throw new Exception("Invalid match string passed to helper noJobStringMatch.");
+    }
 
-    if(stristr(strtoupper($var), strtoupper($matchString)) !== false)
+    if (stristr(strtoupper($var), strtoupper($matchString)) !== false) {
         return 0;
+    }
 
     return null;
 }
@@ -147,12 +148,14 @@ function noJobStringMatch($var, $matchString)
  */
 function getRunDateRange($configNumDays=null)
 {
-	if(is_empty_value($configNumDays))
-	    $configNumDays = getConfigurationSetting('number_days');
-	
+    if (is_empty_value($configNumDays)) {
+        $configNumDays = getConfigurationSetting('number_days');
+    }
+    
     $num_days = filter_var($configNumDays, FILTER_VALIDATE_INT);
-    if($num_days === false)
+    if ($num_days === false) {
         $num_days = 1;
+    }
 
     $strDateRange = null;
     $startDate = new DateTime();
@@ -177,39 +180,37 @@ function getRunDateRange($configNumDays=null)
  */
 function combineTextAllChildren($node, $fRecursed = false, $delim=" ", $arrChildStrings=[])
 {
+    if (empty($node)) {
+        return null;
+    }
 
-	if (empty($node))
-		return null;
+    if (is_array($node) && count($node) > 1) {
+        $strError = sprintf("Warning:  " . count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
+        LogWarning($strError);
+    }
 
-	if (is_array($node) && count($node) > 1) {
-		$strError = sprintf("Warning:  " . count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
-		LogWarning($strError);
-	}
+    if (is_array($node) && count($node) >= 1) {
+        $node = $node[0];
+    }
 
-	if (is_array($node) && count($node) >= 1)
-		$node = $node[0];
+    $nodeKey = $node->getNode()->getNodePath();
 
-	$nodeKey = $node->getNode()->getNodePath();
+    if ($fRecursed === true) {
+        LogDebug("Combining text for all child from node {$nodeKey}");
+    } else {
+        LogDebug("... processing text from {$nodeKey} and related elements...");
+    }
 
-	if ($fRecursed === true)
-		LogDebug("Combining text for all child from node {$nodeKey}");
-	else
-		LogDebug("... processing text from {$nodeKey} and related elements...");
-
-	//
-	// By luck, the DiDomElement returns the textContent from all child elements
-	// underneath it already so we can shortcut this to just return that.
-	//
-	try
-	{
-		return $node->text;
-	}
-	catch (Exception $ex)
-	{
-		// do nothing
-
-	}
-	return '';
+    //
+    // By luck, the DiDomElement returns the textContent from all child elements
+    // underneath it already so we can shortcut this to just return that.
+    //
+    try {
+        return $node->text;
+    } catch (Exception $ex) {
+        // do nothing
+    }
+    return '';
 }
 
 
@@ -224,22 +225,19 @@ function combineTextAllNodes($nodes, $delim=" ")
     $retStr = "";
     $arrNodeStrings = array();
 
-	if(!empty($nodes))
-	{
+    if (!empty($nodes)) {
         foreach ($nodes as $node) {
-	        $nodeKey = $node->getNode()->getNodePath();
-	        if($node->hasChildren()) {
-		        $arrNodeStrings[$nodeKey] = combineTextAllChildren($node, true, $delim, $arrNodeStrings);
-	        }
-	        else {
-		        $arrNodeStrings[$nodeKey] = $node->text();
-	        }
+            $nodeKey = $node->getNode()->getNodePath();
+            if ($node->hasChildren()) {
+                $arrNodeStrings[$nodeKey] = combineTextAllChildren($node, true, $delim, $arrNodeStrings);
+            } else {
+                $arrNodeStrings[$nodeKey] = $node->text();
+            }
         }
 
         $retStr = join($delim, $arrNodeStrings);
     }
     return $retStr;
-
 }
 
 
@@ -251,27 +249,30 @@ function combineTextAllNodes($nodes, $delim=" ")
  */
 function doExec($cmd)
 {
-	if (stristr($cmd, "2>&1") !== true)
-		$cmd = "{$cmd} 2>&1";
+    if (stristr($cmd, "2>&1") !== true) {
+        $cmd = "{$cmd} 2>&1";
+    }
 
-	$cmdArrOutput = array();
-	$cmdRet = null;
-	$lastResultLine = null;
+    $cmdArrOutput = array();
+    $cmdRet = null;
+    $lastResultLine = null;
 
-	$lastOutput = exec($cmd, $cmdArrOutput, $cmdRet);
-	$cmdStrOutput = join(PHP_EOL, $cmdArrOutput);
-	if($cmdRet !== 0)
-		throw new Exception("Command '{$cmd}' returned non-zero result code.  Output: {$cmdStrOutput}");
+    $lastOutput = exec($cmd, $cmdArrOutput, $cmdRet);
+    $cmdStrOutput = join(PHP_EOL, $cmdArrOutput);
+    if ($cmdRet !== 0) {
+        throw new Exception("Command '{$cmd}' returned non-zero result code.  Output: {$cmdStrOutput}");
+    }
 
-	foreach ($cmdArrOutput as $resultLine) {
-		LogMessage($resultLine);
-		$lastResultLine = $resultLine;
-	}
+    foreach ($cmdArrOutput as $resultLine) {
+        LogMessage($resultLine);
+        $lastResultLine = $resultLine;
+    }
 
-	if (empty($lastOutput))
-		$lastOutput = $lastResultLine;
+    if (empty($lastOutput)) {
+        $lastOutput = $lastResultLine;
+    }
 
-	LogMessage("Command '{$cmd}' returned code={$cmdRet}; last_line='{$lastOutput}'.");
+    LogMessage("Command '{$cmd}' returned code={$cmdRet}; last_line='{$lastOutput}'.");
 
 
     return $lastOutput;
@@ -279,25 +280,23 @@ function doExec($cmd)
 
 
 
-if ( ! function_exists('glob_recursive'))
-{
-	// Does not support flag GLOB_BRACE
+if (! function_exists('glob_recursive')) {
+    // Does not support flag GLOB_BRACE
 
-	/**
-	 * @param     $pattern
-	 * @param int $flags
-	 *
-	 * @return array
-	 */
-	function glob_recursive($pattern, $flags = 0)
-	{
-		$files = glob($pattern, $flags);
+    /**
+     * @param     $pattern
+     * @param int $flags
+     *
+     * @return array
+     */
+    function glob_recursive($pattern, $flags = 0)
+    {
+        $files = glob($pattern, $flags);
 
-		foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir)
-		{
-			$files = array_merge($files, glob_recursive($dir.'/'.basename($pattern), $flags));
-		}
+        foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
+            $files = array_merge($files, glob_recursive($dir.'/'.basename($pattern), $flags));
+        }
 
-		return $files;
-	}
+        return $files;
+    }
 }

@@ -24,362 +24,360 @@ use Propel\Runtime\Propel;
  */
 class User extends BaseUser
 {
-	private $_userSearchSiteRunsByJobSite = array();
+    private $_userSearchSiteRunsByJobSite = array();
 
-	/**
-	 * @return \JobScooper\DataAccess\User
-	 */
-	static function getCurrentUser()
+    /**
+     * @return \JobScooper\DataAccess\User
+     */
+    public static function getCurrentUser()
     {
         return getConfigurationSetting('current_user');
     }
 
-	/**
-	 * @param \JobScooper\DataAccess\User $user
-	 */
-	static function setCurrentUser(User $user)
+    /**
+     * @param \JobScooper\DataAccess\User $user
+     */
+    public static function setCurrentUser(User $user)
     {
         setConfigurationSetting('current_user', $user);
-	    setConfigurationSetting('alerts.results.to', $user);
+        setConfigurationSetting('alerts.results.to', $user);
     }
 
-	/**
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	function canNotifyUser()
+    /**
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function canNotifyUser()
     {
-	    $now = new \DateTime();
-	    $lastNotify = $this->getLastNotifiedAt();
-	    if(empty($lastNotify))
-	    	return true;
+        $now = new \DateTime();
+        $lastNotify = $this->getLastNotifiedAt();
+        if (empty($lastNotify)) {
+            return true;
+        }
 
-	    $numDays = $this->getNotificationFrequency();
-	    if($numDays === 0)
-	    	return true;
+        $numDays = $this->getNotificationFrequency();
+        if ($numDays === 0) {
+            return true;
+        }
 
-	    if(empty($numDays))
-		    $numDays = 1;
-	    $interval = date_interval_create_from_date_string(strval($numDays) . ' days');
-	    $nextNotify = clone $lastNotify;
-	    $nextNotify->add($interval);
+        if (empty($numDays)) {
+            $numDays = 1;
+        }
+        $interval = date_interval_create_from_date_string(strval($numDays) . ' days');
+        $nextNotify = clone $lastNotify;
+        $nextNotify->add($interval);
 
-	    if(empty($lastNotify) || $now >= $nextNotify)
-	    	return true;
+        if (empty($lastNotify) || $now >= $nextNotify) {
+            return true;
+        }
 
-	    return false;
-
+        return false;
     }
 
-	/**
-	 * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
-	 *
-	 * @return bool|void
-	 * @throws \Exception
-	 * @throws \Psr\Cache\InvalidArgumentException
-	 */
-	public function postSave(ConnectionInterface $con = null)
+    /**
+     * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+     *
+     * @return bool|void
+     * @throws \Exception
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function postSave(ConnectionInterface $con = null)
     {
-	    parent::postSave($con);
+        parent::postSave($con);
 
-	    if (!empty($this->getSearchLocations()) && !empty($this->getSearchKeywords())) {
-		    try {
-			    $this->_updateUserSearchPairs();
-		    } catch (PropelException $ex) {
-			    handleException($ex);
-		    }
-	    }
+        if (!empty($this->getSearchLocations()) && !empty($this->getSearchKeywords())) {
+            try {
+                $this->_updateUserSearchPairs();
+            } catch (PropelException $ex) {
+                handleException($ex);
+            }
+        }
     }
 
-	/**
-	 * @return \JobScooper\DataAccess\GeoLocation[]
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	public function getSearchGeoLocations()
+    /**
+     * @return \JobScooper\DataAccess\GeoLocation[]
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function getSearchGeoLocations()
     {
-    	$loc = array();
-	    $searchpairs = $this->getUserSearchPairs();
-	    foreach ($searchpairs as $pair)
-	    {
-	    	$loc[] = $pair->getGeoLocationFromUS();
-	    }
-	    return array_unique($loc);
+        $loc = array();
+        $searchpairs = $this->getUserSearchPairs();
+        foreach ($searchpairs as $pair) {
+            $loc[] = $pair->getGeoLocationFromUS();
+        }
+        return array_unique($loc);
     }
 
-	/**
-	 * @param array  $arr
-	 * @param string $keyType
-	 * @throws \Exception
-	 */
-	public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
+    /**
+     * @param array  $arr
+     * @param string $keyType
+     * @throws \Exception
+     */
+    public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-	    if (array_key_exists('email', $arr)) {
-		    $this->setEmailAddress($arr['email']);
-		    unset($arr['email']);
-	    }
+        if (array_key_exists('email', $arr)) {
+            $this->setEmailAddress($arr['email']);
+            unset($arr['email']);
+        }
 
-	    if (array_key_exists('display_name', $arr)) {
-		    $this->setName($arr['display_name']);
-		    unset($arr['display_name']);
-	    }
+        if (array_key_exists('display_name', $arr)) {
+            $this->setName($arr['display_name']);
+            unset($arr['display_name']);
+        }
 
-	    foreach ($arr as $k => $v)
-	    {
-			switch(strtolower($k))
-			{
-				case 'email':
-					$this->setEmailAddress($arr['email']);
-					unset($arr['email']);
-					break;
+        foreach ($arr as $k => $v) {
+            switch (strtolower($k)) {
+                case 'email':
+                    $this->setEmailAddress($arr['email']);
+                    unset($arr['email']);
+                    break;
 
-				case 'display_name':
-					$this->setName($arr['display_name']);
-					unset($arr['display_name']);
-					break;
+                case 'display_name':
+                    $this->setName($arr['display_name']);
+                    unset($arr['display_name']);
+                    break;
 
-				case 'search_keywords':
-				case 'keywords':
-					$this->setSearchKeywords($arr[strtolower($k)]);
-					unset($arr[strtolower($k)]);
-					break;
+                case 'search_keywords':
+                case 'keywords':
+                    $this->setSearchKeywords($arr[strtolower($k)]);
+                    unset($arr[strtolower($k)]);
+                    break;
 
-				case 'search_locations':
-					$this->setSearchLocations($arr['search_locations']);
-					unset($arr['search_locations']);
-					break;
+                case 'search_locations':
+                    $this->setSearchLocations($arr['search_locations']);
+                    unset($arr['search_locations']);
+                    break;
 
-				case 'inputfiles':
-					$this->_parseConfigUserInputFiles($arr);
-					unset($arr['inputfiles']);
-					break;
-					
-				case 'notification_delay':
-					$this->setNotificationFrequency($arr['notification_delay']);
-					unset($arr['notification_delay']);
-					break;
+                case 'inputfiles':
+                    $this->_parseConfigUserInputFiles($arr);
+                    unset($arr['inputfiles']);
+                    break;
+                    
+                case 'notification_delay':
+                    $this->setNotificationFrequency($arr['notification_delay']);
+                    unset($arr['notification_delay']);
+                    break;
 
-				default:
-					$arr[ucwords($k)] = $v;
-					unset($arr[$k]);
-			}
+                default:
+                    $arr[ucwords($k)] = $v;
+                    unset($arr[$k]);
+            }
+        }
 
-	    }
-
-	    parent::fromArray($arr, $keyType);
+        parent::fromArray($arr, $keyType);
     }
 
-	/**
-	 * @throws \Exception
-	 * @return null
-	 */
+    /**
+     * @throws \Exception
+     * @return null
+     */
     private function _parseConfigUserInputFiles($arrUserFacts)
     {
-	    //
-	    // Validate each of the inputfiles that the user passed
-	    // and configure all searches
-	    //
-	    $verifiedInputFiles = array();
-	    if (array_key_exists('inputfiles', $arrUserFacts) && !empty($arrUserFacts['inputfiles']) && is_array($arrUserFacts['inputfiles'])) {
-		    $inputfiles = $arrUserFacts['inputfiles'];
-		    foreach ($inputfiles as $key => $cfgvalue)
-		    {
-			    $split= explode(';', $cfgvalue);
-			    $type = $split[0];
-			    $path = $split[1];
+        //
+        // Validate each of the inputfiles that the user passed
+        // and configure all searches
+        //
+        $verifiedInputFiles = array();
+        if (array_key_exists('inputfiles', $arrUserFacts) && !empty($arrUserFacts['inputfiles']) && is_array($arrUserFacts['inputfiles'])) {
+            $inputfiles = $arrUserFacts['inputfiles'];
+            foreach ($inputfiles as $key => $cfgvalue) {
+                $split= explode(';', $cfgvalue);
+                $type = $split[0];
+                $path = $split[1];
 
-			    $tempFileDetails = null;
-			    $fileinfo = new \SplFileInfo($path);
-			    if($fileinfo->getRealPath() !== false){
-				    $tempFileDetails = parsePathDetailsFromString($fileinfo->getRealPath(), C__FILEPATH_FILE_MUST_EXIST);
-			    }
+                $tempFileDetails = null;
+                $fileinfo = new \SplFileInfo($path);
+                if ($fileinfo->getRealPath() !== false) {
+                    $tempFileDetails = parsePathDetailsFromString($fileinfo->getRealPath(), C__FILEPATH_FILE_MUST_EXIST);
+                }
 
-			    if(null === $tempFileDetails || $tempFileDetails->isFile() !== true) {
-				    throw new \Exception("Specified input file '{$path}' was not found.  Aborting.");
-			    }
+                if (null === $tempFileDetails || $tempFileDetails->isFile() !== true) {
+                    throw new \Exception("Specified input file '{$path}' was not found.  Aborting.");
+                }
 
-			    $key = $fileinfo->getBasename('.csv');
-			    if(!array_key_exists($type, $verifiedInputFiles))
-			        $verifiedInputFiles[$type] = array();
-			    $verifiedInputFiles[$type][$key] = $tempFileDetails->getPathname();
-		    }
+                $key = $fileinfo->getBasename('.csv');
+                if (!array_key_exists($type, $verifiedInputFiles)) {
+                    $verifiedInputFiles[$type] = array();
+                }
+                $verifiedInputFiles[$type][$key] = $tempFileDetails->getPathname();
+            }
 
-		    $this->setInputFiles($verifiedInputFiles);
-	    }
-
+            $this->setInputFiles($verifiedInputFiles);
+        }
     }
 
-	/**
-	 * @param array[]|null $v
-	 * @throws \Exception
-	 */
-	public function setInputFiles($v)
-	{
-		if(!empty($v))
-			$this->setInputFilesJson(encodeJSON($v));
-	}
+    /**
+     * @param array[]|null $v
+     * @throws \Exception
+     */
+    public function setInputFiles($v)
+    {
+        if (!empty($v)) {
+            $this->setInputFilesJson(encodeJSON($v));
+        }
+    }
 
-	/**
-	 * @param string $type Return the subset of input files of a specific type only.
-	 *
-	 * @return array[]|null
-	 * @throws \Exception
-	 */
-	public function getInputFiles($type=null)
-	{
-		$files = null;
-		$v = $this->getInputFilesJson();
-		if(!empty($v) && is_string($v))
-			$files = decodeJSON($v);
+    /**
+     * @param string $type Return the subset of input files of a specific type only.
+     *
+     * @return array[]|null
+     * @throws \Exception
+     */
+    public function getInputFiles($type=null)
+    {
+        $files = null;
+        $v = $this->getInputFilesJson();
+        if (!empty($v) && is_string($v)) {
+            $files = decodeJSON($v);
+        }
 
-		if(!empty($type) && !empty($files))
-		{
-			if(array_key_exists($type, $files))
-				$files = $files[$type];
-			else
-				$files = array();
-		}
+        if (!empty($type) && !empty($files)) {
+            if (array_key_exists($type, $files)) {
+                $files = $files[$type];
+            } else {
+                $files = array();
+            }
+        }
 
-		return $files;
-	}
+        return $files;
+    }
 
-	/**
-	 * @return null
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 * @throws \Exception
-	 * @throws \Psr\Cache\InvalidArgumentException
-	 */
-	private function _updateUserSearchPairs()
-	{
-		$userSearchPairs = array();
-		$slug = $this->getUserSlug();
+    /**
+     * @return null
+     * @throws \Propel\Runtime\Exception\PropelException
+     * @throws \Exception
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    private function _updateUserSearchPairs()
+    {
+        $userSearchPairs = array();
+        $slug = $this->getUserSlug();
 
-		$searchLocations = $this->getSearchLocations();
-		if (empty($searchLocations)) {
-			LogWarning("No search locations have been set for {$slug}. Unable to create any search pairings for user.");
-			return ;
-		}
+        $searchLocations = $this->getSearchLocations();
+        if (empty($searchLocations)) {
+            LogWarning("No search locations have been set for {$slug}. Unable to create any search pairings for user.");
+            return ;
+        }
 
-		$searchKeywords = $this->getSearchKeywords();
-		if (empty($searchKeywords)) {
-			LogWarning("No user search keywords have been configuredfor {$slug}. Unable to create any search pairings for user");
-			return ;
-		}
+        $searchKeywords = $this->getSearchKeywords();
+        if (empty($searchKeywords)) {
+            LogWarning("No user search keywords have been configuredfor {$slug}. Unable to create any search pairings for user");
+            return ;
+        }
 
-		$locmgr = LocationManager::getLocationManager();
-		if(empty($locmgr)) {
-			LocationManager::create();
-			$locmgr = LocationManager::getLocationManager();
-		}
-		$searchGeoLocIds = array();
+        $locmgr = LocationManager::getLocationManager();
+        if (empty($locmgr)) {
+            LocationManager::create();
+            $locmgr = LocationManager::getLocationManager();
+        }
+        $searchGeoLocIds = array();
 
-		foreach ($searchLocations as $lockey => $searchLoc)
-		{
-			$location = $locmgr->lookupAddress($searchLoc);
-			if (!empty($location)) {
-				LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}'s keywords");
-				$locId = $location->getGeoLocationId();
-				$searchGeoLocIds[$locId] = $locId;
+        foreach ($searchLocations as $lockey => $searchLoc) {
+            $location = $locmgr->lookupAddress($searchLoc);
+            if (!empty($location)) {
+                LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}'s keywords");
+                $locId = $location->getGeoLocationId();
+                $searchGeoLocIds[$locId] = $locId;
 
-				foreach ($searchKeywords as $kwd) {
-					$user_search = UserSearchPairQuery::create()
-						->filterByUserId($this->getUserId())
-						->filterByUserKeyword($kwd)
-						->filterByGeoLocationId($locId)
-						->findOneOrCreate();
+                foreach ($searchKeywords as $kwd) {
+                    $user_search = UserSearchPairQuery::create()
+                        ->filterByUserId($this->getUserId())
+                        ->filterByUserKeyword($kwd)
+                        ->filterByGeoLocationId($locId)
+                        ->findOneOrCreate();
 
-					$user_search->setUserId($this->getUserId());
-					$user_search->setUserKeyword($kwd);
-					$user_search->setIsActive(true);
-					$user_search->setGeoLocationId($locId);
-					$user_search->save();
+                    $user_search->setUserId($this->getUserId());
+                    $user_search->setUserKeyword($kwd);
+                    $user_search->setIsActive(true);
+                    $user_search->setGeoLocationId($locId);
+                    $user_search->save();
 
-					$userSearchPairs[$user_search->getUserSearchPairId()] = $user_search;
-				}
-			}
-			else
-				LogError("Could not create user searches for the '{$searchLoc}' search location.");
-		}
+                    $userSearchPairs[$user_search->getUserSearchPairId()] = $user_search;
+                }
+            } else {
+                LogError("Could not create user searches for the '{$searchLoc}' search location.");
+            }
+        }
 
-		try {
-			$query = UserSearchPairQuery::create();
+        try {
+            $query = UserSearchPairQuery::create();
 
-			$locIdColumnName = $query->getAliasedColName(UserSearchPairTableMap::COL_GEOLOCATION_ID);
-			$kwdColumnName = $query->getAliasedColName(UserSearchPairTableMap::COL_USER_KEYWORD);
-			$con = Propel::getWriteConnection(UserSearchPairTableMap::DATABASE_NAME);
+            $locIdColumnName = $query->getAliasedColName(UserSearchPairTableMap::COL_GEOLOCATION_ID);
+            $kwdColumnName = $query->getAliasedColName(UserSearchPairTableMap::COL_USER_KEYWORD);
+            $con = Propel::getWriteConnection(UserSearchPairTableMap::DATABASE_NAME);
 
-			$oldPairUpdate  = $query->filterByUserSearchPairId(array_keys($userSearchPairs), Criteria::NOT_IN)
-				->filterByUserId($this->getUserId())
-				->filterByIsActive(true, Criteria::EQUAL)
-				->addCond('condUserKwds', $kwdColumnName, array_values($searchKeywords), Criteria::NOT_IN)
-				->addCond('condUserLocs', $locIdColumnName, array_values($searchGeoLocIds), Criteria::NOT_IN)
-				->combine(array('condUserKwds', 'condUserLocs'), Criteria::LOGICAL_OR)
-				->update(array('IsActive' => false), $con);
+            $oldPairUpdate  = $query->filterByUserSearchPairId(array_keys($userSearchPairs), Criteria::NOT_IN)
+                ->filterByUserId($this->getUserId())
+                ->filterByIsActive(true, Criteria::EQUAL)
+                ->addCond('condUserKwds', $kwdColumnName, array_values($searchKeywords), Criteria::NOT_IN)
+                ->addCond('condUserLocs', $locIdColumnName, array_values($searchGeoLocIds), Criteria::NOT_IN)
+                ->combine(array('condUserKwds', 'condUserLocs'), Criteria::LOGICAL_OR)
+                ->update(array('IsActive' => false), $con);
 
-			LogMessage("Marked {$oldPairUpdate} previous user search pairs as inactive.");
+            LogMessage("Marked {$oldPairUpdate} previous user search pairs as inactive.");
+        } catch (PropelException $ex) {
+            handleException($ex, null, false);
+        } catch (\Exception $ex) {
+            handleException($ex, null, false);
+        }
 
-		} catch (PropelException $ex) {
-			handleException($ex, null, false);
-		} catch (\Exception $ex) {
-			handleException($ex, null, false);
-		}
+        if (empty($userSearchPairs)) {
+            LogMessage('Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.');
+            return ;
+        }
+        LogMessage('Updated or created ' . count($userSearchPairs) . " user search pairs for {$slug}.");
+    }
 
-		if (empty($userSearchPairs)) {
-			LogMessage('Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.');
-			return ;
-		}
-		LogMessage('Updated or created ' . count($userSearchPairs) . " user search pairs for {$slug}.");
+    /**
+     * @return array|\JobScooper\DataAccess\UserSearchPair[]|\Propel\Runtime\Collection\ObjectCollection
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function getActiveUserSearchPairs()
+    {
+        $ret = null;
 
-	}
+        $searchPairs = $this->getUserSearchPairs();
+        if (!empty($searchPairs)) {
+            $ret = array_filter($searchPairs->getData(), function (UserSearchPair $v) {
+                return $v->isActive();
+            });
+        }
 
-	/**
-	 * @return array|\JobScooper\DataAccess\UserSearchPair[]|\Propel\Runtime\Collection\ObjectCollection
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	public function getActiveUserSearchPairs()
-	{
-		$ret = null;
+        return $ret;
+    }
 
-		$searchPairs = $this->getUserSearchPairs();
-		if(!empty($searchPairs))
-		{
-			$ret = array_filter($searchPairs->getData(), function (UserSearchPair $v) {
-				return $v->isActive();
-			});
-		}
+    /**
+     * @return array
+     * @throws \Propel\Runtime\Exception\PropelException
+     * @throws \Exception
+     */
+    public function createUserSearchSiteRuns()
+    {
+        startLogSection('Initializing search runs for user ' . $this->getUserSlug());
+        $srchmgr = new SearchBuilder();
+        $this->_userSearchSiteRunsByJobSite = $srchmgr->createSearchesForUser($this);
+        endLogSection(' User search site runs initialization.');
 
-		return $ret;
-	}
+        return $this->_userSearchSiteRunsByJobSite;
+    }
 
-	/**
-	 * @return array
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 * @throws \Exception
-	 */
-	public function createUserSearchSiteRuns()
-	{
-		startLogSection('Initializing search runs for user ' . $this->getUserSlug());
-		$srchmgr = new SearchBuilder();
-		$this->_userSearchSiteRunsByJobSite = $srchmgr->createSearchesForUser($this);
-		endLogSection(' User search site runs initialization.');
+    /**
+     * @return array
+     * @throws \Propel\Runtime\Exception\PropelException
+     * @throws \Exception
+     */
+    public function getUserSearchSiteRuns()
+    {
+        if (empty($this->_userSearchSiteRunsByJobSite)) {
+            $this->createUserSearchSiteRuns();
+        }
 
-		return $this->_userSearchSiteRunsByJobSite;
-	}
+        if (empty($this->_userSearchSiteRunsByJobSite)) {
+            return null;
+        }
 
-	/**
-	 * @return array
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 * @throws \Exception
-	 */
-	public function getUserSearchSiteRuns()
-	{
-		if(empty($this->_userSearchSiteRunsByJobSite))
-			$this->createUserSearchSiteRuns();
-
-		if(empty($this->_userSearchSiteRunsByJobSite))
-			return null;
-
-		$arrSearchesToRun = array_filter($this->_userSearchSiteRunsByJobSite, function($var) {
-			return !empty($var);
-		});
-		return $arrSearchesToRun;
-	}
+        $arrSearchesToRun = array_filter($this->_userSearchSiteRunsByJobSite, function ($var) {
+            return !empty($var);
+        });
+        return $arrSearchesToRun;
+    }
 }

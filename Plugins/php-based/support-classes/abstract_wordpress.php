@@ -20,29 +20,28 @@
  */
 abstract class AbstractWordPress extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
-	protected $additionalLoadDelaySeconds = 20;
-	protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
+    protected $additionalLoadDelaySeconds = 20;
+    protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return array|null
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
-	{
-		$this->arrListingTagSetup['JobListingsPerPage'] =  array("selector" => "div.job_listings", "return_attribute" => "data-per_page");
-		$count = \JobScooper\Utils\DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobListingsPerPage'], null, $this);
-		if(!empty($count))
-		{
-			$this->JobListingsPerPage = intval($count);
-		}
-		unset($this->arrListingTagSetup['JobListingsPerPage']);
+    /**
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    {
+        $this->arrListingTagSetup['JobListingsPerPage'] =  array("selector" => "div.job_listings", "return_attribute" => "data-per_page");
+        $count = \JobScooper\Utils\DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobListingsPerPage'], null, $this);
+        if (!empty($count)) {
+            $this->JobListingsPerPage = intval($count);
+        }
+        unset($this->arrListingTagSetup['JobListingsPerPage']);
 
-		return parent::parseJobsListForPage($objSimpHTML);
-	}
+        return parent::parseJobsListForPage($objSimpHTML);
+    }
 
-	protected $arrBaseListingTagSetup = array(
+    protected $arrBaseListingTagSetup = array(
         'JobPostItem' => array('selector' => 'ul.job_listings li.job_listing'),
         'Title' => array('tag' => 'h3'),
         'Url' => array('tag' => 'a.job_listing-clickbox', 'index' => 0, 'return_attribute' => 'href'),
@@ -52,9 +51,6 @@ abstract class AbstractWordPress extends \JobScooper\SitePlugins\AjaxSitePlugin
         'Category' => array('selector' => 'ul.meta li', 'index' => 0),
         'company_logo' => array('selector' => 'img.company_logo'),
         'JobSitePostId' =>  array('tag' => 'a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/job\/(.*)/i'),
-		'LoadMoreControl' => array('selector' => 'a.load_more_jobs')
+        'LoadMoreControl' => array('selector' => 'a.load_more_jobs')
     );
-
-
-
 }

@@ -17,54 +17,41 @@
 
 namespace JobScooper\SitePlugins;
 
-
 use JobScooper\Utils\SimpleHTMLHelper;
 
 class AjaxMicrodataOnlyPlugin extends AjaxSitePlugin
 {
-	function __construct()
-	{
-		parent::__construct();
-	}
-
-	protected $arrListingTagSetup = array(
-		'JobPostItem' => array('selector' => ''),
-		'Title' => array('selector' => ''),
-		'Url' => array('selector' => ''),
-		'Company' => array('selector' => ''),
-		'Location' => array('selector' => ''),
-		'PostedAt' => array('selector' => ''),
-		'Category' => array('selector' => ''),
-		'JobSitePostId' =>  array('selector' => '')
-	);
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
 
-	/**
-	 * /**
-	 * parseJobsListForPage
-	 *
-	 * This does the heavy lifting of parsing each job record from the
-	 * page's HTML it was passed.
-	 *
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return array|null
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML)
-	{
-		$ret = array();
+    /**
+     * /**
+     * parseJobsListForPage
+     *
+     * This does the heavy lifting of parsing each job record from the
+     * page's HTML it was passed.
+     *
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML)
+    {
+        $ret = array();
 
 
-		$itempropNodes = $objSimpHTML->find("*[itemtype=\"http://schema.org/JobPosting\"]");
-		if(!empty($itempropNodes) && is_array($itempropNodes)) {
-			foreach($itempropNodes as $itemnode)
-			{
-				$item = $this->parseSingleJob($itemnode);
-				$item = $this->cleanupJobItemFields($item);
-				$ret[] = $item;
-			}
-		}
-		return $ret;
-	}
+        $itempropNodes = $objSimpHTML->find("*[itemtype=\"http://schema.org/JobPosting\"]");
+        if (!empty($itempropNodes) && is_array($itempropNodes)) {
+            foreach ($itempropNodes as $itemnode) {
+                $item = $this->parseSingleJob($itemnode);
+                $item = $this->cleanupJobItemFields($item);
+                $ret[] = $item;
+            }
+        }
+        return $ret;
+    }
 }

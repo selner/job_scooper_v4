@@ -17,359 +17,350 @@
 
 use http\Url;
 
-
 /**
  * Class AbstractAdicio
  */
 abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
-	protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
-	protected $JobListingsPerPage = 50;
-	protected $LastKnownSiteLayout = null;
-	protected $CountryCodes = array("US");
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $JobListingsPerPage = 50;
+    protected $LastKnownSiteLayout = null;
+    protected $CountryCodes = array("US");
 
-	// BUGBUG: setting "search job title only" seems to not find jobs with just one word in the title.  "Pharmacy Intern" does not come back for "intern" like it should.  Therefore not setting the kwsJobTitleOnly=true flag.
-	//
-	protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?view=List_Detail&SearchNetworks=US&networkView=national&location=***LOCATION***&radius=50&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***";
-	protected $additionalLoadDelaySeconds = 2;
-	protected $strBaseURLPathSuffix = "";
-	protected $SearchUrlFormat = null;
-	protected $LocationType = 'location-city-comma-statecode';
-	protected $nTotalJobs = null;
-	protected $lastResponseData = null;
-	/**
-	 * @var \JobScooper\DataAccess\UserSearchSiteRun|null
-	 */
-	protected $currentJsonSearchDetails = null;
+    // BUGBUG: setting "search job title only" seems to not find jobs with just one word in the title.  "Pharmacy Intern" does not come back for "intern" like it should.  Therefore not setting the kwsJobTitleOnly=true flag.
+    //
+    protected $strBaseURLPathSection = "/jobs/results/keyword/***KEYWORDS***?view=List_Detail&SearchNetworks=US&networkView=national&location=***LOCATION***&radius=50&sort=PostDate+desc%2C+Priority+desc%2C+score+desc&rows=50&page=***PAGE_NUMBER***";
+    protected $additionalLoadDelaySeconds = 2;
+    protected $strBaseURLPathSuffix = "";
+    protected $SearchUrlFormat = null;
+    protected $LocationType = 'location-city-comma-statecode';
+    protected $nTotalJobs = null;
+    protected $lastResponseData = null;
+    /**
+     * @var \JobScooper\DataAccess\UserSearchSiteRun|null
+     */
+    protected $currentJsonSearchDetails = null;
 
-	protected $arrBaseListingTagSetupNationalSearch = array(
-		'TotalPostCount' => array('selector' => 'span#retCount span'),  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
-		'NoPostsFound' => array('selector' => 'div#aiSearchResultsSuccess h2', 'return_attribute' => 'text', 'return_value_callback' => "matchesNoResultsPattern", 'callback_parameter' => 'Oops'),
-		'JobPostItem' => array('selector' => 'div.aiResultsWrapper'),
-		'Title' => array('selector' => 'div.aiResultTitle h3 a'),
-		'Url' => array('selector' => 'div.aiResultTitle h3 a', 'return_attribute' => 'href'),
-		'JobSitePostId' => array('selector' => 'div.aiResultsMainDiv', 'return_attribute' => 'id', 'return_value_regex' =>  '/aiResultsMainDiv(.*)/'),
-		'Company' => array('selector' => 'li.aiResultsCompanyName'),
-		'Location' => array('selector' => 'span.aiResultsLocationSpan'),
-		'PostedAt' => array('selector' => 'div.aiDescriptionPod ul li', 'index' => 2),
-		'Category' => array('selector' => 'div.aiDescriptionPod ul li', 'index' => 3)
-	);
+    protected $arrBaseListingTagSetupNationalSearch = array(
+        'TotalPostCount' => ['selector'=> 'span#retCount span'],  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
+        'NoPostsFound' => ['selector'=> 'div#aiSearchResultsSuccess h2', 'return_attribute'=> 'text', 'return_value_callback'=> "matchesNoResultsPattern", 'callback_parameter'=> 'Oops'],
+        'JobPostItem' => ['selector'=> 'div.aiResultsWrapper'],
+        'Title' => ['selector'=> 'div.aiResultTitle h3 a'],
+        'Url' => ['selector'=> 'div.aiResultTitle h3 a', 'return_attribute'=> 'href'],
+        'JobSitePostId' => array('selector' => 'div.aiResultsMainDiv', 'return_attribute' => 'id', 'return_value_regex' =>  '/aiResultsMainDiv(.*)/'),
+        'Company' => array('selector' => 'li.aiResultsCompanyName'),
+        'Location' => array('selector' => 'span.aiResultsLocationSpan'),
+        'PostedAt' => array('selector' => 'div.aiDescriptionPod ul li', 'index' => 2),
+        'Category' => array('selector' => 'div.aiDescriptionPod ul li', 'index' => 3)
+    );
 
-	protected $arrBaseListingTagSetupJobsResponsive = array(
-		'TotalPostCount' => array('selector' => 'h1#search-title-holder', 'return_value_regex' => '/(.*) [Jj]obs/'),
-		'JobPostItem' => array('selector' => 'div.arJobPodWrap'),
-		'Title' => array('selector' => 'div.arJobTitle h3 a'),
-		'Url' => array('selector' => 'div.arJobTitle h3 a', 'return_attribute' => 'href'),
-		'JobSitePostId' => array('selector' => 'div.arSaveJob a', 'return_attribute' => 'data-jobid'),
-		'Company' => array('selector' => 'div.arJobCoLink'),
-		'Location' => array('selector' => 'div.arJobCoLoc'),
-		'PostedAt' => array('selector' => 'div.arJobPostDate span')
-	);
+    protected $arrBaseListingTagSetupJobsResponsive = array(
+        'TotalPostCount' => array('selector' => 'h1#search-title-holder', 'return_value_regex' => '/(.*) [Jj]obs/'),
+        'JobPostItem' => array('selector' => 'div.arJobPodWrap'),
+        'Title' => array('selector' => 'div.arJobTitle h3 a'),
+        'Url' => array('selector' => 'div.arJobTitle h3 a', 'return_attribute' => 'href'),
+        'JobSitePostId' => array('selector' => 'div.arSaveJob a', 'return_attribute' => 'data-jobid'),
+        'Company' => array('selector' => 'div.arJobCoLink'),
+        'Location' => array('selector' => 'div.arJobCoLoc'),
+        'PostedAt' => array('selector' => 'div.arJobPostDate span')
+    );
 
-	protected $_layout = null;
+    protected $_layout = null;
 
-	/**
-	 * AbstractAdicio constructor.
-	 * @throws \Exception
-	 */
-	function __construct()
-	{
-		$fDoNotRemoveSetup = false;
-		if(!is_empty_value($this->arrListingTagSetup))
-			$fDoNotRemoveSetup = true;
-		else
-			$this->arrListingTagSetup = $this->arrBaseListingTagSetupNationalSearch;
+    /**
+     * AbstractAdicio constructor.
+     * @throws \Exception
+     */
+    public function __construct()
+    {
+        $fDoNotRemoveSetup = false;
+        if (!is_empty_value($this->arrListingTagSetup)) {
+            $fDoNotRemoveSetup = true;
+        } else {
+            $this->arrListingTagSetup = $this->arrBaseListingTagSetupNationalSearch;
+        }
 
-		parent::__construct();
+        parent::__construct();
 
-		if($fDoNotRemoveSetup !== true)
-			$this->arrListingTagSetup = array();
-	}
+        if ($fDoNotRemoveSetup !== true) {
+            $this->arrListingTagSetup = array();
+        }
+    }
 
-	/**
-	 * @param $apiUri
-	 * @param $hostPageUri
-	 *
-	 * @throws \Exception
-	 * @return \stdClass
-	 */
-	private function getJsonResultsPage($apiUri, $hostPageUri=null)
-	{
-		LogMessage("Downloading JSON listing data from {$apiUri} for " . $this->getJobSiteKey() . "...");
-		if(is_empty_value($hostPageUri))
-			$hostPageUri = $this->getActiveWebdriver()->getCurrentURL();
-		if(is_empty_value($hostPageUri) && !is_empty_value($this->currentJsonSearchDetails))
-			$hostPageUri = $this->currentJsonSearchDetails->searchResultsPageUrl;
+    /**
+     * @param $apiUri
+     * @param $hostPageUri
+     *
+     * @throws \Exception
+     * @return \stdClass
+     */
+    private function getJsonResultsPage($apiUri, $hostPageUri=null)
+    {
+        LogMessage("Downloading JSON listing data from {$apiUri} for " . $this->getJobSiteKey() . "...");
+        if (is_empty_value($hostPageUri)) {
+            $hostPageUri = $this->getActiveWebdriver()->getCurrentURL();
+        }
+        if (is_empty_value($hostPageUri) && !is_empty_value($this->currentJsonSearchDetails)) {
+            $hostPageUri = $this->currentJsonSearchDetails->searchResultsPageUrl;
+        }
 
-		$ret = array();
-		$respdata = $this->getJsonApiResult($apiUri, $this->currentJsonSearchDetails, $hostPageUri);
-		if(!is_empty_value($respdata))
-		{
-			$this->lastResponseData = $respdata;
-			try
-			{
-				$ret['count'] = $respdata->Total;
-				$ret['jobs'] = $respdata->Jobs;
+        $ret = array();
+        $respdata = $this->getJsonApiResult($apiUri, $this->currentJsonSearchDetails, $hostPageUri);
+        if (!is_empty_value($respdata)) {
+            $this->lastResponseData = $respdata;
+            try {
+                $ret['count'] = $respdata->Total;
+                $ret['jobs'] = $respdata->Jobs;
+            } catch (Exception $ex) {
+                throw new Exception($respdata->error);
+            }
+        }
 
-			}
-			catch(Exception $ex)
-			{
-				throw new Exception($respdata->error);
-			}
-		}
+        return $respdata;
+    }
 
-		return $respdata;
-	}
+    /**
+     * @param $jobs
+     *
+     * @return array
+     */
+    private function _parseJsonJobs($jobs)
+    {
+        $jobsite = $this->getJobSiteKey();
+        $ret = array();
+        foreach ($jobs as $job) {
+            $ret[$job->Id] = array(
+                'JobSiteKey' => $jobsite,
+                'JobSitePostId' => "{$job->AdId}-{$job->Id}",
+                'Company' => $job->Company,
+                'Title' =>  $job->JobTitle,
+                'Url' => $job->Url,
+                'Location' => $job->FormattedCityStateCountry,
+                'Category' => is_array($job->CategoryDisplay) ? join(" | ", $job->CategoryDisplay) : null,
+                'PostedAt' => $job->PostDate
+            );
+        }
 
-	/**
-	 * @param $jobs
-	 *
-	 * @return array
-	 */
-	private function _parseJsonJobs($jobs)
-	{
-		$jobsite = $this->getJobSiteKey();
-		$ret = array();
-		foreach($jobs as $job)
-		{
-			$ret[$job->Id] = array(
-				'JobSiteKey' => $jobsite,
-				'JobSitePostId' => "{$job->AdId}-{$job->Id}",
-				'Company' => $job->Company,
-				'Title' =>  $job->JobTitle,
-				'Url' => $job->Url,
-				'Location' => $job->FormattedCityStateCountry,
-				'Category' => is_array($job->CategoryDisplay) ? join(" | ", $job->CategoryDisplay) : null,
-				'PostedAt' => $job->PostDate
-			);
-		}
+        LogMessage("Loaded " . count($ret) . " jobs from JSON with " . count($jobs));
+        return $ret;
+    }
 
-		LogMessage("Loaded " . count($ret) . " jobs from JSON with " . count($jobs));
-		return $ret;
-	}
+    /**
+     * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+     * @param null                                     $nOffset
+     *
+     * @return string
+     */
+    private function _getJsonSearchUrl(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nOffset=null)
+    {
+        if (!is_empty_value($searchDetails->searchResultsPageUrl)) {
+            $jsonUrl = $searchDetails->searchResultsPageUrl. "&format=json";
+        } else {
+            $jsonUrl = $searchDetails->getSearchStartUrl() . "&format=json";
+        }
+        return $jsonUrl;
+    }
+    /**
+     * @param $searchDetails
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+    {
+        $this->nTotalJobs = 0;
+        $this->lastResponseData = 0;
 
-	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 * @param null                                     $nOffset
-	 *
-	 * @return string
-	 */
-	private function _getJsonSearchUrl(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nOffset=null)
-	{
-		if(!is_empty_value($searchDetails->searchResultsPageUrl))
-			$jsonUrl = $searchDetails->searchResultsPageUrl. "&format=json";
-		else
-			$jsonUrl = $searchDetails->getSearchStartUrl() . "&format=json";
-		return $jsonUrl;
-	}
-	/**
-	 * @param $searchDetails
-	 *
-	 * @return mixed
-	 * @throws \Exception
-	 */
-	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
-	{
-		$this->nTotalJobs = 0;
-		$this->lastResponseData = 0;
+        $this->currentJsonSearchDetails = $searchDetails;
+        $hostPage = $searchDetails->getSearchStartUrl();
+        LogMessage("Loading first page for {$this->getJobSiteKey()} from {$hostPage}");
+        $jsonUrl = $this->_getJsonSearchUrl($searchDetails);
+        unset($retData);
+        try {
+            $retData = $this->getJsonResultsPage($jsonUrl, $hostPage);
+            $this->nTotalJobs = $retData->Total;
+            $this->lastResponseData = $retData;
+        } catch (Exception $ex) {
+            //
+        }
 
-		$this->currentJsonSearchDetails = $searchDetails;
-		$hostPage = $searchDetails->getSearchStartUrl();
-		LogMessage("Loading first page for {$this->getJobSiteKey()} from {$hostPage}");
-		$jsonUrl = $this->_getJsonSearchUrl($searchDetails);
-		unset($retData);
-		try {
-			$retData = $this->getJsonResultsPage($jsonUrl, $hostPage);
-			$this->nTotalJobs = $retData->Total;
-			$this->lastResponseData = $retData;
-		}
-		catch (Exception $ex) {
-			//
-		}
+        if (is_empty_value($this->nTotalJobs)) {
+            $this->setLayoutIfNeeded($searchDetails);
+        }
 
-		if(is_empty_value($this->nTotalJobs))
-		{
-			$this->setLayoutIfNeeded($searchDetails);
-		}
+        if (is_empty_value($this->arrListingTagSetup)) {
+            $this->setLayoutIfNeeded($searchDetails);
+        }
+    }
 
-		if(is_empty_value($this->arrListingTagSetup))
-			$this->setLayoutIfNeeded($searchDetails);
+    /**
+     * @throws \Exception
+     */
+    protected function setLayoutIfNeeded(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+    {
+        if (!is_empty_value($this->LastKnownSiteLayout)) {
+            $this->setAdicioPageLayout($this->LastKnownSiteLayout);
+        } else {
+            $template = $this->_determinePageLayout($searchDetails);
 
-	}
+            $this->setAdicioPageLayout($template);
+            LogDebug("Adicio Template for " . get_class($this) . " with url '{$this->SearchUrlFormat}: " . PHP_EOL . "$template = {$template}," . PHP_EOL . "layout = {$this->_layout},  " . PHP_EOL . "template = {$template},  ");
+        }
+    }
 
-	/**
-	 * @throws \Exception
-	 */
-	protected function setLayoutIfNeeded(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
-	{
-		if (!is_empty_value($this->LastKnownSiteLayout)) {
-			$this->setAdicioPageLayout($this->LastKnownSiteLayout);
-		} else {
-			$template = $this->_determinePageLayout($searchDetails);
+    /**
+     * parseTotalResultsCount
+     *
+     * If the site does not show the total number of results
+     * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
+     * in the Constants.php file and just comment out this function.
+     *
+     * parseTotalResultsCount returns the total number of listings that
+     * the search returned by parsing the value from the returned HTML
+     * *
+     * @param $objSimpHTML
+     * @return string|null
+     * @throws \Exception
+     */
+    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    {
+        if (!is_empty_value($this->nTotalJobs)) {
+            return $this->nTotalJobs;
+        }
 
-			$this->setAdicioPageLayout($template);
-			LogDebug("Adicio Template for " . get_class($this) . " with url '{$this->SearchUrlFormat}: " . PHP_EOL . "$template = {$template}," . PHP_EOL . "layout = {$this->_layout},  " . PHP_EOL . "template = {$template},  " );
-		}
-	}
-
-	/**
-	 * parseTotalResultsCount
-	 *
-	 * If the site does not show the total number of results
-	 * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
-	 * in the Constants.php file and just comment out this function.
-	 *
-	 * parseTotalResultsCount returns the total number of listings that
-	 * the search returned by parsing the value from the returned HTML
-	 * *
-	 * @param $objSimpHTML
-	 * @return string|null
-	 * @throws \Exception
-	 */
-	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
-	{
-		if(!is_empty_value($this->nTotalJobs))
-			return $this->nTotalJobs;
-
-		return parent::parseTotalResultsCount($objSimpHTML);
-	}
+        return parent::parseTotalResultsCount($objSimpHTML);
+    }
 
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return array|null
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
-	{
-
-		if (!is_empty_value($this->lastResponseData) || !is_empty_value($this->currentJsonSearchDetails))
-		{
-			try {
-				$ret = array();
-				$nOffset = 0;
-				if (!is_empty_value($this->lastResponseData) && !is_empty_value($this->lastResponseData->Jobs) && count($this->lastResponseData->Jobs) > 0) {
-					$jobs = $this->lastResponseData->Jobs;
-					unset($this->lastResponseData);
-				}
-				else {
-					$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
-					LogMessage("Loading job results JSON data for {$this->getJobSiteKey()} from {$jsonUrl}");
-					$respData = $this->getJsonResultsPage($jsonUrl);
-					$jobs = $respData->Jobs;
-					$this->nTotalJobs = $respData->Total;
-				}
-//				return $this->_parseJsonJobs($jobs);
+    /**
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    {
+        if (!is_empty_value($this->lastResponseData) || !is_empty_value($this->currentJsonSearchDetails)) {
+            try {
+                $ret = array();
+                $nOffset = 0;
+                if (!is_empty_value($this->lastResponseData) && !is_empty_value($this->lastResponseData->Jobs) && count($this->lastResponseData->Jobs) > 0) {
+                    $jobs = $this->lastResponseData->Jobs;
+                    unset($this->lastResponseData);
+                } else {
+                    $jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
+                    LogMessage("Loading job results JSON data for {$this->getJobSiteKey()} from {$jsonUrl}");
+                    $respData = $this->getJsonResultsPage($jsonUrl);
+                    $jobs = $respData->Jobs;
+                    $this->nTotalJobs = $respData->Total;
+                }
+                //				return $this->_parseJsonJobs($jobs);
 //
-				while (!is_empty_value($jobs) && $nOffset < $this->nTotalJobs) {
-					$curPageJobs = $this->_parseJsonJobs($jobs);
-					unset($jobs);
-					$ret = array_merge($ret, $curPageJobs);
-					$nOffset = $nOffset + count($curPageJobs);
-					if ($nOffset < $this->nTotalJobs) {
-						$jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
-						LogMessage("Loading next page of JSON data for {$this->getJobSiteKey()} from {$this->getActiveWebdriver()->getCurrentURL()}");
-						$respData = $this->getJsonResultsPage($jsonUrl);
-						$jobs = $respData->Jobs;
-					}
-				}
-				return $ret;
-			} catch (Exception $ex) {
-				LogWarning("Failed to download " . $this->getJobSiteKey() . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
+                while (!is_empty_value($jobs) && $nOffset < $this->nTotalJobs) {
+                    $curPageJobs = $this->_parseJsonJobs($jobs);
+                    unset($jobs);
+                    $ret = array_merge($ret, $curPageJobs);
+                    $nOffset = $nOffset + count($curPageJobs);
+                    if ($nOffset < $this->nTotalJobs) {
+                        $jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
+                        LogMessage("Loading next page of JSON data for {$this->getJobSiteKey()} from {$this->getActiveWebdriver()->getCurrentURL()}");
+                        $respData = $this->getJsonResultsPage($jsonUrl);
+                        $jobs = $respData->Jobs;
+                    }
+                }
+                return $ret;
+            } catch (Exception $ex) {
+                LogWarning("Failed to download " . $this->getJobSiteKey() . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
 
-				return parent::parseJobsListForPage($objSimpHTML);
-			}
-		}
+                return parent::parseJobsListForPage($objSimpHTML);
+            }
+        }
 
-		return parent::parseJobsListForPage($objSimpHTML);
-	}
+        return parent::parseJobsListForPage($objSimpHTML);
+    }
 
-	/**
-	 * @throws \Exception
-	 */
-	private function _determinePageLayout(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
-	{
-		$urlParts = parse_url($this->SearchUrlFormat);
-		$urlParts['query'] = "";
-		$urlParts['fragment'] = "";
-		$urlParts['path'] = "/jobs/search/results";
-		$baseUrl = new http\Url($urlParts, $urlParts, Url::REPLACE);
-		$url = $baseUrl->toString();
-		if (is_null($this->selenium)) {
-			try {
-				$this->selenium = new \JobScooper\Manager\SeleniumManager();
-			} catch (Exception $ex) {
-				handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
-			}
-		}
+    /**
+     * @throws \Exception
+     */
+    private function _determinePageLayout(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+    {
+        $urlParts = parse_url($this->SearchUrlFormat);
+        $urlParts['query'] = "";
+        $urlParts['fragment'] = "";
+        $urlParts['path'] = "/jobs/search/results";
+        $baseUrl = new http\Url($urlParts, $urlParts, Url::REPLACE);
+        $url = $baseUrl->toString();
+        if (is_null($this->selenium)) {
+            try {
+                $this->selenium = new \JobScooper\Manager\SeleniumManager();
+            } catch (Exception $ex) {
+                handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+            }
+        }
 
-		$baseHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $url);
-		$this->_layout = "careersdefault";
+        $baseHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $url);
+        $this->_layout = "careersdefault";
 
-		if (!is_empty_value($baseHTML)) {
-			try {
-				$head = $baseHTML->find("head");
-				if (!is_empty_value($head) && count($head) >= 1) {
-					foreach ($head[0]->children() as $child) {
-						if ($child->isCommentNode()) {
-							$template = "unknown";
-							$id = 0;
-							$matches = array();
-							$matched = preg_match("/Template Type Requested:\s*([^\(]+)\s*([^,]+)*,?\s?(\d+)?/", $child->text(), $matches);
-							if ($matched !== false) {
-								if (count($matches) > 2) {
-									$template = $matches[2];
-									$id = $matches[3];
-								} elseif (count($matches) == 2) {
-									$template = $matches[1];
-								}
-								break;
-							}
-						}
-					}
-				}
+        if (!is_empty_value($baseHTML)) {
+            try {
+                $head = $baseHTML->find("head");
+                if (!is_empty_value($head) && count($head) >= 1) {
+                    foreach ($head[0]->children() as $child) {
+                        if ($child->isCommentNode()) {
+                            $template = "unknown";
+                            $id = 0;
+                            $matches = array();
+                            $matched = preg_match("/Template Type Requested:\s*([^\(]+)\s*([^,]+)*,?\s?(\d+)?/", $child->text(), $matches);
+                            if ($matched !== false) {
+                                if (count($matches) > 2) {
+                                    $template = $matches[2];
+                                    $id = $matches[3];
+                                } elseif (count($matches) == 2) {
+                                    $template = $matches[1];
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception $ex) {
+            } finally {
+                $this->selenium->done();
+                unset($this->selenium);
+            }
+        }
+    }
 
+    /**
+     * @param $layout
+     */
+    protected function setAdicioPageLayout($layout)
+    {
+        $tags = array();
+        $switchVal = cleanupSlugPart($layout, "");
+        $this->_layout = $switchVal;
+        switch ($switchVal) {
+            case 'jobsresponsivedefault':
+                $tags = $this->arrBaseListingTagSetupJobsResponsive;
+                break;
 
-			} catch (Exception $ex) {
-			} finally {
-				$this->selenium->done();
-				unset($this->selenium);
-			}
-		}
-	}
+            case "careersdefault":
+                $tags = $this->arrBaseListingTagSetupNationalSearch;
+                break;
 
-	/**
-	 * @param $layout
-	 */
-	protected function setAdicioPageLayout($layout)
-	{
-		$tags = array();
-		$switchVal = cleanupSlugPart($layout, "");
-		$this->_layout = $switchVal;
-		switch($switchVal) {
-			case 'jobsresponsivedefault':
-				$tags = $this->arrBaseListingTagSetupJobsResponsive;
-				break;
+            case "jobsearchresults":
+                $tags = $this->arrBaseListingTagSetupNationalSearch;
+                $this->arrListingTagSetup['TotalPostCount']['selector'] = "span#retCountNumber";
+                break;
 
-			case "careersdefault":
-				$tags = $this->arrBaseListingTagSetupNationalSearch;
-				break;
-
-			case "jobsearchresults":
-				$tags = $this->arrBaseListingTagSetupNationalSearch;
-				$this->arrListingTagSetup['TotalPostCount']['selector'] = "span#retCountNumber";
-				break;
-
-			default:
-				LogWarning("UNKNOWN ADICIO LAYOUT");
-				$this->_layout = "default";
-				$tags = $this->arrBaseListingTagSetupNationalSearch;
-				break;
-		}
-		$this->arrListingTagSetup = array_merge_recursive_distinct($tags, $this->arrListingTagSetup);
-
-	}
+            default:
+                LogWarning("UNKNOWN ADICIO LAYOUT");
+                $this->_layout = "default";
+                $tags = $this->arrBaseListingTagSetupNationalSearch;
+                break;
+        }
+        $this->arrListingTagSetup = array_merge_recursive_distinct($tags, $this->arrListingTagSetup);
+    }
 }
 
 
@@ -378,13 +369,12 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
  */
 class PluginMashable extends AbstractAdicio
 {
-	protected $JobSiteName = 'Mashable';
-	protected $childSiteURLBase = 'http://jobs.mashable.com';
-	// Note:  Mashable has a short list of jobs (< 500-1000 total) so we exclude keyword search here as an optimization.  We may download more jobs overall, but through fewer round trips to the servers
-	protected $strBaseURLPathSection = "/jobs/search/results?location=***LOCATION***&radius=50&view=List_Detail&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&";
-	protected $LocationType = 'location-city-comma-state';
-	protected $LastKnownSiteLayout = "jobsresponsivedefault";
-
+    protected $JobSiteName = 'Mashable';
+    protected $childSiteURLBase = 'http://jobs.mashable.com';
+    // Note:  Mashable has a short list of jobs (< 500-1000 total) so we exclude keyword search here as an optimization.  We may download more jobs overall, but through fewer round trips to the servers
+    protected $strBaseURLPathSection = "/jobs/search/results?location=***LOCATION***&radius=50&view=List_Detail&sort=PostType+asc%2C+PostDate+desc%2C+IsFeatured+desc&rows=50&";
+    protected $LocationType = 'location-city-comma-state';
+    protected $LastKnownSiteLayout = "jobsresponsivedefault";
 }
 
 
@@ -393,9 +383,9 @@ class PluginMashable extends AbstractAdicio
  */
 class PluginJacksonville extends AbstractAdicio
 {
-	protected $JobSiteName = 'Jacksonville';
-	protected $childSiteURLBase = 'http://jobs.jacksonville.com';
-	protected $LastKnownSiteLayout = "jobsresponsivedefault";
+    protected $JobSiteName = 'Jacksonville';
+    protected $childSiteURLBase = 'http://jobs.jacksonville.com';
+    protected $LastKnownSiteLayout = "jobsresponsivedefault";
 }
 
 
@@ -404,9 +394,9 @@ class PluginJacksonville extends AbstractAdicio
  */
 class PluginPolitico extends AbstractAdicio
 {
-	protected $JobSiteName = 'Politico';
-	protected $childSiteURLBase = 'http://jobs.powerjobs.com';
-	protected $LastKnownSiteLayout = "jobsearchresults";
+    protected $JobSiteName = 'Politico';
+    protected $childSiteURLBase = 'http://jobs.powerjobs.com';
+    protected $LastKnownSiteLayout = "jobsearchresults";
 }
 
 /**
@@ -414,9 +404,9 @@ class PluginPolitico extends AbstractAdicio
  */
 class PluginIEEE extends AbstractAdicio
 {
-	protected $JobSiteName = 'IEEE';
-	protected $childSiteURLBase = 'http://jobs.ieee.org';
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'IEEE';
+    protected $childSiteURLBase = 'http://jobs.ieee.org';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -424,9 +414,9 @@ class PluginIEEE extends AbstractAdicio
  */
 class PluginVariety extends AbstractAdicio
 {
-	protected $JobSiteName = 'Variety';
-	protected $childSiteURLBase = 'http://jobs.variety.com';
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'Variety';
+    protected $childSiteURLBase = 'http://jobs.variety.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -434,9 +424,9 @@ class PluginVariety extends AbstractAdicio
  */
 class PluginCellCom extends AbstractAdicio
 {
-	protected $JobSiteName = 'CellCom';
-	protected $childSiteURLBase = 'http://jobs.cell.com';
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'CellCom';
+    protected $childSiteURLBase = 'http://jobs.cell.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 // NO LONGER ADICIO-BASED
@@ -454,9 +444,9 @@ class PluginCellCom extends AbstractAdicio
  */
 class PluginHamptonRoads extends AbstractAdicio
 {
-	protected $JobSiteName = 'HamptonRoads';
-	protected $childSiteURLBase = 'http://careers.hamptonroads.com';
-	protected $LastKnownSiteLayout = "jobsresponsivedefault";
+    protected $JobSiteName = 'HamptonRoads';
+    protected $childSiteURLBase = 'http://careers.hamptonroads.com';
+    protected $LastKnownSiteLayout = "jobsresponsivedefault";
 }
 
 /**
@@ -464,9 +454,9 @@ class PluginHamptonRoads extends AbstractAdicio
  */
 class PluginAnalyticTalent extends AbstractAdicio
 {
-	protected $JobSiteName = 'AnalyticTalent';
-	protected $childSiteURLBase = 'http://www.analytictalent.datasciencecentral.com';
-	protected $LastKnownSiteLayout = "jobsresponsivedefault";
+    protected $JobSiteName = 'AnalyticTalent';
+    protected $childSiteURLBase = 'http://www.analytictalent.datasciencecentral.com';
+    protected $LastKnownSiteLayout = "jobsresponsivedefault";
 }
 
 /**
@@ -474,9 +464,9 @@ class PluginAnalyticTalent extends AbstractAdicio
  */
 class PluginKenoshaNews extends AbstractAdicio
 {
-	protected $JobSiteName = 'KenoshaNews';
-	protected $childSiteURLBase = 'http://kenosha.careers.adicio.com';
-	protected $LastKnownSiteLayout = "jobsresponsivedefault";
+    protected $JobSiteName = 'KenoshaNews';
+    protected $childSiteURLBase = 'http://kenosha.careers.adicio.com';
+    protected $LastKnownSiteLayout = "jobsresponsivedefault";
 }
 
 /**
@@ -484,9 +474,9 @@ class PluginKenoshaNews extends AbstractAdicio
  */
 class PluginTopekaCapitalJournal extends AbstractAdicio
 {
-	protected $JobSiteName = 'TopekaCapitalJournal';
-	protected $childSiteURLBase = 'http://jobs.cjonline.com';
-	protected $LastKnownSiteLayout = "jobsearchresults";
+    protected $JobSiteName = 'TopekaCapitalJournal';
+    protected $childSiteURLBase = 'http://jobs.cjonline.com';
+    protected $LastKnownSiteLayout = "jobsearchresults";
 }
 
 /**
@@ -494,9 +484,9 @@ class PluginTopekaCapitalJournal extends AbstractAdicio
  */
 class PluginRetailCareersNow extends AbstractAdicio
 {
-	protected $JobSiteName = 'RetailCareersNow';
-	protected $childSiteURLBase = 'http://retail.careers.adicio.com';
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'RetailCareersNow';
+    protected $childSiteURLBase = 'http://retail.careers.adicio.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -504,9 +494,9 @@ class PluginRetailCareersNow extends AbstractAdicio
  */
 class PluginHealthJobs extends AbstractAdicio
 {
-	protected $JobSiteName = 'HealthJobs';
-	protected $childSiteURLBase = 'http://healthjobs.careers.adicio.com';
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'HealthJobs';
+    protected $childSiteURLBase = 'http://healthjobs.careers.adicio.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -514,9 +504,9 @@ class PluginHealthJobs extends AbstractAdicio
  */
 class PluginPharmacyJobCenter extends AbstractAdicio
 {
-	protected $JobSiteName = 'PharmacyJobCenter';
-	protected $childSiteURLBase = 'http://pharmacy.careers.adicio.com';
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'PharmacyJobCenter';
+    protected $childSiteURLBase = 'http://pharmacy.careers.adicio.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -524,9 +514,9 @@ class PluginPharmacyJobCenter extends AbstractAdicio
  */
 class PluginKCBD extends AbstractAdicio
 {
-	protected $JobSiteName = 'KCBD';
-	protected $childSiteURLBase = 'http://kcbd.careers.adicio.com';
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'KCBD';
+    protected $childSiteURLBase = 'http://kcbd.careers.adicio.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -534,9 +524,9 @@ class PluginKCBD extends AbstractAdicio
  */
 class PluginAfro extends AbstractAdicio
 {
-	protected $JobSiteName = 'Afro';
-	protected $childSiteURLBase = 'http://afro.careers.adicio.com';
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'Afro';
+    protected $childSiteURLBase = 'http://afro.careers.adicio.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -544,11 +534,10 @@ class PluginAfro extends AbstractAdicio
  */
 class PluginJamaCareerCenter extends AbstractAdicio
 {
-	protected $JobSiteName = 'JamaCareerCenter';
-	protected $childSiteURLBase = 'http://jama.careers.adicio.com';
+    protected $JobSiteName = 'JamaCareerCenter';
+    protected $childSiteURLBase = 'http://jama.careers.adicio.com';
 
-	protected $SearchUrlFormat = "http://jama.careers.adicio.com/jobs/search/results?view=List_Detail&sort=PostDate+desc&radius=25&rows=50";
-
+    protected $SearchUrlFormat = "http://jama.careers.adicio.com/jobs/search/results?view=List_Detail&sort=PostDate+desc&radius=25&rows=50";
 }
 
 /**
@@ -556,9 +545,9 @@ class PluginJamaCareerCenter extends AbstractAdicio
  */
 class PluginSeacoastOnline extends AbstractAdicio
 {
-	protected $JobSiteName = 'SeacoastOnline';
-	protected $childSiteURLBase = 'http://seacoast.careers.adicio.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'SeacoastOnline';
+    protected $childSiteURLBase = 'http://seacoast.careers.adicio.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -566,9 +555,9 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginAlbuquerqueJournal extends AbstractAdicio
 {
-	protected $JobSiteName = 'AlbuquerqueJournal';
-	protected $childSiteURLBase = 'http://abqcareers.careers.adicio.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'AlbuquerqueJournal';
+    protected $childSiteURLBase = 'http://abqcareers.careers.adicio.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -576,9 +565,9 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginWestHawaiiToday extends AbstractAdicio
 {
-	protected $JobSiteName = 'WestHawaiiToday';
-	protected $childSiteURLBase = 'http://careers.westhawaiitoday.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'WestHawaiiToday';
+    protected $childSiteURLBase = 'http://careers.westhawaiitoday.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -586,9 +575,9 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginDeadline extends AbstractAdicio
 {
-	protected $JobSiteName = 'Deadline';
-	protected $childSiteURLBase = 'http://jobsearch.deadline.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'Deadline';
+    protected $childSiteURLBase = 'http://jobsearch.deadline.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -596,8 +585,8 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginLogCabinDemocrat extends AbstractAdicio
 {
-	protected $JobSiteName = 'LogCabinDemocrat';
-	protected $childSiteURLBase = 'http://jobs.thecabin.net';
+    protected $JobSiteName = 'LogCabinDemocrat';
+    protected $childSiteURLBase = 'http://jobs.thecabin.net';
 }
 
 /**
@@ -605,9 +594,9 @@ class PluginLogCabinDemocrat extends AbstractAdicio
  */
 class PluginPennEnergy extends AbstractAdicio
 {
-	protected $JobSiteName = 'PennEnergy';
-	protected $childSiteURLBase = 'http://careers.pennenergyjobs.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'PennEnergy';
+    protected $childSiteURLBase = 'http://careers.pennenergyjobs.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -615,9 +604,9 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginBig4Firms extends AbstractAdicio
 {
-	protected $JobSiteName = 'Big4Firms';
-	protected $childSiteURLBase = 'http://careers.big4.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'Big4Firms';
+    protected $childSiteURLBase = 'http://careers.big4.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -625,9 +614,9 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginVindy extends AbstractAdicio
 {
-	protected $JobSiteName = 'Vindy';
-	protected $childSiteURLBase = 'http://careers.vindy.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'Vindy';
+    protected $childSiteURLBase = 'http://careers.vindy.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -635,9 +624,9 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginCareerCast extends AbstractAdicio
 {
-	protected $JobSiteName = 'CareerCast';
-	protected $childSiteURLBase = 'http://www.careercast.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'CareerCast';
+    protected $childSiteURLBase = 'http://www.careercast.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -645,16 +634,16 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginTheLancet extends AbstractAdicio
 {
-	protected $JobSiteName = 'TheLancet';
-	protected $childSiteURLBase = 'http://careers.thelancet.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'TheLancet';
+    protected $childSiteURLBase = 'http://careers.thelancet.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 class PluginVictoriaTXAdvocate extends AbstractAdicio
 {
-	protected $JobSiteName = 'VictoriaTXAdvocate';
-	protected $childSiteURLBase = 'http://jobs.crossroadsfinder.com';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'VictoriaTXAdvocate';
+    protected $childSiteURLBase = 'http://jobs.crossroadsfinder.com';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -662,9 +651,9 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginTVB extends AbstractAdicio
 {
-	protected $JobSiteName = 'TVB';
-	protected $childSiteURLBase = 'http://postjobs.tvb.org';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'TVB';
+    protected $childSiteURLBase = 'http://postjobs.tvb.org';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -672,9 +661,9 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginSHRM extends AbstractAdicio
 {
-	protected $JobSiteName = 'SHRM';
-	protected $childSiteURLBase = 'http://hrjobs.shrm.org';
-protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = 'SHRM';
+    protected $childSiteURLBase = 'http://hrjobs.shrm.org';
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -682,9 +671,9 @@ protected $LastKnownSiteLayout = "careersdefault";
  */
 class PluginCareerCastIT extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastIT";
-	protected $childSiteURLBase = "http://it.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastIT";
+    protected $childSiteURLBase = "http://it.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -692,9 +681,9 @@ class PluginCareerCastIT extends AbstractAdicio
  */
 class PluginCareerCastHealthcare extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastHealthcare";
-	protected $childSiteURLBase = "http://healthcare.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastHealthcare";
+    protected $childSiteURLBase = "http://healthcare.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -702,9 +691,9 @@ class PluginCareerCastHealthcare extends AbstractAdicio
  */
 class PluginCareerCastNursing extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastNursing";
-	protected $childSiteURLBase = "http://nursing.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastNursing";
+    protected $childSiteURLBase = "http://nursing.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -712,13 +701,13 @@ class PluginCareerCastNursing extends AbstractAdicio
  */
 class PluginCareerCastTempJobs extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastTempJobs";
-	protected $childSiteURLBase = "http://tempjobs.careercast.com";
-	protected $LastKnownSiteLayout = "jobsresponsivedefault";
+    protected $JobSiteName = "CareerCastTempJobs";
+    protected $childSiteURLBase = "http://tempjobs.careercast.com";
+    protected $LastKnownSiteLayout = "jobsresponsivedefault";
 
-	protected $arrListingTagSetup = array(
-		'NoPostsFound' =>  array('selector' => 'h5', 'index' => 0, 'return_attribute' => 'node', 'return_value_callback' => "matchesNoResultsPattern", 'callback_parameter' => 'Oops! Nothing')
-	);
+    protected $arrListingTagSetup = array(
+        'NoPostsFound' =>  array('selector' => 'h5', 'index' => 0, 'return_attribute' => 'node', 'return_value_callback' => "matchesNoResultsPattern", 'callback_parameter' => 'Oops! Nothing')
+    );
 }
 
 /**
@@ -726,9 +715,9 @@ class PluginCareerCastTempJobs extends AbstractAdicio
  */
 class PluginCareerCastMarketing extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastMarketing";
-	protected $childSiteURLBase = "http://marketing.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastMarketing";
+    protected $childSiteURLBase = "http://marketing.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -736,9 +725,9 @@ class PluginCareerCastMarketing extends AbstractAdicio
  */
 class PluginCareerCastRetail extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastRetail";
-	protected $childSiteURLBase = "http://retail.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastRetail";
+    protected $childSiteURLBase = "http://retail.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -746,9 +735,9 @@ class PluginCareerCastRetail extends AbstractAdicio
  */
 class PluginCareerCastGreenNetwork extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastGreenNetwork";
-	protected $childSiteURLBase = "http://green.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastGreenNetwork";
+    protected $childSiteURLBase = "http://green.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -756,9 +745,9 @@ class PluginCareerCastGreenNetwork extends AbstractAdicio
  */
 class PluginCareerCastDiversity extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastDiversity";
-	protected $childSiteURLBase = "http://diversity.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastDiversity";
+    protected $childSiteURLBase = "http://diversity.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -766,9 +755,9 @@ class PluginCareerCastDiversity extends AbstractAdicio
  */
 class PluginCareerCastConstruction extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastConstruction";
-	protected $childSiteURLBase = "http://construction.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastConstruction";
+    protected $childSiteURLBase = "http://construction.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -776,9 +765,9 @@ class PluginCareerCastConstruction extends AbstractAdicio
  */
 class PluginCareerCastEnergy extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastEnergy";
-	protected $childSiteURLBase = "http://energy.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastEnergy";
+    protected $childSiteURLBase = "http://energy.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -786,9 +775,9 @@ class PluginCareerCastEnergy extends AbstractAdicio
  */
 class PluginCareerCastTrucking extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastTrucking";
-	protected $childSiteURLBase = "http://trucking.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastTrucking";
+    protected $childSiteURLBase = "http://trucking.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -796,9 +785,9 @@ class PluginCareerCastTrucking extends AbstractAdicio
  */
 class PluginCareerCastDisability extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastDisability";
-	protected $childSiteURLBase = "http://disability.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastDisability";
+    protected $childSiteURLBase = "http://disability.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -806,9 +795,9 @@ class PluginCareerCastDisability extends AbstractAdicio
  */
 class PluginCareerCastHR extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastHR";
-	protected $childSiteURLBase = "http://hr.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastHR";
+    protected $childSiteURLBase = "http://hr.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -816,9 +805,9 @@ class PluginCareerCastHR extends AbstractAdicio
  */
 class PluginCareerCastVeteran extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastVeteran";
-	protected $childSiteURLBase = "http://veteran.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastVeteran";
+    protected $childSiteURLBase = "http://veteran.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -826,9 +815,9 @@ class PluginCareerCastVeteran extends AbstractAdicio
  */
 class PluginCareerCastHospitality extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastHospitality";
-	protected $childSiteURLBase = "http://hospitality.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastHospitality";
+    protected $childSiteURLBase = "http://hospitality.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
 
 /**
@@ -836,8 +825,7 @@ class PluginCareerCastHospitality extends AbstractAdicio
  */
 class PluginCareerCastFinance extends AbstractAdicio
 {
-	protected $JobSiteName = "CareerCastFinance";
-	protected $childSiteURLBase = "http://finance.careercast.com";
-	protected $LastKnownSiteLayout = "careersdefault";
+    protected $JobSiteName = "CareerCastFinance";
+    protected $childSiteURLBase = "http://finance.careercast.com";
+    protected $LastKnownSiteLayout = "careersdefault";
 }
-

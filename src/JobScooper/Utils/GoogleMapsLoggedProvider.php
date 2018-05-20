@@ -20,7 +20,6 @@ namespace JobScooper\Utils;
 use Geocoder\HttpAdapter\HttpAdapterInterface;
 use Geocoder\Provider\GoogleMapsProvider;
 
-
 class GoogleMapsLoggedProvider extends GoogleMapsProvider
 {
     protected $callCounter = 0;
@@ -32,15 +31,15 @@ class GoogleMapsLoggedProvider extends GoogleMapsProvider
     }
     protected $logger = null;
 
-    function setLogger($logger)
+    public function setLogger($logger)
     {
         $this->logger = $logger;
     }
     protected function executeQuery($query)
     {
         $this->callCounter += 1;
-	    $context = array('channel' => 'geocoder', 'numberGeoApiCalls' => $this->callCounter, 'query' => $query, 'call_count_for_run' => $this->callCounter);
-	    $this->logger->log(\Monolog\Logger::INFO, 'Google Geocoder Called (' . $this->callCounter . ' times)', $context);
-	    return parent::executeQuery($query);
+        $context = array('channel' => 'geocoder', 'numberGeoApiCalls' => $this->callCounter, 'query' => $query, 'call_count_for_run' => $this->callCounter);
+        $this->logger->log(\Monolog\Logger::INFO, 'Google Geocoder Called (' . $this->callCounter . ' times)', $context);
+        return parent::executeQuery($query);
     }
 }

@@ -25,18 +25,17 @@ use JobScooper\SitePlugins\Base\SitePlugin;
  */
 class ApiPlugin extends SitePlugin
 {
-	/**
-	 * ApiPlugin constructor.
-	 *
-	 * @param null $strBaseDir
-	 * @throws \Exception
-	 */
-	function __construct($strBaseDir = null)
+    /**
+     * ApiPlugin constructor.
+     *
+     * @param null $strBaseDir
+     * @throws \Exception
+     */
+    public function __construct($strBaseDir = null)
     {
         $this->additionalBitFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
         $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
 
         parent::__construct();
-
     }
 }

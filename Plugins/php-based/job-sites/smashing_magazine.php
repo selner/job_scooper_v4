@@ -32,5 +32,4 @@ class PluginSmashingMagazine extends \JobScooper\SitePlugins\AjaxSitePlugin
         'JobSitePostId' =>  array(array('tag' => 'article'), 'return_attribute' => 'id'),
         'Company' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'entry-company'),
         );
-
 }

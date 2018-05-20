@@ -42,16 +42,16 @@ class PluginIndeed extends \JobScooper\SitePlugins\AjaxSitePlugin
         'PostedAt' => array('selector' => 'span.date', 'index'=> 0)
         );
 
-	/**
-	 * @param $var
-	 *
-	 * @return int|null
-	 * @throws \Exception
-	 */
-	static function checkNoJobResults($var)
+    /**
+     * @param $var
+     *
+     * @return int|null
+     * @throws \Exception
+     */
+    public static function checkNoJobResults($var)
     {
         $ret = null;
-        if(!empty($var) && is_array($var)) {
+        if (!empty($var) && is_array($var)) {
             $var = $var[0];
             $node1 = $var->find("p.message");
             if (!empty($node1)) {
@@ -69,39 +69,40 @@ class PluginIndeed extends \JobScooper\SitePlugins\AjaxSitePlugin
     }
 
 
-	/**
-	 * @param $jobs
-	 *
-	 * @return array
-	 */
-	private function _parseJsonJobs($jobs)
-	{
-		$ret = array();
-		foreach($jobs as $job)
-		{
-			$ret[$job->Id] = array(
-				'JobSiteKey' => $this->getJobSiteKey(),
-				'JobSitePostId' => $job->jk,
-				'Company' => $job->cmp,
-				'Title' =>  $job->title,
-				'Url' => "/viewjob?jk={$job->jk}&vjs=3",
-				'Location' => $job->loc,
-				'PostedAt' => $job->PostDate
-			);
-		}
-
-		LogMessage("Loaded " . count($ret) . " jobs from JSON with " . count($jobs));
-		return $ret;
-	}
-
-	/**
-	 * @param $nItem
-	 *
-	 * @return int|string
-	 */
-	function getItemURLValue($nItem)
+    /**
+     * @param $jobs
+     *
+     * @return array
+     */
+    private function _parseJsonJobs($jobs)
     {
-        if($nItem == null || $nItem == 1) { return ""; }
+        $ret = array();
+        foreach ($jobs as $job) {
+            $ret[$job->Id] = array(
+                'JobSiteKey' => $this->getJobSiteKey(),
+                'JobSitePostId' => $job->jk,
+                'Company' => $job->cmp,
+                'Title' =>  $job->title,
+                'Url' => "/viewjob?jk={$job->jk}&vjs=3",
+                'Location' => $job->loc,
+                'PostedAt' => $job->PostDate
+            );
+        }
+
+        LogMessage("Loaded " . count($ret) . " jobs from JSON with " . count($jobs));
+        return $ret;
+    }
+
+    /**
+     * @param $nItem
+     *
+     * @return int|string
+     */
+    public function getItemURLValue($nItem)
+    {
+        if ($nItem == null || $nItem == 1) {
+            return "";
+        }
 
         return "&start=" . $nItem;
     }

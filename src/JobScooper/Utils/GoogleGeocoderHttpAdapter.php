@@ -24,21 +24,19 @@ class InvalidServerResponse extends \RuntimeException implements \Geocoder\Excep
 {
 }
 
-class GoogleGeocoderHttpAdapter extends CurlWrapper  implements \Geocoder\HttpAdapter\HttpAdapterInterface
+class GoogleGeocoderHttpAdapter extends CurlWrapper implements \Geocoder\HttpAdapter\HttpAdapterInterface
 {
-
-    function getName()
+    public function getName()
     {
         return 'curl';
     }
 
-    function getContent($url)  // used in Google Maps Geocoder only
+    public function getContent($url)  // used in Google Maps Geocoder only
     {
         $curl_output = $this->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = C__SRC_LOCATION);
-        if(array_key_exists('body', $curl_output))
-        {
+        if (array_key_exists('body', $curl_output)) {
             $json = json_decode($curl_output['body']);
-            if($json->status != 'OK') {
+            if ($json->status != 'OK') {
                 $errMsg = $json->status . ' - ' . $json->error_message;
                 switch ($json->status) {
                     case 'REQUEST_DENIED':
@@ -63,7 +61,5 @@ class GoogleGeocoderHttpAdapter extends CurlWrapper  implements \Geocoder\HttpAd
         }
 
         return $curl_output['output'];
-
     }
-
 }

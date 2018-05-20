@@ -27,7 +27,7 @@ class PluginZipRecruiter extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $JobSiteName = 'ziprecruiter';
     protected $JobPostingBaseUrl = 'www.ziprecruiter.com';
     protected $JobListingsPerPage = C__TOTAL_ITEMS_UNKNOWN__; // we use this to make sure we only have 1 single results page
-	protected $CountryCodes = array("US");
+    protected $CountryCodes = array("US");
 
     protected $SearchUrlFormat = "https://www.ziprecruiter.com/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
     protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
@@ -44,24 +44,24 @@ class PluginZipRecruiter extends \JobScooper\SitePlugins\AjaxSitePlugin
         'JobSitePostId'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
     );
 
-	/**
-	 * @param $var
-	 *
-	 * @return int|null
-	 * @throws \Exception
-	 */
-	function checkNoJobResults($var)
+    /**
+     * @param $var
+     *
+     * @return int|null
+     * @throws \Exception
+     */
+    public function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "No jobs");
     }
 
-	/**
-	 * @param $objSimpHTML
-	 *
-	 * @return null|string
-	 * @throws \Exception
-	 */
-	function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    /**
+     * @param $objSimpHTML
+     *
+     * @return null|string
+     * @throws \Exception
+     */
+    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         sleep($this->additionalLoadDelaySeconds + 1);
 
@@ -86,27 +86,25 @@ class PluginZipRecruiter extends \JobScooper\SitePlugins\AjaxSitePlugin
         return parent::parseTotalResultsCount($objSimpHTML);
     }
 
-	/**
-	 * @param null $nTotalItems
-	 *
-	 * @throws \Exception
-	 */
-	protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
+    /**
+     * @param null $nTotalItems
+     *
+     * @throws \Exception
+     */
+    protected function goToEndOfResultsSetViaLoadMore($nTotalItems = null)
     {
         $this->selectorMoreListings = ".load_more_jobs";
         parent::goToEndOfResultsSetViaLoadMore($nTotalItems);
 
         parent::goToEndOfResultsSetViaPageDown($nTotalItems);
-
     }
-
 }
 
 
 class PluginZipRecruiterUK extends PluginZipRecruiter
 {
-	protected $JobSiteName = 'ZipRecruiterUK';
-	protected $JobPostingBaseUrl = 'http://www.ziprecruiter.co.uk';
-	protected $SearchUrlFormat = "https://www.ziprecruiter.co.uk/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
-	protected $CountryCodes = array("UK");
+    protected $JobSiteName = 'ZipRecruiterUK';
+    protected $JobPostingBaseUrl = 'http://www.ziprecruiter.co.uk';
+    protected $SearchUrlFormat = "https://www.ziprecruiter.co.uk/candidate/search?search=***KEYWORDS***&include_near_duplicates=1&location=***LOCATION***&radius=25&days=***NUMBER_DAYS***";
+    protected $CountryCodes = array("UK");
 }

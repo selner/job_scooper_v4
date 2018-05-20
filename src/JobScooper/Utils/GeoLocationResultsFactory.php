@@ -14,36 +14,34 @@ use JobScooper\DataAccess\GeoLocationQuery;
 
 class GeoLocationResultsFactory implements ResultFactoryInterface
 {
-	/**
-	 * {@inheritDoc}
-	 * @returns GeoLocation
-	 */
-	final public function createFromArray(array $data)
-	{
-		$geolocation = $this->newInstance();
-		$geolocation->fromGeocode(isset($data[0]) ? $data[0] : $data);
+    /**
+     * {@inheritDoc}
+     * @returns GeoLocation
+     */
+    final public function createFromArray(array $data)
+    {
+        $geolocation = $this->newInstance();
+        $geolocation->fromGeocode(isset($data[0]) ? $data[0] : $data);
 
 
-		$locKey = $geolocation->getGeoLocationKey();
-		$existingGeo = GeoLocationQuery::create()
-			->findOneByGeoLocationKey($locKey);
-		if(empty($existingGeo)) {
-			$geolocation->save();
+        $locKey = $geolocation->getGeoLocationKey();
+        $existingGeo = GeoLocationQuery::create()
+            ->findOneByGeoLocationKey($locKey);
+        if (empty($existingGeo)) {
+            $geolocation->save();
 
-			return $geolocation;
+            return $geolocation;
+        }
 
-		}
+        unset($geolocation);
+        return $existingGeo;
+    }
 
-		unset($geolocation);
-		return $existingGeo;
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function newInstance()
-	{
-		return new GeoLocation();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public function newInstance()
+    {
+        return new GeoLocation();
+    }
 }

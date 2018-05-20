@@ -27,7 +27,6 @@ abstract class AbstractDotJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected function goToEndOfResultsSetViaLoadMore($nTotalListings)
     {
-
         $this->selectorMoreListings = "#button_moreJobs";
 
         $js = "

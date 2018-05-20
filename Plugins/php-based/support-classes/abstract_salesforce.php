@@ -26,8 +26,8 @@
  */
 abstract class AbstractSalesforce extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
-	function getPageURLValue($nPage)
-	{
-		return (empty($nPage) || $nPage === 0) ? "" : $nPage - 1;
-	}
+    public function getPageURLValue($nPage)
+    {
+        return (empty($nPage) || $nPage === 0) ? "" : $nPage - 1;
+    }
 }

@@ -44,26 +44,26 @@ use \Propel\Runtime\ActiveQuery\Criteria;
  */
 function loadSqlite3MathExtensions()
 {
-	try {
-		$sql2 = '[UNKNONWN]';
+    try {
+        $sql2 = '[UNKNONWN]';
 
-	    $con = \Propel\Runtime\Propel::getConnection();
+        $con = \Propel\Runtime\Propel::getConnection();
         $expath = '/opt/sqlite/extensions/libsqlitefunctions';
-        if(PHP_OS === 'Darwin')
+        if (PHP_OS === 'Darwin') {
             $expath .= '.dylib';
-        else
+        } else {
             $expath .= '.so';
+        }
 
         $sql2 = "SELECT load_extension('{$expath}');";
         $stmt = $con->prepare($sql2);
         $stmt->execute();
         return true;
+    } catch (Exception $ex) {
+        handleException($ex, "FAILED to load math functions extension for SQLite with call: {$sql2}.   ERROR DETAILS: %s", true);
+    }
 
-	} catch (Exception $ex) {
-		handleException($ex, "FAILED to load math functions extension for SQLite with call: {$sql2}.   ERROR DETAILS: %s", true);
-	}
-
-	return false;
+    return false;
 }
 
 
@@ -82,19 +82,18 @@ function loadSqlite3MathExtensions()
  */
 function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocation $searchLoc = null)
 {
-    if(is_empty_value($arrJobItem)  || !is_array($arrJobItem)) {
+    if (is_empty_value($arrJobItem)  || !is_array($arrJobItem)) {
         return null;
     }
 
     try {
-        if(array_key_exists('JobPostingId', $arrJobItem) && null !== $arrJobItem['JobPostingId']) {
+        if (array_key_exists('JobPostingId', $arrJobItem) && null !== $arrJobItem['JobPostingId']) {
             $jobRecord =  \JobScooper\DataAccess\JobPostingQuery::create()
                 ->filterByPrimaryKey($arrJobItem['JobPostingId'])
                 ->findOneOrCreate();
-        }
-        else {
-            if(is_empty_value($arrJobItem['JobSiteKey'])) {
-	            throw new InvalidArgumentException('Attempted to create a new job posting record without a valid JobSiteKey value.');
+        } else {
+            if (is_empty_value($arrJobItem['JobSiteKey'])) {
+                throw new InvalidArgumentException('Attempted to create a new job posting record without a valid JobSiteKey value.');
             }
 
             $jobRecord = \JobScooper\DataAccess\JobPostingQuery::create()
@@ -103,22 +102,17 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
                 ->findOneOrCreate();
         }
 
-        if(null !== $searchLoc)
-        {
-	        $jobRecord->setSearchLocation($searchLoc->getGeoLocationId());
+        if (null !== $searchLoc) {
+            $jobRecord->setSearchLocation($searchLoc->getGeoLocationId());
         }
         $jobRecord->fromArray($arrJobItem);
         $jobRecord->save();
         return $jobRecord;
-
-    }
-    catch (Exception $ex)
-    {
+    } catch (Exception $ex) {
         handleException($ex);
     }
 
     return null;
-
 }
 
 
@@ -135,55 +129,49 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
  */
 function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null, $countsOnly=false)
 {
-	$results = null;
+    $results = null;
 
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create();
-	$query->joinWithJobPostingFromUJM();
+    $query->joinWithJobPostingFromUJM();
 
-	if($countsOnly !== true)
-	{
-		$query->limit(2500);
+    if ($countsOnly !== true) {
+        $query->limit(2500);
 
-		$query->useJobPostingFromUJMQuery()
-			->orderByKeyCompanyAndTitle()
-			->endUse();
+        $query->useJobPostingFromUJMQuery()
+            ->orderByKeyCompanyAndTitle()
+            ->endUse();
 
-		$keyResults = 'UserJobMatchId';
-	}
-	else {
+        $keyResults = 'UserJobMatchId';
+    } else {
+        $sitekeyColumnName = $query->getAliasedColName(\JobScooper\DataAccess\Map\JobPostingTableMap::COL_JOBSITE_KEY);
+        $query->clearSelectColumns()
+            ->addAsColumn('TotalNewUserJobMatches', 'COUNT(DISTINCT(UserJobMatch.UserJobMatchId))')
+            ->addAsColumn('TotalNewJobPostings', 'COUNT(DISTINCT(UserJobMatch.JobPostingId))')
+            ->select(array($sitekeyColumnName, 'TotalNewUserJobMatches', 'TotalNewJobPostings'))
+            ->groupBy(array($sitekeyColumnName));
 
-		$sitekeyColumnName = $query->getAliasedColName(\JobScooper\DataAccess\Map\JobPostingTableMap::COL_JOBSITE_KEY);
-		$query->clearSelectColumns()
-			->addAsColumn('TotalNewUserJobMatches', 'COUNT(DISTINCT(UserJobMatch.UserJobMatchId))')
-			->addAsColumn('TotalNewJobPostings', 'COUNT(DISTINCT(UserJobMatch.JobPostingId))')
-			->select(array($sitekeyColumnName, 'TotalNewUserJobMatches', 'TotalNewJobPostings'))
-			->groupBy(array($sitekeyColumnName));
-
-			$keyResults = null;
-
-	}
+        $keyResults = null;
+    }
 
 
-	$query->filterByUserNotificationStatus($userNotificationState);
-	$query->filterByUser($user);
-	$query->filterByDaysAgo($nNumDaysBack);
-	$query->filterByGeoLocationIds($arrGeoLocIds);
+    $query->filterByUserNotificationStatus($userNotificationState);
+    $query->filterByUser($user);
+    $query->filterByDaysAgo($nNumDaysBack);
+    $query->filterByGeoLocationIds($arrGeoLocIds);
 
-	if(null !== $keyResults) {
-		$results = $query->find()->toKeyIndex($keyResults);
-	}
-	else {
-		$results = $query->find()->getData();
-	}
+    if (null !== $keyResults) {
+        $results = $query->find()->toKeyIndex($keyResults);
+    } else {
+        $results = $query->find()->getData();
+    }
 
-	if (!empty($results) && !empty($sitekeyColumnName))
-	{
-		$results = array_column($results, null, $sitekeyColumnName);
-	}
+    if (!empty($results) && !empty($sitekeyColumnName)) {
+        $results = array_column($results, null, $sitekeyColumnName);
+    }
 
-	unset($query);
+    unset($query);
 
-	return $results;
+    return $results;
 }
 
 //
@@ -200,31 +188,27 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null )
+function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null)
 {
-	$chunkResults = null;
-	$continueLoop = true;
+    $chunkResults = null;
+    $continueLoop = true;
 
-	$nResults = 0;
-	while (null !== $chunkResults && $continueLoop === true)
-	{
-		$chunkResults = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $user);
-		if (null !== $chunkResults)
-		{
-			$nSetResults = $nResults + count($chunkResults) - 1;
-			LogMessage("Processing user match results #{$nResults} - {$nSetResults} via callback '{$callback}'...");
-			$callback($chunkResults);
-			$nResults += ($nResults + count($chunkResults) - 1);
-		}
-		else
-		{
-			$continueLoop = false;
-		}
-	}
+    $nResults = 0;
+    while (null !== $chunkResults && $continueLoop === true) {
+        $chunkResults = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $user);
+        if (null !== $chunkResults) {
+            $nSetResults = $nResults + count($chunkResults) - 1;
+            LogMessage("Processing user match results #{$nResults} - {$nSetResults} via callback '{$callback}'...");
+            $callback($chunkResults);
+            $nResults += ($nResults + count($chunkResults) - 1);
+        } else {
+            $continueLoop = false;
+        }
+    }
 
-	if($nResults === 0) {
-		LogMessage('No user job matches were found to auto-mark.');
-	}
+    if ($nResults === 0) {
+        LogMessage('No user job matches were found to auto-mark.');
+    }
 }
 
 /**
@@ -234,18 +218,18 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
  */
 function getGeoLocationsNearby(\JobScooper\DataAccess\GeoLocation $sourceGeoLocation)
 {
-	$arrNearbyIds = [$sourceGeoLocation->getGeoLocationId()];
-	$nearbyLocations = \JobScooper\DataAccess\GeoLocationQuery::create()
-		->filterByDistanceFrom($sourceGeoLocation->getLatitude(), $sourceGeoLocation->getLongitude(), 50, \JobScooper\DataAccess\Map\GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
-		->find();
+    $arrNearbyIds = [$sourceGeoLocation->getGeoLocationId()];
+    $nearbyLocations = \JobScooper\DataAccess\GeoLocationQuery::create()
+        ->filterByDistanceFrom($sourceGeoLocation->getLatitude(), $sourceGeoLocation->getLongitude(), 50, \JobScooper\DataAccess\Map\GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
+        ->find();
 
-	if(!empty($nearbyLocations))
-	{
-		foreach($nearbyLocations as $near)
-			$arrNearbyIds[] = $near->getGeoLocationId();
-	}
+    if (!empty($nearbyLocations)) {
+        foreach ($nearbyLocations as $near) {
+            $arrNearbyIds[] = $near->getGeoLocationId();
+        }
+    }
 
-	return $arrNearbyIds;
+    return $arrNearbyIds;
 }
 
 /**
@@ -257,28 +241,26 @@ function getGeoLocationsNearby(\JobScooper\DataAccess\GeoLocation $sourceGeoLoca
  */
 function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 {
-	LogMessage("Marking " . count($arrUserJobMatchIds) . " user job matches as {$strNewStatus}...");
-	$con = \Propel\Runtime\Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-	$valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
-	$statusInt = array_search($strNewStatus, $valueSet);
-	$nChunkCounter = 1;
+    LogMessage("Marking " . count($arrUserJobMatchIds) . " user job matches as {$strNewStatus}...");
+    $con = \Propel\Runtime\Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+    $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
+    $statusInt = array_search($strNewStatus, $valueSet);
+    $nChunkCounter = 1;
 
-	foreach (array_chunk($arrUserJobMatchIds, 50) as $chunk) {
+    foreach (array_chunk($arrUserJobMatchIds, 50) as $chunk) {
+        $nMax = ($nChunkCounter+50);
+        \JobScooper\DataAccess\UserJobMatchQuery::create()
+            ->filterByUserJobMatchId($chunk)
+            ->update(array('UserNotificationState' => $statusInt), $con);
 
-		$nMax = ($nChunkCounter+50);
-		\JobScooper\DataAccess\UserJobMatchQuery::create()
-			->filterByUserJobMatchId($chunk)
-			->update(array('UserNotificationState' => $statusInt), $con);
-
-		$nChunkCounter += 50;
-		if ($nChunkCounter % 100 === 0) {
-			$con->commit();
-			// fetch a new connection
-			$con = \Propel\Runtime\Propel::getWriteConnection('default');
-			LogMessage("Marking user job matches {$nChunkCounter} - " . ($nMax >= count($arrUserJobMatchIds) ? count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
-		}
-	}
-
+        $nChunkCounter += 50;
+        if ($nChunkCounter % 100 === 0) {
+            $con->commit();
+            // fetch a new connection
+            $con = \Propel\Runtime\Propel::getWriteConnection('default');
+            LogMessage("Marking user job matches {$nChunkCounter} - " . ($nMax >= count($arrUserJobMatchIds) ? count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
+        }
+    }
 }
 
 //
@@ -292,6 +274,5 @@ function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
  */
 function isUserJobMatchAndNotExcluded($var)
 {
-	return ((empty($var['IsExcluded']) || $var['IsExcluded'] !== true) && (!empty($var['IsJobMatch']) && $var['IsJobMatch'] === true));
+    return ((empty($var['IsExcluded']) || $var['IsExcluded'] !== true) && (!empty($var['IsJobMatch']) && $var['IsJobMatch'] === true));
 }
-

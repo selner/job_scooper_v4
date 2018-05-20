@@ -32,13 +32,14 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
     /**
      * {@inheritdoc}
      */
-    function __destruct()
+    public function __destruct()
     {
-        if(!is_null($this->_fpcsv))
+        if (!is_null($this->_fpcsv)) {
             fclose($this->_fpcsv);
+        }
     }
 
-    function getColumnNames()
+    public function getColumnNames()
     {
         return $this->_columns;
     }
@@ -59,13 +60,10 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
                 $r = $this->_getValueArray($key, $val);
                 $ret = array_merge_recursive_distinct($ret, $r);
             }
-        }
-        else
-        {
+        } else {
             $this->checkColumnName($k);
             $ret[$k] = strval($v);
         }
-
     }
     public function format(array $record)
     {
@@ -81,15 +79,12 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
                     $outRecord[$key] = strval($val);
                 }
                 unset($record[$k]);
-            }
-            elseif(is_object($v))
-            {
+            } elseif (is_object($v)) {
                 foreach (object_to_array($v) as $key => $val) {
                     $this->checkColumnName($key);
                     $outRecord[$key] = strval($val);
                 }
-            }
-            else {
+            } else {
                 $this->checkColumnName($k);
                 $outRecord[$k] = strval($v);
             }
@@ -105,7 +100,6 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
         $str = stream_get_contents($fptmp);
         fclose($fptmp);
         return $str;
-
     }
 
     /**
@@ -117,7 +111,8 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
      */
     private function checkColumnName($columnName)
     {
-        if(!in_array(strval($columnName), $this->_columns))
+        if (!in_array(strval($columnName), $this->_columns)) {
             $this->_columns[] = strval($columnName);
+        }
     }
 }

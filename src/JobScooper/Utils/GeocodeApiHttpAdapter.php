@@ -16,46 +16,39 @@
  */
 
 namespace JobScooper\Utils;
+
 use Geocoder\Exception\HttpException;
 
-
-class GeocodeApiHttpAdapter extends CurlWrapper  implements \Geocoder\HttpAdapter\HttpAdapterInterface
+class GeocodeApiHttpAdapter extends CurlWrapper implements \Geocoder\HttpAdapter\HttpAdapterInterface
 {
+    public function getName()
+    {
+        return 'curl';
+    }
 
-	function getName()
-	{
-		return 'curl';
-	}
+    /**
+     * @param string $url
+     *
+     * @return string
+     * @throws \ErrorException
+     */
+    public function getContent($url)  // used in Google Maps Geocoder only
+    {
+        try {
+            $curl_output = $this->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = C__SRC_LOCATION);
+        } catch (\ErrorException $ex) {
+            throw new HttpException("GeocodeApi server error [#{$ex->getCode()}]: {$ex->getMessage()}.", $ex->getCode(), $ex);
+        }
 
-	/**
-	 * @param string $url
-	 *
-	 * @return string
-	 * @throws \ErrorException
-	 */
-	function getContent($url)  // used in Google Maps Geocoder only
-	{
-		try {
-			$curl_output = $this->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = C__SRC_LOCATION);
-		}
-		catch (\ErrorException $ex)
-		{
-			throw new HttpException("GeocodeApi server error [#{$ex->getCode()}]: {$ex->getMessage()}.", $ex->getCode(), $ex);
-		}
+        if (array_key_exists('body', $curl_output)) {
+            if (empty($curl_output['body'])) {
+                return null;
+            }
 
-		if(array_key_exists('body', $curl_output))
-		{
-			if (empty($curl_output['body']))
-			{
-				return null;
-			}
+            $json = json_decode($curl_output['body']);
+            return $json;
+        }
 
-			$json = json_decode($curl_output['body']);
-			return $json;
-		}
-
-		return $curl_output['output'];
-
-	}
-
+        return $curl_output['output'];
+    }
 }

@@ -29,13 +29,12 @@ class PluginExpedia extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $additionalBitFlags = [C__JOB_SETTINGS_URL_VALUE_REQUIRED];
     protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_NOCONTROL;
 
-    function getDaysURLValue($days = null) {
+    public function getDaysURLValue($days = null)
+    {
         $ret = 1;
 
-        if($days != null)
-        {
-            switch($days)
-            {
+        if ($days != null) {
+            switch ($days) {
                 case ($days>1 && $days<=7):
                     $ret = 7;
                     break;
@@ -50,11 +49,10 @@ class PluginExpedia extends \JobScooper\SitePlugins\AjaxSitePlugin
         }
 
         return $ret;
-
     }
 
 
-    function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $resultsSection= $objSimpHTML->find("span[class='GF34SVYCIUH'] span");
         $totalItemsText = $resultsSection[0]->text();
@@ -64,13 +62,13 @@ class PluginExpedia extends \JobScooper\SitePlugins\AjaxSitePlugin
         return str_replace(",", "", $strTotalItemsCount);
     }
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return array|null|void
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    /**
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null|void
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
 
@@ -78,15 +76,16 @@ class PluginExpedia extends \JobScooper\SitePlugins\AjaxSitePlugin
         $parent = $objSimpHTML->find('div[class="GF34SVYCOUH.GF34SVYCAUH"]');
 
         $nodesJobs= $parent[0]->find('li');
-        foreach($nodesJobs as $node)
-        {
+        foreach ($nodesJobs as $node) {
             $item = getEmptyJobListingRecord();
             $item['Company'] = 'Expedia';
 
             $titleLink = $node->find("h3 a")[0];
             $item['Title'] = $titleLink->text();
             $item['Url'] = $titleLink->href;
-            if($item['Title'] == '') continue;
+            if ($item['Title'] == '') {
+                continue;
+            }
 
             $item['JobSitePostId'] = str_replace(array("(", ")"), "", $node->find("h3 small")[0]->text());
 
@@ -95,12 +94,11 @@ class PluginExpedia extends \JobScooper\SitePlugins\AjaxSitePlugin
 //            $item['brief'] = $node->find("p[class='search-result-item-description']")[0]->text();
 //           $item['brief'] = str_ireplace(array("Position Description ", "position overview", "PositionSummary"), "", $item['brief']);
 
-            $item['PostedAt'] = str_ireplace("date posted: ","", $node->find("span[class='search-result-item-post-date']")[0]->text());
+            $item['PostedAt'] = str_ireplace("date posted: ", "", $node->find("span[class='search-result-item-post-date']")[0]->text());
 
             $ret[] = $item;
         }
 
         return $ret;
     }
-
 }

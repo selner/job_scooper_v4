@@ -38,7 +38,4 @@ class PluginTesla extends \JobScooper\SitePlugins\AjaxSitePlugin
         'Department' => array('selector' => 'td.listing-department'),
         'Location' => array('selector' => 'td.listing-location')
     );
-
 }
-
-

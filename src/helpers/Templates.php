@@ -18,7 +18,6 @@
 
 use LightnCandy\LightnCandy;
 
-
 /**
  * @param $path
  *
@@ -35,8 +34,9 @@ function loadTemplate($path)
     $template = file_get_contents($tmplFile);
 
     LogDebug("Compiling Mustache template ({$tmplFile}...");
-    $tmpl = LightnCandy::compile($template,
-        Array(
+    $tmpl = LightnCandy::compile(
+        $template,
+        array(
             'flags' => LightnCandy::FLAG_RENDER_DEBUG | LightnCandy::FLAG_ERROR_LOG | LightnCandy::FLAG_ERROR_EXCEPTION | LightnCandy::FLAG_HANDLEBARSJS_FULL | LightnCandy::FLAG_THIS | LightnCandy::FLAG_PROPERTY | LightnCandy::FLAG_JSOBJECT| LightnCandy::FLAG_ELSE,
             'partialresolver' => function ($cx, $name) use ($partialsDir) {
                 $partialpath = "$partialsDir/$name.tmpl";
@@ -47,10 +47,11 @@ function loadTemplate($path)
             },
             'Utils' => array(
                 'getEvenOdd' => function ($arg1) {
-                    if((floatval($arg1) % 2) == 0)
+                    if ((floatval($arg1) % 2) == 0) {
                         return "even";
-                    else
+                    } else {
                         return "odd";
+                    }
                 },
                 "isequal" => function ($arg1, $arg2) {
                     return ($arg1 === $arg2) ? 'Yes' : 'No';
@@ -77,10 +78,9 @@ function loadTemplate($path)
 
     // Get the render function from the php file
 //    $renderer = assets($renderFile);
-// Get the render function
+    // Get the render function
 //    $renderer = LightnCandy::prepare($phpStr);
-    if($renderer == false)
-    {
+    if ($renderer == false) {
         throw new Exception("Error: unable to compile template '$tmplFile'");
     }
 
@@ -90,6 +90,6 @@ function loadTemplate($path)
 
 function renderTemplate($renderer, $data)
 {
-#    return $renderer($data, array('debug' => \LightnCandy\Runtime::DEBUG_TAGS_HTML));
+    #    return $renderer($data, array('debug' => \LightnCandy\Runtime::DEBUG_TAGS_HTML));
     return $renderer($data);
 }
