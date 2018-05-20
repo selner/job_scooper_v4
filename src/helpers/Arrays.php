@@ -393,7 +393,7 @@ function array_from_orm_object_list_by_array_keys(array $list, array $keysToRetu
     , $list);
     if(count($keysToReturn) == 1)
         $ret = array_column($ret, $keysToReturn[0], $keysToReturn[0]);
-    else if(!empty($keyIndex) && is_array($ret) && in_array($keyIndex, array_keys($keysToReturn)))
+    else if(!empty($keyIndex) && is_array($ret) && array_key_exists($keyIndex, $keysToReturn))
     {
     	$ret = array_column($ret, null, $keyIndex);
     }

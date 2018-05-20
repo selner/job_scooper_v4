@@ -132,7 +132,7 @@ function exportToDebugJSON($obj, $strBaseFileName)
  */
 function noJobStringMatch($var, $matchString)
 {
-    if(is_null($matchString) || strlen($matchString) == 0)
+    if(is_empty_value($matchString))
         throw new Exception("Invalid match string passed to helper noJobStringMatch.");
 
     if(stristr(strtoupper($var), strtoupper($matchString)) !== false)
@@ -149,7 +149,7 @@ function noJobStringMatch($var, $matchString)
  */
 function getRunDateRange($configNumDays=null)
 {
-	if(empty($configNumDays))
+	if(is_empty_value($configNumDays))
 	    $configNumDays = getConfigurationSetting('number_days');
 	
     $num_days = filter_var($configNumDays, FILTER_VALIDATE_INT);

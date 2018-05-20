@@ -207,7 +207,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		$v = str_ireplace("- easy apply", "", $v);
 		$v = $this->_cleanupTextValue($v);
 
-		if (strlen($v) == 0)
+		if (is_empty_value($v))
 			throw new \Exception($this->getJobSiteKey() . " posting's title string is empty.");
 
 		parent::setTitle($v);
@@ -247,7 +247,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	private function _updateAutoLocationColumns()
 	{
 		$loc_str = $this->getLocation();
-		if (is_null($loc_str) || strlen($loc_str) == 0) {
+		if (is_empty_value($loc_str)) {
 			// clear any previous job location ID when we set a new location string
 			$this->setGeoLocationFromJP(null);
 			$this->setGeoLocationId(null);
@@ -259,11 +259,11 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		try {
 			$searchLoc = null;
 			$countryCode = null;
-			if(!empty($this->_searchLocId))
+			if(!is_empty_value($this->_searchLocId))
 			{
 				$searchLoc = GeoLocationQuery::create()
 					->findOneByGeoLocationId($this->_searchLocId);
-				if(!empty($searchLoc)) {
+				if(!is_empty_value($searchLoc)) {
 					$countryCode = $searchLoc->getCountryCode();
 				}
 
@@ -271,10 +271,10 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 
 			$locmgr = LocationManager::getLocationManager();
 
-			if(false === stristr($loc_str, " {$countryCode}"))
+			if(false === stripos($loc_str, " {$countryCode}"))
 				$loc_str = "{$loc_str} {$countryCode}";
 			$location = $locmgr->lookupAddress($loc_str);
-			if (!is_null($location)) {
+			if (!is_empty_value($location)) {
 				$this->setGeoLocationFromJP($location);
 				$this->_setDenormalizedLocationDisplayValue_();
 			}
@@ -476,7 +476,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	function __construct($arrJobFacts = null)
 	{
 		parent::__construct();
-		if (!is_null($arrJobFacts) && count($arrJobFacts) > 1) {
+		if (!is_empty_value($arrJobFacts) && count($arrJobFacts) > 1) {
 			foreach (array_keys($arrJobFacts) as $key)
 				$this->set($key, $arrJobFacts[$key]);
 			$this->save();
@@ -494,7 +494,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
 	{
 		$ret = parent::toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, $includeForeignObjects);
-		if(!empty($ret) && is_array($ret)) {
+		if(!is_empty_value($ret) && is_array($ret)) {
 			$ret['KeySiteAndPostId'] = $this->getKeySiteAndPostId();
 
 		}

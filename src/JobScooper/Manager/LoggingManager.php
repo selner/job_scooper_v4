@@ -177,7 +177,7 @@ Class LoggingManager extends \Monolog\Logger
 	 */
 	public function getChannelLogger($channel)
     {
-        if( empty($channel) || !in_array($channel, array_keys($this->_loggers)))
+        if( empty($channel) || !array_key_exists($channel, $this->_loggers))
             $channel = $this->_loggerName;
 
         return $this->_loggers[$channel];

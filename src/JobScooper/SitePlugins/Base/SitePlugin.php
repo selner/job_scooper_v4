@@ -805,11 +805,11 @@ abstract class SitePlugin implements IJobSitePlugin
 		$retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
 		if (array_key_exists('TotalPostCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalPostCount']) && count($this->arrListingTagSetup['TotalPostCount']) > 0) {
 			$retJobCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalPostCount'], null, $this);
-			if (is_empty_value($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
+			if (is_empty_value($retJobCount))
 				throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalPostCount']));
 		} else if (array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalResultPageCount']) && count($this->arrListingTagSetup['TotalResultPageCount']) > 0) {
 			$retPageCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalResultPageCount'], null, $this);
-			if (is_empty_value($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
+			if (is_empty_value($retJobCount))
 				throw new \Exception("Unable to determine number of pages for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['TotalResultPageCount']));
 
 			$retJobCount = $retPageCount * $this->JobListingsPerPage;
@@ -1287,7 +1287,7 @@ abstract class SitePlugin implements IJobSitePlugin
 				if ($item['JobSitePostId'] == null)
 					$item['JobSitePostId'] = $job->url;
 
-				if (strlen(trim($item['Title'])) == 0 || strlen(trim($item['JobSitePostId'])) == 0) {
+				if (is_empty_value($item['Title']) || is_empty_value($item['JobSitePostId'])) {
 					continue;
 				}
 				$item['Location'] = $job->location;
@@ -1353,7 +1353,7 @@ abstract class SitePlugin implements IJobSitePlugin
 			$arrItem[$key] = cleanupTextValue($arrItem[$key]);
 		}
 
-		if (is_null($arrItem['JobSiteKey']) || strlen($arrItem['JobSiteKey']) == 0)
+		if (is_empty_value($arrItem['JobSiteKey']))
 			$arrItem['JobSiteKey'] = $this->JobSiteName;
 
 		$arrItem['JobSiteKey'] = cleanupSlugPart($arrItem['JobSiteKey']);
@@ -1414,7 +1414,7 @@ abstract class SitePlugin implements IJobSitePlugin
 	function saveSearchReturnedJobs($arrJobList, UserSearchSiteRun $searchDetails, &$nCountNewJobs = 0)
 	{
 
-		if(empty($arrJobList))
+		if(is_empty_value($arrJobList))
 			return;
 
 		foreach($arrJobList as $k => $item)
@@ -1434,7 +1434,7 @@ abstract class SitePlugin implements IJobSitePlugin
 				->filterByJobSitePostId($arrJobSitePostIds, Criteria::IN)
 				->find()
 				->toKeyIndex("JobSitePostId");
-			if (!empty($alreadyExist)) {
+			if (!is_empty_value($alreadyExist)) {
 				$arrExistJobCols = array_from_orm_object_list_by_array_keys($alreadyExist, array("JobPostingId", "JobSitePostId", "FirstSeenAt"), "JobPostingId");
 				$arrExistJobSitePostIds = array_column($arrExistJobCols, "JobSitePostId", "JobSitePostId");
 				$this->arrSearchReturnedJobs[$siteRunKey] = $this->arrSearchReturnedJobs[$siteRunKey] + $arrExistJobCols;
@@ -1444,7 +1444,7 @@ abstract class SitePlugin implements IJobSitePlugin
 				});
 			}
 
-			if(!empty($arrJobsToAdd)) {
+			if(!is_empty_value($arrJobsToAdd)) {
 				$conWrite = Propel::getServiceContainer()->getWriteConnection(JobPostingTableMap::DATABASE_NAME);
 
 				$bulkUpsert = new ObjectCollection();
@@ -1455,7 +1455,7 @@ abstract class SitePlugin implements IJobSitePlugin
 				$insertedJobs = $bulkUpsert->toKeyIndex("JobPostingId");
 				$arrJobCols = array_from_orm_object_list_by_array_keys($insertedJobs, array("JobPostingId", "JobSitePostId", "FirstSeenAt"), "JobPostingId");
 
-				$this->arrSearchReturnedJobs[$siteRunKey] = $this->arrSearchReturnedJobs[$siteRunKey] + $arrJobCols;
+				$this->arrSearchReturnedJobs[$siteRunKey] += $arrJobCols;
 			}
 
 			$nCountNewJobs = count($arrJobsToAdd);
@@ -1481,13 +1481,13 @@ abstract class SitePlugin implements IJobSitePlugin
 			->toKeyIndex("JobPostingId");
 
 		$arrTemp = array_combine($arrJobIds, $arrJobIds);
-		if(!empty($alreadyMatched))
+		if(!is_empty_value($alreadyMatched))
 		{
 			$arrIdsToAdd = array_diff($arrJobIds, array_keys($alreadyMatched));
 			$arrTemp = array_combine($arrIdsToAdd, $arrIdsToAdd);
 		}
 
-		if(!empty($arrTemp)) {
+		if(!is_empty_value($arrTemp)) {
 			$arrUserMatches = array_map(function ($value) use ($userId) {
 				return array('JobPostingId' => $value, 'UserId' => $userId);
 			}, $arrTemp);
@@ -1632,7 +1632,7 @@ JSCODE;
 			$driver->executeAsyncScript($jsCode);
 
 			$response = $driver->executeScript("return window.JSCOOP_API_RETURN;");
-			if (empty($response)) {
+			if (is_empty_value($response)) {
 				$simpHtml = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
 				$node = $simpHtml->find("script#{$apiNodeId}");
 				if (!empty($node)) {
@@ -1679,7 +1679,7 @@ JSCODE;
     {
 	    $objSimpleHTML = null;
         try {
-            if(!empty($url))
+            if(!is_empty_value($url))
             {
 	            $searchDetails->searchResultsPageUrl = $url;
                 $this->getActiveWebdriver()->get($url);
@@ -1717,7 +1717,7 @@ JSCODE;
 
 	        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
                 try {
-	                if (is_null($this->selenium)) {
+	                if (is_empty_value($this->selenium)) {
 		                $this->selenium = new SeleniumManager($this->additionalLoadDelaySeconds);
 	                } else {
 		                // Close out any previous webdriver sessions before we start anew

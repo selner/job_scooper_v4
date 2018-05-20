@@ -229,7 +229,7 @@ class Careerjet_API {
 			}
 		}
 
-		$header = "User-Agent: careerjet-api-client-v" . $this->version . "-php-v" . phpversion();
+		$header = "User-Agent: careerjet-api-client-v" . $this->version . "-php-v" . PHP_VERSION;
 		if ($current_page_url) {
 			$header .= "\nReferer: " . $current_page_url;
 		}
