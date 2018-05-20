@@ -170,14 +170,14 @@ function getCountryCodeRemapping($code)
 {
 
 
-$COUNTRY_CODE_REMAPPINGS = array(
-	"GB" => "UK"
-);
+	$COUNTRY_CODE_REMAPPINGS = array(
+		"GB" => "UK"
+	);
 
-if(is_empty_value($code) || !array_key_exists($code, $COUNTRY_CODE_REMAPPINGS))
-	return null;
+	if(is_empty_value($code) || !array_key_exists($code, $COUNTRY_CODE_REMAPPINGS))
+		return null;
 
-return $COUNTRY_CODE_REMAPPINGS[$code];
+	return $COUNTRY_CODE_REMAPPINGS[$code];
 }
 
 class GeoLocation extends BaseGeoLocation

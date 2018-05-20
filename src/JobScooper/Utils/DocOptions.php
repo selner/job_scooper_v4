@@ -38,11 +38,11 @@ Options:
   --user=<config_user_key>  Which set of user configuration settings should we run.  
   --stages=<stage_numbers>  Comma-separated list of stage numbers to run from 1 - 4. [default: 1,2,3]
   --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey. [default: all]
-  --debug  Show debug output. [default: false]
-  --ignore_recent    Run a search regardless of whether it was run recently.
-  --delete  Removes the user data associated with specified users.
-  --recap  Sends a weekly jobs recap notification to specified users.  
-  --disable-notifications   Do not send email alerts for new jobs. [default: false]
+  --debug                   Show debug output
+  --ignore_recent           Run a search regardless of whether it was run recently.
+  --delete                  Removes the user data associated with specified users.
+  --recap                   Sends a weekly jobs recap notification to specified users.  
+  --disable-notifications   Do not send email alerts for new jobs.
 ';
 
     public function __construct($commandfile, $input = array())
@@ -65,12 +65,14 @@ Options:
 	        // and use the value from it if it exists.  All environment setting values start
 	        // with JOBSCOOPER_ and then the all caps name of the command line switch.
 	        // e.g.  JOBSCOOPER_CONFIG or JOBSCOOPER_USER
-	        if(empty($argval))
+	        if(empty($argval) || $argval === false)
             {
 	            $envkey = strtoupper('JOBSCOOPER_' . strtoupper($argkey));
 	            $envval = getenv($envkey);
-	            if(!empty($envval))
-		            $argval = $envval;
+	            if(!empty($envval)) {
+		            $argval=$envval;
+		            setConfigurationSetting("environment.{$argkey}",$argval);
+	            }
             }
 
             if(is_array($argval) && in_array($argkey, array('jobsite', 'stages')))
