@@ -19,6 +19,7 @@ namespace JobScooper\SitePlugins\Base;
 
 require_once(__ROOT__ . '/src/helpers/Constants.php');
 
+use function JobScooper\DataAccess\getCountryCodeRemapping;
 use JobScooper\SitePlugins\Interfaces\IJobSitePlugin;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
@@ -482,8 +483,13 @@ abstract class SitePlugin implements IJobSitePlugin
 			$this->CountryCodes = array("US");
 		} else {
 			foreach ($this->CountryCodes as $k => $code) {
-				if (!empty($code) && array_key_exists(strtoupper($code), GeoLocation::$COUNTRY_CODE_REMAPPINGS))
-					$this->CountryCodes[$k] = GeoLocation::$COUNTRY_CODE_REMAPPINGS[$code];
+				$remap = getCountryCodeRemapping($code);
+				if(!is_empty_value($remap)){
+					$this->CountryCodes[$k] = $remap;
+				}
+				else {
+					$this->CountryCodes[$k] = strtoupper($code);
+				}
 			}
 		}
 
