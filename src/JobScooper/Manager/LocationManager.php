@@ -139,6 +139,7 @@ class LocationManager
 		$geolocation = $this->_queryDBForLocation($lookupAddress);
 		if(null !== $geolocation)
 		{
+			LogMessage("... matched DB Geolocation for {$lookupAddress}.");
 			$this->_geoLocCache->cacheGeoLocation($geolocation, $lookupAddress);
 			return $geolocation;
 		}
@@ -156,6 +157,8 @@ class LocationManager
 
 		try {
 			$geoloc = $this->geocode($lookupAddress);
+			LogMessage("... Geocoder returned Geolocation {$geoloc->getGeoLocationKey()} for {$lookupAddress}.");
+			$this->_geoLocCache->cacheGeoLocation($geoloc, $lookupAddress);
 		} catch (Exception $e) {
 			throw($e);
 		} catch (\Psr\Cache\InvalidArgumentException $e) {
@@ -327,7 +330,7 @@ class LocationManager
 			throw $ex;
 		}
 
-		if (is_empty_value($geocodeResult) ) {
+		if (!is_empty_value($geocodeResult) ) {
 			$geolocation = $geocodeResult;
 			try {
 				$lookup = LocationManager::scrubLocationValue($strAddress);

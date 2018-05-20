@@ -27,6 +27,7 @@ use Psr\Log\LogLevel;
 
 use phpFastCache\CacheManager;
 
+const C_CACHE_ITEM_EXPIRATION_SECS = 604800; # 7 * 24 * 60 * 60
 
 /**
  * Class GeoLocationCache
@@ -125,7 +126,7 @@ class GeoLocationCache
 	 */
 	function getCacheKey($strAddress)
 	{
-		return cleanupSlugPart($strAddress, $replacement = '_');
+		return strScrub($strAddress, FOR_LOOKUP_VALUE_MATCHING);
 	}
 
 	/**
@@ -141,6 +142,8 @@ class GeoLocationCache
 		$k = $this->getCacheKey($strLocationName);
 		$cacheItem = $this->_cache->getItem($k);
 		$cacheItem->set(GEOLOCATION_GEOCODE_FAILED);
+		$cacheItem->expiresAfter(C_CACHE_ITEM_EXPIRATION_SECS);
+
 		$this->_cache->setItem($cacheItem);
 	}
 
@@ -201,6 +204,7 @@ class GeoLocationCache
 			$cacheItem = $this->_cache->getItem($k);
 			$cacheItem->addTags($tags);
 			$cacheItem->set($geolocation->getGeoLocationId());
+			$cacheItem->expiresAfter(C_CACHE_ITEM_EXPIRATION_SECS);
 			$this->_cache->setItem($cacheItem);
 			$newCacheItems[] = $cacheItem;
 		}
@@ -272,7 +276,7 @@ class GeoLocationCache
 				$cacheItem = $this->_cache->getItem($itemKey);
 				if ($cacheItem->isHit() === true)
 					$geoLocId = $cacheItem->get();
-				if (!is_null($geoLocId) && $geoLocId !== false && $geoLocId != GEOLOCATION_GEOCODE_FAILED) {
+				if (!is_empty_value($geoLocId) && $geoLocId !== false && $geoLocId != GEOLOCATION_GEOCODE_FAILED) {
 					$geolocation = GeoLocationQuery::create()
 						->findOneByGeoLocationId($geoLocId);
 
