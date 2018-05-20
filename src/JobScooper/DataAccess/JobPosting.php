@@ -115,11 +115,29 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		return $ret;
 	}
 
+	private function isLocationModified()
+	{
+		$cols = $this->getModifiedColumnsPhpNames();
+		$locChanged = false;
+		foreach($cols as $col) {
+			if(stripos($col, "GeoLocation") !== false ||
+				stripos($col, "Location") !== false)
+			{
+				$locChanged = true;
+			}
+		}
+		return $locChanged;
+	}
+
 	/**
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	private function _setDenormalizedLocationDisplayValue_()
 	{
+
+		if(true !== $this->isLocationModified())
+			return;
+
 		$val = "";
 		$location = $this->getGeoLocationFromJP();
 		if (!is_null($location)) {
@@ -138,26 +156,41 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 		$this->setLocationDisplayValue($val);
 	}
 
+	public function getModifiedColumnsPhpNames()
+	{
+		$cols = parent::getModifiedColumns();
+		if(!is_empty_value($cols))
+		{
+			$phpCols = array();
+			foreach($cols as $col) {
+					$phpCols[$col]=JobPostingTableMap::translateFieldName($col, TableMap::TYPE_COLNAME, TableMap::TYPE_PHPNAME);
+			}
+			return $phpCols;
+		}
+	}
+
 	/**
 	 *
 	 * @throws \Exception
 	 */
 	public function normalizeJobRecord()
 	{
-		$fields = $this->getModifiedColumns();
-		foreach($fields as $field) {
-			$phpField = JobPostingTableMap::translateFieldName($field, TableMap::TYPE_COLNAME, TableMap::TYPE_PHPNAME);
-			$getFunc = "get{$phpField}";
-			$setFunc = "set{$phpField}";
-			$val = call_user_func(array($this, $getFunc));
-			if (!empty($val) && is_string($val)) {
-				$cleanVal = $this->_cleanupTextValue($val);
-				call_user_func(array($this, $setFunc), $cleanVal);
-			}
-		}
+		$fields = $this->getModifiedColumnsPhpNames();
+		if(!is_empty_value($fields)) {
+			foreach($fields as $phpField) {
 
-		$this->updateAutoColumns();
-		$this->setJobSiteKey(cleanupSlugPart($this->getJobSiteKey()));
+				$getFunc = "get{$phpField}";
+				$setFunc = "set{$phpField}";
+				$val = $this->$getFunc;
+				if (!is_empty_value($val) && is_string($val)) {
+					$cleanVal = $this->_cleanupTextValue($val);
+					call_user_func(array($this, $setFunc), $cleanVal);
+				}
+			}
+
+			$this->updateAutoColumns();
+			$this->setJobSiteKey(cleanupSlugPart($this->getJobSiteKey()));
+		}
 	}
 
 	/**
@@ -246,6 +279,10 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	 */
 	private function _updateAutoLocationColumns()
 	{
+		if(true !== $this->isLocationModified()){
+			return;
+		}
+
 		$loc_str = $this->getLocation();
 		if (is_empty_value($loc_str)) {
 			// clear any previous job location ID when we set a new location string
