@@ -139,13 +139,32 @@ class GeoLocationCache
     {
         $k = $this->getCacheKey($strLocationName);
         LogDebug("... adding unknown location {$k} = '{$strLocationName}' to cache ");
-        $cacheItem = $this->_cache->getItem($k);
-        $cacheItem->set(GEOLOCATION_GEOCODE_FAILED);
-        $cacheItem->expiresAfter(C_CACHE_ITEM_EXPIRATION_SECS);
-
-        $this->_cache->setItem($cacheItem);
+        $this->cacheGeoLocationItem($k, GEOLOCATION_GEOCODE_FAILED);
     }
 
+    /**
+	 * @param $key
+	 * @param $value
+	 * @param array $tags
+	 *
+	 * @return \phpFastCache\Core\Item\ExtendedCacheItemInterface
+	 * @throws \Exception
+	*/
+    private function cacheGeoLocationItem($key, $value, $tags = array())
+    {
+    	try {
+	        $cacheItem = $this->_cache->getItem($key);
+            $cacheItem->addTags($tags);
+            $cacheItem->set($value);
+            $cacheItem->expiresAfter(C_CACHE_ITEM_EXPIRATION_SECS);
+            $this->_cache->setItem($cacheItem);
+
+            return $this->_cache->getItem($key);
+        }
+        catch(\phpFastCache\Exceptions\phpFastCacheInvalidArgumentException $ex) {
+			throw new \Exception("Failed to set cache item with key={$key}, value={$value}, tags=". getArrayDebugOutput($tags), $ex->getCode(), $ex);;
+        }
+    }
 
     /**
      * @param \JobScooper\DataAccess\GeoLocation $geolocation
@@ -201,11 +220,7 @@ class GeoLocationCache
 
         $newCacheItems = array();
         foreach ($keys as $k) {
-            $cacheItem = $this->_cache->getItem($k);
-            $cacheItem->addTags($tags);
-            $cacheItem->set($geolocation->getGeoLocationId());
-            $cacheItem->expiresAfter(C_CACHE_ITEM_EXPIRATION_SECS);
-            $this->_cache->setItem($cacheItem);
+        	$cacheItem = $this->cacheGeoLocationItem($k, $geolocation->getGeoLocationId(), $tags);
             $newCacheItems[] = $cacheItem;
         }
         $this->_cache->saveMultiple($newCacheItems);
