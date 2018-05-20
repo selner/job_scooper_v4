@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 use JobScooper\DataAccess\UserSearchSiteRun;
 
 /**
@@ -22,6 +23,17 @@ use JobScooper\DataAccess\UserSearchSiteRun;
 abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $SiteSearchBaseUrl = null;
+	protected $SiteVariant = null;
+
+
+    private $tagsBySiteVariant = [
+    	'JobCountInH1' => [
+	        'TotalPostCount'        => ['selector' => 'div#results h1', 'return_attribute' => 'text', 'return_value_regex' =>  '/.*?\s([\d,]+)\s*/']
+		],
+    	'JobCountInH2' => [
+	        'TotalPostCount'        => ['selector' => 'h2', 'return_attribute' => 'text', 'return_value_regex' =>  '/.*?\s([\d,]+)\s*/']
+		]
+	];
 
     /**
      * AbstractMadgexATS constructor.
@@ -52,6 +64,11 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
         $this->additionalBitFlags[] = C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER;
         parent::__construct();
         $this->_flags_ &= ~C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+
+        if(!is_empty_value($this->SiteVariant) and array_key_exists($this->SiteVariant, $this->tagsBySiteVariant))
+        {
+        	$this->arrListingTagSetup = array_merge_recursive_distinct($this->arrListingTagSetup,$this->tagsBySiteVariant[$this->SiteVariant]);
+        }
     }
 
     protected $JobSiteName = 'madgexats';
