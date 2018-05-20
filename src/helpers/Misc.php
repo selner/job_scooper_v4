@@ -43,12 +43,10 @@ function is_empty_value($v)
 		case 'array':
 			return $v === null || (is_array($v) && (count($v) === 0 || count(array_keys($v)) === 0));
 
-		case 'object':
-		    return $v === null || (is_object($v) && (count(get_object_vars($v)) === 0));
-
 		case 'boolean':
 			return $v !== null && $v !== false;
 
+		case 'object':
 		default:
 			return empty($v);
 

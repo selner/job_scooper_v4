@@ -94,7 +94,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
 	 */
 	protected function updateAutoColumns()
 	{
-		$this->setKeyCompanyAndTitle(cleanupSlugPart($this->getCompany() . $this->getTitle()));
+		$this->setKeyCompanyAndTitle(strScrub($this->getCompany() . $this->getTitle(), FOR_LOOKUP_VALUE_MATCHING));
 		$this->_updateAutoLocationColumns();
 		$this->_setDenormalizedLocationDisplayValue_();
 	}
