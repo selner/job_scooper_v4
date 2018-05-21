@@ -1543,7 +1543,9 @@ abstract class SitePlugin implements IJobSitePlugin
     private function _addJobMatchesToUser(UserSearchSiteRun $searchDetails)
     {
         if (array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()])) {
-            $this->_addJobMatchIdsToUser(array_keys($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]), $searchDetails);
+        	$arrNewJobIds = array_column($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()], null, 'JobPostingId');
+
+            $this->_addJobMatchIdsToUser(array_keys($arrNewJobIds), $searchDetails);
         }
     }
 
