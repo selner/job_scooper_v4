@@ -329,8 +329,11 @@ class LocationManager
         if (!is_empty_value($geocodeResult)) {
             $geolocation = $geocodeResult;
             try {
-                $lookup = LocationManager::scrubLocationValue($strAddress);
-                $this->_geoLocCache->cacheGeoLocation($geolocation, $lookup);
+            	if(null !== $geolocation){
+
+	                $lookup = LocationManager::scrubLocationValue($strAddress);
+	                $this->_geoLocCache->cacheGeoLocation($geolocation, $lookup);
+            	}
             } catch (\InvalidArgumentException $e) {
                 handleException($e);
             } catch (\Psr\Cache\InvalidArgumentException $e) {

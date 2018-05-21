@@ -25,6 +25,7 @@ abstract class AjaxSitePlugin extends SitePlugin
     public function __construct($strBaseDir = null)
     {
         $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
+        $this->additionalBitFlags[] = C__JOB_USE_SELENIUM;
         try {
             $this->_selenium = new SeleniumManager();
         } catch (\Exception $ex) {

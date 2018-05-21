@@ -65,7 +65,7 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
         parent::__construct();
         $this->_flags_ &= ~C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
 
-        if(!is_empty_value($this->SiteVariant) and array_key_exists($this->SiteVariant, $this->tagsBySiteVariant))
+        if(!is_empty_value($this->SiteVariant) && array_key_exists($this->SiteVariant, $this->tagsBySiteVariant))
         {
         	$this->arrListingTagSetup = array_merge_recursive_distinct($this->arrListingTagSetup,$this->tagsBySiteVariant[$this->SiteVariant]);
         }
