@@ -28,15 +28,13 @@ use JBZoo\Utils\Slug;
  *
  *
  ******************************************************************************/
-
-
 /**
  * Strip punctuation from text.
  * http://nadeausoftware.com/articles/2007/9/php_tip_how_strip_punctuation_characters_web_page
  * @param $text
  * @return mixed
  */
-function strip_punctuation($text)
+function strip_punctuation_from_html($text)
 {
     $urlbrackets    = '\[\]\(\)';
     $urlspacebefore = ':;\'_\*%@&?!' . $urlbrackets;
@@ -83,8 +81,20 @@ function strip_punctuation($text)
 }
 
 
+/**
+* @param $text
+ *
+ * @return null|string|string[]
+*/function strip_punctuation($text)
+{
+	return preg_replace('/[[:punct:]]/', '', $text);
+}
 
-function isValueURLEncoded($str)
+/**
+* @param $str
+ *
+ * @return bool|int
+*/function isValueURLEncoded($str)
 {
     if (strlen($str) <= 0) {
         return 0;
@@ -93,7 +103,12 @@ function isValueURLEncoded($str)
 }
 
 
-function remove_prefix($text, $prefix)
+/**
+* @param $text
+* @param $prefix
+ *
+ * @return string
+*/function remove_prefix($text, $prefix)
 {
     if (0 === strpos($text, $prefix)) {
         $text = substr($text, strlen($prefix)).'';
@@ -101,7 +116,12 @@ function remove_prefix($text, $prefix)
     return $text;
 }
 
-function remove_postfix($text, $postfix)
+/**
+* @param $text
+* @param $postfix
+ *
+ * @return bool|string
+*/function remove_postfix($text, $postfix)
 {
     if (substr($text, strlen($text) - strlen($postfix)) === $postfix) {
         $text = substr($text, 0, (strlen($text)-strlen($postfix)));
@@ -110,7 +130,13 @@ function remove_postfix($text, $postfix)
 }
 
 
-function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
+/**
+* @param $v
+* @param null $prefixRemove
+* @param null $postfixRemove
+ *
+ * @return bool|null|string|string[]
+*/function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
 {
     if (empty($v)|| !is_string($v)) {
         return $v;
@@ -144,9 +170,9 @@ function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
  * Cleanup a string to make a slug of it
  * Removes special characters, replaces blanks with a separator, and trim it
  *
- * @param     string $slug        the text to slugify
+ * @param     string|null $slug        the text to slugify
  * @param     string $replacement the separator used by slug
- * @return    string               the slugified text
+ * @return    string|null              the slugified text
  */
 function cleanupSlugPart($slug, $replacement = '_')
 {
@@ -177,13 +203,21 @@ function cleanupSlugPart($slug, $replacement = '_')
 }
 
 
-function getTodayAsString($delim = "-")
+/**
+* @param string $delim
+ *
+ * @return false|string
+*/function getTodayAsString($delim = "-")
 {
     $fmt = "Y" . $delim . "m" . $delim . "d";
     return date($fmt);
 }
 
-function getNowAsString($delim = "-")
+/**
+* @param string $delim
+ *
+ * @return string
+*/function getNowAsString($delim = "-")
 {
     $fmt = join($delim, array("%Y", "%m", "%d", "%H", "%M", "%S"));
     return strftime($fmt, time());
@@ -233,6 +267,7 @@ function strScrub($str, $flags = null)
 
     if ($flags & REMOVE_PUNCT) {  // has to come after HTML_DECODE
         $ret = strip_punctuation($ret);
+
     }
 
     if ($flags & REMOVE_ALL_SPACES) {
