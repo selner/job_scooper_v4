@@ -86,8 +86,8 @@ echo "***************************************************************"
 echo "Logging into repo..."
 docker login r.cfcr.io -u bryanselner -p $CODEFRESH_API_KEY
 
-# echo "Pulling repo images..."
-# docker-compose $DCOMP_PARAMS pull
+echo "Pulling repo images..."
+docker-compose $DCOMP_PARAMS pull
 
 echo "Starting stack up in background..."
 docker-compose $DCOMP_PARAMS up -d
