@@ -5,7 +5,6 @@ steps:
     title: Building Docker Image
     type: build
     image_name: selner/job-scooper-v4
-    working_directory: ${{main_clone}}
     dockerfile: docker/Dockerfile
     tag: '${{CF_BRANCH_TAG_NORMALIZED}}.${{CF_BUILD_ID}}'
     metadata: # Declare the metadata attribute
