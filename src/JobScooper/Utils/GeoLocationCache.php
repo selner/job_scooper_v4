@@ -175,6 +175,9 @@ class GeoLocationCache
      */
     public function cacheGeoLocation(GeoLocation $geolocation, $newLookupString = null)
     {
+    	if(null !== $geolocation)
+    		throw new InvalidArgumentException("Error: attempted to set a null value as a cached geolocation.");
+
         $lookups = array($newLookupString);
         $tags = [$geolocation->getGeoLocationKey()];
 

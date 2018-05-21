@@ -36,6 +36,13 @@ const JSON_FILENAME = "-alljobsites.json";
  */
 class StageManager
 {
+	public function __construct($config = null)
+	{
+		if(null !== $config) {
+			$this->classConfig = $config;
+		}
+	}
+
     protected $JobSiteName = "StageManager";
     private $classConfig = null;
 

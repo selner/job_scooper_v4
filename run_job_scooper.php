@@ -49,5 +49,5 @@ try {
     print("Could not load {$arguments["config"]}: " . $e->getMessage());
 }
 
-$classRunJobs = new \JobScooper\Manager\StageManager();
+$classRunJobs = new \JobScooper\Manager\StageManager($config);
 $classRunJobs->runAll();

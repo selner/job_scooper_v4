@@ -156,6 +156,9 @@ class LocationManager
 
         try {
             $geoloc = $this->geocode($lookupAddress);
+            if(null === $geoloc){
+            	throw new \InvalidArgumentException("Error:  Geocoder returned a null location for {$lookupAddress}.");
+            }
             LogMessage("... Geocoder returned Geolocation {$geoloc->getGeoLocationKey()} for {$lookupAddress}.");
             $this->_geoLocCache->cacheGeoLocation($geoloc, $lookupAddress);
         } catch (Exception $e) {
