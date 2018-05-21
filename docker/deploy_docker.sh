@@ -6,24 +6,31 @@ if [ -z $CODEFRESH_API_KEY ]; then
 	goto s_error
 fi
 
+DCOMP_VERBOSE=""
+# Uncomment this line to turn on verbose output for all docker-compose calls
+# DCOMP_VERBOSE=" --verbose "
 
-COMPOSE_OVERRIDE=$1
+DEPLOY_STACK=$1
 
 if [ -z ${1} ]; then
-    COMPOSE_OVERRIDE="codefresh"
+    DEPLOY_STACK="codefresh"
 fi
 
-DOCKCOMP_OVERRIDE_FILE="docker-compose.$COMPOSE_OVERRIDE.yml"
-DCOMP_PARAMS="-f docker-compose.yml -f $DOCKCOMP_OVERRIDE_FILE"
+DOCKCOMP_STACK_FILE="docker-compose.$DEPLOY_STACK.yml"
+DCOMP_PARAMS="$DCOMP_VERBOSE -f docker-compose.yml -f $DOCKCOMP_STACK_FILE"
 
-if [ ! -f "$DOCKCOMP_OVERRIDE_FILE" ]; then
-    echo "Unable to find override file $DOCKCOMP_OVERRIDE_FILE.  Aborting."
+if [ ! -f "$DOCKCOMP_STACK_FILE" ]; then
+    echo "Unable to find override file $DOCKCOMP_STACK_FILE.  Aborting."
     exit
+fi
+
+if [ -f "./docker-compose.override.yml" ]; then
+    DCOMP_PARAMS="$DCOMP_PARAMS -f ./docker-compose.override.yml"
 fi
 
 echo "****************************************************************"
 echo ""
-echo "          DEPLOYING:  $COMPOSE_OVERRIDE"
+echo "          DEPLOYING:  $DEPLOY_STACK"
 echo ""
 echo "****************************************************************"
 echo ""
@@ -38,7 +45,6 @@ if [ ! -f ".env" ]; then
     fi
 fi
 
-
 sed '/JS_DEPLOY_DATE/ d' .env > envtmp1
 sed '/GIT_COMMIT_HASH/ d' envtmp1 > envtmp2
 sed '/BRANCH/ d'  envtmp2 > .env
@@ -48,10 +54,14 @@ echo "JS_DEPLOY_DATE=$(date +%s)" >> .env
 echo "GIT_COMMIT_HASH=$(echo $(git rev-parse --short HEAD) | tr '[A-Z]' '[a-z]')" >> .env
 echo "BRANCH=$(echo $(git symbolic-ref --short HEAD))" >> .env
 echo "BRANCH_LC=$(echo $(git symbolic-ref --short HEAD) | tr '[A-Z]' '[a-z]')" >> .env
+echo "DEPLOY_STACK=$DEPLOY_STACK" >> .env
 
-echo "Docker .env variables are set to: "
+echo "........................................."
+echo "   Docker .env variables are set to: "
+echo ""
 cat .env
-
+echo "........................................."
+echo ""
 
 echo "***************************************************************"
 echo ""
@@ -63,7 +73,7 @@ docker-compose $DCOMP_PARAMS config
 
 docker-compose $DCOMP_PARAMS down --remove-orphans
 
-if [ $COMPOSE_OVERRIDE == 'dev' ]; then
+if [ $DEPLOY_STACK == 'dev' ]; then
     echo "Building images..."
     docker-compose $DCOMP_PARAMS build
 fi
@@ -76,8 +86,8 @@ echo "***************************************************************"
 echo "Logging into repo..."
 docker login r.cfcr.io -u bryanselner -p $CODEFRESH_API_KEY
 
-echo "Pulling repo images..."
-docker-compose $DCOMP_PARAMS pull
+# echo "Pulling repo images..."
+# docker-compose $DCOMP_PARAMS pull
 
 echo "Starting stack up in background..."
 docker-compose $DCOMP_PARAMS up -d
