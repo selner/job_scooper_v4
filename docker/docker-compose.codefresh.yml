@@ -2,4 +2,4 @@ version: "3.2"
 
 services:
   app:
-     image: job-scooper-v4-$BRANCH_LC
+     image: job-scooper-v4:$BRANCH_LC
