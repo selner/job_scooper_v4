@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: ../
-      dockerfile: ./Dockerfile
+      dockerfile: docker/Dockerfile
       args:
         - GIT_COMMIT_HASH=$GIT_COMMIT_HASH
     # image: js4_dev_$GIT_COMMIT_HASH
