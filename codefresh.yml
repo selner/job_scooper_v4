@@ -4,9 +4,9 @@ steps:
   BuildingDockerImage:
     title: Building Docker Image
     type: build
-    image_name: selner/js4-${{CF_BRANCH_TAG_NORMALIZED}}
+    image_name: selner/job-scooper-v4-${{CF_BRANCH_TAG_NORMALIZED}}
     working_directory: ${{main_clone}}
-    dockerfile: Dockerfile
+    dockerfile: ./docker/Dockerfile
     metadata: # Declare the metadata attribute
       set: # Specify the set operation
         - qa: pending

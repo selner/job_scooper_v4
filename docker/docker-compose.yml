@@ -58,12 +58,7 @@ services:
       - JOBSCOOPER_CONFIG
       - NLTK_DATA
       - JOBSCOOPER_GEOCODEAPI_SERVER="http://jobscooperv4_geocodeapi:5000"
-    build:
-      context: ./
-      dockerfile: Dockerfile
-      args:
-        - GIT_COMMIT_HASH=$GIT_COMMIT_HASH
-    image: js4_$GIT_COMMIT_HASH
+
     volumes:
       - type: bind
         source: "$JOBSCOOPER_HOST_VOLDIR"

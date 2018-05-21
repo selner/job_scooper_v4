@@ -224,7 +224,7 @@ RUN ls -al /usr/bin
 RUN docker-php-ext-enable zip
 
 WORKDIR /opt/jobs_scooper
-ADD ./composer.json /opt/jobs_scooper/
+ADD ../composer.json /opt/jobs_scooper/
 RUN composer install --no-interaction -vv
 
 ########################################################
@@ -232,7 +232,7 @@ RUN composer install --no-interaction -vv
 ### Install python dependencies
 ###
 ########################################################
-ADD ./python/pyJobNormalizer/requirements.txt /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
+ADD ../python/pyJobNormalizer/requirements.txt /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 
 
@@ -247,7 +247,7 @@ ARG GIT_COMMIT_HASH
 ###
 ########################################################
 RUN echo "Adding all source files from `pwd` to /opt/jobs_scooper"
-ADD ./ /opt/jobs_scooper/
+ADD .. /opt/jobs_scooper/
 
 RUN echo "Verifying correct source installed..."
 RUN ls -al /opt/jobs_scooper
