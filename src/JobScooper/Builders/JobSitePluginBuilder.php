@@ -433,9 +433,16 @@ class JobSitePluginBuilder
         $jobsitekey = strtolower($pluginData['JobSiteName']);
 
 
-        if (!empty($arrConfigData['PluginExtendsClassName']) && stristr($arrConfigData['PluginExtendsClassName'], "Abstract") === false) {
+        $listingTagBucket = 'arrListingTagSetup';
+        if (!empty($arrConfigData['PluginExtendsClassName']) && false === stripos($arrConfigData['PluginExtendsClassName'], "Abstract"))
+        {
             setArrayItem($pluginData, 'PluginExtendsClassName', $arrConfigData, 'PluginExtendsClassName');
         }
+        elseif(false !== stripos($arrConfigData['PluginExtendsClassName'], "Abstract"))
+        {
+            $listingTagBucket = 'arrBaseListingTagSetup';
+        }
+
         $pluginData['PluginExtendsClassName'] = str_replace("\\\\", "\\", $pluginData['PluginExtendsClassName']);
 
         setArrayItem($pluginData, 'JobPostingBaseUrl', $arrConfigData, 'BaseURL');
@@ -451,7 +458,7 @@ class JobSitePluginBuilder
                 $pluginData['PaginationType'] = strtoupper($arrConfigData['Pagination']['Type']);
                 switch (strtoupper($arrConfigData['Pagination']['Type'])) {
                     case 'NEXT-BUTTON':
-                        $pluginData['arrListingTagSetup']['NextButton'] = array(
+                        $pluginData[$listingTagBucket]['NextButton'] = array(
                             'selector' => $arrConfigData['Pagination']['Selector'],
                             'index' => $arrConfigData['Pagination']['Index'],
                             'type' => 'CSS'
@@ -459,7 +466,7 @@ class JobSitePluginBuilder
                         break;
 
                     case 'LOAD-MORE':
-                        $pluginData['arrListingTagSetup']['LoadMoreControl'] = array(
+                        $pluginData[$listingTagBucket]['LoadMoreControl'] = array(
                             'selector' => $arrConfigData['Pagination']['Selector'],
                             'index' => $arrConfigData['Pagination']['Index'],
                             'type' => 'CSS'
@@ -474,14 +481,14 @@ class JobSitePluginBuilder
 
 
         if (array_key_exists("Collections", $arrConfigData) && !is_null($arrConfigData['Collections']) && is_array($arrConfigData['Collections']) && count($arrConfigData['Collections']) > 0 && array_key_exists("Fields", $arrConfigData['Collections'][0])) {
-            if (!is_array($pluginData['arrListingTagSetup'])) {
-                $pluginData['arrListingTagSetup'] = array();
+            if (!is_array($pluginData[$listingTagBucket])) {
+                $pluginData[$listingTagBucket] = array();
             }
             foreach ($arrConfigData['Collections'] as $coll) {
                 foreach ($coll['Fields'] as $field) {
                     $name = getArrayItem('Name', $field);
 
-                    $pluginData['arrListingTagSetup'][$name] = array();
+                    $pluginData[$listingTagBucket][$name] = array();
                     $MAP_VALUES = array(
                         ['selector', 'Selector'],
                         ['index', 'Index'],
@@ -495,11 +502,11 @@ class JobSitePluginBuilder
                     );
 
                     foreach ($MAP_VALUES as $mapping) {
-                        setArrayItem($pluginData['arrListingTagSetup'][$name], $mapping[0], $field, $mapping[0]);
+                        setArrayItem($pluginData[$listingTagBucket][$name], $mapping[0], $field, $mapping[0]);
                     }
 
                     foreach ($MAP_VALUES as $mapping) {
-                        setArrayItem($pluginData['arrListingTagSetup'][$name], $mapping[0], $field, $mapping[1]);
+                        setArrayItem($pluginData[$listingTagBucket][$name], $mapping[0], $field, $mapping[1]);
                     }
                 }
             }

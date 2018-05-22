@@ -419,7 +419,8 @@ class ConfigBuilder
                 if (empty($updatedUser)) {
                     throw new \Exception('Failed to create or update user based on config section users.{$key_user}.');
                 }
-                $user_recs[$key_user] = $updatedUser;
+                $user_recs[$key_user] = $updatedUser->toArray();
+                $updatedUser = null;
             }
         }
 
@@ -432,8 +433,9 @@ class ConfigBuilder
         // First try to pull the user from the database by that userslug value.  Use that user
         // if we find one.  This allows a dev to override the local config file data if needed
         if (!empty($cmd_line_user_to_run)) {
-            $currentUser = UserQuery::create()
-                ->findOneByUserSlug($cmd_line_user_to_run);
+            $currentUser = UserQuery::getUserByUserSlug($cmd_line_user_to_run);
+            if(null !== $currentUser)
+            	$currentUser = $currentUser->toArray();
         }
 
         // if we didn't match a user, look for one as the key name in a config file section under [users.*]

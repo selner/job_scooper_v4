@@ -82,20 +82,35 @@ function getOutputDirectory($key)
     return $ret;
 }
 
-function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpecific=true, $dirKey="debug")
+function generateOutputFilePath($dirKey="debug", $baseFileName="UNKNOWN", $ext="UNKNOWN", $userId = null)
 {
     $outDir = getOutputDirectory($dirKey);
-    $today = "_" . getNowAsString("");
-    $user = "";
-    if ($isUserSpecific === true) {
-        $objUser = \JobScooper\DataAccess\User::getCurrentUser();
-        if (!is_null($objUser)) {
-            $user = "_" . $objUser->getUserSlug();
+    $now = '_' . getNowAsString('');
+    $user = '';
+
+    if (null !== $userId) {
+        $userFacts = \JobScooper\DataAccess\User::getUserFactsById($userId);
+        if (!is_empty_value($userFacts)) {
+            $user = '_' . $userFacts['UserSlug'];
         }
     }
 
-    $ret = "{$outDir}/{$baseFileName}{$user}{$today}.{$ext}";
-    return $ret;
+    return "{$outDir}/{$baseFileName}{$user}{$now}.{$ext}";
+}
+
+
+function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpecific=true, $dirKey="debug")
+{
+	$userId = null;
+
+    if ($isUserSpecific === true) {
+        $userFacts = \JobScooper\DataAccess\User::getCurrentUserFacts();
+        if (!is_empty_value($userFacts)) {
+            $userId = $userFacts['UserId'];
+        }
+    }
+
+	return generateOutputFilePath($dirKey, $baseFileName, $ext, $userId);
 }
 
 

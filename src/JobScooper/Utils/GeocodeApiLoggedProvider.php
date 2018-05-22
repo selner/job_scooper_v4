@@ -92,7 +92,7 @@ class GeocodeApiLoggedProvider extends AbstractProvider implements LocaleAwarePr
         if (empty($this->region)) {
             return '';
         }
-        $this->region;
+        return $this->region;
     }
 
     /**
@@ -111,7 +111,7 @@ class GeocodeApiLoggedProvider extends AbstractProvider implements LocaleAwarePr
         if (empty($this->apiKey)) {
             return '';
         }
-        $this->apiKey;
+        return $this->apiKey;
     }
 
     /**

@@ -17,7 +17,7 @@
 
 namespace JobScooper\Utils;
 
-use JobScooper\DataAccess\UserQuery;
+use JobScooper\DataAccess\User;use JobScooper\DataAccess\UserQuery;
 use JobScooper\DataAccess\UserSearchPairQuery;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -52,15 +52,20 @@ class DBRecordRemover
         return DBRecordRemover::removeUserRelatedRecords($query, $users, $userSearchPairs, $geolocations);
     }
 
-    public static function removeUserRelatedRecords(&$query, $users=null, $userSearches=null, $geolocations=null, $jobsites=null)
+    public static function removeUserRelatedRecords(&$query, $users=array(), $userSearches=null, $geolocations=null, $jobsites=null)
     {
         if (empty($query)) {
             return false;
+		}
+
+		$arrUserIds = array();
+        foreach($users as $userFacts) {
+            $arrUserIds[$userFacts['UserId']] = $userFacts['UserId'];
         }
 
         try {
             $queryFilters = array();
-            foreach (['users' => $users, 'searchpairs' => $userSearches, 'geolocations' => $geolocations, 'jobsites' => $jobsites] as $k => $param) {
+            foreach (['userIds' => $arrUserIds, 'searchpairs' => $userSearches, 'geolocations' => $geolocations, 'jobsites' => $jobsites] as $k => $param) {
                 if (!empty($param) && !is_array($param)) {
                     $queryFilters[$k] = array($param);
                 } elseif (empty($param)) {
@@ -74,12 +79,13 @@ class DBRecordRemover
                 foreach ($v as $itemKey => $item) {
                     if (is_object($item)) {
                         switch ($k) {
-                            case 'users':
-                                $queryFilters[$k][$itemKey] = $item->getUserId();
+                            case 'userIds':
+                                $queryFilters[$k][$itemKey] = $item;
                                 break;
 
                             case 'searchpairs':
-                                $queryFilters[$k][$itemKey] = $item->getUserSearchPairId();
+                            	$user = User::getUserObjById($users[$item]);
+                                $queryFilters[$k][$itemKey] = $user->getUserSearchPairId();
                                 break;
 
                             case 'geolocations':
@@ -94,8 +100,8 @@ class DBRecordRemover
                 }
             }
 
-            if (!empty($queryFilters['users'])) {
-                $query->filterByUserId($queryFilters['users'], Criteria::IN);
+            if (!empty($queryFilters['userIds'])) {
+                $query->filterByUserId($queryFilters['userIds'], Criteria::IN);
             }
 
             if (!empty($queryFilters['searchespairs'])) {

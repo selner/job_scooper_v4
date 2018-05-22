@@ -20,14 +20,13 @@ namespace JobScooper\SitePlugins\Base;
 require_once(__ROOT__ . '/src/helpers/Constants.php');
 
 use function JobScooper\DataAccess\getCountryCodeRemapping;
-use JobScooper\SitePlugins\Interfaces\IJobSitePlugin;
+use JobScooper\DataAccess\UserSearchSiteRun;use JobScooper\SitePlugins\Interfaces\IJobSitePlugin;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatchQuery;
-use JobScooper\DataAccess\UserSearchSiteRun;
 use JobScooper\Manager\SeleniumManager;
 use JobScooper\Utils\DomItemParser;
 use JobScooper\Utils\ExtendedDiDomElement;
@@ -274,36 +273,30 @@ abstract class SitePlugin implements IJobSitePlugin
     }
 
     /**
-     * @param UserSearchSiteRun[]         $arrSearches
+     * @param UserSearchSiteRun[]         arrSearchRuns
      *
-     * @param \JobScooper\DataAccess\User $user
+     * @param array $userFacts
      *
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function setSearches($arrSearches, User $user)
+    public function setSearches($arrSearchRuns)
     {
         $this->arrSearchesToReturn = array(); // clear out any previous searches
 
-        $this->_currentUserForSearches = $user;
         $this->setResultsFilterType();
 
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
-            $searchToKeep = null;
-            foreach (array_keys($arrSearches) as $searchkey) {
-                $search = $arrSearches[$searchkey];
-                if (empty($searchToKeep)) {
-                    $searchToKeep = $search;
-                } else {
-                    $search->delete();
-                    unset($arrSearches[$searchkey]);
-                }
+            $searchToKeep = array_pop($arrSearchRuns);
+            foreach ($arrSearchRuns as $searchkey) {
+                $search = $arrSearchRuns[$searchkey];
+                $search->delete();
             }
-            $arrSearches = array($searchToKeep);
+            $arrSearchRuns = array($searchToKeep);
         }
 
-        foreach ($arrSearches as $searchDetails) {
-            $this->_addSearch_($searchDetails);
+        foreach ($arrSearchRuns as $search) {
+            $this->addSearch($search);
         }
     }
 
@@ -354,11 +347,13 @@ abstract class SitePlugin implements IJobSitePlugin
              *  but the user is currently missing from their potential job matches.
              */
             if ((strcasecmp($this->resultsFilterType, "all-only") == 0) || (strcasecmp($this->resultsFilterType, "all-by-location") == 0)) {
-                try {
-                    LogMessage("Checking for missing {$this->JobSiteKey} jobs for user {$this->_currentUserForSearches->getUserId()}.");
+            	try {
+            		$userFacts = User::getUserFactsById($search->getUserId());
+
+                    LogMessage("Checking for missing {$this->JobSiteKey} jobs for user {$userFacts['UserSlug']}.");
                     $dataExistingUserJobMatchIds = UserJobMatchQuery::create()
                         ->select("JobPostingId")
-                        ->filterByUserId($this->_currentUserForSearches->getUserId())
+                        ->filterByUserId($userFacts['UserId'])
                         ->useJobPostingFromUJMQuery()
                         ->filterByJobSiteKey($this->JobSiteKey)
                         ->endUse()
@@ -374,11 +369,11 @@ abstract class SitePlugin implements IJobSitePlugin
                     $jobIdsToAddToUser = array_diff($queryAllJobsFromJobSite, $dataExistingUserJobMatchIds);
 
                     if (null !== $jobIdsToAddToUser && count($jobIdsToAddToUser) > 0) {
-                        LogMessage("Found " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs not yet assigned to user " . $this->_currentUserForSearches->getUserSlug() . ".");
+                        LogMessage("Found " . count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs not yet assigned to user {$userFacts['UserSlug']}.");
                         $this->_addJobMatchIdsToUser($jobIdsToAddToUser, $search);
-                        LogMessage("Successfully added " . count($jobIdsToAddToUser) . " " . $this->JobSiteKey . " jobs to user " . $this->_currentUserForSearches->getUserSlug() . ".");
+                        LogMessage("Successfully added " . count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs to user {$userFacts['UserSlug']}.");
                     } else {
-                        LogMessage("User " . $this->_currentUserForSearches->getUserSlug() . " had no missing previously loaded listings from " . $this->JobSiteKey . ".");
+                        LogMessage("User {$userFacts['UserSlug']} had no missing previously loaded listings from {$this->JobSiteKey}.");
                     }
                 } catch (Exception $ex) {
                     handleException($ex);
@@ -462,11 +457,6 @@ abstract class SitePlugin implements IJobSitePlugin
     protected $CountryCodes = array("US");
     private $_curlWrapper = null;
     protected $searchResultsPageUrl = null;
-
-    /**
-     * @var User/null
-     */
-    protected $_currentUserForSearches = null;
 
     /**
      * @param \JobScooper\DataAccess\GeoLocation|null $location
@@ -947,22 +937,22 @@ abstract class SitePlugin implements IJobSitePlugin
 
         $this->log("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...");
 
-        $js = "
+        $js = '
             scroll = setTimeout(doNextPage, " . $secs . ");
             function doNextPage() 
             {
-                var loadnext = document.querySelector(\"" . $this->selectorMoreListings . "\");
-                if(loadnext != null && !typeof(loadnext .click) !== \"function\" && loadnext.length >= 1) {
+                var loadnext = document.querySelector(" . $this->selectorMoreListings . ");
+                if(loadnext != null && !typeof(loadnext .click) !== "function" && loadnext.length >= 1) {
                     loadnext = loadnext[0];
                 } 
     
-                if(loadnext != null && loadnext.style.display === \"\") 
+                if(loadnext != null && loadnext.style.display === "") 
                 { 
                     loadnext.click();  
-                    console.log(\"Clicked load next results control " . $this->selectorMoreListings . "...\");
+                    console.log("Clicked load next results control " . $this->selectorMoreListings . "...");
                 }
             }  
-        ";
+        ';
 
         $this->runJavaScriptSnippet($js, false);
 
@@ -1020,7 +1010,7 @@ abstract class SitePlugin implements IJobSitePlugin
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    private function _addSearch_(UserSearchSiteRun $searchDetails)
+    private function addSearch(UserSearchSiteRun $searchDetails)
     {
         $searchDetails->setStartingUrlForSearch();
 
@@ -1507,7 +1497,7 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     private function _addJobMatchIdsToUser($arrJobIds, UserSearchSiteRun $searchDetails)
     {
-        $userId = $this->_currentUserForSearches->getUserId();
+        $userId = $searchDetails->getUserId();
 
         $alreadyMatched = UserJobMatchQuery::create()
             ->filterByUserId($userId)

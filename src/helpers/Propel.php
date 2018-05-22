@@ -120,14 +120,14 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
  * @param null $userNotificationState
  * @param array|null $arrGeoLocIds
  * @param int|null $nNumDaysBack
- * @param \JobScooper\DataAccess\User|null $user
+ * @param array|null $userFacts
  *
  * @return \JobScooper\DataAccess\UserJobMatch[]
  *
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null, $countsOnly=false)
+function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $userFacts=null, $countsOnly=false)
 {
     $results = null;
 
@@ -155,7 +155,7 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 
 
     $query->filterByUserNotificationStatus($userNotificationState);
-    $query->filterByUser($user);
+    $query->filterByUserId($userFacts['UserId']);
     $query->filterByDaysAgo($nNumDaysBack);
     $query->filterByGeoLocationIds($arrGeoLocIds);
 
@@ -183,19 +183,19 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
  * @param                                  $userNotificationState
  * @param null                             $arrGeoIds
  * @param null                             $nNumDaysBack
- * @param \JobScooper\DataAccess\User|null $user
+ * @param array|null $userFacts
  *
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, \JobScooper\DataAccess\User $user=null)
+function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, $userFacts=null)
 {
     $chunkResults = null;
     $continueLoop = true;
 
     $nResults = 0;
     while (null !== $chunkResults && $continueLoop === true) {
-        $chunkResults = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $user);
+        $chunkResults = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $userFacts);
         if (null !== $chunkResults) {
             $nSetResults = $nResults + count($chunkResults) - 1;
             LogMessage("Processing user match results #{$nResults} - {$nSetResults} via callback '{$callback}'...");

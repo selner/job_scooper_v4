@@ -119,7 +119,7 @@ class JobsMailSender
                     } elseif (array_key_exists('Email', $user) && !empty($user['Email'])) {
                         $email = $user['email'];
                     } elseif (array_key_exists('User', $user) && !empty($user['User'])) {
-                        $email = $user['User']->getEmailAddress();
+                        $email = $user['User']['EmailAddress'];
                     }
 
                     if (array_key_exists('name', $user) && !empty($user['name'])) {
@@ -127,7 +127,7 @@ class JobsMailSender
                     } elseif (array_key_exists('Name', $user) && !empty($user['Name'])) {
                         $name = $user['Name'];
                     } elseif (array_key_exists('User', $user) && !empty($user['User'])) {
-                        $name = $user['User']->getName();
+                        $name = $user['User']['Name'];
                     }
 
                     switch ($kind) {

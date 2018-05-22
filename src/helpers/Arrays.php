@@ -353,7 +353,7 @@ function array_subset_keys(array $haystack, array $keys)
 }
 
 /**
- * @param      $coll
+ * @param \Propel\Runtime\Collection\Collection $coll
  * @param null $limitToKeys
  *
  * @return array

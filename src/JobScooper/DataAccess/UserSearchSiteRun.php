@@ -307,6 +307,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
     /**
      * @param null $nDays
+     *
      * @throws \Exception
      * @return int
      */
@@ -322,6 +323,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
     /**
      * @param $nPage
+     *
      * @throws \Exception
      *
      * @return string
@@ -337,6 +339,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
     /**
      * @param $nItem
+     *
      * @throws \Exception
      *
      * @return int
@@ -440,6 +443,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
     /**
      * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+     *
      * @throws \Exception
      *
      * @return string
@@ -499,6 +503,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
     /**
      * @param $flagToCheck
+     *
      * @throws \Exception
      * @return bool
      */
@@ -510,5 +515,19 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
         }
 
         throw new \Exception("Error: could not get job site plugin object for {$this->getJobSiteKey()}.");
+    }
+
+    /**
+     * @throws \Propel\Runtime\Exception\PropelException
+     * @return integer
+     */
+    public function getUserId()
+    {
+    	$searchPair = $this->getUserSearchPairFromUSSR();
+    	if(null !== $searchPair) {
+    		return $searchPair->getUserId();
+    	}
+
+    	return null;
     }
 }

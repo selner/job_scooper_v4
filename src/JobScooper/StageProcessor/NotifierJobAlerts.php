@@ -107,15 +107,20 @@ class NotifierJobAlerts extends JobsMailSender
     }
 
     /**
-     * @param User $user
+     * @param array $userFacts
      * @return bool
      * @throws \Exception
      * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
      */
-    public function processRunResultsNotifications(User $user)
+    public function processRunResultsNotifications(array $userFacts)
     {
         startLogSection("Processing user notification alerts");
         $matches = null;
+
+        if(null === $userFacts || null === $userFacts['UserId']) {
+        	throw new \InvalidArgumentException("Cannot send notifications for a null UserId.");
+        }
+        $user = User::getUserObjById($userFacts['UserId']);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
@@ -139,7 +144,7 @@ class NotifierJobAlerts extends JobsMailSender
             }
             $matches = array( "all" => array());
 
-            LogMessage("Building job notification list for {$user->getName()}'s keyword matches in {$geoLocation->getDisplayName()}...");
+            LogMessage("Building job notification list for {$userFacts['UserSlug']}'s keyword matches in {$geoLocation->getDisplayName()}...");
             $place = $geoLocation->getDisplayName();
             $arrNearbyIds = getGeoLocationsNearby($geoLocation);
             $geoLocationId = $geoLocation->getGeoLocationId();
@@ -149,7 +154,7 @@ class NotifierJobAlerts extends JobsMailSender
                 [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
                 $arrNearbyIds,
                 null,
-                $user
+                $userFacts
             );
 
             if (empty($dbMatches)) {
@@ -171,21 +176,27 @@ class NotifierJobAlerts extends JobsMailSender
             }
 
 
-            $this->_sendResultsNotification($matches, $subject, $user, $geoLocationId);
+            $this->_sendResultsNotification($matches, $subject, $userFacts, $geoLocationId);
 
             unset($matches);
         }
+        $user = null;
     }
 
 
     /**
-     * @param User $user
+     * @param array $userFacts
      * @return bool
      * @throws \Exception
      * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
      */
-    public function processWeekRecapNotifications(User $user)
+    public function processWeekRecapNotifications(array $userFacts)
     {
+        if(null === $userFacts || null === $userFacts['UserId']) {
+        	throw new \InvalidArgumentException("Cannot send notifications for a null UserId.");
+        }
+        $user = User::getUserObjById($userFacts['UserId']);
+
         //
         // Send a separate notification for each GeoLocation the user had set
         //
@@ -226,19 +237,20 @@ class NotifierJobAlerts extends JobsMailSender
             $matches["isUserJobMatchAndNotExcluded"] = array_filter($matches["all"], "isUserJobMatchAndNotExcluded");
 
             $subject = "Weekly {$place} Roundup for " . getRunDateRange(7);
-            $this->_sendResultsNotification($matches, $subject, $user, $geoLocationId);
+            $this->_sendResultsNotification($matches, $subject, $userFacts, $geoLocationId);
 
             unset($matches);
+            $user = null;
         }
     }
 
     /**
-     * @param User $sendToUser
+     * @param array $userFacts
      * @return bool
      * @throws \Exception
      * @throws \PhpOffice\PhpSpreadsheet\Style\Exception
      */
-    private function _sendResultsNotification(&$matches, $resultsTitle, User $sendToUser, $geoLocationId=null)
+    private function _sendResultsNotification(&$matches, $resultsTitle, $userFacts, $geoLocationId=null)
     {
         $ret = false;
 
@@ -286,9 +298,9 @@ class NotifierJobAlerts extends JobsMailSender
         startLogSection("Generating HTML & text email content for user ");
 
         try {
-            $messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, count($allJobMatchIds), $sendToUser, $geoLocationId);
+            $messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, count($allJobMatchIds), $userFacts, $geoLocationId);
             if (empty($messageHtml)) {
-                throw new Exception("Failed to generate email notification content for email {$resultsTitle} to sent to user {$sendToUser}.");
+                throw new Exception("Failed to generate email notification content for email {$resultsTitle} to sent to user {$userFacts['UserSlug']}.");
             }
 
             endLogSection("Email content ready to send.");
@@ -296,8 +308,9 @@ class NotifierJobAlerts extends JobsMailSender
             //
             // Send the email notification out for the completed job
             //
-            startLogSection("Sending email to user " . $sendToUser->getEmailAddress() ."...");
+            startLogSection("Sending email to user {$userFacts['EmailAddress']}...");
 
+            $sendToUser = User::getUserObjById($userFacts['UserId']);
             $ret = $this->sendEmail(NotifierJobAlerts::PLAINTEXT_EMAIL_DIRECTIONS, $messageHtml, $arrFilesToAttach, $resultsTitle, "results", $sendToUser);
             if ($ret !== false && $ret !== null) {
 
@@ -320,6 +333,7 @@ class NotifierJobAlerts extends JobsMailSender
             endLogSection(" Email send failed.");
             handleException($ex);
         } finally {
+            $sendToUser = null;
             unset($messageHtml, $matches);
         }
 
@@ -380,12 +394,12 @@ class NotifierJobAlerts extends JobsMailSender
     /**
      * @param $subject
      * @param $matches
-     * @param User $user
+     * @param array $userFacts
      *
      * @return mixed
      * @throws \Exception
      */
-    private function _generateHTMLEmailContent($subject, &$matches, $totalJobs, User $user, $geoLocationId=null)
+    private function _generateHTMLEmailContent($subject, &$matches, $totalJobs, $userFacts, $geoLocationId=null)
     {
         try {
             $renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_results_responsive.tmpl")));
@@ -410,6 +424,7 @@ class NotifierJobAlerts extends JobsMailSender
                 "JobMatches" => $matches["isUserJobMatchAndNotExcluded"]
             );
 
+            $user = User::getUserObjById($userFacts['UserId']);
             $kwds = $user->getSearchKeywords();
             $data['Search']['Keywords'] = join(", ", $kwds);
 

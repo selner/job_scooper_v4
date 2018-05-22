@@ -5,7 +5,7 @@ namespace JobScooper\DataAccess;
 use JobScooper\Builders\SearchBuilder;
 use JobScooper\DataAccess\Base\User as BaseUser;
 use JobScooper\Manager\LocationManager;
-use Propel\Runtime\ActiveQuery\Criteria;
+use JobScooper\Utils\Settings;use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
@@ -27,11 +27,48 @@ class User extends BaseUser
     private $_userSearchSiteRunsByJobSite = array();
 
     /**
+     * @return array
+     */
+    public static function getCurrentUserFacts()
+    {
+        $userId = Settings::getValue('current_user_id');
+        if(null === $userId) {
+        	return null;
+        }
+		return self::getUserFactsById($userId);
+    }
+
+    /**
+     * @param int $userId
+     * @return array
+     */
+    public static function getUserFactsById($userId)
+    {
+        if(null === $userId)
+        	throw new \InvalidArgumentException("Requested UserId value was null.");
+
+    	$user = User::getUserObjById($userId);
+    	$arrFacts = null;
+
+		if(null === $user) {
+			LogWarning("Requested UserId {$userId} could not be found in database.");
+		}
+		else {
+			$arrFacts = $user->toArray();
+		}
+
+		$user = null;
+		return $arrFacts;
+    }
+
+    /**
+     * @param int $userId
      * @return \JobScooper\DataAccess\User
      */
-    public static function getCurrentUser()
+    public static function getUserObjById($userId)
     {
-        return getConfigurationSetting('current_user');
+       return UserQuery::create()
+            ->findOneByUserId($userId);
     }
 
     /**
@@ -41,8 +78,9 @@ class User extends BaseUser
      */
     public static function setCurrentUser(User $user)
     {
-        setConfigurationSetting('current_user', $user);
-        setConfigurationSetting('alerts.results.to', $user);
+    	$user->save();
+        Settings::setValue('current_user_id', $user->getUserId());
+        Settings::setValue('alerts.results.to', $user->toArray());
     }
 
     /**
@@ -362,12 +400,19 @@ class User extends BaseUser
     }
 
     /**
+     * @param integer $jobSiteKey
      * @return array
      * @throws \Propel\Runtime\Exception\PropelException
      * @throws \Exception
      */
-    public function getUserSearchSiteRuns()
+    public function getUserSearchSiteRunsForJobSite($jobSiteKey)
     {
+
+        if(null === $jobSiteKey) {
+        	throw new \InvalidArgumentException('Cannot get UserSearchSiteRuns for null JobSiteKey.');
+        }
+
+
         if (empty($this->_userSearchSiteRunsByJobSite)) {
             $this->createUserSearchSiteRuns();
         }
@@ -376,9 +421,31 @@ class User extends BaseUser
             return null;
         }
 
-        $arrSearchesToRun = array_filter($this->_userSearchSiteRunsByJobSite, function ($var) {
-            return !empty($var);
-        });
+        $arrSearchesToRun = array();
+
+		if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$jobSiteKey])) {
+			$arrSearchesToRun = $this->_userSearchSiteRunsByJobSite[$jobSiteKey];
+		}
+
         return $arrSearchesToRun;
+    }
+
+
+    /**
+     * @return array
+     * @throws \Propel\Runtime\Exception\PropelException
+     * @throws \Exception
+     */
+    static function getSearchSiteRunsForUser($userId, $jobSiteKey = null)
+    {
+    	$userobj = self::getUserObjById($userId);
+
+        if($userobj === null){
+    		throw new \InvalidArgumentException("User ID {$userId} could not be found in the database.");
+        }
+
+        $siteRuns = $userobj->getUserSearchSiteRuns($jobSiteKey);
+    	$userobj = null;
+		return $siteRuns;
     }
 }

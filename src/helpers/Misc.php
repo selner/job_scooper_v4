@@ -114,7 +114,7 @@ function exportToDebugJSON($obj, $strBaseFileName)
 
     $jsonSelf = json_encode($saveArr, JSON_HEX_QUOT | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP);
     $basefile = getDefaultJobsOutputFileName($strFilePrefix = "_debug_" . $strBaseFileName, $strExt = "", $delim = "-");
-    $debugJSONFile = generateOutputFileName($basefile, $ext="json");
+    $debugJSONFile = generateOutputFilePath('debug', $basefile, $ext='json');
     file_put_contents($debugJSONFile, $jsonSelf);
 
     return $debugJSONFile;
@@ -256,7 +256,6 @@ function doExec($cmd)
     $cmdArrOutput = array();
     $cmdRet = null;
     $lastResultLine = null;
-
     $lastOutput = exec($cmd, $cmdArrOutput, $cmdRet);
     $cmdStrOutput = join(PHP_EOL, $cmdArrOutput);
     if ($cmdRet !== 0) {

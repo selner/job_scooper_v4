@@ -43,6 +43,27 @@ class UserQuery extends BaseUserQuery
      * @return User|null
      *
      */
+    public static function getUserByUserSlug($slug)
+    {
+        if (empty($slug)) {
+            throw new \Exception('Unable to search for user by user slug.  Missing required user slug parameter.');
+        }
+
+        $user = UserQuery::create()
+            ->filterByUserSlug($slug)
+            ->findOne();
+
+        return $user;
+    }
+
+    /**
+     *
+     * @throws \Exception
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return User|null
+     *
+     */
     public static function findOrCreateUserByUserSlug($slug, $arrUserFactsToSet = array(), $overwriteFacts = false)
     {
         if (empty($slug)) {
