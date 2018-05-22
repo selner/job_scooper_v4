@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-deploy_docker.sh dev
+./deploy_docker.sh dev
 
 
