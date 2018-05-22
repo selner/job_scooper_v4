@@ -92,7 +92,7 @@ class JobSitePluginBuilder
     /**
      * @param string $strJobSiteKey
      * @throws \Exception
-     * @return \JobScooper\BasePlugin\Interfaces\IJobSitePlugin
+     * @return \JobScooper\SitePlugins\Interfaces\IJobSitePlugin
      */
     public static function getJobSitePlugin($strJobSiteKey)
     {

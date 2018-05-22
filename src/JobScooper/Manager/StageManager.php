@@ -17,14 +17,13 @@
 namespace JobScooper\Manager;
 
 use JobScooper\Builders\JobSitePluginBuilder;
-use JobScooper\Builders\SearchBuilder;
 use JobScooper\DataAccess\User;
-use JobScooper\DataAccess\UserSearchSiteRun;
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Builders\ConfigBuilder;
 use JobScooper\Utils\DBRecordRemover;
+use JobScooper\Utils\Settings;
 
 const JOBLIST_TYPE_UNFILTERED = "unfiltered";
 const JOBLIST_TYPE_MARKED = "marked";
@@ -63,7 +62,7 @@ class StageManager
 
         $runStartTime = getConfigurationSetting('app_run_start_datetime');
         if (empty($runStartTime)) {
-            setConfigurationSetting('app_run_start_datetime', new \DateTime());
+	        Settings::setValue('app_run_start_datetime', new \DateTime());
         }
     }
 

@@ -8,7 +8,6 @@
 
 namespace JobScooper\Utils;
 
-use M1\Vars\Vars;
 use Noodlehaus\Config;
 
 class Settings extends \Adbar\Dot

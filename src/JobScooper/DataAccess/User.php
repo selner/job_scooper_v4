@@ -36,6 +36,8 @@ class User extends BaseUser
 
     /**
      * @param \JobScooper\DataAccess\User $user
+     * @throws \PDOException
+     * @throws \Propel\Runtime\Exception\PropelException
      */
     public static function setCurrentUser(User $user)
     {
@@ -168,7 +170,6 @@ class User extends BaseUser
 
     /**
      * @throws \Exception
-     * @return null
      */
     private function _parseConfigUserInputFiles($arrUserFacts)
     {
@@ -242,7 +243,6 @@ class User extends BaseUser
     }
 
     /**
-     * @return null
      * @throws \Propel\Runtime\Exception\PropelException
      * @throws \Exception
      * @throws \Psr\Cache\InvalidArgumentException
@@ -312,12 +312,13 @@ class User extends BaseUser
                 ->addCond('condUserLocs', $locIdColumnName, array_values($searchGeoLocIds), Criteria::NOT_IN)
                 ->combine(array('condUserKwds', 'condUserLocs'), Criteria::LOGICAL_OR)
                 ->update(array('IsActive' => false), $con);
-
+			$query = null;
+			$con = null;
             LogMessage("Marked {$oldPairUpdate} previous user search pairs as inactive.");
         } catch (PropelException $ex) {
-            handleException($ex, null, false);
+            handleException($ex, null, true);
         } catch (\Exception $ex) {
-            handleException($ex, null, false);
+            handleException($ex, null, true);
         }
 
         if (empty($userSearchPairs)) {

@@ -19,13 +19,11 @@ namespace JobScooper\Builders;
 use JobScooper\DataAccess\UserQuery;
 use JobScooper\Manager\LocationManager;
 use JobScooper\Utils\Settings;
-use Noodlehaus\Exception\EmptyDirectoryException;
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Runtime\Exception\InvalidArgumentException;
 use \SplFileInfo;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
-use M1\Vars\Vars;
 use \Propel\Runtime\Propel;
 
 use Noodlehaus\Config;
@@ -479,6 +477,7 @@ class ConfigBuilder
             if (!empty($otherUser)) {
                 $nextUser = $otherUser->toArray();
                 $nextUser['User'] = $otherUser;
+                $otherUser = null;
             } else {
                 $nextUser = $arrOtherUserFacts;
                 $nextUser['User'] = null;

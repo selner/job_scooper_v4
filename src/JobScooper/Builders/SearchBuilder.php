@@ -99,6 +99,7 @@ class SearchBuilder
         if (!empty($completedSitesAllOnly)) {
             $completedSites = array_merge($completedSites, $completedSitesAllOnly);
         }
+        $completedSitesAllOnly = null;
 
         $searchLocations = $user->getSearchGeoLocations();
 
@@ -121,7 +122,9 @@ class SearchBuilder
             if (!empty($sitesAllLocationOnly)) {
                 $completedSites = array_merge($completedSites, $sitesAllLocationOnly);
             }
+            $sitesAllLocationOnly = null;
         }
+        $searchLocations = null;
         $completedSites = array_column($completedSites, "LastCompleted", "JobSiteKey");
 
         if (!empty($completedSites)) {
@@ -198,6 +201,8 @@ class SearchBuilder
                 LogMessage("Skipping the following searches because they have run since " . $siteWaitCutOffTime->format("Y-m-d H:i") . ": " . getArrayDebugOutput($skipTheseSearches));
             }
         }
+
+        $recordsToSkip = null;
     }
 
 
@@ -222,10 +227,8 @@ class SearchBuilder
             return array();
         }
 
-
-
         $nKeywords = count($user->getSearchKeywords());
-        $nLocations = countAssociativeArrayValues($user->getSearchGeoLocations());
+        $nLocations = countAssociativeArrayValues($user->getSearchLocations());
         $nTotalPairs = countAssociativeArrayValues($userSearchPairs);
         $nTotalSearches = $nKeywords * $nLocations * count($sites);
 
@@ -235,15 +238,17 @@ class SearchBuilder
         $ntotalSearchRuns = 0;
 
         foreach ($sites as $jobsiteKey => $site) {
+            $ccJobSite = $site->getSupportedCountryCodes();
+
             foreach ($userSearchPairs as $searchPair) {
                 $geoloc = $searchPair->getGeoLocationFromUS();
                 $ccSearch = $geoloc->getCountryCode();
-                $ccJobSite = $site->getSupportedCountryCodes();
-                $matches = null;
+                $geoloc = null;
+
                 $ccOverlaps= array_intersect(array($ccSearch), $ccJobSite);
                 if (!empty($ccOverlaps)) {
                     $searchrun = new UserSearchSiteRun();
-                    $searchrun->setUserSearchPairFromUSSR($searchPair);
+                    $searchrun->setUserSearchPairId($searchPair->getUserSearchPairId());
                     $searchrun->setJobSiteKey($site);
                     $searchrun->setAppRunId(getConfigurationSetting('app_run_id'));
                     $searchrun->setStartedAt(time());
@@ -252,6 +257,8 @@ class SearchBuilder
                     if (!array_key_exists($jobsiteKey, $searchRuns)) {
                         $searchRuns[$jobsiteKey] = array();
                     }
+
+                    // BUGBUG:  Convert this to store the array, not the object
                     $searchRuns[$jobsiteKey][$searchrun->getUserSearchSiteRunKey()] = $searchrun;
                     $ntotalSearchRuns += 1;
                 } else {
@@ -259,6 +266,7 @@ class SearchBuilder
                 }
             }
         }
+		$userSearchPairs = null;
 
         LogMessage(" Generated {$ntotalSearchRuns} total search runs to process.");
         return $searchRuns;

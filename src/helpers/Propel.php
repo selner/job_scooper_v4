@@ -169,7 +169,7 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
         $results = array_column($results, null, $sitekeyColumnName);
     }
 
-    unset($query);
+    $query = null;
 
     return $results;
 }

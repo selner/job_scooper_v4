@@ -419,7 +419,7 @@ class DomItemParser
                 $ret = $this->_getReturnValueByIndex($nodeMatches, $index);
             } elseif (!empty($nodeMatches) && is_array($nodeMatches)) {
                 if (count($nodeMatches) > 1) {
-                    $strError = sprintf('Warning:  %s plugin matched %d nodes to selector \'%s\' but did not specify an index.  Assuming first node.  Tag = %s', $this->JobSiteName, count($nodeMatches), $strMatch, getArrayDebugOutput($arrTag));
+                    $strError = sprintf('Warning: ' . self::class . ' matched %d nodes to selector \'%s\' but did not specify an index.  Assuming first node.  Tag = %s', count($nodeMatches), $strMatch, getArrayDebugOutput($arrTag));
                     $this->log($strError, LogLevel::WARNING);
                 }
                 $ret = $nodeMatches[0];
@@ -436,7 +436,7 @@ class DomItemParser
                     if (preg_match($propertyRegEx, $retTemp, $match) !== false && count($match) >= 1) {
                         $ret = $match[1];
                     } else {
-                        $this->log(sprintf('%s plugin failed to find match for regex \'%s\' for tag \'%s\' with value \'%s\' as expected.', $this->JobSiteName, $propertyRegEx, getArrayDebugOutput($arrTag), $ret), LogLevel::DEBUG);
+                        $this->log(sprintf(self::class . ' failed to find match for regex \'%s\' for tag \'%s\' with value \'%s\' as expected.', $propertyRegEx, getArrayDebugOutput($arrTag), $ret), LogLevel::DEBUG);
                     }
                 }
             }

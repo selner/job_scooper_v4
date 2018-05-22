@@ -257,6 +257,8 @@ class GeoLocation extends BaseGeoLocation
         } catch (PropelException $ex) {
             handleException($ex, "Failed to save GeoLocation " . $this->getDisplayName() . ".  Error: %s", true);
         }
+
+        return false;
     }
 
     public function postSave(ConnectionInterface $con = null)

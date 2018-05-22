@@ -19,6 +19,7 @@ namespace JobScooper\Manager;
 use Bramus\Monolog\Formatter\ColorSchemes\DefaultScheme;
 use JobScooper\Logging\CSVLogHandler;
 use JobScooper\Logging\ErrorEmailLogHandler;
+use JobScooper\Utils\Settings;
 use Monolog\ErrorHandler;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\DeduplicationHandler;
@@ -115,7 +116,7 @@ class LoggingManager extends \Monolog\Logger
         $this->_shouldLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
         if (array_key_exists('log_level', $logOptions) and !empty($logOptions['log_level'])) {
             if (strtoupper($logOptions["log_level"]) === "DEBUG") {
-                setConfigurationSetting('debug', true);
+                Settings::setValue('debug', true);
             }
             $this->_defaultLogLevel = self::toMonologLevel($logOptions["log_level"]);
         } else {
@@ -391,9 +392,6 @@ class LoggingManager extends \Monolog\Logger
      */
     public function getDebugContext($context=array(), \Exception $thrownExc = null)
     {
-        $user = \JobScooper\DataAccess\User::getCurrentUser();
-        $userSlug = empty($user) ? "" : $user->getSlug();
-
         $runtime_fmt = "";
         $runStartTime = getConfigurationSetting('app_run_start_datetime');
         if (!empty($runStartTime)) {
@@ -411,7 +409,6 @@ class LoggingManager extends \Monolog\Logger
             'hostname' => gethostname(),
             'channel' => "",
             'jobsite' => "",
-            'username' => $userSlug,
             'runtime' => $runtime_fmt
         ];
 
@@ -480,13 +477,6 @@ class LoggingManager extends \Monolog\Logger
         //
         if (!empty($this->_sentryClient)) {
             $this->_sentryClient = new \Raven_Client();
-            if (!empty($user)) {
-                $this->_sentryClient->user_context(array(
-                    "email"    => $user->getEmailAddress(),
-                    "id"       => $user->getUserId(),
-                    "username" => $user->getSlug()
-                ), false);
-            }
 
             if (!empty($context)) {
                 $sentryContext = array_copy($context);
