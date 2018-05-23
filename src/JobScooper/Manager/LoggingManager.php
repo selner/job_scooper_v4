@@ -56,11 +56,11 @@ class JobsErrorHandler extends ErrorHandler
         }
 
         if (empty($GLOBALS['logger'])) {
-            $GLOBALS['logger'] = getChannelLogger("default");
+            $GLOBALS['logger'] = getChannelLogger('default');
         }
 
-        LogError(sprintf("Uncaught Exception: %s", $e->getMessage()));
-        handleException($e, "Uncaught Exception: %s");
+        LogError(sprintf('Uncaught Exception: %s', $e->getMessage()));
+        handleException($e, 'Uncaught Exception: %s');
 //        exit(255);
     }
 }
@@ -74,7 +74,7 @@ class LoggingManager extends \Monolog\Logger
     protected $arrCumulativeErrors = array();
 
     private $_handlersByType = array();
-    private $_loggerName = "default";
+    private $_loggerName = 'default';
     private $_loggers = array();
     private $_csvHandle = null;
     private $_dedupeHandle = null;
@@ -93,11 +93,9 @@ class LoggingManager extends \Monolog\Logger
      *
      * @throws \Exception
      */
-    public function __construct($name, array $handlers = array(), array $processors = array())
+    public function __construct($name=C__APPNAME__, array $handlers = array(), array $processors = array())
     {
         $GLOBALS['logger'] = $this;
-        
-        $name = C__APPNAME__;
 
         $logger = new Logger($name);
 
@@ -115,10 +113,10 @@ class LoggingManager extends \Monolog\Logger
         $logOptions = getConfigurationSetting('logging', array());
         $this->_shouldLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
         if (array_key_exists('log_level', $logOptions) and !empty($logOptions['log_level'])) {
-            if (strtoupper($logOptions["log_level"]) === "DEBUG") {
+            if (strtoupper($logOptions['log_level']) === 'DEBUG') {
                 Settings::setValue('debug', true);
             }
-            $this->_defaultLogLevel = self::toMonologLevel($logOptions["log_level"]);
+            $this->_defaultLogLevel = self::toMonologLevel($logOptions['log_level']);
         } else {
             $this->_defaultLogLevel = self::ERROR;
         }
@@ -126,7 +124,7 @@ class LoggingManager extends \Monolog\Logger
 
         $now = new DateTime('NOW');
 
-        $this->_handlersByType['stderr'] = new StreamHandler("php://stderr", Logger::DEBUG);
+        $this->_handlersByType['stderr'] = new StreamHandler('php://stderr', Logger::DEBUG);
         $fmter = new ColoredLineFormatter(new DefaultScheme());
         //	    $fmter = $this->_handlersByType['stderr']->getFormatter();
         $fmter->allowInlineLineBreaks(true);
@@ -142,12 +140,12 @@ class LoggingManager extends \Monolog\Logger
         $this->_loggers['database'] = $this->withName('database');
         $this->_loggers['caches'] = $this->withName('caches');
 
-        $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started from STDIN");
+        $this->LogRecord(\Psr\Log\LogLevel::INFO, 'Logging started from STDIN');
 
 //        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
         $propelContainer = Propel::getServiceContainer();
 
-        $this->logRecord(LogLevel::INFO, "Logging started for " . __APP_VERSION__ ." at " . $now->format('Y-m-d\TH:i:s'));
+        $this->logRecord(LogLevel::INFO, 'Logging started for ' . __APP_VERSION__ .' at ' . $now->format('Y-m-d\TH:i:s'));
     }
 
     /**
@@ -162,7 +160,7 @@ class LoggingManager extends \Monolog\Logger
             $meta = stream_get_meta_data($stream);
         }
 
-        if (is_array($meta) && array_key_exists("uri", $meta)) {
+        if (is_array($meta) && array_key_exists('uri', $meta)) {
             return $meta['uri'];
         }
 
@@ -197,13 +195,13 @@ class LoggingManager extends \Monolog\Logger
      */
     public function updatePropelLogging()
     {
-        $logger = $this->getChannelLogger("database");
+        $logger = $this->getChannelLogger('database');
 
         Propel::getServiceContainer()->setLogger($logger->getName(), $logger);
         if (isDebug()) {
             $con = Propel::getWriteConnection(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
             $con->useDebug(true);
-            LogMessage("Enabled debug logging for Propel.");
+            LogMessage('Enabled debug logging for Propel.');
         }
     }
 
@@ -212,18 +210,18 @@ class LoggingManager extends \Monolog\Logger
      */
     private function _addSentryHandler()
     {
-        $settings = getConfigurationSetting("config_file_settings.sentry");
+        $settings = getConfigurationSetting('config_file_settings.sentry');
         if (!empty($settings)) {
-            if (array_key_exists("dsn", $settings)) {
-                LogMessage("Found Sentry config properties; setting up Sentry logging...");
+            if (array_key_exists('dsn', $settings)) {
+                LogMessage('Found Sentry config properties; setting up Sentry logging...');
                 $sentryOptions = array(
-                    "server" => gethostname(),
-                    "auto_log_stacks" => true
+                    'server' => gethostname(),
+                    'auto_log_stacks' => true
                 );
                 $this->_sentryClient = new \Raven_Client($settings['dsn'], $sentryOptions);
 
                 $handler = new RavenHandler($this->_sentryClient, Logger::ERROR);
-                $handler->setFormatter(new LineFormatter("%message% %context% %extra%\n"));
+                $handler->setFormatter(new LineFormatter('%message% %context% %extra%\n'));
 
                 $this->_handlersByType['sentry'] = $handler;
                 $this->pushHandler($handler);
@@ -245,7 +243,7 @@ class LoggingManager extends \Monolog\Logger
     {
         $logLevel = (isDebug() ? Logger::DEBUG : $this->_defaultLogLevel);
 
-        $today = getTodayAsString("-");
+        $today = getTodayAsString('-');
         $mainLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log";
         $this->_handlersByType['logfile'] = new StreamHandler($mainLog, $logLevel, $bubble = true);
         $fmter = $this->_handlersByType['logfile']->getFormatter();
@@ -256,16 +254,16 @@ class LoggingManager extends \Monolog\Logger
         $this->pushHandler($this->_handlersByType['logfile']);
         $this->logRecord(\Psr\Log\LogLevel::INFO, "Logging started to logfile at {$mainLog}");
 
-        $now = getNowAsString("-");
+        $now = getNowAsString('-');
         $csvlog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-run_errors.csv";
-        $fpcsv = fopen($csvlog, "w");
+        $fpcsv = fopen($csvlog, 'w');
         $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, $this->_defaultLogLevel, $bubble = true);
         $this->pushHandler($this->_handlersByType['csverrors']);
         $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started to CSV file at {$csvlog}");
 
-        $now = getNowAsString("-");
+        $now = getNowAsString('-');
         $dedupeLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-dedupe_log_errors.csv";
-        $this->_dedupeHandle = fopen($dedupeLog, "w");
+        $this->_dedupeHandle = fopen($dedupeLog, 'w');
         $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailLogHandler(Logger::ERROR, true), $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::ERROR, $time = 60, $bubble = true);
         $this->pushHandler($this->_handlersByType['dedupe_email']);
         $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started for deduped email log file at {$dedupeLog}");
@@ -354,20 +352,20 @@ class LoggingManager extends \Monolog\Logger
         if ($nType == LoggingManager::C__LOG_SECTION_BEGIN) {
             $indentCount = $this->_openSections * 2;
             $lineChar = strval($this->_openSections + 1);
-            $intro = "BEGIN: ";
+            $intro = 'BEGIN: ';
             $this->_openSections += 1;
         } else {
             $this->_openSections -= 1;
             $lineChar = strval($this->_openSections + 1);
             $indentCount = $this->_openSections * 2;
-            $intro = "END: ";
+            $intro = 'END: ';
         }
 
-        $indent = sprintf("%-{$indentCount}s", "");
+        $indent = sprintf("%-{$indentCount}s", '');
         $numCharsSecLines = max((strlen($headerText) + 15), 80);
         $sepLineFmt = "[%'{$lineChar}{$numCharsSecLines}s]";
 
-        $sepLine = sprintf($sepLineFmt, "") . PHP_EOL;
+        $sepLine = sprintf($sepLineFmt, '') . PHP_EOL;
 
         $fmt = PHP_EOL . PHP_EOL .
             "{$indent}{$sepLine}" . PHP_EOL .
@@ -375,7 +373,7 @@ class LoggingManager extends \Monolog\Logger
             "{$indent}{$sepLine}" .
             PHP_EOL;
 
-        $lineContent = sprintf($fmt, "", $intro, $headerText);
+        $lineContent = sprintf($fmt, '', $intro, $headerText);
 
         $this->log(LogLevel::INFO, $lineContent);
     }
@@ -392,23 +390,23 @@ class LoggingManager extends \Monolog\Logger
      */
     public function getDebugContext($context=array(), \Exception $thrownExc = null)
     {
-        $runtime_fmt = "";
+        $runtime_fmt = '';
         $runStartTime = getConfigurationSetting('app_run_start_datetime');
         if (!empty($runStartTime)) {
             $runtime = $runStartTime->diff(new \DateTime());
-            $runtime_fmt = $runtime->format("%h:%d:%s");
+            $runtime_fmt = $runtime->format('%h:%d:%s');
         }
 
 
         $baseContext = [
-            'class_call' => "",
-            'exception_message' => "",
-            'exception_file' => "",
-            'exception_line' => "",
-//		'exception_trace' => "",
+            'class_call' => '',
+            'exception_message' => '',
+            'exception_file' => '',
+            'exception_line' => '',
+//		'exception_trace' => '',
             'hostname' => gethostname(),
-            'channel' => "",
-            'jobsite' => "",
+            'channel' => '',
+            'jobsite' => '',
             'runtime' => $runtime_fmt
         ];
 
@@ -427,29 +425,29 @@ class LoggingManager extends \Monolog\Logger
         $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
         while ($i < count($dbg) - 1) {
             if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
-                (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array("getDebugContent", "handleException")))) {
-                $class = $dbg[$i]['class'] . "->" . $dbg[$i]['function'] ."()";
+                (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array('getDebugContent', 'handleException')))) {
+                $class = $dbg[$i]['class'] . '->' . $dbg[$i]['function'] .'()';
                 if (!empty($dbg[$i]['object'])) {
                     $objclass = get_class($dbg[$i]['object']);
                     if (strcasecmp($objclass, $dbg[$i]['class']) != 0) {
                         $class = "{$objclass} -> {$class}";
                         try {
-                            if (is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], "getName")) {
+                            if (is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], 'getName')) {
                                 $jobsiteKey = $dbg[$i]['object']->getName();
                             }
                         } catch (Exception $ex) {
-                            $jobsiteKey = "";
+                            $jobsiteKey = '';
                         }
                         try {
                             if (array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args'])) {
-                                if (is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), "getUserSearchSiteRunKey")) {
+                                if (is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), 'getUserSearchSiteRunKey')) {
                                     $usersearch = $dbg[$i]['args'][0]->getUserSearchSiteRunKey();
                                 } else {
-                                    $usersearch = "";
+                                    $usersearch = '';
                                 }
                             }
                         } catch (Exception $ex) {
-                            $usersearch = "";
+                            $usersearch = '';
                         }
                     }
                     break;
@@ -460,7 +458,7 @@ class LoggingManager extends \Monolog\Logger
 
 
         $context['class_call'] = $class;
-        $context['channel'] = is_null($jobsiteKey) ? "default" : "plugins";
+        $context['channel'] = is_null($jobsiteKey) ? 'default' : 'plugins';
         $context['jobsite'] = $jobsiteKey;
 
 
@@ -468,7 +466,7 @@ class LoggingManager extends \Monolog\Logger
             $context['exception_message'] = $thrownExc->getMessage();
             $context['exception_file'] = $thrownExc->getFile();
             $context['exception_line'] = $thrownExc->getLine();
-            //		$context['exception_trace'] = join("|", preg_split("/$/", encodeJSON($thrownExc->getTrace())));
+            //		$context['exception_trace'] = join('|', preg_split('/$/', encodeJSON($thrownExc->getTrace())));
         }
 
 

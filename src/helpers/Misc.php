@@ -257,7 +257,7 @@ function doExec($cmd)
     $cmdRet = null;
     $lastResultLine = null;
     $lastOutput = exec($cmd, $cmdArrOutput, $cmdRet);
-    $cmdStrOutput = join(PHP_EOL, $cmdArrOutput);
+    $cmdStrOutput = implode(PHP_EOL, $cmdArrOutput);
     if ($cmdRet !== 0) {
         throw new Exception("Command '{$cmd}' returned non-zero result code.  Output: {$cmdStrOutput}");
     }

@@ -71,7 +71,7 @@ class JobsAutoMarker
         // Filter the full jobs list looking for duplicates, etc.
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        LogMessage(PHP_EOL . "**************  Updating jobs list for known filters ***************" . PHP_EOL);
+        LogMessage(PHP_EOL . '**************  Updating jobs list for known filters ***************' . PHP_EOL);
 
         try {
             // Dupes aren't affected by the user's matches so do that marking first
@@ -86,7 +86,7 @@ class JobsAutoMarker
             // Get all the postings that are in the table but not marked as ready-to-send
             //
             doCallbackForAllMatches(
-                array($this, "_markJobsListSubset_"),
+                array($this, '_markJobsListSubset_'),
                 [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, Criteria::EQUAL],
                 null,
                 null,
@@ -107,7 +107,7 @@ class JobsAutoMarker
     {
         $errs = array();
 
-        LogMessage("Clearing old auto-marked facts from jobs we are re-marking...");
+        LogMessage('Clearing old auto-marked facts from jobs we are re-marking...');
         try {
             foreach ($results as $jobMatch) {
                 $jobMatch->clearUserMatchState();
@@ -140,7 +140,7 @@ class JobsAutoMarker
 
 
         if (!empty($errs)) {
-            $err_to_return = "";
+            $err_to_return = '';
             foreach ($errs as $ex) {
                 if (!empty($err_to_return)) {
                     $err_to_return .= PHP_EOL . PHP_EOL;
@@ -164,9 +164,9 @@ class JobsAutoMarker
         // We'll use this same Save call to store that the record has been automarked
         // and is ready for sending.
         //
-        LogMessage("Auto-marking complete. Setting marked jobs to 'ready-to-send'...");
+        LogMessage('Auto-marking complete. Setting marked jobs to \'ready-to-send\'...');
         try {
-            $con = Propel::getWriteConnection("default");
+            $con = Propel::getWriteConnection('default');
             $totalMarkedReady = 0;
             foreach ($results as $jobMatch) {
                 $jobMatch->setUserNotificationState(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND);
@@ -176,7 +176,7 @@ class JobsAutoMarker
                     $con->commit();
 
                     // fetch a new connection
-                    $con = Propel::getWriteConnection("default");
+                    $con = Propel::getWriteConnection('default');
                     $nStartMarked = $totalMarkedReady - 100;
                     LogMessage("... user job matches {$nStartMarked} - {$totalMarkedReady} marked 'ready-to-send.'");
                 }
@@ -193,12 +193,12 @@ class JobsAutoMarker
      */
     private function _findAndMarkRecentDuplicatePostings()
     {
-        startLogSection("Finding new duplicate company / job title pairs in the past 7 days to mark as dupe...");
+        startLogSection('Finding new duplicate company / job title pairs in the past 7 days to mark as dupe...');
         try {
             $daysBack = 7;
             $sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string("{$daysBack} days ago"));
             $included_sites = array_keys(JobSiteManager::getIncludedJobSites());
-            $itemKeysToExport = array("JobPostingId", "Title", "Company", "JobSite", "KeyCompanyAndTitle", "GeoLocationId", "FirstSeenAt", "DuplicatesJobPostingId");
+            $itemKeysToExport = array('JobPostingId', 'Title', 'Company', 'JobSite', 'KeyCompanyAndTitle', 'GeoLocationId', 'FirstSeenAt', 'DuplicatesJobPostingId');
 
             LogMessage("Querying for all job postings created in the last {$daysBack} days");
             $dupeQuery = JobPostingQuery::create()
@@ -210,25 +210,25 @@ class JobsAutoMarker
 
             $recentJobPostings = $dupeQuery->find();
 
-            //			$outfile = generateOutputFileName("dedupe", "csv", true, 'debug');
+            //			$outfile = generateOutputFileName('dedupe', 'csv', true, 'debug');
             //			LogMessage("Writing results to CSV {$outfile}");
             //			file_put_contents($outfile, $recentJobPostings->toCSV(false, false));
 //
 
             $arrRecentJobs = array();
-            LogMessage("Reducing full resultset data to just the columns needed for deduplication...");
-            foreach ($recentJobPostings->toKeyIndex("JobPostingId") as $id => $job) {
+            LogMessage('Reducing full resultset data to just the columns needed for deduplication...');
+            foreach ($recentJobPostings->toKeyIndex('JobPostingId') as $id => $job) {
                 $arrRecentJobs[$id] = $job->toFlatArrayForCSV(false, $itemKeysToExport);
             }
             $cntJobs = countAssociativeArrayValues($arrRecentJobs);
 
             $jsonObj = array(
-                "user" => $this->_markingUserFacts,
-                "job_postings" => $arrRecentJobs
+                'user' => $this->_markingUserFacts,
+                'job_postings' => $arrRecentJobs
             );
 
-            $outfile = generateOutputFileName("dedupe", "json", true, 'debug');
-            $resultsfile = generateOutputFileName("deduped_jobs_results", "json", true, 'debug');
+            $outfile = generateOutputFileName('dedupe', 'json', true, 'debug');
+            $resultsfile = generateOutputFileName('deduped_jobs_results', 'json', true, 'debug');
             LogMessage("Exporting {$cntJobs} job postings to {$outfile} for deduplication...");
             writeJson($jsonObj, $outfile);
 
@@ -241,12 +241,12 @@ class JobsAutoMarker
 
                 #					$cmd = "source " . realpath(__ROOT__) . "/python/pyJobNormalizer/venv/bin/activate; " . $cmd;
 
-                LogMessage(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL);
+                LogMessage(PHP_EOL . "    ~~~~~~ Running command: {$cmd}  ~~~~~~~" . PHP_EOL);
                 doExec($cmd);
             } catch (Exception $ex) {
                 throw $ex;
             } finally {
-                endLogSection("Python command call finished.");
+                endLogSection('Python command call finished.');
             }
             
             if (!is_file($resultsfile)) {
@@ -256,25 +256,25 @@ class JobsAutoMarker
             LogMessage("Loading list of duplicate job postings from {$resultsfile}...");
             $jobsToMarkDupe = loadJSON($resultsfile);
 
-            $cntJobsToMark = countAssociativeArrayValues($jobsToMarkDupe["duplicate_job_postings"]);
+            $cntJobsToMark = countAssociativeArrayValues($jobsToMarkDupe['duplicate_job_postings']);
 
             LogMessage("Marking {$cntJobsToMark} jobs as duplicate in the database...");
 
             $totalMarked = 0;
-            $con = Propel::getWriteConnection("default");
+            $con = Propel::getWriteConnection('default');
 
-            foreach ($jobsToMarkDupe["duplicate_job_postings"] as $key=>$job) {
+            foreach ($jobsToMarkDupe['duplicate_job_postings'] as $key=>$job) {
                 $jobRecord =  \JobScooper\DataAccess\JobPostingQuery::create()
                     ->filterByPrimaryKey($key)
                     ->findOneOrCreate();
                 assert($jobRecord->isNew() === false);
-                $jobRecord->setDuplicatesJobPostingId($job["isDuplicateOf"]);
+                $jobRecord->setDuplicatesJobPostingId($job['isDuplicateOf']);
                 $jobRecord->save($con);
-                $totalMarked += 1;
+                ++$totalMarked;
                 if ($totalMarked % 100 === 0) {
                     $con->commit();
                     // fetch a new connection
-                    $con = Propel::getWriteConnection("default");
+                    $con = Propel::getWriteConnection('default');
                     LogMessage("... marked {$totalMarked} duplicate job postings...");
                 }
             }
@@ -283,7 +283,7 @@ class JobsAutoMarker
         } catch (\Exception $ex) {
             handleException($ex, null, false);
         } finally {
-            endLogSection("Finished processing job posting duplicates.");
+            endLogSection('Finished processing job posting duplicates.');
         }
     }
 
@@ -294,7 +294,7 @@ class JobsAutoMarker
     {
         $sqlType = \Propel\Runtime\Propel::getServiceContainer()->getAdapterClass();
         switch ($sqlType) {
-            case "mysql":
+            case 'mysql':
                 return true;
                 break;
 
@@ -302,15 +302,15 @@ class JobsAutoMarker
             return false;
                 break;
 
-            case "sqlite":
+            case 'sqlite':
                 try {
                     $ret = loadSqlite3MathExtensions();
                     if ($ret) {
-                        LogMessage("Successfully loaded the necessary math functions for SQLite to do geospatial filtering.");
+                        LogMessage('Successfully loaded the necessary math functions for SQLite to do geospatial filtering.');
                     }
                     return $ret;
                 } catch (\Exception $ex) {
-                    LogWarning("Failed to load the necessary math functions for SQLite to do geospatial filtering.  Falling back to county-level instead.");
+                    LogWarning('Failed to load the necessary math functions for SQLite to do geospatial filtering.  Falling back to county-level instead.');
                 }
                 break;
         }
@@ -328,7 +328,7 @@ class JobsAutoMarker
             return;
         }
 
-        LogMessage("Marking Out of Area Jobs");
+        LogMessage('Marking Out of Area Jobs');
 
         if ($this->_isGeoSpatialWorking()) {
             $this->_markJobsList_OutOfArea_Geospatial($arrJobsList);
@@ -344,7 +344,7 @@ class JobsAutoMarker
     private function _markJobsList_OutOfArea_CountyFiltered(&$arrJobsList)
     {
         try {
-            startLogSection("Automarker: marking jobs as out of area using counties...");
+            startLogSection('Automarker: marking jobs as out of area using counties...');
 
             $userObj = User::getUserObjById($this->_markingUserFacts['UserId']);
             $searchLocations = $userObj->getSearchGeoLocations();
@@ -354,14 +354,14 @@ class JobsAutoMarker
 
             /* Find all locations that are within 50 miles of any of our search locations */
 
-            LogMessage("Auto-marking postings not in same counties as the search locations...");
+            LogMessage('Auto-marking postings not in same counties as the search locations...');
             foreach ($searchLocations as $searchloc) {
                 if (!empty($searchloc)) {
-                    $arrIncludeCounties[] = $searchloc->getCounty() . "~" .$searchloc->getRegion();
+                    $arrIncludeCounties[] = $searchloc->getCounty() . '~' .$searchloc->getRegion();
                 }
             }
 
-            LogMessage("Finding job postings not in the following counties & states: " . getArrayValuesAsString($arrIncludeCounties) . " ...");
+            LogMessage('Finding job postings not in the following counties & states: ' . getArrayValuesAsString($arrIncludeCounties) . ' ...');
             $arrJobsOutOfArea = array_filter($arrJobsList, function (UserJobMatch $v) use ($arrIncludeCounties) {
                 $posting = $v->getJobPostingFromUJM();
                 $locId = $posting->getGeoLocationId();
@@ -373,7 +373,7 @@ class JobsAutoMarker
                 $county = $location->getCounty();
                 $state = $location->getRegion();
                 if (!is_null($county) && !is_null($state)) {
-                    $match = $county . "~" . $state;
+                    $match = $county . '~' . $state;
                     if (!in_array($match, $arrIncludeCounties)) {
                         return true;
                     }
@@ -381,7 +381,7 @@ class JobsAutoMarker
                 return false;
             });
 
-            LogMessage("Marking user job matches as out of area for " . count($arrJobsOutOfArea) . " matches ...");
+            LogMessage('Marking user job matches as out of area for ' . count($arrJobsOutOfArea) . ' matches ...');
 
             foreach ($arrJobsOutOfArea as &$jobOutofArea) {
                 $jobOutofArea->setOutOfUserArea(true);
@@ -391,11 +391,11 @@ class JobsAutoMarker
             $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
 
 
-            LogMessage("Jobs excluded as out of area: marked ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) .";  not marked " . $nJobsNotMarked . " / " . countAssociativeArrayValues($arrJobsList));
+            LogMessage('Jobs excluded as out of area: marked '. $nJobsMarkedAutoExcluded . '/' . countAssociativeArrayValues($arrJobsList) .';  not marked ' . $nJobsNotMarked . ' / ' . countAssociativeArrayValues($arrJobsList));
         } catch (Exception $ex) {
-            handleException($ex, "Error in _markJobsList_OutOfArea_CountyFiltered: %s", true);
+            handleException($ex, 'Error in _markJobsList_OutOfArea_CountyFiltered: %s', true);
         } finally {
-            endLogSection("Out of area job marking by county finished.");
+            endLogSection('Out of area job marking by county finished.');
         }
     }
 
@@ -406,22 +406,22 @@ class JobsAutoMarker
     private function _markJobsList_OutOfArea_Geospatial(&$arrJobsList)
     {
         try {
-            startLogSection("Automarker: marking jobs as out of area using geospatial data...");
+            startLogSection('Automarker: marking jobs as out of area using geospatial data...');
             $searchLocations = $this->_markingUserFacts->getSearchGeoLocations();
 
             $arrNearbyIds = array();
 
             /* Find all locations that are within 50 miles of any of our search locations */
 
-            LogMessage("Getting locationIDs within 50 miles of search locations...");
+            LogMessage('Getting locationIDs within 50 miles of search locations...');
             foreach ($searchLocations as $searchloc) {
                 if (!empty($searchloc)) {
                     $arrNearbyIds = array_merge($arrNearbyIds, getGeoLocationsNearby($searchloc));
                 }
             }
 
-            LogMessage("Marking job postings in the " . count($arrNearbyIds) . " matching areas ...");
-            $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array("UserJobMatchId")));
+            LogMessage('Marking job postings in the ' . count($arrNearbyIds) . ' matching areas ...');
+            $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array('UserJobMatchId')));
             $arrInAreaJobs = array_filter($arrJobsList, function (UserJobMatch $var) use ($arrNearbyIds) {
                 if (!empty($var->getJobPostingFromUJM())) {
                     $geoId = $var->getJobPostingFromUJM()->getGeoLocationId();
@@ -432,34 +432,34 @@ class JobsAutoMarker
                 return false;
             });
 
-            $arrInAreaIds = array_column($arrInAreaJobs, "UserJobMatchId", "UserJobMatchId");
+            $arrInAreaIds = array_column($arrInAreaJobs, 'UserJobMatchId', 'UserJobMatchId');
 
             foreach (array_chunk($arrInAreaIds, 50) as $chunk) {
                 $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
                 UserJobMatchQuery::create()
                     ->filterByUserJobMatchId($chunk)
-                    ->update(array("OutOfUserArea" => false), $con);
+                    ->update(array('OutOfUserArea' => false), $con);
             }
 
-            LogMessage("Marking job postings outside " . count($arrNearbyIds) . " matching areas ...");
+            LogMessage('Marking job postings outside ' . count($arrNearbyIds) . ' matching areas ...');
             $arrOutOfAreaIds = array_diff($arrJobListIds, $arrInAreaIds);
             if (!empty($arrOutOfAreaIds)) {
                 foreach (array_chunk($arrOutOfAreaIds, 50) as $chunk) {
                     $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
                     UserJobMatchQuery::create()
                         ->filterByUserJobMatchId($chunk)
-                        ->update(array("OutOfUserArea" => true), $con);
+                        ->update(array('OutOfUserArea' => true), $con);
                 }
             }
 
             $nJobsMarkedAutoExcluded = count($arrOutOfAreaIds);
             $nJobsNotMarked = count($arrInAreaJobs);
 
-            LogMessage("Jobs excluded as out of area:  marked out of area ". $nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ."; marked in area = " . $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList));
+            LogMessage('Jobs excluded as out of area:  marked out of area '. $nJobsMarkedAutoExcluded . '/' . countAssociativeArrayValues($arrJobsList) .'; marked in area = ' . $nJobsNotMarked . '/' . countAssociativeArrayValues($arrJobsList));
         } catch (Exception $ex) {
-            handleException($ex, "Error in _markJobsList_OutOfArea_Geospatial: %s", true);
+            handleException($ex, 'Error in _markJobsList_OutOfArea_Geospatial: %s', true);
         } finally {
-            endLogSection("Out of area job marking geospatially finished.");
+            endLogSection('Out of area job marking geospatially finished.');
         }
     }
 
@@ -470,7 +470,7 @@ class JobsAutoMarker
     private function _markJobsList_SetAutoExcludedCompaniesFromRegex_(&$arrJobsList)
     {
         try {
-            startLogSection("Automarker: marking company names as excluded based on user input files...");
+            startLogSection('Automarker: marking company names as excluded based on user input files...');
 
             //
             // Load the exclusion filter and other user data from files
@@ -485,8 +485,8 @@ class JobsAutoMarker
                 return;
             }
 
-            LogMessage("Excluding Jobs by Companies Regex Matches");
-            LogMessage("Checking ".count($arrJobsList) ." roles against ". count($this->companies_regex_to_filter) ." excluded companies.");
+            LogMessage('Excluding Jobs by Companies Regex Matches');
+            LogMessage('Checking '.count($arrJobsList) .' roles against '. count($this->companies_regex_to_filter) .' excluded companies.');
 
             foreach ($arrJobsList as &$jobMatch) {
                 $matched_exclusion = false;
@@ -505,11 +505,11 @@ class JobsAutoMarker
                 }
             }
 
-            LogMessage("Jobs marked with excluded companies: ".$nJobsMarkedAutoExcluded . "/" . countAssociativeArrayValues($arrJobsList) ." marked as excluded; not marked ". $nJobsNotMarked . "/" . countAssociativeArrayValues($arrJobsList));
+            LogMessage('Jobs marked with excluded companies: '.$nJobsMarkedAutoExcluded . '/' . countAssociativeArrayValues($arrJobsList) .' marked as excluded; not marked '. $nJobsNotMarked . '/' . countAssociativeArrayValues($arrJobsList));
         } catch (Exception $ex) {
-            handleException($ex, "Error in SetAutoExcludedCompaniesFromRegex: %s", true);
+            handleException($ex, 'Error in SetAutoExcludedCompaniesFromRegex: %s', true);
         } finally {
-            endLogSection("Company exclusion by name finished.");
+            endLogSection('Company exclusion by name finished.');
         }
     }
 
@@ -521,14 +521,14 @@ class JobsAutoMarker
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    private function _exportJobMatchesToJson($basefile="automarker", $arrJobList)
+    private function _exportJobMatchesToJson($basefile='automarker', $arrJobList)
     {
         $jobMatchKeys = array();
         $arrJobItems = array();
         if ($arrJobList) {
             $item = array_shift($arrJobList);
             $jobMatchKeys = array_keys($item->toArray());
-            $jobMatchKeys[] = "Title";
+            $jobMatchKeys[] = 'Title';
             array_unshift($arrJobList, $item);
         }
         foreach ($arrJobList as $job) {
@@ -544,13 +544,13 @@ class JobsAutoMarker
         $neg_kwds = $this->_loadUserNegativeTitleKeywords();
 
         $jsonObj = array(
-            "user" => $this->_markingUserFacts->toArray(),
-            "job_matches" => $arrJobItems,
-            "search_keywords" => $searchKeywords,
-            "negative_title_keywords" => $neg_kwds
+            'user' => $this->_markingUserFacts->toArray(),
+            'job_matches' => $arrJobItems,
+            'search_keywords' => $searchKeywords,
+            'negative_title_keywords' => $neg_kwds
         );
 
-        $outfile = generateOutputFileName($basefile, "json", true, 'debug');
+        $outfile = generateOutputFileName($basefile, 'json', true, 'debug');
         writeJson($jsonObj, $outfile);
 
         return $outfile;
@@ -559,9 +559,9 @@ class JobsAutoMarker
     private function _updateKeywordMatchForSingleJob(UserJobMatch $job, $arrMatchData)
     {
         $arrJobMatchFacts = array_subset_keys($arrMatchData, array(
-            "UserJobMatchId",
-            "MatchedNegativeTitleKeywords",
-            "MatchedUserKeywords"
+            'UserJobMatchId',
+            'MatchedNegativeTitleKeywords',
+            'MatchedUserKeywords'
         ));
         if (!empty($arrJobMatchFacts['MatchedUserKeywords'])) {
             if (is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
@@ -631,14 +631,14 @@ class JobsAutoMarker
             // or insert if missing
             //
             if (!empty($arrMatchRecs)) {
-                $con = Propel::getWriteConnection("default");
+                $con = Propel::getWriteConnection('default');
                 $dbRecsById = array();
                 $chunks = array_chunk(array_keys($arrMatchRecs), 50);
                 foreach ($chunks as $idchunk) {
                     $dbRecsById = UserJobMatchQuery::create()
                         ->filterByUserJobMatchId($idchunk, Criteria::IN)
                         ->find()
-                        ->toKeyIndex("UserJobMatchId");
+                        ->toKeyIndex('UserJobMatchId');
                     foreach ($idchunk as $id) {
                         if (array_key_exists($id, $dbRecsById)) {
                             $dbMatch = $dbRecsById[$id];
@@ -657,7 +657,7 @@ class JobsAutoMarker
                     // a clean connection so we don't trip up the database with long connection times
                     $con->commit();
                     // fetch a new connection
-                    $con = Propel::getWriteConnection("default");
+                    $con = Propel::getWriteConnection('default');
                 }
             }
 
@@ -677,36 +677,36 @@ class JobsAutoMarker
      */
     private function _markJobsList_KeywordMatches_(&$arrJobsList)
     {
-        startLogSection("Automarker: Starting matching of " . count($arrJobsList) . " job role titles against user search keywords ...");
+        startLogSection('Automarker: Starting matching of ' . count($arrJobsList) . ' job role titles against user search keywords ...');
 
         try {
-            $basefile = "mark_titlematches";
+            $basefile = 'mark_titlematches';
 
-            LogMessage("Exporting " . count($arrJobsList) . " user job matches to JSON file '{$basefile}_src.json' for matching...");
+            LogMessage('Exporting ' . count($arrJobsList) . " user job matches to JSON file '{$basefile}_src.json' for matching...");
             $sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $arrJobsList);
-            $resultsfile = generateOutputFileName("{$basefile}_results", "json", true, 'debug');
+            $resultsfile = generateOutputFileName("{$basefile}_results", 'json', true, 'debug');
 
             try {
-                startLogSection("Calling python to do work of job title matching.");
-                $PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/matchTitlesToKeywords.py");
-                $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($sourcefile) . " -o " . escapeshellarg($resultsfile);
+                startLogSection('Calling python to do work of job title matching.');
+                $PYTHONPATH = realpath(__ROOT__ . '/python/pyJobNormalizer/matchTitlesToKeywords.py');
+                $cmd = 'python ' . $PYTHONPATH . ' -i ' . escapeshellarg($sourcefile) . ' -o ' . escapeshellarg($resultsfile);
 
-                #					$cmd = "source " . realpath(__ROOT__) . "/python/pyJobNormalizer/venv/bin/activate; " . $cmd;
+                #					$cmd = 'source ' . realpath(__ROOT__) . '/python/pyJobNormalizer/venv/bin/activate; ' . $cmd;
 
-                LogMessage(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL);
+                LogMessage(PHP_EOL . '    ~~~~~~ Running command: ' . $cmd . '  ~~~~~~~' . PHP_EOL);
                 doExec($cmd);
 
-                LogMessage("Updating database with new match results...");
+                LogMessage('Updating database with new match results...');
                 $this->_updateUserJobMatchesFromJson($resultsfile, $arrJobsList);
             } catch (Exception $ex) {
                 throw $ex;
             } finally {
-                endLogSection("Python command call finished.");
+                endLogSection('Python command call finished.');
             }
         } catch (Exception $ex) {
             handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s');
         } finally {
-            endLogSection("Job role title matching finished.");
+            endLogSection('Job role title matching finished.');
         }
     }
 
@@ -717,11 +717,11 @@ class JobsAutoMarker
     {
         assert(!empty($this->_markingUserFacts));
 
-        $inputfiles = $this->_markingUserFacts->getInputFiles("negative_title_keywords");
+        $inputfiles = $this->_markingUserFacts->getInputFiles('negative_title_keywords');
 
         if (!is_array($inputfiles)) {
             // No files were found, so bail
-            LogDebug("No input files were found with title token strings to exclude.");
+            LogDebug('No input files were found with title token strings to exclude.');
 
             return array();
         }
@@ -759,7 +759,7 @@ class JobsAutoMarker
 
         $rx = $delim.preg_quote(trim($pattern), $delim).$delim.'i';
         try {
-            $testMatch = preg_match($rx, "empty");
+            $testMatch = preg_match($rx, 'empty');
         } catch (\Exception $ex) {
             LogError($ex->getMessage());
             if (isDebug() == true) {
@@ -773,14 +773,14 @@ class JobsAutoMarker
 
     /**
      * Initializes the global list of titles we will automatically mark
-     * as "not interested" in the final results set.
+     * as 'not interested' in the final results set.
      * @throws \Exception
      */
     public function _loadCompanyRegexesToFilter()
     {
         if (!is_empty_value($this->companies_regex_to_filter)) {
             // We've already loaded the companies; go ahead and return right away
-            LogDebug("Using previously loaded " . count($this->companies_regex_to_filter) . " regexed company strings to exclude.");
+            LogDebug('Using previously loaded ' . count($this->companies_regex_to_filter) . ' regexed company strings to exclude.');
             return;
         }
         $inputfiles = $this->_markingUserFacts['InputFiles']['regex_filter_companies'];
@@ -791,11 +791,11 @@ class JobsAutoMarker
         $regexList = array();
         foreach ($inputfiles as $fileItem) {
             LogDebug("Loading job Company regexes to filter from { $fileItem }.");
-            $loadedCompaniesRegex = loadCSV($fileItem, "match_regex");
+            $loadedCompaniesRegex = loadCSV($fileItem, 'match_regex');
             if (!empty($loadedCompaniesRegex)) {
                 //	        $classCSVFile = new SimpleCSV($fileItem, 'r');
                 //	        $loadedCompaniesRegex= $classCSVFile->readAllRecords(true, array('match_regex'));
-                $regexList = array_merge($regexList, array_column($loadedCompaniesRegex, "match_regex"));
+                $regexList = array_merge($regexList, array_column($loadedCompaniesRegex, 'match_regex'));
                 LogDebug(count($loadedCompaniesRegex) . " companies found in the file {$fileItem} that will be automatically filtered from job listings.");
             }
         }
@@ -826,6 +826,6 @@ class JobsAutoMarker
             LogDebug("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered.");
         }
 
-        LogMessage("Loaded " . count($this->companies_regex_to_filter). " regexes to use for filtering companies from " . getArrayValuesAsString($inputfiles));
+        LogMessage('Loaded ' . count($this->companies_regex_to_filter). ' regexes to use for filtering companies from ' . getArrayValuesAsString($inputfiles));
     }
 }
