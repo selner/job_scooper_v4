@@ -16,12 +16,12 @@
  */
 namespace JobScooper\Manager;
 
-use JobScooper\Builders\JobSitePluginBuilder;
+use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\User;
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
-use JobScooper\Builders\ConfigBuilder;
+use JobScooper\Utils\ConfigInitializer;
 use JobScooper\Utils\DBRecordRemover;
 use JobScooper\Utils\Settings;
 
@@ -56,7 +56,7 @@ class StageManager
     private function _initConfig()
     {
         if (empty($this->classConfig)) {
-            $this->classConfig = new ConfigBuilder();
+            $this->classConfig = new ConfigInitializer();
             $this->classConfig->initialize();
         }
 
@@ -78,6 +78,9 @@ class StageManager
              * Run specific stages requested via command-line
              */
             $usersForRun = getConfigurationSetting("users_for_run");
+            if(is_empty_value($usersForRun)) {
+            	throw new \InvalidArgumentException("No user information was set to be run.  Aborting.");
+            }
 
             $cmds = getConfigurationSetting("command_line_args");
             if (array_key_exists("recap", $cmds) && !empty($cmds['recap'])) {
@@ -89,11 +92,11 @@ class StageManager
 
                 foreach ($usersForRun as $user) {
                     foreach ($arrRunStages as $stage) {
-                        $stageFunc = "doStage" . $stage;
+                        $stageFunc = "doStage{$stage}";
                         try {
-                            call_user_func(array($this, $stageFunc), $user);
+                            $this->$stageFunc($user);
                         } catch (\Exception $ex) {
-                            throw new \Exception("Error:  failed to call method \$this->" . $stageFunc . "() for " . $stage . " from option --StageProcessor " . join(",", $arrRunStages) . ".  Error: " . $ex);
+                            throw new \Exception("Error:  failed to call method \$this->{$stageFunc}() for {$stage} from option --StageProcessor " . implode(",", $arrRunStages) . ".  Error: {$ex}");
                         }
                     }
                 }
@@ -134,13 +137,13 @@ class StageManager
         // Let's go get the jobs for those searches
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $jobsites = JobSitePluginBuilder::getIncludedJobSites();
-        $site = null;
+        $jobsiteKeys = JobSiteManager::getIncludedJobSiteKeys();
+        $sitePlugin = null;
 
-        if (!is_empty_value($jobsites)) {
-            LogMessage(PHP_EOL . "**************  Starting Run of Searches for " . count($jobsites) . " Job Sites **************  " . PHP_EOL);
+        if (!is_empty_value($jobsiteKeys)) {
+            LogMessage(PHP_EOL . "**************  Starting Run of Searches for " . count($jobsiteKeys) . " Job Sites **************  " . PHP_EOL);
 
-	        foreach($jobsites as $jobsiteKey => $site)
+	        foreach($jobsiteKeys as $jobsiteKey)
 	        {
 
 	            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,10 +162,10 @@ class StageManager
 	                    // Add the user's searches to the plugin
 	                    //
 	                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	                    startLogSection("Setting up {$countTotalSiteSearches}  search(es) for {$jobsiteKey}...");
+	                    startLogSection("Setting up {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
 	                    try {
-	                        $site = $jobsites[$jobsiteKey];
-	                        $site->setSearches($siteRuns);
+	                    	$sitePlugin = JobSiteManager::getJobSitePluginByKey($jobsiteKey);
+	                        $sitePlugin->setSearches($siteRuns);
 	                    } catch (\Exception $classError) {
 	                        handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = false);
 	                    } finally {
@@ -183,7 +186,7 @@ class StageManager
 	                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	                    try {
 	                        startLogSection("Downloading updated jobs on {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
-	                        $site->downloadLatestJobsForAllSearches();
+	                        $sitePlugin->downloadLatestJobsForAllSearches();
 	                    } catch (\Exception $classError) {
 	                        handleException($classError, "{$jobsiteKey} failed to download job postings: %s", $raise = false);
 	                    } finally {
@@ -194,7 +197,6 @@ class StageManager
 	                handleException($ex, null, false);
 	            } finally {
 					$user = null;
-					$site = null;
 	            }
             }
         } else {

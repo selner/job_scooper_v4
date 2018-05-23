@@ -1,8 +1,22 @@
 <?php
+/**
+ * Copyright 2014-18 Bryan Selner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\Builders\JobSitePluginBuilder;
 use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use JobScooper\Utils\SimpleHTMLHelper;
@@ -39,16 +53,15 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 
     /**
-     * @return \JobScooper\SitePlugins\Base\SitePlugin|null
+     * @return \JobScooper\SitePlugins\Interfaces\IJobSitePlugin|null
      * @throws \Exception
      */
     public function getSitePlugin()
     {
-        if (null !== $this->_plugin) {
-            return $this->_plugin;
+        if (null === $this->_plugin) {
+	        $this->_plugin = JobSiteManager::getJobSitePluginByKey($this->getJobSiteKey());
         }
 
-        $this->_plugin = JobSitePluginBuilder::getJobSitePlugin($this->getJobSiteKey());
         return $this->_plugin;
     }
 
@@ -187,10 +200,9 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
     public function toFlatArray($includeGeolocation = false)
     {
         $location = array();
-        $arrItem = null;
 
-        $arrJobPosting = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
-        updateColumnsForCSVFlatArray($arrJobPosting, new UserSearchSiteRunTableMap());
+        $searchRunFacts = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
+        updateColumnsForCSVFlatArray($searchRunFacts, new UserSearchSiteRunTableMap());
         if ($includeGeolocation === true) {
             $searchPair = $this->getUserSearchPairFromUSSR();
             if (null !== $searchPair && null !== $searchPair->getGeoLocationId()) {
@@ -199,13 +211,13 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                     $location = $jobloc->toFlatArrayForCSV();
                 }
 
-                $arrItem = array_merge_recursive_distinct($arrJobPosting, $location);
+                $searchRunFacts = array_merge_recursive_distinct($searchRunFacts, $location);
             }
-        } else {
-            $arrItem = $arrJobPosting;
         }
 
-        return $arrItem;
+        $searchRunFacts['UserId'] = UserSearchSiteRunManager::getUserIdFromSearchFacts($searchRunFacts);
+
+        return $searchRunFacts;
     }
 
     /**

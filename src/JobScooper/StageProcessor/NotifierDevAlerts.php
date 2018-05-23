@@ -17,7 +17,7 @@
 
 namespace JobScooper\StageProcessor;
 
-use JobScooper\Builders\JobSitePluginBuilder;
+use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\Logging\ErrorEmailLogHandler;
 use JobScooper\Utils\JobsMailSender;
@@ -55,7 +55,7 @@ class NotifierDevAlerts extends JobsMailSender
             $countsOnly = true
         );
 
-        $includedSites = JobSitePluginBuilder::getIncludedJobSites(false);
+        $includedSites = JobSiteManager::getIncludedJobSites(false);
         $arrPluginResults = array_fill_keys(array_keys($includedSites), array());
         foreach ($arrPluginResults as $k => $val) {
             $arrPluginResults[$k] = array(

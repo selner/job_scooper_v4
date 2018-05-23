@@ -17,7 +17,7 @@
 
 namespace JobScooper\StageProcessor;
 
-use JobScooper\Builders\JobSitePluginBuilder;
+use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
@@ -129,7 +129,7 @@ class NotifierJobAlerts extends JobsMailSender
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $class = null;
 
-        if (!$user->canNotifyUser() && !JobSitePluginBuilder::isSubsetOfSites()) {
+        if (!$user->canNotifyUser() && !JobSiteManager::isSubsetOfSites()) {
             LogMessage("Notification would violate the user's notification frequency.  Skipping send");
 
             return false;
@@ -320,7 +320,7 @@ class NotifierJobAlerts extends JobsMailSender
                 // we will notify the users again in a full report run.  Otherwise they would get annoyingly small
                 // separate reports instead.
                 //
-                if (!isDebug() && !JobSitePluginBuilder::isSubsetOfSites() &&
+                if (!isDebug() && !JobSiteManager::isSubsetOfSites() &&
                     !empty($allJobMatchIds)) {
                     $now = new \DateTime();
                     $sendToUser->setLastNotifiedAt($now);

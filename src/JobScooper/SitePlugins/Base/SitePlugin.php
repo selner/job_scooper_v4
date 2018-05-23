@@ -19,8 +19,11 @@ namespace JobScooper\SitePlugins\Base;
 
 require_once(__ROOT__ . '/src/helpers/Constants.php');
 
+use JobScooper\DataAccess\UserSearchSiteRunManager;
 use function JobScooper\DataAccess\getCountryCodeRemapping;
-use JobScooper\DataAccess\UserSearchSiteRun;use JobScooper\SitePlugins\Interfaces\IJobSitePlugin;
+use JobScooper\DataAccess\UserSearchSiteRun;
+use JobScooper\DataAccess\UserSearchSiteRunQuery;
+use JobScooper\SitePlugins\Interfaces\IJobSitePlugin;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
@@ -40,7 +43,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel;
-use JobScooper\Builders\JobSitePluginBuilder;
+use JobScooper\DataAccess\JobSiteManager;
 
 /**
  * Class SitePlugin
@@ -94,11 +97,9 @@ abstract class SitePlugin implements IJobSitePlugin
             }
         }
 
-        $this->JobSiteKey = $this->getJobSiteKey();
-
         if (is_empty_value($this->JobSiteName)) {
             $classname = get_class($this);
-            if (preg_match('/^Plugin(\w+)/', $classname, $matches) > 0) {
+            if (preg_match('/^Plugin(\w+)/', self::class, $matches) > 0) {
                 $this->JobSiteName = $matches[1];
             }
         }
@@ -206,10 +207,10 @@ abstract class SitePlugin implements IJobSitePlugin
                 return ($a['rank'] < $b['rank']) ? -1 : 1;
             });
         }
+
     }
 
     /**
-     * @return string
      * @throws \Exception
      */
     public function setResultsFilterType()
@@ -225,12 +226,13 @@ abstract class SitePlugin implements IJobSitePlugin
         }
 
         $key = $this->getJobSiteKey();
-        $allSites = JobSitePluginBuilder::getAllJobSites();
-        $thisSite = $allSites[$key];
-        $thisSite->setResultsFilterType($this->resultsFilterType);
-        $thisSite->save();
-
-        return $this->resultsFilterType;
+        $site = JobSiteManager::getJobSiteByKey($key);
+        if(null === $site){
+        	throw new \InvalidArgumentException("Unable to setResultsFilterType.  Missing DB record for {$key}");
+        }
+        $site->setResultsFilterType($this->resultsFilterType);
+        $site->save();
+        $site = null;
     }
 
     /**
@@ -239,13 +241,13 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     public function getJobSiteKey()
     {
+	    if(null === $this->JobSiteKey) {
+        	$siteKey = JobSiteManager::getJobSiteKeyByPluginClass(get_class($this));
+            $this->JobSiteKey = $siteKey;
+        }
+
         if (is_empty_value($this->JobSiteKey)) {
-            $arrSiteList = JobSitePluginBuilder::getAllJobSites();
-            $className = get_class($this);
-            $siteKey = strtolower(str_ireplace("Plugin", "", $className));
-            if (array_key_exists($siteKey, $arrSiteList) === true) {
-                $this->JobSiteKey = $siteKey;
-            }
+        	throw new \InvalidArgumentException("No JobSiteKey specified for this job site plugin.");
         }
 
         return $this->JobSiteKey;
@@ -288,11 +290,20 @@ abstract class SitePlugin implements IJobSitePlugin
 
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $searchToKeep = array_pop($arrSearchRuns);
-            foreach ($arrSearchRuns as $searchkey) {
-                $search = $arrSearchRuns[$searchkey];
-                $search->delete();
-            }
-            $arrSearchRuns = array($searchToKeep);
+            if(!is_empty_value($arrSearchRuns))
+            {
+	            foreach ($arrSearchRuns as $searchkey) {
+	            	$search = UserSearchSiteRunQuery::create()
+	            	    ->findByUserSearchSiteRunKey($searchkey);
+	            	if(null === $search) {
+	            		throw new \InvalidArgumentException("Search key {$searchkey} did not match an UserSearchSiteRun database object.");
+	            	}
+	                $search->delete();
+	                $search = null;
+	            }
+			}
+			$arrSearchRuns = array($searchToKeep);
+            $searchToKeep = null;
         }
 
         foreach ($arrSearchRuns as $search) {
@@ -454,7 +465,7 @@ abstract class SitePlugin implements IJobSitePlugin
     protected $_flags_ = null;
     protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
 
-    protected $CountryCodes = array("US");
+    protected $CountryCodes = null;
     private $_curlWrapper = null;
     protected $searchResultsPageUrl = null;
 
@@ -473,9 +484,12 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     public function getSupportedCountryCodes()
     {
-        if (empty($this->CountryCodes)) {
-            $this->CountryCodes = array("US");
-        } else {
+    	if(null === $this->CountryCodes)
+        {
+        	$this->CountryCodes = ["US"]; // default all plugins to US if not specified
+        }
+
+        if (null !== $this->CountryCodes) {
             foreach ($this->CountryCodes as $k => $code) {
                 $remap = getCountryCodeRemapping($code);
                 if (!is_empty_value($remap)) {
@@ -1005,22 +1019,25 @@ abstract class SitePlugin implements IJobSitePlugin
 
 
     /**
-     * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+     * @param array $searchDetails
      *
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    private function addSearch(UserSearchSiteRun $searchDetails)
+    private function addSearch($searchFacts)
     {
-        $searchDetails->setStartingUrlForSearch();
+    	$search = UserSearchSiteRunManager::getSearchRunObjFromFacts($searchFacts);
 
-        $searchDetails->save();
+        $search->setStartingUrlForSearch();
+
+        $search->save();
 
         //
         // Add the search to the list of ones to run
         //
-        $this->arrSearchesToReturn[$searchDetails->getUserSearchSiteRunKey()] = $searchDetails;
-        $this->log($this->JobSiteName . ": added search (" . $searchDetails->getUserSearchSiteRunKey() . ")");
+        $this->arrSearchesToReturn[$search->getUserSearchSiteRunKey()] = $search;
+        $this->log($this->JobSiteName . ": added search (" . $search->getUserSearchSiteRunKey() . ")");
+        $search = null;
     }
 
     /**

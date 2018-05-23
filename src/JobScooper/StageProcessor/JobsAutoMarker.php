@@ -16,14 +16,14 @@
  */
 namespace JobScooper\StageProcessor;
 
-use JobScooper\Builders\JobSitePluginBuilder;
+use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\JobPostingQuery;
 use Exception;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery;
-use JobScooper\Manager\LocationManager;
+use JobScooper\DataAccess\GeoLocationManager;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Propel;
 
@@ -35,7 +35,7 @@ class JobsAutoMarker
 {
 
     /**
-     * @var LocationManager
+     * @var GeoLocationManager
      */
     protected $_locmgr = null;
     protected $title_negative_keyword_tokens = null;
@@ -56,7 +56,7 @@ class JobsAutoMarker
     public function __construct(array $userFacts)
     {
         $this->_markingUserFacts = $userFacts;
-        $this->_locmgr = LocationManager::getLocationManager();
+        $this->_locmgr = GeoLocationManager::getLocationManager();
     }
 
     /**
@@ -197,7 +197,7 @@ class JobsAutoMarker
         try {
             $daysBack = 7;
             $sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string("{$daysBack} days ago"));
-            $included_sites = array_keys(JobSitePluginBuilder::getIncludedJobSites());
+            $included_sites = array_keys(JobSiteManager::getIncludedJobSites());
             $itemKeysToExport = array("JobPostingId", "Title", "Company", "JobSite", "KeyCompanyAndTitle", "GeoLocationId", "FirstSeenAt", "DuplicatesJobPostingId");
 
             LogMessage("Querying for all job postings created in the last {$daysBack} days");

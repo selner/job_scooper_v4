@@ -1,11 +1,25 @@
 <?php
+/**
+ * Copyright 2014-18 Bryan Selner
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\Builders\SearchBuilder;
 use JobScooper\DataAccess\Base\User as BaseUser;
-use JobScooper\Manager\LocationManager;
-use JobScooper\Utils\Settings;use Propel\Runtime\ActiveQuery\Criteria;
+use JobScooper\Utils\Settings;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
@@ -24,7 +38,8 @@ use Propel\Runtime\Propel;
  */
 class User extends BaseUser
 {
-    private $_userSearchSiteRunsByJobSite = array();
+    private $_userSearchSiteRunsByJobSite = null;
+	private $_userSearchCountryCodes = null;
 
     /**
      * @return array
@@ -40,14 +55,15 @@ class User extends BaseUser
 
     /**
      * @param int $userId
+     *
      * @return array
      */
     public static function getUserFactsById($userId)
     {
         if(null === $userId)
-        	throw new \InvalidArgumentException("Requested UserId value was null.");
+        	throw new \InvalidArgumentException('Requested UserId value was null.');
 
-    	$user = User::getUserObjById($userId);
+    	$user = self::getUserObjById($userId);
     	$arrFacts = null;
 
 		if(null === $user) {
@@ -63,6 +79,7 @@ class User extends BaseUser
 
     /**
      * @param int $userId
+     *
      * @return \JobScooper\DataAccess\User
      */
     public static function getUserObjById($userId)
@@ -73,6 +90,7 @@ class User extends BaseUser
 
     /**
      * @param \JobScooper\DataAccess\User $user
+     *
      * @throws \PDOException
      * @throws \Propel\Runtime\Exception\PropelException
      */
@@ -102,15 +120,11 @@ class User extends BaseUser
         if (empty($numDays)) {
             $numDays = 1;
         }
-        $interval = date_interval_create_from_date_string(strval($numDays) . ' days');
+        $interval = date_interval_create_from_date_string("{$numDays} days");
         $nextNotify = clone $lastNotify;
         $nextNotify->add($interval);
 
-        if (empty($lastNotify) || $now >= $nextNotify) {
-            return true;
-        }
-
-        return false;
+        return empty($lastNotify) || $now >= $nextNotify;
     }
 
     /**
@@ -150,6 +164,7 @@ class User extends BaseUser
     /**
      * @param array  $arr
      * @param string $keyType
+     *
      * @throws \Exception
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
@@ -207,6 +222,8 @@ class User extends BaseUser
     }
 
     /**
+     * @param array $arrUserFacts
+     *
      * @throws \Exception
      */
     private function _parseConfigUserInputFiles($arrUserFacts)
@@ -246,6 +263,7 @@ class User extends BaseUser
 
     /**
      * @param array[]|null $v
+     *
      * @throws \Exception
      */
     public function setInputFiles($v)
@@ -269,7 +287,7 @@ class User extends BaseUser
             $files = decodeJSON($v);
         }
 
-        if (!empty($type) && !empty($files)) {
+        if (!is_empty_value($type) && !is_empty_value($files)) {
             if (array_key_exists($type, $files)) {
                 $files = $files[$type];
             } else {
@@ -302,17 +320,17 @@ class User extends BaseUser
             return ;
         }
 
-        $locmgr = LocationManager::getLocationManager();
-        if (empty($locmgr)) {
-            LocationManager::create();
-            $locmgr = LocationManager::getLocationManager();
+        $locmgr = GeoLocationManager::getLocationManager();
+        if (is_empty_value($locmgr)) {
+            GeoLocationManager::create();
+            $locmgr = GeoLocationManager::getLocationManager();
         }
         $searchGeoLocIds = array();
 
         foreach ($searchLocations as $lockey => $searchLoc) {
             $location = $locmgr->lookupAddress($searchLoc);
-            if (!empty($location)) {
-                LogMessage("Updating/adding user search keyword/location pairings for location " . $location->getDisplayName() . " and user {$slug}'s keywords");
+            if (!is_empty_value($location)) {
+                LogMessage("Updating/adding user search keyword/location pairings for location {$location->getDisplayName()} and user {$slug}'s keywords");
                 $locId = $location->getGeoLocationId();
                 $searchGeoLocIds[$locId] = $locId;
 
@@ -367,7 +385,7 @@ class User extends BaseUser
     }
 
     /**
-     * @return array|\JobScooper\DataAccess\UserSearchPair[]|\Propel\Runtime\Collection\ObjectCollection
+     * @return \JobScooper\DataAccess\UserSearchPair[]|null
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function getActiveUserSearchPairs()
@@ -383,24 +401,27 @@ class User extends BaseUser
 
         return $ret;
     }
-
     /**
-     * @return array
+     * @return integer[]
      * @throws \Propel\Runtime\Exception\PropelException
-     * @throws \Exception
      */
-    public function createUserSearchSiteRuns()
+    public function getActiveUserSearchPairIds()
     {
-        startLogSection('Initializing search runs for user ' . $this->getUserSlug());
-        $srchmgr = new SearchBuilder();
-        $this->_userSearchSiteRunsByJobSite = $srchmgr->createSearchesForUser($this);
-        endLogSection(' User search site runs initialization.');
+    	$pairIds = array();
 
-        return $this->_userSearchSiteRunsByJobSite;
-    }
+		$pairs = $this->getActiveUserSearchPairs();
+		if(!is_empty_value($pairs) && is_array($pairs)) {
+			foreach($pairs as $k => $pair) {
+				$pairIds[] = $pair->getUserSearchPairId();
+				$pairs[$k] = null;
+			}
+		}
+		return is_empty_value($pairIds) ? null : $pairIds;
+	}
 
-    /**
-     * @param integer $jobSiteKey
+	/**
+     * @param string $jobSiteKey
+     *
      * @return array
      * @throws \Propel\Runtime\Exception\PropelException
      * @throws \Exception
@@ -414,7 +435,7 @@ class User extends BaseUser
 
 
         if (empty($this->_userSearchSiteRunsByJobSite)) {
-            $this->createUserSearchSiteRuns();
+            $this->initializeSiteRuns();
         }
 
         if (empty($this->_userSearchSiteRunsByJobSite)) {
@@ -423,29 +444,175 @@ class User extends BaseUser
 
         $arrSearchesToRun = array();
 
-		if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$jobSiteKey])) {
+		if(array_key_exists($jobSiteKey, $this->_userSearchSiteRunsByJobSite) &&  !is_empty_value($this->_userSearchSiteRunsByJobSite[$jobSiteKey])) {
 			$arrSearchesToRun = $this->_userSearchSiteRunsByJobSite[$jobSiteKey];
 		}
 
         return $arrSearchesToRun;
     }
 
-
     /**
-     * @return array
-     * @throws \Propel\Runtime\Exception\PropelException
-     * @throws \Exception
-     */
-    static function getSearchSiteRunsForUser($userId, $jobSiteKey = null)
+    *
+    * @return void
+    * @throws \Propel\Runtime\Exception\PropelException
+    * @throws \Exception
+	*/
+    private function initializeSiteRuns()
     {
-    	$userobj = self::getUserObjById($userId);
+    	if(null !== $this->_userSearchSiteRunsByJobSite)
+    		return;
 
-        if($userobj === null){
-    		throw new \InvalidArgumentException("User ID {$userId} could not be found in the database.");
+        $sites = JobSiteManager::getIncludedJobSites();
+
+		$userSearchRuns = $this->queryUserSearchSiteRuns();
+        if(!is_empty_value($userSearchRuns))
+        {
+        	foreach($userSearchRuns as $k => $run)
+            {
+            	$this->_userSearchSiteRunsByJobSite[$run->getJobSiteKey()][$k] = $run->toFlatArray();
+            }
+        	return;
         }
 
-        $siteRuns = $userobj->getUserSearchSiteRuns($jobSiteKey);
-    	$userobj = null;
-		return $siteRuns;
+        $searchPairs = $this->getActiveUserSearchPairs();
+        $nTotalPairs = count($searchPairs);
+        $nKeywords = count($this->getSearchKeywords());
+        $nLocations = countAssociativeArrayValues($this->getSearchLocations());
+        $nTotalSearches = $nKeywords * $nLocations * count($sites);
+
+        $countryCodes = $this->getCountryCodesForUser();
+
+        LogMessage("Creating search runs for {$nTotalPairs} search pairs X " . count($sites) . " jobsites = up to {$nTotalSearches} total searches, from {$nKeywords} search keywords and {$nLocations} search locations in " . implode(", ", $countryCodes) .".");
+
+        $ntotalSearchRuns = 0;
+
+        JobSiteManager::filterJobSitesByCountryCodes($sites, $countryCodes);
+
+        foreach ($sites as $jobsiteKey => $site) {
+            $ccJobSite = $site->getSupportedCountryCodes();
+            $ccSiteOverlaps = array_intersect($countryCodes, $ccJobSite);
+
+            if(!is_empty_value($ccSiteOverlaps)) {
+
+	            foreach ($searchPairs as $pairKey => $searchPair) {
+	            	$pairGeo = $searchPair->getGeoLocationFromUS();
+					$ccPair = array();
+	            	if(!is_empty_value($pairGeo)) {
+	            		$ccPair = $pairGeo->getCountryCode();
+	            	}
+	            	$ccPairOverlaps = array_intersect($countryCodes, array($ccPair));
+	                if (!is_empty_value($ccPairOverlaps)) {
+	                    $searchrun = new UserSearchSiteRun();
+	                    $searchrun->setUserSearchPairId($searchPair->getUserSearchPairId());
+	                    $searchrun->setJobSiteKey($site);
+	                    $searchrun->setAppRunId(getConfigurationSetting('app_run_id'));
+	                    $searchrun->setStartedAt(time());
+	                    $searchrun->save();
+	                    if(!is_array($this->_userSearchSiteRunsByJobSite)){
+	                        $this->_userSearchSiteRunsByJobSite = array();
+	                    }
+	                    if (!array_key_exists($jobsiteKey, $this->_userSearchSiteRunsByJobSite)) {
+	                        $this->_userSearchSiteRunsByJobSite[$jobsiteKey]= array();
+	                    }
+
+	                    $this->_userSearchSiteRunsByJobSite[$jobsiteKey][$searchrun->getUserSearchSiteRunKey()] = $searchrun->toFlatArray();
+	                    $searchrun = null;
+	                    ++$ntotalSearchRuns;
+		            } else {
+		                LogDebug("Skipping searches for SearchPairId {$searchPair['UserSearchPairId']} because its country codes [" . implode('|', $ccPair) . "] do not include the user's search pair's country codes [{$countryCodes}]...");
+		            }
+
+		            $searchPair = null;
+			        $searchPairs[$pairKey] = null;
+		            unset($searchPairs[$pairKey]);
+                }
+            } else {
+                LogDebug("JobSite {$jobsiteKey}'s country codes [" . implode('|', $ccJobSite) . "] do not include the user's search pair's country codes [{$countryCodes}].  Skipping {$jobsiteKey} searches...");
+            }
+			$site = null;
+	        $sites[$jobsiteKey] = null;
+            unset($sites[$jobsiteKey]);
+        }
+		$searchPairs = null;
+        $sites = null;
+
+        $totalRuns = 0;
+        foreach(array_keys($this->_userSearchSiteRunsByJobSite) as $siteKey)
+        {
+            UserSearchSiteRunManager::filterRecentlyRunUserSearchRuns($this->_userSearchSiteRunsByJobSite[$siteKey]);
+            if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$siteKey])) {
+	            $totalRuns += count($this->_userSearchSiteRunsByJobSite[$siteKey]);
+            }
+        }
+
+        LogMessage(" Generated {$totalRuns} total search runs to process.");
+
+    }
+
+    /**
+	 * @return array|null
+	 * @throws \Propel\Runtime\Exception\PropelException
+	*/
+    private function getCountryCodesForUser()
+    {
+    	if(null === $this->_userSearchCountryCodes) {
+    		$this->_userSearchCountryCodes = array();
+
+	        $searchPairs = $this->getActiveUserSearchPairs();
+	        while($searchPairs !== null && !empty($searchPairs))
+	        {
+	        	$pair = array_pop($searchPairs);
+		        $geoloc = $pair->getGeoLocationFromUS();
+		        if(null !== $geoloc) {
+			        $code = $geoloc->getCountryCode();
+
+			        if(null !== $code && !in_array($code, $this->_userSearchCountryCodes, false))
+		            {
+			            $this->_userSearchCountryCodes[] = $code;
+			        }
+				}
+		        $geoloc = null;
+				$pair = null;
+	        }
+        }
+
+        return $this->_userSearchCountryCodes;
+    }
+
+
+    /*
+    * @return array
+	* @throws \Propel\Runtime\Exception\PropelException
+	*/
+    /**
+ * @return array|null
+* @throws \Propel\Runtime\Exception\PropelException
+*/private function queryUserSearchSiteRuns()
+    {
+        $appRunId = Settings::getValue('app_run_id');
+    	$searchPairIds = array();
+
+        //
+        // let's start with the searches specified with the details in the the config.ini
+        //
+        $searchPairs = $this->getActiveUserSearchPairs();
+        $nTotalPairs = 0;
+        if (empty($searchPairs)) {
+            return null;
+        }
+
+    	foreach($searchPairs as $k => $pair) {
+    		$searchPairIds[] = $searchPairs[$k]->getUserSearchPairId();
+    	    ++$nTotalPairs;
+    		// free the object & related db connection
+    		$searchPairs[$k] = null;
+        }
+		$searchPairs = null;
+
+        return UserSearchSiteRunQuery::create()
+            ->filterByAppRunId($appRunId)
+            ->filterByUserSearchPairId($searchPairIds, Criteria::IN)
+            ->find()
+            ->toArray("UserSearchSiteRunKey");
     }
 }

@@ -14,11 +14,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace JobScooper\Builders;
+namespace JobScooper\Utils;
 
 use JobScooper\DataAccess\UserQuery;
-use JobScooper\Manager\LocationManager;
-use JobScooper\Utils\Settings;
+use JobScooper\DataAccess\GeoLocationManager;
+use JobScooper\DataAccess\JobSiteManager;
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Runtime\Exception\InvalidArgumentException;
 use \SplFileInfo;
@@ -26,44 +26,42 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use \Propel\Runtime\Propel;
 
-use Noodlehaus\Config;
-
 $GLOBALS['CACHES'] = array('LOCATION_MANAGER' =>null, 'GEOCODER_ENABLED' => true);
 
 
 /**
- * Class ConfigBuilder
- * @package JobScooper\Builders
+ * Class ConfigInitializer
+ * @package JobScooper\Utils
  */
-class ConfigBuilder
+class ConfigInitializer
 {
     private $_rootOutputDirInfo = null;
 
     /**
-     * ConfigBuilder constructor.
+     * ConfigInitializer constructor.
      *
      * @param null $iniFile
      *
      */
     public function __construct($iniFile = null)
     {
-        if (empty($iniFile)) {
+        if (null === $iniFile) {
             $iniFile = Settings::getValue('command_line_args.config');
         }
 
-        if (empty($iniFile)) {
+        if (is_empty_value($iniFile)) {
             throw new \InvalidArgumentException('Missing user configuration settings file definition.  You must specify the configuration file on the command line.  Aborting.');
         }
 
         $envDirOut = getenv('JOBSCOOPER_OUTPUT');
-        if (!empty($envDirOut)) {
+        if (!is_empty_value($envDirOut)) {
             Settings::setValue('output_directories.root', $envDirOut);
         }
 
         $configData = Settings::loadConfig($iniFile);
         Settings::setValue('config_file_settings', $configData);
         $outdir = Settings::getValue('config_file_settings.output_directory');
-        if (empty(Settings::getValue('output_directories.root')) && !empty($outdir)) {
+        if (is_empty_value(Settings::getValue('output_directories.root')) && !is_empty_value($outdir)) {
             Settings::setValue('output_directories.root', $outdir);
         }
     }
@@ -156,7 +154,6 @@ class ConfigBuilder
      */
     private function setupRunFromConfig()
     {
-
         //
         // Load the global search data that will be used to create
         // and configure all searches
@@ -177,27 +174,27 @@ class ConfigBuilder
 
         // initialize the plugin bulder class so that all the plugins get loaded
         //
-        new JobSitePluginBuilder();
+        new JobSiteManager();
 
         $this->instantiateLocationManager();
         $this->parseSeleniumParameters();
 
-        if (count(JobSitePluginBuilder::getIncludedJobSites()) == 0) {
+        if (count(JobSiteManager::getIncludedJobSiteKeys()) == 0) {
             LogError('No job site plugins could be loaded for the given search geographic locations.  Aborting.');
             return;
         }
     }
 
     /**
-     * @return \JobScooper\Manager\LocationManager
+     * @return \JobScooper\DataAccess\GeoLocationManager
      * @throws \Exception
      */
     private function instantiateLocationManager()
     {
-        $cache = LocationManager::getLocationManager();
-        if (empty($cache)) {
-            LocationManager::create();
-            $cache = LocationManager::getLocationManager();
+        $cache = GeoLocationManager::getLocationManager();
+        if (null === $cache) {
+            GeoLocationManager::create();
+            $cache = GeoLocationManager::getLocationManager();
         }
 
         return $cache;
@@ -282,7 +279,7 @@ class ConfigBuilder
     {
         LogDebug('Configuring Propel logging...');
         $defaultLogger = $GLOBALS['logger'];
-        if (is_null($defaultLogger)) {
+        if (null === $defaultLogger) {
             $pathLog = getOutputDirectory('logs') . '/propel-' .getTodayAsString('-').'.log';
             LogWarning('Could not find global logger object so configuring propel logging separately at {$pathLog}.');
             $defaultLogger = new Logger('defaultLogger');
@@ -336,13 +333,12 @@ class ConfigBuilder
         LogMessage('Loading global search settings from config file...');
 
         $gsoset = $this->getSetting('global_search_options');
-        if (!empty($gsoset)) {
+        if (!is_empty_value($gsoset)) {
             // This must happen first so that the search locations can be geocoded
             if (array_key_exists('google_maps_api_key', $gsoset)) {
                 Settings::setValue('google_maps_api_key', $gsoset['google_maps_api_key']);
             }
 
-            $allJobSitesByKey = JobSitePluginBuilder::getAllJobSites();
             foreach ($gsoset as $gsoKey => $gso) {
                 if (!empty($gso)) {
                     switch (strtoupper($gsoKey)) {
@@ -363,11 +359,6 @@ class ConfigBuilder
                     }
                 }
             }
-
-            //
-            // Filter out sites excluded in the config file
-            //
-            JobSitePluginBuilder::setSitesAsExcluded(Settings::getValue('config_excluded_sites'));
         }
     }
 
@@ -409,14 +400,27 @@ class ConfigBuilder
         //
         // Configure the primary user for the config file and set it
         //
+        $currentUser = null;
+        $cmd_line_user_to_run = Settings::getValue('command_line_args.user');
+
         $config_users = $this->getSetting('users');
         $user_recs = array();
-        if (empty($config_users)) {
+        if (is_empty_value($config_users)) {
             throw new \Exception('No users found in configuration settings.  Aborting.');
         } else {
+
+        	//
+        	// if the user specified a single user to run on the commamnd line, then ignore any
+        	// user data loaded from the config for this run besides that specific user.
+        	//
+        	if(!is_empty_value($cmd_line_user_to_run)) {
+        		if(array_key_exists($cmd_line_user_to_run, $config_users)) {
+        			$config_users = [$config_users[$cmd_line_user_to_run]];
+        		}
+        	}
             foreach ($config_users as $key_user => $config_user) {
                 $updatedUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($key_user), $config_user, $overwriteFacts = true);
-                if (empty($updatedUser)) {
+                if (null === $updatedUser) {
                     throw new \Exception('Failed to create or update user based on config section users.{$key_user}.');
                 }
                 $user_recs[$key_user] = $updatedUser->toArray();
@@ -426,9 +430,6 @@ class ConfigBuilder
 
         Settings::setValue('users_for_run', $user_recs);
 
-
-        $currentUser = null;
-        $cmd_line_user_to_run = Settings::getValue('command_line_args.user');
 
         // First try to pull the user from the database by that userslug value.  Use that user
         // if we find one.  This allows a dev to override the local config file data if needed
@@ -476,7 +477,7 @@ class ConfigBuilder
 
             $nextUser = array();
             $otherUser = UserQuery::findUserByEmailAddress($arrOtherUserFacts['email'], $arrOtherUserFacts, false);
-            if (!empty($otherUser)) {
+            if (null !== $otherUser) {
                 $nextUser = $otherUser->toArray();
                 $nextUser['User'] = $otherUser;
                 $otherUser = null;

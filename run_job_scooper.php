@@ -43,10 +43,10 @@ $arguments = $cmdline->getAll();
 \JobScooper\Utils\Settings::setValue('command_line_args', $arguments);
 
 try {
-    $config = new \JobScooper\Builders\ConfigBuilder($arguments["config"]);
+    $config = new \JobScooper\Utils\ConfigInitializer($arguments["config"]);
     $config->initialize();
 } catch (Exception $e) {
-    print("Could not load {$arguments["config"]}: " . $e->getMessage());
+    throw new \Exception("Could not load {$arguments["config"]}: " . $e->getMessage());
 }
 
 $classRunJobs = new \JobScooper\Manager\StageManager($config);

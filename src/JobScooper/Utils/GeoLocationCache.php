@@ -19,7 +19,7 @@ namespace JobScooper\Utils;
 
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\GeoLocationQuery;
-use JobScooper\Manager\LocationManager;
+use JobScooper\DataAccess\GeoLocationManager;
 use Monolog\Logger;
 use \Psr\Cache\InvalidArgumentException;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -31,7 +31,7 @@ const C_CACHE_ITEM_EXPIRATION_SECS = 604800; # 7 * 24 * 60 * 60
 
 /**
  * Class GeoLocationCache
- * @package JobScooper\Manager
+ * @package JobScooper\Utils
  */
 class GeoLocationCache
 {
@@ -203,7 +203,7 @@ class GeoLocationCache
         }
 
         foreach ($lookups as $k => $l) {
-            $lookups[$k] = LocationManager::scrubLocationValue($l);
+            $lookups[$k] = GeoLocationManager::scrubLocationValue($l);
         }
         $lookups = array_iunique(array_values($lookups));
 

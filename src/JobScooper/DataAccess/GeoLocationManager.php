@@ -15,14 +15,12 @@
  * under the License.
  */
 
-namespace JobScooper\Manager;
+namespace JobScooper\DataAccess;
 
 use Geocoder\Exception\NoResultException;
 use Geocoder\Geocoder;
 
 use \Exception;
-use JobScooper\DataAccess\GeoLocation;
-use JobScooper\DataAccess\GeoLocationQuery;
 use JobScooper\Utils\GeocodeApiHttpAdapter;
 use JobScooper\Utils\GeocodeApiLoggedProvider;
 use \JobScooper\Utils\GeoLocationCache;
@@ -35,10 +33,10 @@ use Monolog\Logger;
 use Psr\Cache\InvalidArgumentException;
 
 /**
- * Class LocationManager
- * @package JobScooper\Manager
+ * Class GeoLocationManager
+ * @package JobScooper\DataAccess
  */
-class LocationManager
+class GeoLocationManager
 {
     /**
      * @var \JobScooper\Utils\GeoLocationCache|null
@@ -46,26 +44,26 @@ class LocationManager
     private $_geoLocCache = null;
 
     /**
-     * @return LocationManager
+     * @return GeoLocationManager
      * @throws \Exception
      */
     public static function getLocationManager()
     {
-        $loc = getCacheData('LocationManager');
+        $loc = getCacheData('GeoLocationManager');
         if (empty($loc)) {
-            $loc = LocationManager::create();
+            $loc = GeoLocationManager::create();
         }
         return $loc;
     }
 
     /**
-     * @return LocationManager
+     * @return GeoLocationManager
      * @throws \Exception
      */
     public static function create()
     {
-        $loc = new LocationManager();
-        setAsCacheData('LocationManager', $loc);
+        $loc = new GeoLocationManager();
+        setAsCacheData('GeoLocationManager', $loc);
         return $loc;
     }
 
@@ -213,7 +211,7 @@ class LocationManager
 
 
     /**
-     * LocationManager constructor.
+     * GeoLocationManager constructor.
      * @throws \Exception
      */
     public function __construct()
@@ -330,25 +328,53 @@ class LocationManager
         }
 
         if (!is_empty_value($geocodeResult)) {
-            $geolocation = $geocodeResult;
             try {
-            	if(null !== $geolocation){
-
-	                $lookup = LocationManager::scrubLocationValue($strAddress);
+	        	$geolocation = $this->getGeoLocationFromGeocode($geocodeResult);
+            	if(null !== $geolocation) {
+	                $lookup = self::scrubLocationValue($strAddress);
 	                $this->_geoLocCache->cacheGeoLocation($geolocation, $lookup);
+		            return $geolocation;
             	}
             } catch (\InvalidArgumentException $e) {
                 handleException($e);
             } catch (\Psr\Cache\InvalidArgumentException $e) {
                 handleException($e);
             }
+            finally {
+            	$geocodeResult = null;
+            }
+        }
+
+        $lookup = self::scrubLocationValue($strAddress);
+        $this->_geoLocCache->cacheUnknownLocation($lookup);
+
+        return null;
+    }
+
+    /**
+	 * @params array|null $geocodeResult
+     *
+     * @returns GeoLocation
+     * @throws \Exception
+	 */
+    final public function getGeoLocationFromGeocode($geocodeResult=null)
+    {
+
+        $geolocation = new GeoLocation();
+        $geolocation->fromGeocode(isset($geocodeResult[0]) ? $geocodeResult[0] : $geocodeResult);
+
+        $locKey = $geolocation->getGeoLocationKey();
+        $existingGeo = GeoLocationQuery::create()
+            ->findOneByGeoLocationKey($locKey);
+        if (null === $existingGeo)
+        {
+            $geolocation->save();
 
             return $geolocation;
-        } else {
-            $lookup = LocationManager::scrubLocationValue($strAddress);
-            $this->_geoLocCache->cacheUnknownLocation($lookup);
-
-            return null;
         }
+
+        $geolocation = null;
+        return $existingGeo;
     }
+
 }

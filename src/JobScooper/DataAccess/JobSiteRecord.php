@@ -17,9 +17,7 @@
 
 namespace JobScooper\DataAccess;
 
-use \Exception;
 use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;
-use JobScooper\SitePlugins\Base\SitePlugin;
 
 /**
  * Skeleton subclass for representing a row from the 'job_site' table.
@@ -30,6 +28,9 @@ use JobScooper\SitePlugins\Base\SitePlugin;
  * application requirements.  This class will only be generated as
  * long as it does not already exist in the output directory.
  *
+ * magic methods:
+ *
+ * @method getSupportedCountryCodes() Gets the country codes from the JobSite plugin
  */
 class JobSiteRecord extends BaseJobSiteRecord
 {
@@ -38,45 +39,43 @@ class JobSiteRecord extends BaseJobSiteRecord
      */
     private $_pluginObject = null;
 
+    /**
+	 * @return \JobScooper\SitePlugins\Base\SitePlugin
+     * @throws \Exception
+	*/
+	public function getPlugin(){
+	    if(null === $this->_pluginObject) {
+            $this->instantiatePlugin();
+	    }
+
+	    return $this->_pluginObject;
+	}
 
     /**
-     * @return \JobScooper\SitePlugins\Base\SitePlugin|null
      * @throws \Exception
+     * @throws \InvalidArgumentException
      */
-    public function getPlugin()
+    private function instantiatePlugin()
     {
-        if (is_null($this->getPluginClassName())) {
-            throw new \Exception("Missing jobsite plugin class name for " . $this->getJobSiteKey());
+        if (null !== $this->_pluginObject) {
+            return;
         }
 
-        if (!is_null($this->_pluginObject)) {
-            return $this->_pluginObject;
-        }
+        $class = $this->getPluginClassName();
         try {
-            $class = $this->getPluginClassName();
-            //			    if (!in_array($class, get_declared_classes())) {
-            //				    LogWarning("Unable to find declared class " . $this->getPluginClassName() . "] for plugin " . $this->getJobSiteKey() .".  Disabling JobSite for future runs.");
-            //				    $this->_pluginObject = null;
-            //				    $this->setisDisabled(true);
-            //				    $this->save();
-            //			    }
-            //			    else
-            //			    {
-            if (empty($class)) {
-                LogWarning("Unable to find plugin class name for {$this->getJobSiteKey()}.");
-            } else {
-                $this->_pluginObject = new $class();
-
-                setCacheItem("all_jobsites_and_plugins", $this->getJobSiteKey(), $this);
+            if (is_empty_value($class)) {
+            	$class = "Plugin{$this->getJobSiteKey()}";
+	            if (!in_array($class, get_declared_classes())) {
+	                throw new \InvalidArgumentException("Unable to find declared plugin class {$class} for {$this->getJobSiteKey()}.");
+	            }
             }
+            $this->_pluginObject = new $class();
         } catch (\Exception $ex) {
-            LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() . "]:  " . $ex->getMessage());
+            LogError("Error instantiating jobsite {$this->getJobSiteKey()} plugin object by class [{$class}]:  {$ex->getMessage()}");
+            $this->_pluginObject = null;
             unset($this->_pluginObject);
-        } finally {
-            return $this->_pluginObject;
         }
     }
-
 
     /**
      * Derived method to catches calls to undefined methods.
@@ -86,24 +85,25 @@ class JobSiteRecord extends BaseJobSiteRecord
      * @param mixed  $params
      *
      * @return array|string
-     */
+     *@throws \Exception
+*/
     public function __call($method, $params)
     {
+    	$obj = null;
         if (method_exists($this, $method)) {
-            return call_user_func(
-                array($this, $method),
-                    $params
-            );
+            $obj = $this;
         } else {
             $plugin = $this->getPlugin();
-            if (!empty($plugin) &&
-                method_exists($plugin, $method)) {
-                return call_user_func_array(
-                    array($plugin, $method),
-                    $params
-                );
-            }
+            if (null !== $plugin && method_exists($plugin, $method)) {
+            	$obj = $plugin;
+	        }
         }
+
+        if(null !== $obj) {
+           return call_user_func_array(array($obj, $method), $params);
+        }
+        $class = self::class;
+        LogError("{$method} not found for class {$class}.");
         return false;
     }
 }

@@ -18,18 +18,17 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Map\JobPostingTableMap;
-use JobScooper\Manager\LocationManager;
-use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\TableMap;
 use Exception;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Connection\ConnectionInterface;
+use \JobScooper\DataAccess\Base\JobPosting as BaseJobPosting;
 
 /**
  * Class JobPosting
  * @package JobScooper\DataAccess
  */
-class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \ArrayAccess
+class JobPosting extends BaseJobPosting implements \ArrayAccess
 {
     private $_searchLocId = null;
 
@@ -302,7 +301,7 @@ class JobPosting extends \JobScooper\DataAccess\Base\JobPosting implements \Arra
                 }
             }
 
-            $locmgr = LocationManager::getLocationManager();
+            $locmgr = GeoLocationManager::getLocationManager();
 
             if (false === stripos($loc_str, " {$countryCode}")) {
                 $loc_str = "{$loc_str} {$countryCode}";

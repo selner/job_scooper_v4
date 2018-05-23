@@ -757,11 +757,11 @@ function getCacheAsArray($cacheName)
     if (empty($cache)) {
         switch ($cacheName) {
             case "all_jobsites_and_plugins":
-                \JobScooper\Builders\JobSitePluginBuilder::getAllJobSites();
+                \JobScooper\DataAccess\JobSiteManager::getAllJobSites();
                 break;
 
             case "included_sites":
-                \JobScooper\Builders\JobSitePluginBuilder::setSitesAsExcluded();
+                \JobScooper\DataAccess\JobSiteManager::setSitesAsExcluded();
                 break;
 
             default:
