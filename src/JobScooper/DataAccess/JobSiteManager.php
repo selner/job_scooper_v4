@@ -208,7 +208,6 @@ class JobSiteManager
     public static function getAllJobSiteKeys() {
         $allKeys = Settings::getValue('all_jobsite_keys');
         if($allKeys === null) {
-        	new JobSiteManager();
 	        $allKeys = Settings::getValue('all_jobsite_keys');
         }
 
@@ -222,8 +221,9 @@ class JobSiteManager
 	*/
     public static function filterRecentlyRunJobSites(&$sites)
     {
-    	if(null === $sites)
+    	if(is_empty_value($sites)) {
     		return $sites;
+        }
 
     	$stillIncluded = array_keys($sites);
         $siteWaitCutOffTime = date_sub(new \DateTime(), date_interval_create_from_date_string('23 hours'));
@@ -251,7 +251,7 @@ class JobSiteManager
 						$site = null;
 		                $sites[$k] = null;
 		                unset($sites[$k]);
-		                }
+                  }
                 }
 	        }
         }
@@ -269,17 +269,18 @@ class JobSiteManager
      */
     public static function getJobSitesCmdLineIncludedInRun()
     {
+
         $cmdLineSites = getConfigurationSetting('command_line_args.jobsite');
-        $siteKeys = self::getAllJobSiteKeys();
-        if (in_array('all', $cmdLineSites)) {
-            return $siteKeys;
+        if(is_empty_value($cmdLineSites)) {
+        	return array();
         }
 
-        $includedSites = array_filter($cmdLineSites, function ($v) use ($siteKeys) {
-            return array_key_exists(strtolower($v), $siteKeys);
-        });
+        // can't call GetAllJobSiteKeys here because we will be in a recursion loop if we do
+        if (in_array('all', $cmdLineSites)) {
+            return Settings::getValue('all_jobsite_keys');
+        }
 
-        return $includedSites;
+        return $cmdLineSites;
     }
 
     /**
@@ -305,10 +306,15 @@ class JobSiteManager
      * @param array &$sites
      * @param string[] $countryCodes
      *
-	 * @throws \Exception
+	 * @return array
+*    * @throws \Exception
      */
     public static function filterJobSitesByCountryCodes(&$sites, $countryCodes)
     {
+    	if(is_empty_value($sites) || is_empty_value($countryCodes)) {
+    		return $sites;
+        }
+
         $ccRun = array_unique($countryCodes);
         $siteKeysOutOfSearchArea = array();
 
@@ -349,7 +355,9 @@ class JobSiteManager
      */
     public function __construct()
     {
-        if ($this->_pluginsLoaded !== true) {
+	    $is_init = Settings::getValue('JobSiteManager.initialized');
+
+        if (is_empty_value($is_init) || $is_init !== true) {
             $pathPluginDirectory = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'Plugins'));
             if (empty($pathPluginDirectory)) {
                 throw new Exception('Path to plugins source directory was not set.');
@@ -372,33 +380,37 @@ class JobSiteManager
 
             $this->syncDatabaseJobSitePluginClassList();
 
-            $this->_pluginsLoaded = true;
-        }
+            Settings::setValue('JobSiteManager.initialized', true);
+       }
     }
 
     /**
      * @throws \Propel\Runtime\Exception\PropelException
-     */
+     * @throws \Exception
+	*/
     private function syncDatabaseJobSitePluginClassList()
     {
         LogMessage('Adding any missing declared jobsite plugins and jobsite records in database...', null, null, null, $channel='plugins');
-
-        $declaredPluginsBySite = $this->getAllDeclaredPluginClassesByJobSiteKey();
-		$declaredSiteKeys = array_keys($declaredPluginsBySite);
-
-        $dbJobSitesByKey = \JobScooper\DataAccess\JobSiteRecordQuery::create()
-            ->filterByJobSiteKey($declaredSiteKeys, Criteria::IN)
+        $allDBJobSitesByKey = \JobScooper\DataAccess\JobSiteRecordQuery::create()
             ->find()
-            ->toArray("JobSiteKey");
-
-        if(is_empty_value($dbJobSitesByKey)) {
-			$dbJobSitesByKey = array();
+            ->toArray('JobSiteKey');
+        if(is_empty_value($allDBJobSitesByKey)) {
+			$allDBJobSitesByKey = array();
         }
-        $jobsitesToAdd = array_diff_key($declaredPluginsBySite, $dbJobSitesByKey);
-        if (!is_empty_value($jobsitesToAdd)) {
-            LogMessage('Adding ' . getArrayValuesAsString($jobsitesToAdd), null, null, null, $channel='plugins');
 
-            foreach ($jobsitesToAdd as $jobSiteKey => $pluginClass) {
+        $prevDisabledSitesByKey = array_filter($allDBJobSitesByKey, function($v) {
+        	return $v['isDisabled'] === true;
+        });
+        $enabledSitesByKey = array_diff_key($allDBJobSitesByKey, $prevDisabledSitesByKey);
+
+        $declaredPluginsBySiteKey = $this->getAllDeclaredPluginClassesByJobSiteKey();
+		$sitesToReEnable = array_intersect_key($prevDisabledSitesByKey, $declaredPluginsBySiteKey);
+
+		$sitesToAdd = array_diff_key($declaredPluginsBySiteKey, $allDBJobSitesByKey);
+        if (!is_empty_value($sitesToAdd)) {
+            LogMessage('Adding ' . getArrayValuesAsString($sitesToAdd), null, null, null, $channel='plugins');
+
+            foreach ($sitesToAdd as $jobSiteKey => $pluginClass) {
                 $dbrec = JobSiteRecordQuery::create()
                     ->filterByJobSiteKey($jobSiteKey)
                     ->findOneOrCreate();
@@ -408,34 +420,46 @@ class JobSiteManager
                 $dbrec->setDisplayName(str_replace('Plugin', '', $pluginClass));
                 $dbrec->save();
                 $dbrec = null;
+                $enabledSitesByKey[$jobSiteKey] = $jobSiteKey;
             }
         }
 
-        $enabledSites = array_filter($dbJobSitesByKey, function ($v, $k) use ($declaredPluginsBySite) {
-            return array_key_exists($k, $declaredPluginsBySite) && ($v['isDisabled'] !== true);
-        }, ARRAY_FILTER_USE_BOTH);
+        $sitesToDisable = array_diff_key($enabledSitesByKey, $declaredPluginsBySiteKey);
+        if(!is_empty_value($sitesToDisable) && is_array($sitesToDisable)) {
+			$sitesToSetDisabled = JobSiteManager::getJobSitesByKeys(array_keys($sitesToDisable));
+            LogMessage('Disabling ' . count($sitesToSetDisabled) . ' site plugins...', null, null, null, $channel='plugins');
+			foreach($sitesToSetDisabled as $key => $site)
+            {
+				LogWarning("{$jobSiteKey} did not have a matching Plugin class that was declared so it cannot be used.  Marking as disabled in the database and ignoring it.");
+	            $site->setisDisabled(true);
+	            $site->save();
+                $enabledSites[$key] = null;
+                unset($enabledSites[$key]);
+                $site = null;
+			}
+		}
 
-        $jobsitesToDisable = array_diff_key($dbJobSitesByKey, $enabledSites);
-        if (!empty($jobsitesToDisable)) {
-            LogMessage('Disabling ' . join(', ', array_keys($jobsitesToDisable)), null, null, null, $channel='plugins');
-            foreach ($jobsitesToDisable as $jobSiteKey =>$jobsite) {
-                $dbJobSitesByKey[$jobSiteKey]->setIsDisabled(true);
-                $dbJobSitesByKey[$jobSiteKey]->save();
-            }
+        if (!empty($sitesToReEnable) && is_array($sitesToReEnable)) {
+            $sitesToEnable = JobSiteManager::getJobSitesByKeys(array_keys($sitesToReEnable));
+            LogMessage('Re-enabling previously disabled sites that now have plugin classes: ' . implode(', ', array_keys($sitesToEnable)), null, null, null, $channel='plugins');
+            foreach ($sitesToEnable as $jobSiteKey => $site) {
+                $site->setisDisabled(false);
+                $site->setPluginClassName($declaredPluginsBySiteKey[$jobSiteKey]);
+                $site->save();
+
+                $site = null;
+                $sitesToEnable[$jobSiteKey] = null;
+                unset($sitesToEnable[$jobSiteKey]);
+                $enabledSitesByKey[$jobSiteKey] = $jobSiteKey;
+			}
+			$sitesToEnable = null;
         }
 
-        $nEnabledSites = count($enabledSites);
+        $nEnabledSites = count($enabledSitesByKey);
         LogMessage("Loaded {$nEnabledSites} enabled jobsite plugins.");
         $dbJobSitesByKey = null;
 
-        if(is_empty_value($enabledSites)) {
-        	$enabledKeys = array();
-        }
-        else {
-			$enabledKeys = array_keys($enabledSites);
-		}
-
-	    Settings::setValue('all_jobsite_keys', array_combine($enabledKeys, $enabledKeys));
+	    Settings::setValue('all_jobsite_keys', $enabledSites);
 
     }
 
@@ -746,7 +770,6 @@ class JobSiteManager
             return preg_match('/^Plugin/', $class) !== 0;
         });
 
-        $declaredPluginsBySite = array();
         foreach ($pluginClasses as $class) {
             $jobsitekey = cleanupSlugPart(str_replace('Plugin', '', $class));
             $classListBySite[$jobsitekey] = $class;
