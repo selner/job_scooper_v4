@@ -3,7 +3,7 @@ echo off
 
 if [ -z $CODEFRESH_API_KEY ]; then
 	echo "Missing required environment variable CODEFRESH_API_KEY."
-	goto s_error
+	exit
 fi
 
 DCOMP_VERBOSE=""
