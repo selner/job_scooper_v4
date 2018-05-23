@@ -301,7 +301,7 @@ class GeoLocationManager
     /**
      * @param $strAddress
      *
-     * @return \JobScooper\DataAccess\GeoLocation|null
+     * @return \Geocoder\Result\ResultInterface|\Geocoder\Result\ResultInterface|\JobScooper\DataAccess\GeoLocation|null
      * @throws \Exception
      * @throws \Psr\Cache\InvalidArgumentException
      */
@@ -315,66 +315,26 @@ class GeoLocationManager
         }
 
         $geocodeResult = null;
+        $lookup = self::scrubLocationValue($strAddress);
         try {
             $this->countGeocodeCalls += 1;
-            $geocodeResult = $this->_geocoder->geocode($strAddress);
+            $geolocation = $this->_geocoder->geocode($strAddress);
+            if (is_empty_value($geolocation)) {
+				throw new NoResultException("Geocoder returned no results found for {$strAddress}.");
+			}
+            /** @noinspection PhpParamsInspection */ $this->_geoLocCache->cacheGeoLocation($geolocation, $lookup);
+            return $geolocation;
+
         } catch (NoResultException $ex) {
             LogDebug("No geocode result was found for {$strAddress}:  " . $ex->getMessage(), null, $this->loggerName);
-            $geocodeResult = null;
+            $geolocation = null;
+	        $this->_geoLocCache->cacheUnknownLocation($lookup);
         } catch (Exception $ex) {
-            $this->countGeocodeErrors += 1;
+            ++$this->countGeocodeErrors;
             LogError("Failed to geocode {$strAddress}: " . $ex->getMessage(), null, $ex, $this->loggerName);
-            throw $ex;
+	        $this->_geoLocCache->cacheUnknownLocation($lookup);
         }
-
-        if (!is_empty_value($geocodeResult)) {
-            try {
-	        	$geolocation = $this->getGeoLocationFromGeocode($geocodeResult);
-            	if(null !== $geolocation) {
-	                $lookup = self::scrubLocationValue($strAddress);
-	                $this->_geoLocCache->cacheGeoLocation($geolocation, $lookup);
-		            return $geolocation;
-            	}
-            } catch (\InvalidArgumentException $e) {
-                handleException($e);
-            } catch (\Psr\Cache\InvalidArgumentException $e) {
-                handleException($e);
-            }
-            finally {
-            	$geocodeResult = null;
-            }
-        }
-
-        $lookup = self::scrubLocationValue($strAddress);
-        $this->_geoLocCache->cacheUnknownLocation($lookup);
-
         return null;
+
     }
-
-    /**
-	 * @params array|null $geocodeResult
-     *
-     * @returns GeoLocation
-     * @throws \Exception
-	 */
-    final public function getGeoLocationFromGeocode($geocodeResult=null)
-    {
-
-        $geolocation = new GeoLocation();
-        $geolocation->fromGeocode(isset($geocodeResult[0]) ? $geocodeResult[0] : $geocodeResult);
-
-        $locKey = $geolocation->getGeoLocationKey();
-        $existingGeo = GeoLocationQuery::create()
-            ->findOneByGeoLocationKey($locKey);
-        if (null === $existingGeo)
-        {
-            $geolocation->save();
-
-            return $geolocation;
-        }
-
-        $geolocation = null;
-        return $existingGeo;
-    }
-
 }

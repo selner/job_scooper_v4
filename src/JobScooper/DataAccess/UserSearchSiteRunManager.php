@@ -17,8 +17,8 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\Utils\SimpleHTMLHelper;
-use Propel\Runtime\ActiveQuery\Criteria;
+use JobScooper\DataAccess\Map\JobSiteRecordTableMap;use JobScooper\Utils\SimpleHTMLHelper;
+use Propel\Runtime\ActiveQuery\Criteria;use Propel\Runtime\ActiveQuery\ModelCriteria;
 
 
 class UserSearchSiteRunManager {
@@ -162,64 +162,64 @@ class UserSearchSiteRunManager {
     public static function filterRecentlyRunUserSearchRuns(&$searchRuns)
     {
         $skippedSearchRuns = array();
-        $siteWaitCutOffTime = date_sub(new \DateTime(), date_interval_create_from_date_string('23 hours'));
+        $dtSiteWaitPrevRunCutOff = date_sub(new \DateTime(), date_interval_create_from_date_string('23 hours'));
         $srKeys = array_keys($searchRuns);
         $user = User::getUserObjById($searchRuns[$srKeys[0]]['UserId']);
 		$searchPairIds = $user->getActiveUserSearchPairIds();
+		$user = null;
 
-        $potentialRunsToSkip = UserSearchSiteRunQuery::create()
+        // Remove any that ran before the cache cut off time, not since that time.
+        // We are left with only those we should skip, aka the ones that
+        // ran after our cutoff time
+        //
+        $runsToSkip = UserSearchSiteRunQuery::create()
             ->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
-            ->select(array('JobSiteKey', 'UserSearchPairId', 'LastCompleted'))
+            ->select(array('JobSiteKey', 'UserSearchPairId', 'EndedAt', 'JobSiteFromUSSR.ResultsFilterType', 'UserSearchPairFromUSSR.GeoLocationId'))
+			->join('UserSearchPairFromUSSR')
+		        ->addRelationSelectColumns('UserSearchPairFromUSSR')
+			->join("JobSiteFromUSSR")
+		        ->addRelationSelectColumns('JobSiteFromUSSR')
             ->filterByUserSearchPairId($searchPairIds, Criteria::IN)
             ->filterByRunResultCode(array('successful', 'failed'))
-            ->groupBy(array('JobSiteKey', 'UserSearchPairId'))
+            ->filterByEndedAt($dtSiteWaitPrevRunCutOff, Criteria::GREATER_EQUAL)
+            ->groupBy(array('JobSiteKey', 'UserSearchPairId', 'EndedAt'))
             ->find()
             ->toArray();
 
         // Filter jobsite/searchpair combos that can be skipped given the lastcompleted date.
         //
-        if (!empty($potentialRunsToSkip)) {
-            // Remove any that ran before the cache cut off time, not since that time.
-            // We are left with only those we should skip, aka the ones that
-            // ran after our cutoff time
-            //
-            foreach ($potentialRunsToSkip as $potentialSkip) {
-            	$jobSiteKey = $potentialSkip['JobSiteKey'];
-                if (new \DateTime($potentialSkip['LastCompleted']) >= $siteWaitCutOffTime) {
-                    $filteredSiteSearchIdPairs["{$jobSiteKey}-{$potentialSkip['UserSearchPairId']}"] = $potentialSkip;
-                }
-
+        if (!empty($runsToSkip)) {
+        	$resultsFilterEnums = JobSiteRecordTableMap::getValueSet(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE);
+	        foreach($runsToSkip as $skip) {
+	        	foreach($searchRuns as $runKey => $run) {
+					if($skip['JobSiteKey'] === $run['JobSiteKey']) {
+						if($resultsFilterEnums[$skip['JobSiteFromUSSR.ResultsFilterType']] === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION &&
+							(int)$skip['UserSearchPairFromUSSR.GeoLocationId'] === (int)$run['GeoLocationId'])
+					    {
+							$skippedSearchRuns[$runKey] = $run;
+						} elseif((int)$skip['UserSearchPairId'] === (int)$run['UserSearchPairId']) {
+							$skippedSearchRuns[$runKey] = $run;
+						}
+					}
+	        	}
             }
-            $filterRuns = array_filter($searchRuns, function ($v) use ($filteredSiteSearchIdPairs) {
-                if(array_key_exists('JobSiteKey', $v) && array_key_exists('UserSearchPairId', $v))
-                {
-                    $sitePairKey = "{$v['JobSiteKey']}-{$v['UserSearchPairId']}";
-                    if(array_key_exists($sitePairKey, $filteredSiteSearchIdPairs)) {
-                        return true;
-                    }
-                }
-                return false;
-            });
+        }
 
-            if(!is_empty_value($filterRuns)) {
-                foreach($filterRuns as $runKey => $searchFacts) {
-                    $searchRun = self::getSearchRunObjFromFacts($searchFacts);
-                    $searchRun->setRunResultCode('skipped');
-                    $searchRun->save();
-                    $searchRun = null;
-                    $searchRuns[$runKey] = null;
-                    unset($searchRuns[$runKey]);
-                    $skippedSearchRuns[] = $runKey;
-               }
-            }
-		}
+        if (!is_empty_value($skippedSearchRuns)) {
+        	foreach($skippedSearchRuns as $runKey => $run) {
+                $search = self::getSearchRunObjFromFacts($run);
+                $search->setRunResultCode('skipped');
+                $search->save();
+                $search = null;
 
-        if (!empty($skippedSearchRuns)) {
-            LogMessage('Skipping the following searches because they have run since ' . $siteWaitCutOffTime->format('Y-m-d H:i') . ': ' . implode(', ', $skippedSearchRuns));
+                $searchRuns[$runKey] = null;
+                unset($searchRuns[$runKey]);
+			}
+
+            LogMessage('Skipping ' . count(array_keys($skippedSearchRuns)) . ' searches because they have run since ' . $dtSiteWaitPrevRunCutOff->format('Y-m-d H:i') . ': ' . implode(', ', array_keys($skippedSearchRuns)));
         }
 
     }
-
 
 
 }

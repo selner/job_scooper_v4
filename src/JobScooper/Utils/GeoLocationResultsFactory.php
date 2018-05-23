@@ -48,6 +48,7 @@ class GeoLocationResultsFactory implements ResultFactoryInterface
 
     /**
      * {@inheritDoc}
+     * @returns GeoLocation
      */
     public function newInstance()
     {

@@ -167,7 +167,7 @@ class GeoLocationCache
     }
 
     /**
-     * @param \JobScooper\DataAccess\GeoLocation $geolocation
+     * @param GeoLocation $geolocation
      * @param string $newLookupString
      *
      * @throws \phpFastCache\Exceptions\phpFastCacheInvalidArgumentException

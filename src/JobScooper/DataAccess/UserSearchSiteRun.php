@@ -203,17 +203,24 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
         $searchRunFacts = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
         updateColumnsForCSVFlatArray($searchRunFacts, new UserSearchSiteRunTableMap());
-        if ($includeGeolocation === true) {
-            $searchPair = $this->getUserSearchPairFromUSSR();
-            if (null !== $searchPair && null !== $searchPair->getGeoLocationId()) {
-                $jobloc = $searchPair->getGeoLocationFromUS();
-                if (null !== $jobloc) {
-                    $location = $jobloc->toFlatArrayForCSV();
-                }
 
-                $searchRunFacts = array_merge_recursive_distinct($searchRunFacts, $location);
-            }
+        $searchPair = $this->getUserSearchPairFromUSSR();
+        if (null !== $searchPair && null !== $searchPair->getGeoLocationId()) {
+        	$searchRunFacts['GeoLocationId'] = $searchPair->getGeoLocationId();
+	        if($includeGeolocation === true) {
+	            $jobloc = $searchPair->getGeoLocationFromUS();
+	            if (null !== $jobloc) {
+	                $location = $jobloc->toFlatArrayForCSV();
+	            }
+
+	            $searchRunFacts = array_merge_recursive_distinct($searchRunFacts, $location);
+	        }
         }
+        $searchPair = null;
+
+        $site = $this->getJobSiteFromUSSR();
+		$searchRunFacts['ResultsFilterType'] = $site->getResultsFilterType();
+		$site = null;
 
         $searchRunFacts['UserId'] = UserSearchSiteRunManager::getUserIdFromSearchFacts($searchRunFacts);
 
