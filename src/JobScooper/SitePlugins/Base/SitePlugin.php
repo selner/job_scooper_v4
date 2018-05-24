@@ -53,6 +53,7 @@ abstract class SitePlugin implements IJobSitePlugin
 {
     const VALUE_NOT_SUPPORTED = -1;
 
+
     /**
      * SitePlugin constructor.
      *
@@ -60,6 +61,10 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     public function __construct()
     {
+        if(null === $this->JobSiteKey) {
+            $this->JobSiteKey = SitePluginFactory::getJobSiteKeyForPluginClass(get_class($this));
+        }
+
         if (!is_empty_value($this->childSiteURLBase) && is_empty_value($this->JobPostingBaseUrl)) {
             $this->JobPostingBaseUrl = $this->childSiteURLBase;
         }
@@ -211,46 +216,20 @@ abstract class SitePlugin implements IJobSitePlugin
     }
 
     /**
-     * @throws \Exception
-     */
-    public function setResultsFilterType()
-    {
+    * @return string
+    */
+    public  function getPluginResultsFilterType(){
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             if ($this->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
-                $this->resultsFilterType = "all-only";
+                $this->resultsFilterType = 'all-only';
             } else {
-                $this->resultsFilterType = "all-by-location";
+                $this->resultsFilterType = 'all-by-location';
             }
         } else {
-            $this->resultsFilterType = "user-filtered";
+            $this->resultsFilterType = 'user-filtered';
         }
 
-        $key = $this->getJobSiteKey();
-        $site = JobSiteManager::getJobSiteByKey($key);
-        if(null === $site){
-        	throw new \InvalidArgumentException("Unable to setResultsFilterType.  Missing DB record for {$key}");
-        }
-        $site->setResultsFilterType($this->resultsFilterType);
-        $site->save();
-        $site = null;
-    }
-
-    /**
-     * @return null|string
-     * @throws \Exception
-     */
-    public function getJobSiteKey()
-    {
-	    if(null === $this->JobSiteKey) {
-        	$siteKey = JobSiteManager::getJobSiteKeyByPluginClass(get_class($this));
-            $this->JobSiteKey = $siteKey;
-        }
-
-        if (is_empty_value($this->JobSiteKey)) {
-        	throw new \InvalidArgumentException("No JobSiteKey specified for this job site plugin.");
-        }
-
-        return $this->JobSiteKey;
+        return $this->resultsFilterType;
     }
 
 
@@ -285,8 +264,6 @@ abstract class SitePlugin implements IJobSitePlugin
     public function setSearches($arrSearchRuns)
     {
         $this->arrSearchesToReturn = array(); // clear out any previous searches
-
-        $this->setResultsFilterType();
 
         if ($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
             $searchToKeep = array_pop($arrSearchRuns);
@@ -1383,7 +1360,7 @@ abstract class SitePlugin implements IJobSitePlugin
     {
         if ($this->isBitFlagSet(C__JOB_USE_SITENAME_AS_COMPANY)) {
             if (!array_key_exists('Company', $arrItem) || empty($ret['Company'])) {
-                $arrItem['Company'] = $this->getJobSiteKey();
+                $arrItem['Company'] = $this->JobSiteKey;
             }
         }
 
@@ -1472,7 +1449,7 @@ abstract class SitePlugin implements IJobSitePlugin
             $arrJobSitePostIds = array_column($arrJobsToAdd, "JobSitePostId", "JobSitePostId");
 
             $alreadyExist = JobPostingQuery::create()
-                ->filterByJobSiteKey($this->getJobSiteKey())
+                ->filterByJobSiteKey($this->JobSiteKey)
                 ->filterByJobSitePostId($arrJobSitePostIds, Criteria::IN)
                 ->find()
                 ->toKeyIndex("JobSitePostId");
@@ -1953,7 +1930,7 @@ JSCODE;
                                 $arrPreviouslyLoadedJobSiteIds = array_column($arrPreviouslyLoadedJobs, 'JobSitePostId');
                                 $newJobThisPage = array_diff(array_column($arrPageJobsList, 'JobSitePostId'), $arrPreviouslyLoadedJobSiteIds);
                                 if (empty($newJobThisPage)) {
-                                    $site = $this->getJobSiteKey();
+                                    $site = $this->JobSiteKey;
                                     throw new Exception("{$site} returned the same jobs for page {$nPageCount}.  We likely aren't paginating successfully to new results; aborting to prevent infinite results parsing.");
                                 }
                             }
@@ -2215,7 +2192,7 @@ JSCODE;
                         $ret[$item['JobSitePostId']] = $item;
                     }
                 } catch (Exception $ex) {
-                    $this->log("Error parsing LD+JSON for " . $this->getJobSiteKey() . ": " . $ex->getMessage(), \Monolog\Logger::DEBUG);
+                    $this->log("Error parsing LD+JSON for " . $this->JobSiteKey . ": " . $ex->getMessage(), \Monolog\Logger::DEBUG);
                 }
             }
         }

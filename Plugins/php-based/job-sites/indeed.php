@@ -79,7 +79,7 @@ class PluginIndeed extends \JobScooper\SitePlugins\AjaxSitePlugin
         $ret = array();
         foreach ($jobs as $job) {
             $ret[$job->Id] = array(
-                'JobSiteKey' => $this->getJobSiteKey(),
+                'JobSiteKey' => $this->JobSiteKey,
                 'JobSitePostId' => $job->jk,
                 'Company' => $job->cmp,
                 'Title' =>  $job->title,

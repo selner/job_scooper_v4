@@ -46,7 +46,7 @@ abstract class AbstractResumatorFall2017 extends \JobScooper\SitePlugins\Base\Si
 
         foreach (array_keys($retItems) as $k => $ret) {
             if (!array_key_exists('Company', $ret) || empty($ret['Company'])) {
-                $retItems[$k]['Company'] = $this->getJobSiteKey();
+                $retItems[$k]['Company'] = $this->JobSiteKey;
             }
         }
 

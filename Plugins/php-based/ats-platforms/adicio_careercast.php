@@ -96,7 +96,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     private function getJsonResultsPage($apiUri, $hostPageUri=null)
     {
-        LogMessage("Downloading JSON listing data from {$apiUri} for " . $this->getJobSiteKey() . "...");
+        LogMessage("Downloading JSON listing data from {$apiUri} for " . $this->JobSiteKey . "...");
         if (is_empty_value($hostPageUri)) {
             $hostPageUri = $this->getActiveWebdriver()->getCurrentURL();
         }
@@ -126,7 +126,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     private function _parseJsonJobs($jobs)
     {
-        $jobsite = $this->getJobSiteKey();
+        $jobsite = $this->JobSiteKey;
         $ret = array();
         foreach ($jobs as $job) {
             $ret[$job->Id] = array(
@@ -173,7 +173,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 
         $this->currentJsonSearchDetails = $searchDetails;
         $hostPage = $searchDetails->getSearchStartUrl();
-        LogMessage("Loading first page for {$this->getJobSiteKey()} from {$hostPage}");
+        LogMessage("Loading first page for {$this->JobSiteKey} from {$hostPage}");
         $jsonUrl = $this->_getJsonSearchUrl($searchDetails);
         unset($retData);
         try {
@@ -249,7 +249,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
                     unset($this->lastResponseData);
                 } else {
                     $jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
-                    LogMessage("Loading job results JSON data for {$this->getJobSiteKey()} from {$jsonUrl}");
+                    LogMessage("Loading job results JSON data for {$this->JobSiteKey} from {$jsonUrl}");
                     $respData = $this->getJsonResultsPage($jsonUrl);
                     $jobs = $respData->Jobs;
                     $this->nTotalJobs = $respData->Total;
@@ -263,14 +263,14 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
                     $nOffset = $nOffset + count($curPageJobs);
                     if ($nOffset < $this->nTotalJobs) {
                         $jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
-                        LogMessage("Loading next page of JSON data for {$this->getJobSiteKey()} from {$this->getActiveWebdriver()->getCurrentURL()}");
+                        LogMessage("Loading next page of JSON data for {$this->JobSiteKey} from {$this->getActiveWebdriver()->getCurrentURL()}");
                         $respData = $this->getJsonResultsPage($jsonUrl);
                         $jobs = $respData->Jobs;
                     }
                 }
                 return $ret;
             } catch (Exception $ex) {
-                LogWarning("Failed to download " . $this->getJobSiteKey() . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
+                LogWarning("Failed to download " . $this->JobSiteKey . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
 
                 return parent::parseJobsListForPage($objSimpHTML);
             }

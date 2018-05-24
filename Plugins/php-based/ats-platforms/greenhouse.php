@@ -48,7 +48,7 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
         $ret = array();
         foreach ($jobs as $job) {
             $ret[$job->id] = array(
-                'JobSiteKey' => $this->getJobSiteKey(),
+                'JobSiteKey' => $this->JobSiteKey,
                 'JobSitePostId' => $job->id,
                 'Company' => $this->JobSiteName,
                 'Title' =>  $job->title,

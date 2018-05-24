@@ -17,7 +17,7 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;
+use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;use JobScooper\SitePlugins\SitePluginFactory;use Propel\Runtime\Connection\ConnectionInterface;
 
 /**
  * Skeleton subclass for representing a row from the 'job_site' table.
@@ -50,6 +50,30 @@ class JobSiteRecord extends BaseJobSiteRecord
 
 	    return $this->_pluginObject;
 	}
+
+	/**
+    * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+    * @return bool
+    * @throws \Propel\Runtime\Exception\PropelException
+    */
+	public function preSave(ConnectionInterface $con = null)
+    {
+        if(null === $this->getResultsFilterType() && null !== $this->getPluginClassName()) {
+            try {
+                $plugin = SitePluginFactory::create($this->getJobSiteKey());
+                if(null !== $plugin) {
+                    $type = $plugin->getPluginResultsFilterType();
+                    $this->setResultsFilterType($type);
+                }
+            }
+            catch (\Exception $ex ) { }
+            finally {
+                $plugin = null;
+            }
+        }
+        return parent::preSave($con);
+    }
+
 
     /**
      * @throws \Exception

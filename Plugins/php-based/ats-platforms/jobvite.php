@@ -88,7 +88,7 @@ abstract class AbstractJobviteATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 
         foreach ($retItems as $k => $ret) {
             if (!array_key_exists('Company', $ret) || empty($ret['Company'])) {
-                $retItems[$k]['Company'] = $this->getJobSiteKey();
+                $retItems[$k]['Company'] = $this->JobSiteKey;
             }
         }
 
