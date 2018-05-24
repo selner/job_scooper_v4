@@ -24,6 +24,7 @@ use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\Utils\JobsMailSender;
 use Exception;
+use JobScooper\Utils\Settings;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -128,8 +129,7 @@ class NotifierJobAlerts extends JobsMailSender
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $class = null;
-
-        if (!$user->canNotifyUser() && !JobSiteManager::isSubsetOfSites()) {
+        if (!$user->canNotifyUser() && !Settings::is_in_setting_value('command_line_args.jobsite', 'all')) {
             LogMessage("Notification would violate the user's notification frequency.  Skipping send");
 
             return false;
@@ -320,8 +320,8 @@ class NotifierJobAlerts extends JobsMailSender
                 // we will notify the users again in a full report run.  Otherwise they would get annoyingly small
                 // separate reports instead.
                 //
-                if (!isDebug() && !JobSiteManager::isSubsetOfSites() &&
-                    !empty($allJobMatchIds)) {
+                if (!isDebug() && !Settings::is_in_setting_value('command_line_args.jobsite', 'all') &&
+                    !is_empty_value($allJobMatchIds)) {
                     $now = new \DateTime();
                     $sendToUser->setLastNotifiedAt($now);
                     $sendToUser->save();

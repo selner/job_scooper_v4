@@ -31,19 +31,6 @@ class JobSiteManager
 {
 
     /**
-     * @return bool
-     */
-    public static function isSubsetOfSites()
-    {
-        $cmdLineSites = getConfigurationSetting("command_line_args.jobsite");
-        if (in_array("all", $cmdLineSites)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * @return \JobScooper\DataAccess\JobSiteRecord[]|null
      * @throws \Exception
      */
@@ -130,24 +117,22 @@ class JobSiteManager
     }
 
     /**
-     * @param bool $fOptimizeBySiteRunOrder
      *
      * @return array|mixed
      * @throws \Exception
      */
-    public static function getIncludedJobSites($fOptimizeBySiteRunOrder=false)
+    public static function getIncludedJobSites()
     {
-    	$includedKeys = self::getIncludedJobSiteKeys($fOptimizeBySiteRunOrder);
+    	$includedKeys = self::getIncludedJobSiteKeys();
     	return self::getJobSitesByKeys($includedKeys);
 	}
 
 	/**
-     * @param bool $fOptimizeBySiteRunOrder
      *
      * @return array|null
      * @throws \Exception
      */
-    public static function getIncludedJobSiteKeys($fOptimizeBySiteRunOrder=false)
+    public static function getIncludedJobSiteKeys()
     {
     	$siteKeys = Settings::getValue("included_jobsite_keys");
         if (null === $siteKeys)
@@ -168,24 +153,6 @@ class JobSiteManager
             $siteKeys = array_keys($sites);
             self::setIncludedJobSiteKeys($siteKeys);
 
-        }
-
-        if ($fOptimizeBySiteRunOrder === true) {
-	        $sites = self::getJobSitesByKeys($siteKeys);
-            $sitesToSort = array();
-            foreach ($sites as $k => $v) {
-                $sitesToSort[$k] = $v->toArray();
-            }
-            $tmpArrSorted = array_orderby($sitesToSort, "isDisabled", SORT_DESC, "ResultsFilterType", SORT_ASC);
-
-            // now use the temp sorted array's keys and replace the
-            // values with the actual JobSite objects instead of the
-            // array version we used for sorting
-            //
-            $orderedSites = array_replace($tmpArrSorted, $sites);
-            if(null !== $orderedSites && is_array($orderedSites)) {
-            	$siteKeys = array_keys($orderedSites);
-            }
         }
 
     	$siteKeys = Settings::getValue("included_jobsite_keys");
@@ -384,7 +351,7 @@ class JobSiteManager
             $this->_loadJsonPluginConfigFiles_();
             $this->_initializeAllJsonPlugins();
 
-            $this->syncDatabaseJobSitePluginClassList();
+            $this->_syncDatabaseJobSitePluginClassList();
 
             Settings::setValue('JobSiteManager.initialized', true);
        }
@@ -394,7 +361,7 @@ class JobSiteManager
      * @throws \Propel\Runtime\Exception\PropelException
      * @throws \Exception
 	*/
-    private function syncDatabaseJobSitePluginClassList()
+    private function _syncDatabaseJobSitePluginClassList()
     {
         LogMessage('Adding any missing declared jobsite plugins and jobsite records in database...', null, null, null, $channel='plugins');
         $allDBJobSitesByKey = \JobScooper\DataAccess\JobSiteRecordQuery::create()
@@ -409,7 +376,7 @@ class JobSiteManager
         });
         $enabledSitesByKey = array_diff_key($allDBJobSitesByKey, $prevDisabledSitesByKey);
 
-        $declaredPluginsBySiteKey = $this->getAllDeclaredPluginClassesByJobSiteKey();
+        $declaredPluginsBySiteKey = $this->_getAllDeclaredPluginClassesByJobSiteKey();
 		$sitesToReEnable = array_intersect_key($prevDisabledSitesByKey, $declaredPluginsBySiteKey);
 
 		$sitesToAdd = array_diff_key($declaredPluginsBySiteKey, $allDBJobSitesByKey);
@@ -766,7 +733,7 @@ class JobSiteManager
     /**
      * @return array
      */
-    private function getAllDeclaredPluginClassesByJobSiteKey()
+    private function _getAllDeclaredPluginClassesByJobSiteKey()
     {
         $classListBySite = array();
         $classList = get_declared_classes();

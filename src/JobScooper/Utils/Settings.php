@@ -95,4 +95,18 @@ class Settings extends \Adbar\Dot
         parent::clear($keys);
         $GLOBALS[self::JSCOOP_GLOBALS] = $this;
     }
+
+    public static function is_in_setting_value($key, $checkVal) {
+
+        $valuesSet = self::getValue($key);
+        if(is_empty_value($valuesSet)) {
+            return is_empty_value($checkVal);
+        }
+
+        if(is_array($valuesSet)) {
+            return in_array($checkVal, $valuesSet);
+        }
+
+        return $valuesSet == $checkVal;
+    }
 }

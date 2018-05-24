@@ -646,20 +646,6 @@ function setGlobalSetting($root, $keyPath, $value)
     ksort($GLOBALS[$root]);
 }
 
-/**
- * @param $root
- * @param $keyPath
- */
-function removeGlobalSetting($root, $keyPath)
-{
-    doGlobalSettingExists($root);
-
-    $dot = new \Adbar\Dot($GLOBALS[$root]);
-    if ($dot->has($keyPath)) {
-        $dot->delete($keyPath);
-    }
-    $GLOBALS[$root] = $dot->all();
-}
 
 /**
  * @param      $root
@@ -691,17 +677,7 @@ function doGlobalSettingExists($root)
     }
 }
 
-const JOBSCOOPER_CONFIGSETTING_ROOT = "JSCOOP";
 const JOBSCOOPER_CACHES_ROOT = "JSCOOP_CACHES";
-
-/**
- * @param $keyPath
- * @param $value
- */
-function setConfigurationSetting($keyPath, $value)
-{
-    setGlobalSetting($root=JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath, $value);
-}
 
 /**
  * @param $keyPath
@@ -710,68 +686,7 @@ function setConfigurationSetting($keyPath, $value)
  */
 function getConfigurationSetting($keyPath, $default=null)
 {
-    return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath, $default);
-}
-
-/**
- * @return mixed
- */
-function getAllConfigurationSettings()
-{
-    doGlobalSettingExists(JOBSCOOPER_CONFIGSETTING_ROOT);
-
-    return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT);
-}
-
-/**
- * @param $cacheName
- * @param $keyPath
- * @param $value
- */
-function setCacheItem($cacheName, $keyPath, $value)
-{
-    setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName.".".$keyPath, $value);
-}
-
-/**
- * @param $cacheName
- * @param $keyPath
- *
- * @return mixed
- */
-function getCacheItem($cacheName, $keyPath)
-{
-    return getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName.".".$keyPath);
-}
-
-/**
- * @param $cacheName
- *
- * @return mixed
- */
-function getCacheAsArray($cacheName)
-{
-    doGlobalSettingExists(JOBSCOOPER_CACHES_ROOT);
-
-    $cache = getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName);
-    if (empty($cache)) {
-        switch ($cacheName) {
-            case "all_jobsites_and_plugins":
-                \JobScooper\DataAccess\JobSiteManager::getAllJobSites();
-                break;
-
-            case "included_sites":
-                \JobScooper\DataAccess\JobSiteManager::setSitesAsExcluded();
-                break;
-
-            default:
-                break;
-        }
-
-        $cache = getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName);
-    }
-
-    return $cache;
+    return \JobScooper\Utils\Settings::getValue($keyPath, $default);
 }
 
 /**
@@ -790,12 +705,4 @@ function setAsCacheData($cacheName, $value)
 function getCacheData($cacheName)
 {
     return getGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName);
-}
-
-/**
- * @param $cacheName
- */
-function clearCache($cacheName)
-{
-    removeGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName);
 }

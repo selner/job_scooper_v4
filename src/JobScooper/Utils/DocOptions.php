@@ -70,7 +70,7 @@ Options:
                 $envval = getenv($envkey);
                 if (!empty($envval)) {
                     $argval=$envval;
-                    setConfigurationSetting("environment.{$argkey}", $argval);
+                    Settings::setValue("environment.{$argkey}", $argval);
                 }
             }
 

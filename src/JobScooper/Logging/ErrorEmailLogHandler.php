@@ -17,6 +17,7 @@
 namespace JobScooper\Logging;
 
 use JobScooper\Utils\JobsMailSender;
+use JobScooper\Utils\Settings;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Handler\MailHandler;
 
@@ -24,7 +25,7 @@ class ErrorEmailLogHandler extends MailHandler
 {
     public static function getEmailErrorLogContent()
     {
-        return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, "email_error_log_content");
+        return Settings::getValue("email_error_log_content");
     }
 
     /**
@@ -34,7 +35,7 @@ class ErrorEmailLogHandler extends MailHandler
     protected function send($content, array $records)
     {
         $newErrContent = $this->getEmailErrorLogContent() . PHP_EOL . $content;
-        setGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, "email_error_log_content", $newErrContent);
+        return Settings::setValue("email_error_log_content", $newErrContent);
 
 
         $searchParams = $this->_getUserSearchSiteRunContent();
@@ -73,7 +74,7 @@ class ErrorEmailLogHandler extends MailHandler
     {
         $renderer = loadTemplate(__ROOT__ . '/src/assets/templates/partials/html_email_body_search_config_details.tmpl');
 
-        $data = getAllConfigurationSettings();
+        $data = Settings::getAllValues();
         $arrData = objectToArray($data);
         $flatData = array();
         foreach ($arrData as $key => $value) {
