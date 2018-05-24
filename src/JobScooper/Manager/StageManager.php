@@ -141,7 +141,7 @@ class StageManager
         $sitePlugin = null;
 
         if (!is_empty_value($jobsiteKeys)) {
-            LogMessage(PHP_EOL . "**************  Starting Run of Searches for " . count($jobsiteKeys) . " Job Sites **************  " . PHP_EOL);
+            LogMessage(PHP_EOL . "**************  Starting Run for user={$userFacts['UserSlug']} for " . count($jobsiteKeys) . " potential job sites **************  " . PHP_EOL);
 
 	        foreach($jobsiteKeys as $jobsiteKey)
 	        {
@@ -162,7 +162,7 @@ class StageManager
 	                    // Add the user's searches to the plugin
 	                    //
 	                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	                    startLogSection("Setting up {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
+	                    startLogSection("Initializing {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
 	                    try {
 	                    	$sitePlugin = JobSiteManager::getJobSitePluginByKey($jobsiteKey);
 	                        $sitePlugin->setSearches($siteRuns);
@@ -176,7 +176,7 @@ class StageManager
 								unset($siteRuns[$k]);
 	                        }
 	                        $siteRuns = null;
-	                        endLogSection(" added {$jobsiteKey} searches.");
+	                        endLogSection(" {$jobsiteKey} searches initialized.");
 	                    }
 
 	                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +185,7 @@ class StageManager
 	                    //
 	                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	                    try {
-	                        startLogSection("Downloading updated jobs on {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
+	                        startLogSection("Downloading jobs for {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
 	                        $sitePlugin->downloadLatestJobsForAllSearches();
 	                    } catch (\Exception $classError) {
 	                        handleException($classError, "{$jobsiteKey} failed to download job postings: %s", $raise = false);

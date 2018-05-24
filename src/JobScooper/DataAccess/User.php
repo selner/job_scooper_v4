@@ -478,11 +478,11 @@ class User extends BaseUser
         $nTotalPairs = count($searchPairs);
         $nKeywords = count($this->getSearchKeywords());
         $nLocations = countAssociativeArrayValues($this->getSearchLocations());
-        $nTotalSearches = $nKeywords * $nLocations * count($sites);
+        $nTotalPossibleSearches = $nKeywords * $nLocations * count($sites);
 
         $countryCodes = $this->getCountryCodesForUser();
 
-        LogMessage("Creating search runs for {$nTotalPairs} search pairs X " . count($sites) . " jobsites = up to {$nTotalSearches} total searches, from {$nKeywords} search keywords and {$nLocations} search locations in " . implode(", ", $countryCodes) .".");
+        LogDebug("Configuring {$nTotalPairs} search pairs X " . count($sites) . " jobsites = up to {$nTotalPossibleSearches} total searches, from {$nKeywords} search keywords and {$nLocations} search locations in " . implode(", ", $countryCodes) .".");
 
         $ntotalSearchRuns = 0;
 
@@ -517,7 +517,6 @@ class User extends BaseUser
 
 	                    $this->_userSearchSiteRunsByJobSite[$jobsiteKey][$searchrun->getUserSearchSiteRunKey()] = $searchrun->toFlatArray();
 	                    $searchrun = null;
-	                    ++$ntotalSearchRuns;
 		            } else {
 		                LogDebug("Skipping searches for SearchPairId {$searchPair['UserSearchPairId']} because its country codes [" . implode('|', $ccPair) . "] do not include the user's search pair's country codes [{$countryCodes}]...");
 		            }
@@ -545,7 +544,8 @@ class User extends BaseUser
             }
         }
 
-        LogMessage(" Generated {$totalRuns} total search runs to process.");
+        $totalSkippedSearches = $nTotalPossibleSearches - $totalRuns;
+        LogMessage("{$totalRuns} search runs configured for {$this->getUserSlug()}; {$totalSkippedSearches} searches were skipped.");
 
     }
 

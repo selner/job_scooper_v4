@@ -180,7 +180,7 @@ class ConfigInitializer
         $this->parseSeleniumParameters();
 
         if (count(JobSiteManager::getIncludedJobSiteKeys()) == 0) {
-            LogError('No job site plugins could be loaded for the given search geographic locations.  Aborting.');
+            LogError('No JobSite plugins could be loaded for the given search geographic locations.  Aborting.');
             return;
         }
     }

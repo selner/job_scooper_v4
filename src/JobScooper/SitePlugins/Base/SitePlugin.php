@@ -23,7 +23,7 @@ use JobScooper\DataAccess\UserSearchSiteRunManager;
 use function JobScooper\DataAccess\getCountryCodeRemapping;
 use JobScooper\DataAccess\UserSearchSiteRun;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
-use JobScooper\SitePlugins\Interfaces\IJobSitePlugin;
+use JobScooper\SitePlugins\IJobSitePlugin;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
@@ -31,6 +31,7 @@ use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\Manager\SeleniumManager;
+use JobScooper\SitePlugins\SitePluginFactory;
 use JobScooper\Utils\DomItemParser;
 use JobScooper\Utils\ExtendedDiDomElement;
 
@@ -43,7 +44,6 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel;
-use JobScooper\DataAccess\JobSiteManager;
 
 /**
  * Class SitePlugin
