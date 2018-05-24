@@ -153,16 +153,20 @@ class JobSiteManager
         if (null === $siteKeys)
         {
             $remainingEnabledSiteKeys = self::getJobSitesCmdLineIncludedInRun();
-
+			if(null === $remainingEnabledSiteKeys)
+			{
+				return null;
+			}
             $configExcludedSites = Settings::getValue('config_excluded_sites');
-            $remainingEnabledSiteKeys = array_diff(array_values($remainingEnabledSiteKeys), $configExcludedSites);
+			if(null !== $configExcludedSites) {
+	           $remainingEnabledSiteKeys = array_diff(array_values($remainingEnabledSiteKeys), $configExcludedSites);
+			}
 
             $sites = self::getJobSitesByKeys($remainingEnabledSiteKeys);
 			self::filterRecentlyRunJobSites($sites);
 
             $siteKeys = array_keys($sites);
             self::setIncludedJobSiteKeys($siteKeys);
-            Settings::setValue("included_jobsites_keys", $siteKeys);
 
         }
 
@@ -183,6 +187,8 @@ class JobSiteManager
             	$siteKeys = array_keys($orderedSites);
             }
         }
+
+    	$siteKeys = Settings::getValue("included_jobsite_keys");
 
         return $siteKeys;
     }
