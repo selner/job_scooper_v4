@@ -415,7 +415,7 @@ class ConfigInitializer
         	//
         	if(!is_empty_value($cmd_line_user_to_run)) {
         		if(array_key_exists($cmd_line_user_to_run, $config_users)) {
-        			$config_users = [$config_users[$cmd_line_user_to_run]];
+        			$config_users = [$cmd_line_user_to_run => $config_users[$cmd_line_user_to_run]];
         		}
         	}
             foreach ($config_users as $key_user => $config_user) {
