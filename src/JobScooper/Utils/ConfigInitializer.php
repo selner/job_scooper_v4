@@ -53,12 +53,15 @@ class ConfigInitializer
             throw new \InvalidArgumentException('Missing user configuration settings file definition.  You must specify the configuration file on the command line.  Aborting.');
         }
 
+        $this->_iniFile = $iniFile;
+
         $envDirOut = getenv('JOBSCOOPER_OUTPUT');
         if (!is_empty_value($envDirOut)) {
             Settings::setValue('output_directories.root', $envDirOut);
         }
 
         $configData = Settings::loadConfig($iniFile);
+        Settings::setValue('config_file', $iniFile);
         Settings::setValue('config_file_settings', $configData);
         $outdir = Settings::getValue('config_file_settings.output_directory');
         if (is_empty_value(Settings::getValue('output_directories.root')) && !is_empty_value($outdir)) {
@@ -69,6 +72,7 @@ class ConfigInitializer
     protected $nNumDaysToSearch = -1;
     public $arrConfigFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null);
     protected $allConfigFileSettings = null;
+    private $_iniFile = null;
 
     /**
      * @throws \ErrorException
@@ -105,8 +109,7 @@ class ConfigInitializer
         $strOutfileArrString = getArrayValuesAsString(Settings::getValue('output_directories'));
         LogMessage('Output folders configured: ' . $strOutfileArrString);
 
-
-        endLogSection('Loaded configuration details from ' . $this->arrConfigFileDetails->getPathname());
+        endLogSection("Loaded configuration details from {$this->_iniFile}");
 
         startLogSection('Configuring specific settings for this run... ');
         $this->setupRunFromConfig();
@@ -167,7 +170,7 @@ class ConfigInitializer
         $this->parseUserConfigs();
         $this->parseAlertReceipients();
 
-        LogMessage('Loaded all configuration settings from ' . $this->arrConfigFileDetails->getPathname());
+        LogMessage("Loaded all configuration settings from {$this->_iniFile}");
 
         // Note:  this must happen before any of the job site plugins are instantiated
         $this->parsePluginSettings();
