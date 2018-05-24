@@ -17,10 +17,7 @@
 
 namespace JobScooper\DataAccess;
 
-use Exception;
-use JobScooper\SitePlugins\AjaxSitePlugin;
-use JobScooper\SitePlugins\Interfaces\IJobSitePlugin;
-use JobScooper\Utils\Settings;
+use JobScooper\SitePlugins\SitePluginFactory;use JobScooper\Utils\Settings;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 /**
@@ -134,30 +131,7 @@ class JobSiteManager
      */
     public static function getIncludedJobSiteKeys()
     {
-    	$siteKeys = Settings::getValue("included_jobsite_keys");
-        if (null === $siteKeys)
-        {
-            $remainingEnabledSiteKeys = self::getJobSitesCmdLineIncludedInRun();
-			if(null === $remainingEnabledSiteKeys)
-			{
-				return null;
-			}
-            $configExcludedSites = Settings::getValue('config_excluded_sites');
-			if(null !== $configExcludedSites) {
-	           $remainingEnabledSiteKeys = array_diff(array_values($remainingEnabledSiteKeys), $configExcludedSites);
-			}
-
-            $sites = self::getJobSitesByKeys($remainingEnabledSiteKeys);
-			self::filterRecentlyRunJobSites($sites);
-
-            $siteKeys = array_keys($sites);
-            self::setIncludedJobSiteKeys($siteKeys);
-
-        }
-
-    	$siteKeys = Settings::getValue("included_jobsite_keys");
-
-        return $siteKeys;
+	    return Settings::getValue(self::class . '.enabled_sites');
     }
 
     /**
@@ -174,19 +148,6 @@ class JobSiteManager
         Settings::setValue('included_jobsite_keys', $keys);
     }
 
-
-    /**
-	* @throws \Exception
-	*/
-    public static function getAllJobSiteKeys() {
-        $allKeys = Settings::getValue('all_jobsite_keys');
-        if($allKeys === null) {
-	        $allKeys = Settings::getValue('all_jobsite_keys');
-        }
-
-        return $allKeys;
-
-    }
 
     /**
 	* @throws \Propel\Runtime\Exception\PropelException
@@ -306,7 +267,7 @@ class JobSiteManager
         }
 
         if (!is_empty_value($siteKeysOutOfSearchArea)) {
-            LogMessage('Skipping JobSites without coverage in ' . implode(', ', $ccRun) .': ' . implode(', ', $siteKeysOutOfSearchArea) );
+            LogMessage('Skipped ' . count($siteKeysOutOfSearchArea) .' JobSites not covering ' . implode(', ', $ccRun) .': ' . implode(', ', $siteKeysOutOfSearchArea) );
         }
 
     }
@@ -328,32 +289,15 @@ class JobSiteManager
      */
     public function __construct()
     {
-	    $is_init = Settings::getValue('JobSiteManager.initialized');
+        SitePluginFactory::loadAndVerifyInstalledPlugins();
 
-        if (is_empty_value($is_init) || $is_init !== true) {
-            $pathPluginDirectory = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'Plugins'));
-            if (empty($pathPluginDirectory)) {
-                throw new Exception('Path to plugins source directory was not set.');
-            }
+	    $is_init = Settings::getValue(self::class . '.initialized');
 
-            if (!is_dir($pathPluginDirectory)) {
-                throw new Exception("Unable to access the plugin directory '{$pathPluginDirectory}'");
-            }
-
-            $this->_dirPluginsRoot = realpath($pathPluginDirectory . DIRECTORY_SEPARATOR);
-
-            $this->_dirJsonConfigs = join(DIRECTORY_SEPARATOR, array($pathPluginDirectory, 'json-based'));
-
-            $this->_renderer = loadTemplate(__ROOT__ . '/src/assets/templates/eval_jsonplugin.tmpl');
-
-
-            $this->_loadPHPPluginFiles_();
-            $this->_loadJsonPluginConfigFiles_();
-            $this->_initializeAllJsonPlugins();
+        if (null === $is_init || $is_init !== true) {
 
             $this->_syncDatabaseJobSitePluginClassList();
 
-            Settings::setValue('JobSiteManager.initialized', true);
+            Settings::setValue(self::class . '.initialized', true);
        }
     }
 
@@ -363,7 +307,9 @@ class JobSiteManager
 	*/
     private function _syncDatabaseJobSitePluginClassList()
     {
-        LogMessage('Adding any missing declared jobsite plugins and jobsite records in database...', null, null, null, $channel='plugins');
+        LogMessage('Synchronizing database JobSite records with JobSite plugin installation status...', null, null, null, $channel='plugins');
+        $declaredPluginsBySiteKey = SitePluginFactory::getInstalledPlugins();
+
         $allDBJobSitesByKey = \JobScooper\DataAccess\JobSiteRecordQuery::create()
             ->find()
             ->toArray('JobSiteKey');
@@ -371,388 +317,56 @@ class JobSiteManager
 			$allDBJobSitesByKey = array();
         }
 
-        $prevDisabledSitesByKey = array_filter($allDBJobSitesByKey, function($v) {
-        	return $v['isDisabled'] === true;
-        });
-        $enabledSitesByKey = array_diff_key($allDBJobSitesByKey, $prevDisabledSitesByKey);
+        foreach($allDBJobSitesByKey as $jobSiteKey => $jobSiteFacts) {
+			$objJobSite = self::getJobSiteByKey($jobSiteKey);
+			if(null === $objJobSite)
+			    throw new \Exception("{$jobSiteKey} database object could not be instantiated.");
 
-        $declaredPluginsBySiteKey = $this->_getAllDeclaredPluginClassesByJobSiteKey();
-		$sitesToReEnable = array_intersect_key($prevDisabledSitesByKey, $declaredPluginsBySiteKey);
+            if(!array_key_exists($jobSiteKey, $declaredPluginsBySiteKey)) {
+                if($objJobSite->getisDisabled() === false) {
+                    LogWarning("{$jobSiteKey}: plugin class was not found; disabling job site.");
+                }
+                $objJobSite->setisDisabled(true);
+            }
+            else if(is_empty_value($jobSiteFacts['PhpClassName'])) {
+                if($objJobSite->getisDisabled() === true) {
+                    LogMessage("{$jobSiteKey}: new site plugin class was detected; enabling job site.");
+                }
+                $objJobSite->setisDisabled(false);
+                $objJobSite->setPluginClassName($declaredPluginsBySiteKey[$jobSiteKey]);
+            }
+            $objJobSite->save();
+            $objJobSite = null;
+        }
 
-		$sitesToAdd = array_diff_key($declaredPluginsBySiteKey, $allDBJobSitesByKey);
-        if (!is_empty_value($sitesToAdd)) {
-            LogMessage('Adding ' . getArrayValuesAsString($sitesToAdd), null, null, null, $channel='plugins');
-
-            foreach ($sitesToAdd as $jobSiteKey => $pluginClass) {
+        $missingJobSites = array_diff_key($declaredPluginsBySiteKey, $allDBJobSitesByKey);
+        foreach ($missingJobSites as $jobSiteKey => $pluginClass) {
+				LogMessage("{$jobSiteKey}: adding new jobsite for {$pluginClass} and enabling.");
                 $dbrec = JobSiteRecordQuery::create()
                     ->filterByJobSiteKey($jobSiteKey)
                     ->findOneOrCreate();
 
                 $dbrec->setJobSiteKey($jobSiteKey);
                 $dbrec->setPluginClassName($pluginClass);
+                $dbrec->setisDisabled(false);
                 $dbrec->setDisplayName(str_replace('Plugin', '', $pluginClass));
                 $dbrec->save();
                 $dbrec = null;
-                $enabledSitesByKey[$jobSiteKey] = $jobSiteKey;
-            }
         }
 
-        $sitesToDisable = array_diff_key($enabledSitesByKey, $declaredPluginsBySiteKey);
-        if(!is_empty_value($sitesToDisable) && is_array($sitesToDisable)) {
-			$sitesToSetDisabled = JobSiteManager::getJobSitesByKeys(array_keys($sitesToDisable));
-            LogMessage('Disabling ' . count($sitesToSetDisabled) . ' site plugins...', null, null, null, $channel='plugins');
-			foreach($sitesToSetDisabled as $key => $site)
-            {
-				LogWarning("{$jobSiteKey} did not have a matching Plugin class that was declared so it cannot be used.  Marking as disabled in the database and ignoring it.");
-	            $site->setisDisabled(true);
-	            $site->save();
-                $enabledSites[$key] = null;
-                unset($enabledSites[$key]);
-                $site = null;
-			}
-		}
-
-        if (!empty($sitesToReEnable) && is_array($sitesToReEnable)) {
-            $sitesToEnable = JobSiteManager::getJobSitesByKeys(array_keys($sitesToReEnable));
-            LogMessage('Re-enabling previously disabled sites that now have plugin classes: ' . implode(', ', array_keys($sitesToEnable)), null, null, null, $channel='plugins');
-            foreach ($sitesToEnable as $jobSiteKey => $site) {
-                $site->setisDisabled(false);
-                $site->setPluginClassName($declaredPluginsBySiteKey[$jobSiteKey]);
-                $site->save();
-
-                $site = null;
-                $sitesToEnable[$jobSiteKey] = null;
-                unset($sitesToEnable[$jobSiteKey]);
-                $enabledSitesByKey[$jobSiteKey] = $jobSiteKey;
-			}
-			$sitesToEnable = null;
+        $allEnabledJobSites = \JobScooper\DataAccess\JobSiteRecordQuery::create()
+            ->findByisDisabled(false)
+            ->toArray('JobSiteKey');
+        if(is_empty_value($allEnabledJobSites)) {
+			throw new \Exception("Error:  all JobSites are disabled due to plugin installation issues.  Cannot continue.");
         }
 
-        $nEnabledSites = count($enabledSitesByKey);
+        $nEnabledSites = count($allEnabledJobSites);
         LogMessage("Loaded {$nEnabledSites} enabled jobsite plugins.");
         $dbJobSitesByKey = null;
 
-	    Settings::setValue('all_jobsite_keys', $enabledSites);
+	    Settings::setValue(self::class . '.enabled_sites', array_keys($allEnabledJobSites));
 
     }
 
-    /**
-     * @throws \Exception
-     */
-    private function _initializeAllJsonPlugins()
-    {
-        $arrAddedPlugins = null;
-        LogMessage('Initializing all job site plugins...', null, null, null, $channel='plugins');
-
-        LogMessage('Generating classes for ' . count($this->_jsonPluginSetups) . ' JSON-loaded plugins...', null, null, null, $channel='plugins');
-        foreach (array('Abstract', 'Plugin') as $type) {
-            $plugins = array_filter($this->_jsonPluginSetups, function ($val) use ($type) {
-                $matched = preg_match('/^' . $type . '/', $val['PhpClassName']);
-                return ($matched > 0);
-            });
-
-            foreach (array_keys($plugins) as $agentkey) {
-                LogDebug('Running eval statement for class ' . $plugins[$agentkey]['PhpClassName'], null, $channel='plugins');
-                try {
-                    if ($type === 'Abstract' && array_key_exists('arrListingTagSetup', $plugins[$agentkey])) {
-                        $plugins[$agentkey]['arrBaseListingTagSetup'] = $plugins[$agentkey]['arrListingTagSetup'];
-//                        unset($plugins[$agentkey]['arrListingTagSetup'], $plugins[$agentkey]['JobSiteName'], $plugins[$agentkey]['JobSiteKey']);
-                    }
-                    if (!in_array($plugins[$agentkey]['PhpClassName'], get_declared_classes())) {
-                        $evalStmt = $this->_getClassInstantiationCode($plugins[$agentkey]);
-
-                        try {
-                            eval($evalStmt);
-                        } catch (\ParseError $ex) {
-                            throw new \ParseError('Failed to initialize the plugin eval code for ' . $agentkey . ': ' . $ex->getMessage(). PHP_EOL . 'EvalStatement = ' . PHP_EOL . $evalStmt, $ex->getCode(), $ex);
-                        }
-                    }
-                } catch (\Exception $ex) {
-                    handleException($ex);
-                }
-            }
-
-            LogMessage('Added ' . count($plugins) . ' ' . ($type === 'Abstract' ? $type : 'json') . ' plugins: ', null, null, null, $channel='plugins');
-        }
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    private function _loadJsonPluginConfigFiles_()
-    {
-        $this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . '*.json');
-        LogMessage('Loading JSON-based, jobsite plugin configurations from ' . count($this->_configJsonFiles) . ' files under {$this->_dirJsonConfigs}...', null, null, null, $channel='plugins');
-
-        foreach ($this->_configJsonFiles as $f) {
-            $dataPlugins = loadJSON($f, null, true);
-            if (empty($dataPlugins)) {
-                throw new \Exception('Unable to load JSON plugin data file from ' . $f . ': ' . json_last_error_msg());
-            }
-            $plugsToInit = array();
-
-            if (array_key_exists('jobsite_plugins', $dataPlugins)) {
-                $plugsToInit = array_values($dataPlugins['jobsite_plugins']);
-            } else {
-                $plugsToInit[] = $dataPlugins;
-            }
-
-            foreach ($plugsToInit as $config) {
-                $jsonPlugin = $this->_parsePluginConfig_($config);
-                // replace non letter or digits with separator
-
-                $this->_jsonPluginSetups[$jsonPlugin['PhpClassName']] = $jsonPlugin;
-            }
-        }
-    }
-
-
-
-    /**
-     * @throws \Exception
-     */
-    private function _loadPhpPluginFiles_()
-    {
-        $files = glob_recursive($this->_dirPluginsRoot . DIRECTORY_SEPARATOR . '*.php');
-        foreach ($files as $file) {
-            require_once($file);
-        }
-    }
-
-    /**
-     * @param $arrConfigData
-     *
-     * @return array
-     */
-    private function _parsePluginConfig_($arrConfigData)
-    {
-        $pluginData = array();
-        foreach (array_keys($arrConfigData) as $datakey) {
-            if (!array_key_exists($datakey, $pluginData) && !in_array($datakey, array('Collections', 'Fields'))) {
-                setArrayItem($pluginData, $datakey, $arrConfigData, $datakey);
-            }
-        }
-
-        setArrayItem($pluginData, 'PhpClassName', $arrConfigData, 'PhpClassName');
-        if (empty($pluginData['PhpClassName'])) {
-            $pluginData['PhpClassName'] = 'Plugin' . $arrConfigData['JobSiteName'];
-        }
-        if (empty($pluginData['JobSiteName'])) {
-            $pluginData['JobSiteName'] = preg_replace('/^Plugin/', '', $arrConfigData['PhpClassName']);
-        }
-        $jobsitekey = strtolower($pluginData['JobSiteName']);
-
-
-        $listingTagBucket = 'arrListingTagSetup';
-        if (!empty($arrConfigData['PluginExtendsClassName']) && false === stripos($arrConfigData['PluginExtendsClassName'], 'Abstract'))
-        {
-            setArrayItem($pluginData, 'PluginExtendsClassName', $arrConfigData, 'PluginExtendsClassName');
-        }
-        elseif(false !== stripos($arrConfigData['PluginExtendsClassName'], 'Abstract'))
-        {
-            $listingTagBucket = 'arrBaseListingTagSetup';
-        }
-
-        $pluginData['PluginExtendsClassName'] = str_replace('\\\\', '\\', $pluginData['PluginExtendsClassName']);
-
-        setArrayItem($pluginData, 'JobPostingBaseUrl', $arrConfigData, 'BaseURL');
-        setArrayItem($pluginData, 'SearchUrlFormat', $arrConfigData, 'SourceURL');
-//        setArrayItem($pluginData,'CountryCodes', $arrConfigData, 'CountryCodes');
-
-        if (array_key_exists('Pagination', $arrConfigData)) {
-            setArrayItem($pluginData, 'JobListingsPerPage', $arrConfigData['Pagination'], 'PageLimit');
-            setArrayItem($pluginData, 'additionalLoadDelaySeconds', $arrConfigData['Pagination'], 'PageDelaySeconds');
-
-
-            if (array_key_exists('Type', $arrConfigData['Pagination'])) {
-                $pluginData['PaginationType'] = strtoupper($arrConfigData['Pagination']['Type']);
-                switch (strtoupper($arrConfigData['Pagination']['Type'])) {
-                    case 'NEXT-BUTTON':
-                        $pluginData[$listingTagBucket]['NextButton'] = array(
-                            'selector' => $arrConfigData['Pagination']['Selector'],
-                            'index' => $arrConfigData['Pagination']['Index'],
-                            'type' => 'CSS'
-                        );
-                        break;
-
-                    case 'LOAD-MORE':
-                        $pluginData[$listingTagBucket]['LoadMoreControl'] = array(
-                            'selector' => $arrConfigData['Pagination']['Selector'],
-                            'index' => $arrConfigData['Pagination']['Index'],
-                            'type' => 'CSS'
-                        );
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        }
-
-
-        if (array_key_exists('Collections', $arrConfigData) && !is_null($arrConfigData['Collections']) && is_array($arrConfigData['Collections']) && count($arrConfigData['Collections']) > 0 && array_key_exists('Fields', $arrConfigData['Collections'][0])) {
-            if (!is_array($pluginData[$listingTagBucket])) {
-                $pluginData[$listingTagBucket] = array();
-            }
-            foreach ($arrConfigData['Collections'] as $coll) {
-                foreach ($coll['Fields'] as $field) {
-                    $name = getArrayItem('Name', $field);
-
-                    $pluginData[$listingTagBucket][$name] = array();
-                    $MAP_VALUES = array(
-                        ['selector', 'Selector'],
-                        ['index', 'Index'],
-                        ['return_attribute', 'Attribute'],
-                        ['type', 'Type'],
-                        ['field', 'Field'],
-                        ['value', 'Value'],
-                        ['return_value_regex', 'Pattern'],
-                        ['return_value_callback', 'Callback'],
-                        ['callback_parameter', 'CallbackParameter']
-                    );
-
-                    foreach ($MAP_VALUES as $mapping) {
-                        setArrayItem($pluginData[$listingTagBucket][$name], $mapping[0], $field, $mapping[0]);
-                    }
-
-                    foreach ($MAP_VALUES as $mapping) {
-                        setArrayItem($pluginData[$listingTagBucket][$name], $mapping[0], $field, $mapping[1]);
-                    }
-                }
-            }
-        }
-
-        LogDebug('Loaded JSON config for new plugin: ' . $pluginData['JobSiteName'], null, $channel='plugins');
-
-        return $pluginData;
-    }
-
-
-    /**
-     * @param      $pluginConfig
-     * @param      $key
-     * @param bool $quoteItems
-     *
-     * @return null|string
-     */
-    private function _getArrayItemForEval($pluginConfig, $key, $quoteItems = true)
-    {
-        $flags = '';
-        if (array_key_exists($key, $pluginConfig) && !empty($pluginConfig[$key]) && is_array($pluginConfig[$key])) {
-            $flags = 'array()';
-
-            $start = '[';
-            $glue = ', ';
-            $end = ']';
-
-            if ($quoteItems === true) {
-                $start = "[\"";
-                $glue = "\", \"";
-                $end = "\"]";
-            }
-
-            $flags = $start . implode($glue, array_values($pluginConfig[$key])) . $end;
-        }
-
-        return $flags;
-    }
-
-    /**
-     * @param $pluginConfig
-     *
-     * @return mixed
-     */
-    private function _getClassInstantiationCode($pluginConfig)
-    {
-        $evalConfig = array();
-        $PhpClassName = 'Plugin' . $pluginConfig['JobSiteName'];
-
-        $arrayProps = array();
-        $stringProps = array();
-        $numericProps = array();
-        $otherProps = array();
-        $stringProps['JobSiteKey'] = cleanupSlugPart($pluginConfig['JobSiteName']);
-
-
-        foreach (array_keys($pluginConfig) as $key) {
-            switch ($key) {
-                case 'AdditionalFlags':
-                    $arrayProps['additionalBitFlags'] = $this->_getArrayItemForEval($pluginConfig, 'AdditionalFlags', $quoteItems = false);
-                    break;
-
-                case 'PluginExtendsClassName':
-                    $PluginExtendsClassName = $pluginConfig[$key];
-                    unset($pluginConfig[$key]);
-                    break;
-
-                case 'PhpClassName':
-                    $PhpClassName = $pluginConfig[$key];
-                    unset($pluginConfig[$key]);
-                    break;
-
-                case is_numeric($pluginConfig[$key]):
-                    $numericProps[$key] = $pluginConfig[$key];
-                    break;
-
-                case is_string($pluginConfig[$key]):
-                    $stringProps[$key] = $pluginConfig[$key];
-                    break;
-
-                case is_array($pluginConfig[$key]):
-                    if (!empty($pluginConfig[$key])) {
-                        $arrayProps[$key] = var_export($pluginConfig[$key], true);
-                    }
-                    break;
-
-                default:
-                    $otherProps = $pluginConfig[$key];
-                    break;
-            }
-        }
-
-        $implements = null;
-        if (empty($PluginExtendsClassName)) {
-            $PluginExtendsClassName = AjaxSitePlugin::class;
-        }
-
-        $data = array(
-            'PhpClassName' => $PhpClassName,
-            'PluginExtendsClassName' => $PluginExtendsClassName,
-            'string_properties' => $stringProps,
-            'numeric_properties' => $numericProps,
-            'array_properties' => $arrayProps,
-            'other_properties' => $otherProps,
-        );
-
-        $evalStmt = call_user_func($this->_renderer, $data);
-
-        return $evalStmt;
-    }
-
-    /**
-     * @return array
-     */
-    private function _getAllDeclaredPluginClassesByJobSiteKey()
-    {
-        $classListBySite = array();
-        $classList = get_declared_classes();
-        sort($classList);
-
-        $pluginClasses = array_filter($classList, function ($class) {
-            return preg_match('/^Plugin/', $class) !== 0;
-        });
-
-        foreach ($pluginClasses as $class) {
-            $jobsitekey = cleanupSlugPart(str_replace('Plugin', '', $class));
-            $classListBySite[$jobsitekey] = $class;
-            if (in_array(IJobSitePlugin::class, class_implements($class))) {
-                $classListBySite[$jobsitekey] = $class;
-            } else {
-                LogWarning("{$jobsitekey} does not support iJobSitePlugin: " . getArrayDebugOutput(class_implements($class)));
-            }
-        }
-
-        return $classListBySite;
-    }
 }
