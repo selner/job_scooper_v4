@@ -182,7 +182,7 @@ class ConfigInitializer
         $this->instantiateLocationManager();
         $this->parseSeleniumParameters();
 
-        if (count(JobSiteManager::getIncludedJobSiteKeys()) == 0) {
+        if (count(JobSiteManager::getJobSiteKeysIncludedInRun()) == 0) {
             LogError('No JobSite plugins could be loaded for the given search geographic locations.  Aborting.');
             return;
         }

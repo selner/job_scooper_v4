@@ -130,4 +130,27 @@ class JobSiteRecord extends BaseJobSiteRecord
         LogError("{$method} not found for class {$class}.");
         return false;
     }
+    
+    /**
+     * @param string $countryCode
+     *
+	 * @return bool
+*    * @throws \Exception
+     */
+    public function servicesCountryCode($countryCode)
+    {
+    	if(is_empty_value($countryCode)) {
+    		return false;
+        }
+
+        if(is_array($countryCode) && count($countryCode) >= 1) {
+    		$countryCode = array_pop($countryCode);
+        }
+        $siteKeysOutOfSearchArea = array();
+
+        $ccSite = $this->getSupportedCountryCodes();
+        $ccMatches = array_intersect(array($countryCode), $ccSite);
+        return (!is_empty_value($ccMatches));
+    }
+
 }

@@ -53,7 +53,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
 
     /**
-     * @return \JobScooper\SitePlugins\Interfaces\IJobSitePlugin|null
+     * @return \JobScooper\SitePlugins\IJobSitePlugin|null
      * @throws \Exception
      */
     public function getSitePlugin()

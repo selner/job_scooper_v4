@@ -101,7 +101,7 @@ class JobSiteManager
     /**
      * @param string $strJobSiteKey
      * @throws \Exception
-     * @return \JobScooper\SitePlugins\Interfaces\IJobSitePlugin
+     * @return \JobScooper\SitePlugins\IJobSitePlugin
      */
     public static function getJobSitePluginByKey($strJobSiteKey)
     {
@@ -118,9 +118,9 @@ class JobSiteManager
      * @return array|mixed
      * @throws \Exception
      */
-    public static function getIncludedJobSites()
+    public static function getJobSitesIncludedInRun()
     {
-    	$includedKeys = self::getIncludedJobSiteKeys();
+    	$includedKeys = self::getJobSiteKeysIncludedInRun();
     	return self::getJobSitesByKeys($includedKeys);
 	}
 
@@ -129,7 +129,7 @@ class JobSiteManager
      * @return array|null
      * @throws \Exception
      */
-    public static function getIncludedJobSiteKeys()
+    public static function getAllEnabledJobSiteKeys()
     {
 	    return Settings::getValue(self::class . '.enabled_sites');
     }
@@ -146,6 +146,34 @@ class JobSiteManager
         }
 
         Settings::setValue('included_jobsite_keys', $keys);
+    }
+
+
+    /**
+     * @param array $sitesKeysInclude
+     * @throws \Exception
+	*/
+    public static function getJobSiteKeysIncludedInRun()
+    {
+        $siteKeysToRun = Settings::getValue('included_jobsite_keys');
+        if(is_empty_value($siteKeysToRun)) {
+	        $sitesKeysInclude = self::getAllEnabledJobSiteKeys();
+	        if(!is_empty_value($sitesKeysInclude) && is_array($sitesKeysInclude))
+	        {
+	            $siteKeysToRun = array_values($sitesKeysInclude);
+	            $cmdIncluded = self::getJobSitesCmdLineIncludedInRun();
+	            if(!is_empty_value($cmdIncluded)) {
+		            $siteKeysToRun = array_intersect($siteKeysToRun, $cmdIncluded);
+	            }
+		        $cfgExcluded = Settings::getValue('config_excluded_sites');
+	            if(!is_empty_value($cfgExcluded)) {
+		            $siteKeysToRun = array_diff($siteKeysToRun, $cfgExcluded);
+	            }
+	        }
+	
+	        Settings::setValue('included_jobsite_keys', $siteKeysToRun);
+		}
+    	return $siteKeysToRun;
     }
 
 
@@ -217,24 +245,6 @@ class JobSiteManager
         return $cmdLineSites;
     }
 
-    /**
-     * @param array $setExcluded
-     * @throws \Exception
-     */
-    public static function setSitesAsExcluded($setExcluded=array())
-    {
-        if (empty($setExcluded)) {
-            return;
-        }
-
-        $includedSiteKeys = Settings::getValue("included_jobsite_keys");
-		if(is_empty_value($includedSiteKeys)) {
-			return;
-		}
-
-        $siteKeysStillIncluded  = array_diff($includedSiteKeys, array_keys($setExcluded));
-        JobSiteManager::setIncludedJobSiteKeys($siteKeysStillIncluded);
-    }
 
     /**
      * @param array &$sites
@@ -243,7 +253,7 @@ class JobSiteManager
 	 * @return array
 *    * @throws \Exception
      */
-    public static function filterJobSitesByCountryCodes(&$sites, $countryCodes)
+    public static function doesCoverCountryCode($countryCode)
     {
     	if(is_empty_value($sites) || is_empty_value($countryCodes)) {
     		return $sites;
@@ -279,9 +289,6 @@ class JobSiteManager
     protected $_dirPluginsRoot = null;
     protected $_dirJsonConfigs = null;
     protected $_configJsonFiles = array();
-    private $_jsonPluginSetups = array();
-
-    private $_pluginsLoaded = false;
 
     /**
      * JobSiteManager constructor.

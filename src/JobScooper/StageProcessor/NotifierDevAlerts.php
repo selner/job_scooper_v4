@@ -55,7 +55,7 @@ class NotifierDevAlerts extends JobsMailSender
             $countsOnly = true
         );
 
-        $includedSites = JobSiteManager::getIncludedJobSites(false);
+        $includedSites = JobSiteManager::getJobSiteKeysIncludedInRun();
         $arrPluginResults = array_fill_keys(array_keys($includedSites), array());
         foreach ($arrPluginResults as $k => $val) {
             $arrPluginResults[$k] = array(

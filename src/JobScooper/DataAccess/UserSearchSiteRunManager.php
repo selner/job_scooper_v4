@@ -204,6 +204,21 @@ class UserSearchSiteRunManager {
 	        	}
             }
         }
+        
+        foreach($searchRuns as $runKey => $run) {
+			if(!is_empty_value($run['GeoLocationId'])) {
+				$geolocation = GeoLocationQuery::create()->findOneByGeoLocationId($run['GeoLocationId']);
+				if(null !== $geolocation) {
+					$ccode = $geolocation->getCountryCode();
+					$jobSite = JobSiteRecordQuery::create()->findOneByJobSiteKey($run['JobSiteKey']);
+					if($jobSite->servicesCountryCode($ccode) === false) {
+						$skippedSearchRuns[$runKey] = $run;
+					}
+				}
+				
+			}
+        
+        }
 
         if (!is_empty_value($skippedSearchRuns)) {
         	foreach($skippedSearchRuns as $runKey => $run) {

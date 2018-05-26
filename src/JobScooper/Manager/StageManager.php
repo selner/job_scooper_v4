@@ -137,7 +137,7 @@ class StageManager
         // Let's go get the jobs for those searches
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $jobsiteKeys = JobSiteManager::getIncludedJobSiteKeys();
+        $jobsiteKeys = JobSiteManager::getJobSiteKeysIncludedInRun();
         $sitePlugin = null;
 
         if (!is_empty_value($jobsiteKeys)) {

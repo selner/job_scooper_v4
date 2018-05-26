@@ -18,7 +18,7 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\User as BaseUser;
-use JobScooper\Utils\Settings;
+use JobScooper\DataAccess\Map\JobSiteRecordTableMap;use JobScooper\Utils\Settings;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
@@ -462,7 +462,7 @@ class User extends BaseUser
     	if(null !== $this->_userSearchSiteRunsByJobSite)
     		return;
 
-        $sites = JobSiteManager::getIncludedJobSites();
+        $sites = JobSiteManager::getJobSitesIncludedInRun();
 
 		$userSearchRuns = $this->queryUserSearchSiteRuns();
         if(!is_empty_value($userSearchRuns))
@@ -486,8 +486,6 @@ class User extends BaseUser
 
         $ntotalSearchRuns = 0;
 
-        JobSiteManager::filterJobSitesByCountryCodes($sites, $countryCodes);
-
         foreach ($sites as $jobsiteKey => $site) {
             $ccJobSite = $site->getSupportedCountryCodes();
             $ccSiteOverlaps = array_intersect($countryCodes, $ccJobSite);
@@ -502,20 +500,23 @@ class User extends BaseUser
 	            	}
 	            	$ccPairOverlaps = array_intersect($countryCodes, array($ccPair));
 	                if (!is_empty_value($ccPairOverlaps)) {
-	                    $searchrun = new UserSearchSiteRun();
-	                    $searchrun->setUserSearchPairId($searchPair->getUserSearchPairId());
-	                    $searchrun->setJobSiteKey($site);
-	                    $searchrun->setAppRunId(getConfigurationSetting('app_run_id'));
-	                    $searchrun->setStartedAt(time());
-	                    $searchrun->save();
 	                    if(!is_array($this->_userSearchSiteRunsByJobSite)){
 	                        $this->_userSearchSiteRunsByJobSite = array();
 	                    }
-	                    if (!array_key_exists($jobsiteKey, $this->_userSearchSiteRunsByJobSite)) {
-	                        $this->_userSearchSiteRunsByJobSite[$jobsiteKey]= array();
+						if($site->getResultsFilterType() !== JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
+							!array_key_exists($jobsiteKey, $this->_userSearchSiteRunsByJobSite) || count( $this->_userSearchSiteRunsByJobSite[$jobsiteKey]) < 1) {
+		                    $searchrun = new UserSearchSiteRun();
+		                    $searchrun->setUserSearchPairId($searchPair->getUserSearchPairId());
+		                    $searchrun->setJobSiteKey($site);
+		                    $searchrun->setAppRunId(getConfigurationSetting('app_run_id'));
+		                    $searchrun->setStartedAt(time());
+		                    $searchrun->save();
+		                    if (!array_key_exists($jobsiteKey, $this->_userSearchSiteRunsByJobSite)) {
+		                        $this->_userSearchSiteRunsByJobSite[$jobsiteKey]= array();
+		                    }
+	
+		                    $this->_userSearchSiteRunsByJobSite[$jobsiteKey][$searchrun->getUserSearchSiteRunKey()] = $searchrun->toFlatArray();
 	                    }
-
-	                    $this->_userSearchSiteRunsByJobSite[$jobsiteKey][$searchrun->getUserSearchSiteRunKey()] = $searchrun->toFlatArray();
 	                    $searchrun = null;
 		            } else {
 		                LogDebug("Skipping searches for SearchPairId {$searchPair['UserSearchPairId']} because its country codes [" . implode('|', $ccPair) . "] do not include the user's search pair's country codes [{$countryCodes}]...");

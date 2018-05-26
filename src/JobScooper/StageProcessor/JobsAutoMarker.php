@@ -197,7 +197,7 @@ class JobsAutoMarker
         try {
             $daysBack = 7;
             $sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string("{$daysBack} days ago"));
-            $included_sites = array_keys(JobSiteManager::getIncludedJobSites());
+            $included_sites = JobSiteManager::getJobSiteKeysIncludedInRun();
             $itemKeysToExport = array('JobPostingId', 'Title', 'Company', 'JobSite', 'KeyCompanyAndTitle', 'GeoLocationId', 'FirstSeenAt', 'DuplicatesJobPostingId');
 
             LogMessage("Querying for all job postings created in the last {$daysBack} days");
