@@ -388,7 +388,7 @@ class NotifierJobAlerts extends JobsMailSender
             $keys = array_keys($header_facts);
             $data = $arrJobsToNotify[$index];
 
-            LogMessage('Writing jobs to {$sheetName} worksheet...');
+            LogMessage("Writing jobs to {$sheetName} worksheet...");
 
             LogDebug('Reordering the data array to match our column output order...');
 
