@@ -1,7 +1,6 @@
 FROM php:7.2-cli as php
 
 ENV DEBIAN_FRONTEND=noninteractive
-ARG GIT_COMMIT_HASH
 
 #######################################################
 ##
