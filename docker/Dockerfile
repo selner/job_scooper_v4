@@ -3,8 +3,6 @@ FROM php:7.2-cli as php
 ENV DEBIAN_FRONTEND=noninteractive
 ARG GIT_COMMIT_HASH
 
-RUN echo "Git Commit Hash = $GIT_COMMIT_HASH"
-
 #######################################################
 ##
 ## Install and update the core package install toolsets
