@@ -329,6 +329,17 @@ function updateColumnsForCSVFlatArray(&$arr, \Propel\Runtime\Map\TableMap $table
     }
 }
 
+function array_change_key_order(&$arr, $newKeyOrder) {
+    if(is_empty_value($newKeyOrder) || is_empty_value($arr))
+        return;
+
+    foreach ($arr as $k => $v) {
+        unset($arr[$k]);
+        $rowOrder = array_fill_keys($newKeyOrder, null);
+        $arr[$k] = array_intersect_key(array_replace($rowOrder, $v), $rowOrder);
+    }
+}
+
 /**
  * @param array $haystack
  * @param array $needle

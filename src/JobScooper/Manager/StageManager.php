@@ -241,8 +241,6 @@ class StageManager
             $notifier->processRunResultsNotifications($userFacts);
         } catch (\Exception $ex) {
             handleException($ex, null, true);
-        } catch (\PhpOffice\PhpSpreadsheet\Style\Exception $ex) {
-            handleException(null, $ex->getMessage(), true);
         } finally {
             endLogSection("End of stage 3 (notifying user)");
         }
@@ -274,8 +272,6 @@ class StageManager
             }
         } catch (\Exception $ex) {
             handleException($ex, null, true);
-        } catch (\PhpOffice\PhpSpreadsheet\Style\Exception $ex) {
-            handleException(null, $ex->getMessage(), true);
         } finally {
             endLogSection("End of do Weekly Recaps command");
         }
@@ -305,8 +301,6 @@ class StageManager
             }
         } catch (\Exception $ex) {
             handleException($ex, null, true);
-        } catch (\PhpOffice\PhpSpreadsheet\Style\Exception $ex) {
-            handleException($ex, $ex->getMessage(), true);
         } finally {
             endLogSection("END:  removeUserData from database");
         }
