@@ -90,7 +90,7 @@ echo "Pulling repo images..."
 docker-compose $DCOMP_PARAMS pull
 
 echo "Starting stack up in background..."
-docker-compose $DCOMP_PARAMS up -d
+docker-compose $DCOMP_PARAMS up -d --remove-orphans
 
 docker-compose ps -a
 
