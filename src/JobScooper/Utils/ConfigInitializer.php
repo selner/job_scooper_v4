@@ -112,15 +112,15 @@ class ConfigInitializer
         endLogSection("Loaded configuration details from {$this->_iniFile}");
 
         startLogSection('Configuring specific settings for this run... ');
-        $this->setupRunFromConfig();
+        $this->setupRunnerFromConfig();
 
         Settings::setValue('number_days', 1);
 
-        endLogSection('Finished setting up run.');
+        endLogSection('Runner configured.');
     }
 
     /**
-     * @throws \ErrorException
+     * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
      */
     private function setupOutputFolders()
@@ -155,7 +155,7 @@ class ConfigInitializer
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    private function setupRunFromConfig()
+    private function setupRunnerFromConfig()
     {
         //
         // Load the global search data that will be used to create
@@ -181,11 +181,6 @@ class ConfigInitializer
 
         $this->instantiateLocationManager();
         $this->parseSeleniumParameters();
-
-        if (count(JobSiteManager::getJobSiteKeysIncludedInRun()) == 0) {
-            LogError('No JobSite plugins could be loaded for the given search geographic locations.  Aborting.');
-            return;
-        }
     }
 
     /**
