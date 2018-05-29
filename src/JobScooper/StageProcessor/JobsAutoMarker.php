@@ -356,7 +356,7 @@ class JobsAutoMarker
 
             LogMessage('Auto-marking postings not in same counties as the search locations...');
             foreach ($searchLocations as $searchloc) {
-                if (!empty($searchloc)) {
+                if (null !== $searchloc) {
                     $arrIncludeCounties[] = $searchloc->getCounty() . '~' .$searchloc->getRegion();
                 }
             }
@@ -415,7 +415,7 @@ class JobsAutoMarker
 
             LogMessage('Getting locationIDs within 50 miles of search locations...');
             foreach ($searchLocations as $searchloc) {
-                if (!empty($searchloc)) {
+                if (null !== $searchloc) {
                     $arrNearbyIds = array_merge($arrNearbyIds, getGeoLocationsNearby($searchloc));
                 }
             }
@@ -423,7 +423,7 @@ class JobsAutoMarker
             LogMessage('Marking job postings in the ' . count($arrNearbyIds) . ' matching areas ...');
             $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array('UserJobMatchId')));
             $arrInAreaJobs = array_filter($arrJobsList, function (UserJobMatch $var) use ($arrNearbyIds) {
-                if (!empty($var->getJobPostingFromUJM())) {
+                if (null !== $var->getJobPostingFromUJM()) {
                     $geoId = $var->getJobPostingFromUJM()->getGeoLocationId();
                     if (!empty($geoId) && in_array($geoId, $arrNearbyIds)) {
                         return true;

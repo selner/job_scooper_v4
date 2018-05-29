@@ -36,7 +36,7 @@ class GeoLocationResultsFactory implements ResultFactoryInterface
         $locKey = $geolocation->getGeoLocationKey();
         $existingGeo = GeoLocationQuery::create()
             ->findOneByGeoLocationKey($locKey);
-        if (empty($existingGeo)) {
+        if (null !== $existingGeo) {
             $geolocation->save();
 
             return $geolocation;

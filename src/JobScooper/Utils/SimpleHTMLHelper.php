@@ -53,7 +53,7 @@ class ExtendedDiDomElement extends Element
     {
         $elemVisible = true;
         $style = $this->style;
-        if (!empty($style)) {
+        if (null !== $style) {
             $parts = explode(";", $style);
             foreach ($parts as $part) {
                 $kvPair = explode(':', $part);
@@ -78,7 +78,7 @@ class ExtendedDiDomElement extends Element
         }
 
         if ($elemVisible !== false) {
-            if (method_exists($this, 'parent') && !empty($this->parent())) {
+            if (method_exists($this, 'parent') && null !== $this->parent()) {
                 if (method_exists($this->parent(), 'getNode')) {
                     $parent = new ExtendedDiDomElement($this->parent()->getNode());
                     $elemVisible = $parent->isVisible();

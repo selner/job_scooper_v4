@@ -585,7 +585,7 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     public function getJobFactsFromMicrodata($objSimpHTML, $item=array())
     {
-        if (empty($objSimpHTML) || !method_exists($objSimpHTML, "find")) {
+        if (null === $objSimpHTML || !method_exists($objSimpHTML, "find")) {
             return $item;
         }
 
@@ -1176,7 +1176,7 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     private function _setSearchResult_(UserSearchSiteRun $searchDetails, $success = null, $except = null, $runWasSkipped = false, $objPageHtml = null)
     {
-        if (empty($searchDetails) || !($searchDetails instanceof UserSearchSiteRun)) {
+        if (null === $searchDetails || !($searchDetails instanceof UserSearchSiteRun)) {
             throw new \Exception("Invalid user search site run object passed to method.");
         }
 
@@ -2026,7 +2026,7 @@ JSCODE;
                             switch (strtoupper($this->PaginationType)) {
                                 case C__PAGINATION_PAGE_VIA_URL:
                                     $strURL = $this->setResultPageUrl($searchDetails, $nPageCount, $nItemCount);
-                                    if (empty($strURL)) {
+                                    if (null === $strURL) {
                                         throw(new Exception("Plugin " . $this->JobSiteName . " did not generate url for next page result."));
                                     }
                                     $this->selenium->loadPage($strURL);

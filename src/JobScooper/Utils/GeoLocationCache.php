@@ -72,7 +72,7 @@ class GeoLocationCache
     public function __call($name, $args)
     {
         $cache = $this->_cache;
-        if (!empty($cache) && method_exists($cache, $name)) {
+        if (null !== $cache && method_exists($cache, $name)) {
             return call_user_func_array([$cache, $name], $args);
         } else {
             throw new \BadMethodCallException(sprintf("Method {$name} does not exists"));

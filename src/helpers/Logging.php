@@ -158,7 +158,7 @@ function getChannelLogger($channel)
 function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null, $channel=null)
 {
     $toThrow = $ex;
-    if (empty($toThrow)) {
+    if (null === $toThrow) {
         $toThrow = new Exception($fmtLogMsg);
     }
 

@@ -447,7 +447,7 @@ class NotifierJobAlerts extends JobsMailSender
             if (!empty($geoLocationId)) {
                 $geoLocation = GeoLocationQuery::create()
                     ->findOneByGeoLocationId($geoLocationId);
-                if (!empty($geoLocation)) {
+                if (null !== $geoLocation) {
                     $data['Search']['Locations'] = $geoLocation->getDisplayName();
                 } else {
                     $data['Search']['Locations'] = '[unknown]';

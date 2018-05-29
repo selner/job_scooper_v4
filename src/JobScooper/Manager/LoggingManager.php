@@ -462,7 +462,7 @@ class LoggingManager extends \Monolog\Logger
         $context['jobsite'] = $jobsiteKey;
 
 
-        if (!empty($thrownExc)) {
+        if (null !== $thrownExc) {
             $context['exception_message'] = $thrownExc->getMessage();
             $context['exception_file'] = $thrownExc->getFile();
             $context['exception_line'] = $thrownExc->getLine();

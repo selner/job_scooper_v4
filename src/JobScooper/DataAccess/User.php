@@ -329,9 +329,12 @@ class User extends BaseUser
 
         foreach ($searchLocations as $lockey => $searchLoc) {
             $location = $locmgr->lookupAddress($searchLoc);
-            if (!is_empty_value($location)) {
+            if ($location !== null && !is_empty_value($location)) {
                 LogMessage("Updating/adding user search keyword/location pairings for location {$location->getDisplayName()} and user {$slug}'s keywords");
                 $locId = $location->getGeoLocationId();
+                if(is_empty_value($locId)) {
+                	throw new \InvalidArgumentException("Unable to find GeoLocationId for Geolocation object.");
+                }
                 $searchGeoLocIds[$locId] = $locId;
 
                 foreach ($searchKeywords as $kwd) {

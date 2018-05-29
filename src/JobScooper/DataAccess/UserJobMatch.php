@@ -62,7 +62,7 @@ class UserJobMatch extends BaseUserJobMatch
         }
 
         $jp = $this->getJobPostingFromUJM();
-        if (!empty($jp) && !empty($jp->getDuplicatesJobPostingId())) {
+        if (null !== $jp && !empty($jp->getDuplicatesJobPostingId())) {
             $this->setIsExcluded(true);
         }
     }
@@ -93,7 +93,7 @@ class UserJobMatch extends BaseUserJobMatch
     public function toFlatArrayForCSV($limitToKeys=null)
     {
         $jobPost = $this->getJobPostingFromUJM();
-        if (empty($jobPost) && $this->isNew()) {
+        if (null === $jobPost && $this->isNew()) {
             $jobPost = new JobPosting();
         }
         $arrJobPost = $jobPost->toFlatArrayForCSV();

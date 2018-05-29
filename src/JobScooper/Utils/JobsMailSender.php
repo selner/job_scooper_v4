@@ -97,7 +97,7 @@ class JobsMailSender
             //
             // Add initial email address header values
             //
-            if (!empty($toUser)) {
+            if (null !== $toUser) {
                 $this->phpmailer->addAddress($toUser->getEmailAddress(), $toUser->getName());
             }
 
