@@ -87,7 +87,8 @@ class JobSiteManager
     public static function getJobSiteByKey($strJobSiteKey)
     {
         if (empty($strJobSiteKey)) {
-            throw new \InvalidArgumentException("Error: no job site key specified.");
+            throw new \InvalidArgumentException(
+            	'Error: no job site key specified.');
         }
 
         $sites = self::getJobSitesByKeys([$strJobSiteKey]);
