@@ -133,9 +133,10 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
                 $this->lastResponseData = $respdata;
                 try {
                     $ret['jobs'] = $respdata->$jobsKey;
+                    $ret['count'] = 0;
                     if (!empty($countKey)) {
                         $ret['count'] = $respdata->$countKey;
-                    } else {
+                    } elseif (!is_empty_value($ret['Jobs'])) {
                         $ret['count'] = count($ret['jobs']);
                     }
                 } catch (Exception $ex) {

@@ -256,8 +256,6 @@ abstract class SitePlugin implements IJobSitePlugin
     /**
      * @param UserSearchSiteRun[]         arrSearchRuns
      *
-     * @param array $userFacts
-     *
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
      */

@@ -461,7 +461,9 @@ class User extends BaseUser
     {
     	if(null !== $this->_userSearchSiteRunsByJobSite)
     		return;
-
+    	
+    	$this->_userSearchSiteRunsByJobSite = array();
+    	
         $sites = JobSiteManager::getJobSitesIncludedInRun();
 
 		$userSearchRuns = $this->queryUserSearchSiteRuns();
@@ -487,11 +489,12 @@ class User extends BaseUser
         $ntotalSearchRuns = 0;
 
         foreach ($sites as $jobsiteKey => $site) {
+	    	$this->_userSearchSiteRunsByJobSite[$jobsiteKey] = array();
+
             $ccJobSite = $site->getSupportedCountryCodes();
             $ccSiteOverlaps = array_intersect($countryCodes, $ccJobSite);
 
             if(!is_empty_value($ccSiteOverlaps)) {
-
 	            foreach ($searchPairs as $pairKey => $searchPair) {
 	            	$pairGeo = $searchPair->getGeoLocationFromUS();
 					$ccPair = array();
@@ -500,9 +503,7 @@ class User extends BaseUser
 	            	}
 	            	$ccPairOverlaps = array_intersect($countryCodes, array($ccPair));
 	                if (!is_empty_value($ccPairOverlaps)) {
-	                    if(!is_array($this->_userSearchSiteRunsByJobSite)){
-	                        $this->_userSearchSiteRunsByJobSite = array();
-	                    }
+
 						if($site->getResultsFilterType() !== JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
 							!array_key_exists($jobsiteKey, $this->_userSearchSiteRunsByJobSite) || count( $this->_userSearchSiteRunsByJobSite[$jobsiteKey]) < 1) {
 		                    $searchrun = new UserSearchSiteRun();
@@ -521,10 +522,6 @@ class User extends BaseUser
 		            } else {
 		                LogDebug("Skipping searches for SearchPairId {$searchPair['UserSearchPairId']} because its country codes [" . implode('|', $ccPair) . "] do not include the user's search pair's country codes [{$countryCodes}]...");
 		            }
-
-		            $searchPair = null;
-			        $searchPairs[$pairKey] = null;
-		            unset($searchPairs[$pairKey]);
                 }
             } else {
                 LogDebug("JobSite {$jobsiteKey}'s country codes [" . implode('|', $ccJobSite) . "] do not include the user's search pair's country codes [{$countryCodes}].  Skipping {$jobsiteKey} searches...");
@@ -533,20 +530,22 @@ class User extends BaseUser
 	        $sites[$jobsiteKey] = null;
             unset($sites[$jobsiteKey]);
         }
-		$searchPairs = null;
-        $sites = null;
 
         $totalRuns = 0;
         foreach(array_keys($this->_userSearchSiteRunsByJobSite) as $siteKey)
         {
-            UserSearchSiteRunManager::filterRecentlyRunUserSearchRuns($this->_userSearchSiteRunsByJobSite[$siteKey]);
-            if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$siteKey])) {
-	            $totalRuns += count($this->_userSearchSiteRunsByJobSite[$siteKey]);
+        	if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$siteKey])) {
+	            UserSearchSiteRunManager::filterRecentlyRunUserSearchRuns($this->_userSearchSiteRunsByJobSite[$siteKey]);
+	            if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$siteKey])) {
+		            $totalRuns += count($this->_userSearchSiteRunsByJobSite[$siteKey]);
+	            }
             }
-        }
-
+		}
         $totalSkippedSearches = $nTotalPossibleSearches - $totalRuns;
         LogMessage("{$totalRuns} search runs configured for {$this->getUserSlug()}; {$totalSkippedSearches} searches were skipped.");
+
+		$searchPairs = null;
+        $sites = null;
 
     }
 
