@@ -31,5 +31,4 @@ use JobScooper\DataAccess\Base\JobPostingQuery as BaseJobPostingQuery;
  */
 class JobPostingQuery extends BaseJobPostingQuery
 {
-
 }

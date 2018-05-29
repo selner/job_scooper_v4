@@ -17,32 +17,34 @@
  */
 
 
-Use JBZoo\Utils\Url;
+use JBZoo\Utils\Url;
 
 /**
  * Class AbstractDice
  *
  *       Used by dice.json plugin configuration to override single method
  */
-abstract class AbstractBaseDice extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractBaseDice extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 
-	/**
-	 * @param $searchDetails
-	 *
-	 * @return mixed
-	 * @throws \Exception
-	 */
-	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
-	{
-		$urlInfo = parse_url($searchDetails->getSearchStartUrl());
-		if(array_key_exists("query", $urlInfo))
-			unset($urlInfo['query']);
-		if(array_key_exists("fragment", $urlInfo))
-			unset($urlInfo['fragment']);
-		$url = Url::buildAll($urlInfo);
-		$this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $url);
+    /**
+     * @param $searchDetails
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+    {
+        $urlInfo = parse_url($searchDetails->getSearchStartUrl());
+        if (array_key_exists("query", $urlInfo)) {
+            unset($urlInfo['query']);
+        }
+        if (array_key_exists("fragment", $urlInfo)) {
+            unset($urlInfo['fragment']);
+        }
+        $url = Url::buildAll($urlInfo);
+        $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $url);
 
-		return $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
-	}
+        return $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
+    }
 }

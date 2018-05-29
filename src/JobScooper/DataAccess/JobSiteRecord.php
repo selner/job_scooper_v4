@@ -17,9 +17,7 @@
 
 namespace JobScooper\DataAccess;
 
-use \Exception;
-use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;
-use JobScooper\BasePlugin\Classes\BaseSitePlugin;
+use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;use JobScooper\SitePlugins\SitePluginFactory;use Propel\Runtime\Connection\ConnectionInterface;
 
 /**
  * Skeleton subclass for representing a row from the 'job_site' table.
@@ -30,85 +28,129 @@ use JobScooper\BasePlugin\Classes\BaseSitePlugin;
  * application requirements.  This class will only be generated as
  * long as it does not already exist in the output directory.
  *
+ * magic methods:
+ *
+ * @method getSupportedCountryCodes() Gets the country codes from the JobSite plugin
  */
 class JobSiteRecord extends BaseJobSiteRecord
 {
-	/**
-	 * @var \JobScooper\BasePlugin\Classes\BaseSitePlugin
-	 */
-	private $_pluginObject = null;
+    /**
+     * @var \JobScooper\SitePlugins\Base\SitePlugin
+     */
+    private $_pluginObject = null;
 
+    /**
+	 * @return \JobScooper\SitePlugins\Base\SitePlugin
+     * @throws \Exception
+	*/
+	public function getPlugin(){
+	    if(null === $this->_pluginObject) {
+            $this->instantiatePlugin();
+	    }
+
+	    return $this->_pluginObject;
+	}
 
 	/**
-	 * @return \JobScooper\BasePlugin\Classes\BaseSitePlugin|null
-	 * @throws \Exception
-	 */
-	function getPlugin()
+    * @param \Propel\Runtime\Connection\ConnectionInterface|null $con
+    * @return bool
+    * @throws \Propel\Runtime\Exception\PropelException
+    */
+	public function preSave(ConnectionInterface $con = null)
     {
-	    if (is_null($this->getPluginClassName()))
-		    throw new \Exception("Missing jobsite plugin class name for " . $this->getJobSiteKey());
-
-	    if (!is_null($this->_pluginObject))
-	        return $this->_pluginObject;
-	    try {
-		    $class = $this->getPluginClassName();
-//			    if (!in_array($class, get_declared_classes())) {
-//				    LogWarning("Unable to find declared class " . $this->getPluginClassName() . "] for plugin " . $this->getJobSiteKey() .".  Disabling JobSite for future runs.");
-//				    $this->_pluginObject = null;
-//				    $this->setisDisabled(true);
-//				    $this->save();
-//			    }
-//			    else
-//			    {
-		    if(empty($class))
-		        LogWarning("Unable to find plugin class name for {$this->getJobSiteKey()}.");
-		    else
-		    {
-			    $this->_pluginObject = new $class();
-
-			    setCacheItem("all_jobsites_and_plugins", $this->getJobSiteKey(), $this);
-		    }
-
-	    } catch (\Exception $ex) {
-		    LogError("Error instantiating jobsite plugin object" . $this->getJobSiteKey() . " with class name [" . $this->getPluginClassName() . "]:  " . $ex->getMessage());
-		    unset($this->_pluginObject);
-	    }
-	    finally
-	    {
-		    return $this->_pluginObject;
-	    }
+        if(null === $this->getResultsFilterType() && null !== $this->getPluginClassName()) {
+            try {
+                $plugin = SitePluginFactory::create($this->getJobSiteKey());
+                if(null !== $plugin) {
+                    $type = $plugin->getPluginResultsFilterType();
+                    $this->setResultsFilterType($type);
+                }
+            }
+            catch (\Exception $ex ) { }
+            finally {
+                $plugin = null;
+            }
+        }
+        return parent::preSave($con);
     }
 
 
-	/**
-	 * Derived method to catches calls to undefined methods.
-	 *
-	 *
-	 * @param string $name
-	 * @param mixed  $params
-	 *
-	 * @return array|string
-	 */
-	public function __call($method, $params)
-	{
-		if (method_exists($this, $method)) {
-			return call_user_func(
-				array($this, $method),
-					$params
-			);
-		}
-		else {
-			$plugin = $this->getPlugin();
-			if (!empty($plugin) &&
-				method_exists($plugin, $method))
-			{
-				return call_user_func_array(
-					array($plugin, $method),
-					$params
-				);
-			}
-		}
-		return false;
-	}
+    /**
+     * @throws \Exception
+     * @throws \InvalidArgumentException
+     */
+    private function instantiatePlugin()
+    {
+        if (null !== $this->_pluginObject) {
+            return;
+        }
+
+        $class = $this->getPluginClassName();
+        try {
+            if (is_empty_value($class)) {
+            	$class = "Plugin{$this->getJobSiteKey()}";
+	            if (!in_array($class, get_declared_classes())) {
+	                throw new \InvalidArgumentException("Unable to find declared plugin class {$class} for {$this->getJobSiteKey()}.");
+	            }
+            }
+            $this->_pluginObject = new $class();
+        } catch (\Exception $ex) {
+            LogError("Error instantiating jobsite {$this->getJobSiteKey()} plugin object by class [{$class}]:  {$ex->getMessage()}");
+            $this->_pluginObject = null;
+            unset($this->_pluginObject);
+        }
+    }
+
+    /**
+     * Derived method to catches calls to undefined methods.
+     *
+     *
+     * @param string $name
+     * @param mixed  $params
+     *
+     * @return array|string
+     *@throws \Exception
+*/
+    public function __call($method, $params)
+    {
+    	$obj = null;
+        if (method_exists($this, $method)) {
+            $obj = $this;
+        } else {
+            $plugin = $this->getPlugin();
+            if (null !== $plugin && method_exists($plugin, $method)) {
+            	$obj = $plugin;
+	        }
+        }
+
+        if(null !== $obj) {
+           return call_user_func_array(array($obj, $method), $params);
+        }
+        $class = self::class;
+        LogError("{$method} not found for class {$class}.");
+        return false;
+    }
+    
+    /**
+     * @param string $countryCode
+     *
+	 * @return bool
+*    * @throws \Exception
+     */
+    public function servicesCountryCode($countryCode)
+    {
+    	if(is_empty_value($countryCode)) {
+    		return false;
+        }
+
+        if(is_array($countryCode) && count($countryCode) >= 1) {
+    		$countryCode = array_pop($countryCode);
+        }
+        $siteKeysOutOfSearchArea = array();
+
+        $ccSite = $this->getSupportedCountryCodes();
+        $ccMatches = array_intersect(array($countryCode), $ccSite);
+        return (!is_empty_value($ccMatches));
+    }
 
 }

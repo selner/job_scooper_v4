@@ -18,7 +18,7 @@
 
 
 
-class PluginTesla extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class PluginTesla extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'Tesla';
     protected $JobPostingBaseUrl = 'http://www.tesla.com/careers';
@@ -38,7 +38,4 @@ class PluginTesla extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
         'Department' => array('selector' => 'td.listing-department'),
         'Location' => array('selector' => 'td.listing-location')
     );
-
 }
-
-

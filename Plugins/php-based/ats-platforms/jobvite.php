@@ -17,42 +17,42 @@
  */
 use JobScooper\DataAccess\UserSearchSiteRun;
 
-abstract class AbstractJobviteATS extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractJobviteATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
-	/**
-	 * AbstractJobviteATS constructor.
-	 * @throws \Exception
-	 */
-	function __construct()
+    /**
+     * AbstractJobviteATS constructor.
+     * @throws \Exception
+     */
+    public function __construct()
     {
-	    $this->additionalBitFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
-	    $this->additionalBitFlags[] = C__JOB_USE_SITENAME_AS_COMPANY;
+        $this->additionalBitFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+        $this->additionalBitFlags[] = C__JOB_USE_SITENAME_AS_COMPANY;
         parent::__construct();
     }
 
-	/**
-	 * @param $var
-	 *
-	 * @return int|null
-	 * @throws \Exception
-	 */
-	static function checkNoJobResults($var)
+    /**
+     * @param $var
+     *
+     * @return int|null
+     * @throws \Exception
+     */
+    public static function checkNoJobResults($var)
     {
         return noJobStringMatch($var, "Found 0 jobs");
     }
 
-	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 */
-	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
-	{
-		$this->_currentSearchDetails = $searchDetails;
-	}
+    /**
+     * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+     */
+    public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+    {
+        $this->_currentSearchDetails = $searchDetails;
+    }
 
-	/**
-	 * @var array
-	 */
-	protected $arrListingTagSetup = array(
+    /**
+     * @var array
+     */
+    protected $arrListingTagSetup = array(
 //        'JobPostItem'      => array('frame' => 'jobvite_careersite_iframe', 'selector' => 'table.jv-job-list tr'),
         'JobPostItem'      => array('selector' => 'table.jv-job-list tr'),
         'Title'                 => array('selector' => 'td.jv-job-list-name a'),
@@ -60,25 +60,23 @@ abstract class AbstractJobviteATS extends \JobScooper\BasePlugin\Classes\AjaxHtm
         'Location'              => array('selector' => 'td.jv-job-list-location', 'return_attribute' => 'text'),
         'JobSitePostId'                 => array('selector' => 'td.jv-job-list-name a', 'return_attribute' => 'href', 'return_value_regex' =>  '/job\/(.*)/i'),
     );
-	/**
-	 * @var null
-	 */
-	private $_currentSearchDetails = null;
+    /**
+     * @var null
+     */
+    private $_currentSearchDetails = null;
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return \JobScooper\DataAccess\JobPosting[]|null
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    /**
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return \JobScooper\DataAccess\JobPosting[]|null
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
-
         $frame = $objSimpHTML->find("*[name='jobvite_careersite_iframe']");
-        if(!empty($frame) && array_key_exists('attr', $frame[0]))
-        {
+        if (!empty($frame) && array_key_exists('attr', $frame[0])) {
             $srcurl = $frame[0]->attr["src"];
-            if(!empty($srcurl)) {
+            if (!empty($srcurl)) {
                 $newUrl = parse_url($srcurl);
                 $currentUrl = parse_url($this->getActiveWebdriver()->getCurrentUrl());
                 $newUrl['scheme'] = $currentUrl['scheme'];
@@ -88,12 +86,12 @@ abstract class AbstractJobviteATS extends \JobScooper\BasePlugin\Classes\AjaxHtm
         }
         $retItems = parent::parseJobsListForPage($objSimpHTML);
 
-	    foreach($retItems as $k => $ret)
-	    {
-	    	if(!array_key_exists('Company', $ret) || empty($ret['Company']))
-			    $retItems[$k]['Company'] = $this->getJobSiteKey();
-	    }
+        foreach ($retItems as $k => $ret) {
+            if (!array_key_exists('Company', $ret) || empty($ret['Company'])) {
+                $retItems[$k]['Company'] = $this->JobSiteKey;
+            }
+        }
 
-	    return $retItems;
+        return $retItems;
     }
 }

@@ -17,12 +17,10 @@
 
 namespace JobScooper\DataAccess;
 
-
 use JobScooper\DataAccess\Base\UserJobMatch as BaseUserJobMatch;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Map\TableMap;
-
 
 /**
  * Skeleton subclass for representing a row from the 'user_job_match' table.
@@ -38,30 +36,35 @@ class UserJobMatch extends BaseUserJobMatch
 {
     private $delim = ' | ';
 
-	/**
-	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	public function updateUserMatchStatus()
+    /**
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function updateUserMatchStatus()
     {
-        if(count($this->getMatchedUserKeywords()) > 0 )
+        if (count($this->getMatchedUserKeywords()) > 0) {
             $this->setIsJobMatch(true);
-        else
+        } else {
             $this->setIsJobMatch(false);
+        }
 
-	    $this->setIsExcluded(false);
-        if(count($this->getMatchedNegativeTitleKeywords()) > 0 )
+        $this->setIsExcluded(false);
+        if (count($this->getMatchedNegativeTitleKeywords()) > 0) {
             $this->setIsExcluded(true);
+        }
 
-        if(count($this->getMatchedNegativeCompanyKeywords()) > 0 )
+        if (count($this->getMatchedNegativeCompanyKeywords()) > 0) {
             $this->setIsExcluded(true);
+        }
 
-	    if($this->isOutOfUserArea() === true)
-		    $this->setIsExcluded(true);
+        if ($this->isOutOfUserArea() === true) {
+            $this->setIsExcluded(true);
+        }
 
-	    $jp = $this->getJobPostingFromUJM();
-	    if(!empty($jp) && !empty($jp->getDuplicatesJobPostingId()))
-		    $this->setIsExcluded(true);
+        $jp = $this->getJobPostingFromUJM();
+        if (null !== $jp && !empty($jp->getDuplicatesJobPostingId())) {
+            $this->setIsExcluded(true);
+        }
     }
 
     /**
@@ -80,108 +83,111 @@ class UserJobMatch extends BaseUserJobMatch
         return true;
     }
 
-	/**
-	 * @param null $limitToKeys
-	 *
-	 * @return array
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 * @throws \Exception
-	 */
-	public function toFlatArrayForCSV($limitToKeys=null)
+    /**
+     * @param null $limitToKeys
+     *
+     * @return array
+     * @throws \Propel\Runtime\Exception\PropelException
+     * @throws \Exception
+     */
+    public function toFlatArrayForCSV($limitToKeys=null)
     {
         $jobPost = $this->getJobPostingFromUJM();
-        if(empty($jobPost) && $this->isNew())
+        if (null === $jobPost && $this->isNew()) {
             $jobPost = new JobPosting();
+        }
         $arrJobPost = $jobPost->toFlatArrayForCSV();
 
         $arrUserJobMatch = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
-        foreach($arrUserJobMatch as $k => $v)
-        {
-	        if(is_array($v))
-        		$arrUserJobMatch[$k] = join("|", $v);
+        foreach ($arrUserJobMatch as $k => $v) {
+            if (is_array($v)) {
+                $arrUserJobMatch[$k] = join("|", $v);
+            }
         }
         updateColumnsForCSVFlatArray($arrUserJobMatch, new UserJobMatchTableMap());
 
         $arrItem = array_merge_recursive_distinct($arrJobPost, $arrUserJobMatch);
 
-        if(!empty($limitToKeys) && is_array($limitToKeys))
-        {
-        	return array_subset_keys($arrItem, $limitToKeys);
+        if (!empty($limitToKeys) && is_array($limitToKeys)) {
+            return array_subset_keys($arrItem, $limitToKeys);
         }
 
         return $arrItem;
     }
 
-	/**
-	 * @param array $v
-	 *
-	 * @return $this|\JobScooper\DataAccess\UserJobMatch
-	 */
-	public function setMatchedNegativeTitleKeywords($v)
+    /**
+     * @param array $v
+     *
+     * @return $this|\JobScooper\DataAccess\UserJobMatch
+     */
+    public function setMatchedNegativeTitleKeywords($v)
     {
-    	if(!empty($v) && is_array($v))
-	    {
-	    	foreach($v as &$item)
-		    {
-		    	if(is_array($item))
-		    		$item = implode(" ", $item);
-		    }
-	    }
-	    elseif (is_string($v))
-		    $v = array($v);
-	    elseif (empty($v))
-		    $v = array();
+        if (!empty($v) && is_array($v)) {
+            foreach ($v as &$item) {
+                if (is_array($item)) {
+                    $item = implode(" ", $item);
+                }
+            }
+        } elseif (is_string($v)) {
+            $v = array($v);
+        } elseif (empty($v)) {
+            $v = array();
+        }
 
-	    return parent::setMatchedNegativeTitleKeywords($v);
+        return parent::setMatchedNegativeTitleKeywords($v);
     }
 
-	/**
-	 * @param array $v
-	 *
-	 * @return $this|\JobScooper\DataAccess\UserJobMatch
-	 */
-	public function setMatchedUserKeywords($v)
-	{
-		if(!empty($v) && is_array($v))
-		{
-			foreach($v as &$item)
-			{
-				if(is_array($item))
-					$item = implode(" ", $item);
-			}
-		}
-		elseif (is_string($v))
-			$v = array($v);
-		elseif (empty($v))
-			$v = array();
+    /**
+     * @param array $v
+     *
+     * @return $this|\JobScooper\DataAccess\UserJobMatch
+     */
+    public function setMatchedUserKeywords($v)
+    {
+        if (!empty($v) && is_array($v)) {
+            foreach ($v as &$item) {
+                if (is_array($item)) {
+                    $item = implode(" ", $item);
+                }
+            }
+        } elseif (is_string($v)) {
+            $v = array($v);
+        } elseif (empty($v)) {
+            $v = array();
+        }
 
-		return parent::setMatchedUserKeywords($v);
-	}
+        return parent::setMatchedUserKeywords($v);
+    }
 
-	/**
-	 *
-	 */
-	public function clearUserMatchState()
-	{
-		$this->setIsJobMatch(null);
-		$this->setOutOfUserArea(null);
+    /**
+     *
+     */
+    public function clearUserMatchState()
+    {
+        $this->setIsJobMatch(null);
+        $this->setOutOfUserArea(null);
 
-		$kwds = $this->getMatchedNegativeCompanyKeywords();
-		if(!empty($kwds))
-			foreach($kwds as $k)
-				$this->removeMatchedNegativeCompanyKeyword($k);
+        $kwds = $this->getMatchedNegativeCompanyKeywords();
+        if (!empty($kwds)) {
+            foreach ($kwds as $k) {
+                $this->removeMatchedNegativeCompanyKeyword($k);
+            }
+        }
 
-		$kwds = $this->getMatchedNegativeTitleKeywords();
-		if(!empty($kwds))
-			foreach($kwds as $k)
-				$this->removeMatchedNegativeTitleKeyword($k);
+        $kwds = $this->getMatchedNegativeTitleKeywords();
+        if (!empty($kwds)) {
+            foreach ($kwds as $k) {
+                $this->removeMatchedNegativeTitleKeyword($k);
+            }
+        }
 
-		$kwds = $this->getMatchedUserKeywords();
-		if(!empty($kwds))
-			foreach($kwds as $k)
-				$this->removeMatchedUserKeyword($k);
+        $kwds = $this->getMatchedUserKeywords();
+        if (!empty($kwds)) {
+            foreach ($kwds as $k) {
+                $this->removeMatchedUserKeyword($k);
+            }
+        }
 
-		$this->applyDefaultValues();
-	}
-
+        $this->applyDefaultValues();
+    }
 }

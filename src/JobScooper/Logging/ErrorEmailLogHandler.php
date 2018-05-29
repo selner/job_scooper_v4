@@ -16,17 +16,17 @@
  */
 namespace JobScooper\Logging;
 
-
 use JobScooper\Utils\JobsMailSender;
+use JobScooper\Utils\Settings;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Handler\MailHandler;
 
 class ErrorEmailLogHandler extends MailHandler
 {
-	static function getEmailErrorLogContent()
-	{
-		return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, "email_error_log_content");
-	}
+    public static function getEmailErrorLogContent()
+    {
+        return Settings::getValue("email_error_log_content");
+    }
 
     /**
      * {@inheritdoc}
@@ -34,8 +34,8 @@ class ErrorEmailLogHandler extends MailHandler
     */
     protected function send($content, array $records)
     {
-	    $newErrContent = $this->getEmailErrorLogContent() . PHP_EOL . $content;
-	    setGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, "email_error_log_content", $newErrContent);
+        $newErrContent = $this->getEmailErrorLogContent() . PHP_EOL . $content;
+        return Settings::setValue("email_error_log_content", $newErrContent);
 
 
         $searchParams = $this->_getUserSearchSiteRunContent();
@@ -52,11 +52,10 @@ class ErrorEmailLogHandler extends MailHandler
         );
         $renderer = loadTemplate(__ROOT__ . '/src/assets/templates/html_email_error_alerts.tmpl');
 
-	    $htmlBody = call_user_func($renderer, $data);
+        $htmlBody = call_user_func($renderer, $data);
 
         $mailer = new JobsMailSender(true);
         return $mailer->sendEmail("", $htmlBody, null, $subject, "errors");
-
     }
 
     /**
@@ -67,24 +66,25 @@ class ErrorEmailLogHandler extends MailHandler
         return new HtmlFormatter();
     }
 
-	/**
-	 * @return mixed
-	 * @throws \Exception
-	 */
-	private function _getUserSearchSiteRunContent()
+    /**
+     * @return mixed
+     * @throws \Exception
+     */
+    private function _getUserSearchSiteRunContent()
     {
         $renderer = loadTemplate(__ROOT__ . '/src/assets/templates/partials/html_email_body_search_config_details.tmpl');
 
-        $data = getAllConfigurationSettings();
+        $data = Settings::getAllValues();
         $arrData = objectToArray($data);
         $flatData = array();
-        foreach($arrData as $key => $value)
-        	if(is_array($value))
-	        	$flatData[$key] = flattenWithKeys($value);
-            else
-	            $flatData[$key] = $value;
+        foreach ($arrData as $key => $value) {
+            if (is_array($value)) {
+                $flatData[$key] = flattenWithKeys($value);
+            } else {
+                $flatData[$key] = $value;
+            }
+        }
 
         return call_user_func($renderer, $flatData);
-
     }
 }

@@ -40,14 +40,14 @@ if (file_exists($autoload)) {
 $cmdline = new \JobScooper\Utils\DocOptions(__FILE__);
 $arguments = $cmdline->getAll();
 
-setConfigurationSetting('command_line_args', $arguments);
+\JobScooper\Utils\Settings::setValue('command_line_args', $arguments);
 
 try {
-	$config = new \JobScooper\Builders\ConfigBuilder($arguments["config"]);
-	$config->initialize();
-} catch (\PHLAK\Config\Exceptions\InvalidContextException $e) {
-	print("Could not load {$cfgfile}: " . $e->getMessage());
+    $config = new \JobScooper\Utils\ConfigInitializer($arguments["config"]);
+    $config->initialize();
+} catch (Exception $e) {
+    throw new \Exception("Could not load {$arguments["config"]}: " . $e->getMessage());
 }
 
-$classRunJobs = new \JobScooper\Manager\StageManager();
+$classRunJobs = new \JobScooper\Manager\StageManager($config);
 $classRunJobs->runAll();

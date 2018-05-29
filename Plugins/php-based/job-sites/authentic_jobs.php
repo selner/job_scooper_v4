@@ -17,15 +17,15 @@
  */
 
 
-class PluginAuthenticJobs extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class PluginAuthenticJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'AuthenticJobs';
     protected $JobPostingBaseUrl = "https://authenticjobs.com";
     protected $SearchUrlFormat = 'https://authenticjobs.com/#location=***LOCATION***';
-#    protected $SearchUrlFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
+    #    protected $SearchUrlFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
     protected $LocationType = 'location-city';
     protected $JobListingsPerPage = 50;
-	private $_currentSearchDetails = null;
+    private $_currentSearchDetails = null;
 
     protected $arrListingTagSetup = array(
         'NoPostsFound'    => array('selector' => 'ul#listings li#no-results h1', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
@@ -39,34 +39,29 @@ class PluginAuthenticJobs extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimpleP
         'LoadMoreControl'             =>  array('selector' => 'a.ladda-button')
     );
 
-    function checkNoJobResults($var)
+    public function checkNoJobResults($var)
     {
-        return noJobStringMatch($var, "No jobs");
+        return noJobStringMatch($var, "No results found");
     }
 
-	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
-	{
-		$this->_currentSearchDetails = $searchDetails;
-	}
+    public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+    {
+        $this->_currentSearchDetails = $searchDetails;
+    }
 
     protected function goToEndOfResultsSetViaLoadMore($nTotalItems)
     {
         $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage($this->_currentSearchDetails);
 
         $node = $objSimplHtml->find("p.more");
-        if($node == null || count($node) == 0)
-        {
+        if ($node == null || count($node) == 0) {
             return false;
-        }
-        else
-        {
-            if(stristr($node[0]->attr["style"], "display: none") !== false) {
+        } else {
+            if (stristr($node[0]->attr["style"], "display: none") !== false) {
                 return false;
             }
         }
 
         return parent::goToEndOfResultsSetViaLoadMore($nTotalItems);
     }
-
 }
-

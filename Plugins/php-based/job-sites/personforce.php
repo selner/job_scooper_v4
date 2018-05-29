@@ -18,7 +18,7 @@
 
 
 
-class PluginPersonForce extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class PluginPersonForce extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'PersonForce';
     protected $JobPostingBaseUrl = 'http://www.personforce.com';
@@ -44,11 +44,9 @@ class PluginPersonForce extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlu
 
     protected function normalizeJobItem($arrItem)
     {
-
-        $arrItem ['PostedAt'] = strScrub($arrItem['PostedAt'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE );
+        $arrItem ['PostedAt'] = strScrub($arrItem['PostedAt'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE);
         $dateVal = strtotime($arrItem ['PostedAt'], $now = time());
-        if(!($dateVal === false))
-        {
+        if (!($dateVal === false)) {
             $arrItem['PostedAt'] = date('Y-m-d', $dateVal);
         }
 
@@ -57,6 +55,4 @@ class PluginPersonForce extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlu
 
         return parent::normalizeJobItem($arrItem);
     }
-
-
 }

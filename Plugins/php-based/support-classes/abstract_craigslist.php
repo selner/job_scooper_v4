@@ -17,15 +17,14 @@
 
 
 
-class AbstractCraigslist extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class AbstractCraigslist extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
-
-    function getItemURLValue($nItem)
+    public function getItemURLValue($nItem)
     {
-        if($nItem == null || $nItem == 0) { return 0; }
+        if ($nItem == null || $nItem == 0) {
+            return 0;
+        }
 
         return $nItem - 1;
     }
-
 }
-

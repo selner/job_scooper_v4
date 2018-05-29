@@ -24,10 +24,10 @@
  *
  *       Used by salesforce.json plugin configuration to override single method
  */
-abstract class AbstractSalesforce extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractSalesforce extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
-	function getPageURLValue($nPage)
-	{
-		return (empty($nPage) || $nPage === 0) ? "" : $nPage - 1;
-	}
+    public function getPageURLValue($nPage)
+    {
+        return (empty($nPage) || $nPage === 0) ? "" : $nPage - 1;
+    }
 }

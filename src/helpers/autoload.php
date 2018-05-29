@@ -21,4 +21,3 @@ foreach ($files as $file) {
     print "Autoloading {$file}...".PHP_EOL;
     require_once($file);
 }
-

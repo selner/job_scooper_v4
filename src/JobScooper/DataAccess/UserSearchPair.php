@@ -16,5 +16,4 @@ use JobScooper\DataAccess\Base\UserSearchPair as BaseUserSearchPair;
  */
 class UserSearchPair extends BaseUserSearchPair
 {
-
 }

@@ -18,10 +18,10 @@
 
 
 
-CONST C__FILEPATH_NO_FLAGS = 0x0;
-CONST C__FILEPATH_FILE_MUST_EXIST = 0x1;
-CONST C__FILEPATH_DIRECTORY_MUST_EXIST = 0x2;
-CONST C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED= 0x4;
+const C__FILEPATH_NO_FLAGS = 0x0;
+const C__FILEPATH_FILE_MUST_EXIST = 0x1;
+const C__FILEPATH_DIRECTORY_MUST_EXIST = 0x2;
+const C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED= 0x4;
 
 /**
  * @param     $strFilePath
@@ -33,74 +33,84 @@ CONST C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED= 0x4;
 function parsePathDetailsFromString($strFilePath, $flags = C__FILEPATH_NO_FLAGS)
 {
 
-	// if the path doesn't start with a '/', it's a relative path
-	//
-	$fPathIsRelative = !(substr($strFilePath, 0, 1) == '/');
+    // if the path doesn't start with a '/', it's a relative path
+    //
+    $fPathIsRelative = !(substr($strFilePath, 0, 1) == '/');
 
-	//************************************************************************
-	//
-	// Now let's figure out what each part really maps to and setup the array with names for returning
-	// to the caller.
-	//
-	// If AllParts only has one item, then there were no "/" characters in the path string.
-	// So assume the path was either a filename only OR a relative directory path with no trailing '/'
-	//
+    //************************************************************************
+    //
+    // Now let's figure out what each part really maps to and setup the array with names for returning
+    // to the caller.
+    //
+    // If AllParts only has one item, then there were no "/" characters in the path string.
+    // So assume the path was either a filename only OR a relative directory path with no trailing '/'
+    //
 
-	if(!empty($strFilePath)) {
-		$f = new SplFileInfo($strFilePath);
+    if (!empty($strFilePath)) {
+        $f = new SplFileInfo($strFilePath);
 
-		//
-		// At this point, we've set the values for the return array completely
-		//
-
-
-		if(isBitFlagSet($flags, C__FILEPATH_DIRECTORY_MUST_EXIST) && !$f->isDir())
-		{
-			throw new \ErrorException("Directory '" . $f->getPathname() . "' does not exist.");
-		}
-
-		if(isBitFlagSet($flags, C__FILEPATH_FILE_MUST_EXIST) && !$f->isFile())
-		{
-			throw new \ErrorException("File '" . $f->getPathname() . "' does not exist.");
-		}
-
-		if(isBitFlagSet($flags, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED) && !$f->isDir())
-		{
-			mkdir($f->getPathname(), 0777, true);
-		}
+        //
+        // At this point, we've set the values for the return array completely
+        //
 
 
-		return $f;
-	}
+        if (isBitFlagSet($flags, C__FILEPATH_DIRECTORY_MUST_EXIST) && !$f->isDir()) {
+            throw new \ErrorException("Directory '" . $f->getPathname() . "' does not exist.");
+        }
+
+        if (isBitFlagSet($flags, C__FILEPATH_FILE_MUST_EXIST) && !$f->isFile()) {
+            throw new \ErrorException("File '" . $f->getPathname() . "' does not exist.");
+        }
+
+        if (isBitFlagSet($flags, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED) && !$f->isDir()) {
+            mkdir($f->getPathname(), 0777, true);
+        }
 
 
+        return $f;
+    }
 }
 
 
 function getOutputDirectory($key)
 {
-	$ret = getConfigurationSetting("output_directories.".$key);
-	if(empty($ret))
-		$ret =  sys_get_temp_dir();
+    $ret = getConfigurationSetting("output_directories.".$key);
+    if (empty($ret)) {
+        $ret =  sys_get_temp_dir();
+    }
 
-	return $ret;
+    return $ret;
 }
+
+function generateOutputFilePath($dirKey="debug", $baseFileName="UNKNOWN", $ext="UNKNOWN", $userId = null)
+{
+    $outDir = getOutputDirectory($dirKey);
+    $now = '_' . getNowAsString('');
+    $user = '';
+
+    if (null !== $userId) {
+        $userFacts = \JobScooper\DataAccess\User::getUserFactsById($userId);
+        if (!is_empty_value($userFacts)) {
+            $user = '_' . $userFacts['UserSlug'];
+        }
+    }
+
+    return "{$outDir}/{$baseFileName}{$user}{$now}.{$ext}";
+}
+
 
 function generateOutputFileName($baseFileName="NONAME", $ext="UNK", $isUserSpecific=true, $dirKey="debug")
 {
-	$outDir = getOutputDirectory($dirKey);
-	$today = "_" . getNowAsString("");
-	$user = "";
-	if($isUserSpecific === true) {
-		$objUser = \JobScooper\DataAccess\User::getCurrentUser();
-		if(!is_null($objUser))
-		{
-			$user = "_" . $objUser->getUserSlug();
-		}
-	}
+	$userId = null;
 
-	$ret = "{$outDir}/{$baseFileName}{$user}{$today}.{$ext}";
-	return $ret;
+    if ($isUserSpecific === true) {
+        $userFacts = \JobScooper\DataAccess\User::getCurrentUserFacts();
+        if (!is_empty_value($userFacts)) {
+            $userId = $userFacts['UserId'];
+        }
+    }
+
+	return generateOutputFilePath($dirKey, $baseFileName, $ext, $userId);
 }
 
 
@@ -123,35 +133,42 @@ function loadCSV($filename, $indexKeyName = null)
             break;
         } else {
             $arrRec = array_combine($headers, $rowData);
-            if ($indexKeyName != null)
+            if ($indexKeyName != null) {
                 $arrLoadedList[$arrRec[$indexKeyName]] = $arrRec;
-            else
+            } else {
                 $arrLoadedList[] = $arrRec;
+            }
         }
     }
 
     fclose($file);
 
     return $arrLoadedList;
-
 }
 
 
 function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strExt = '', $delim = "", $directoryKey = null)
 {
     $strFilename = '';
-    if (strlen($strFilePrefix) > 0) $strFilename .= $strFilePrefix . "-";
+    if (strlen($strFilePrefix) > 0) {
+        $strFilename .= $strFilePrefix . "-";
+    }
     $date = date_create(null);
     $fmt = "Y" . $delim . "m" . $delim . "d" . "Hi";
 
     $strFilename .= date_format($date, $fmt);
 
-    if (strlen($strBase) > 0) $strFilename .= "-" . $strBase;
-    if (strlen($strExt) > 0) $strFilename .= "." . $strExt;
+    if (strlen($strBase) > 0) {
+        $strFilename .= "-" . $strBase;
+    }
+    if (strlen($strExt) > 0) {
+        $strFilename .= "." . $strExt;
+    }
 
-	$directory = getOutputDirectory($directoryKey);
-    if(!empty($directory))
+    $directory = getOutputDirectory($directoryKey);
+    if (!empty($directory)) {
         $strFilename = $directory . DIRECTORY_SEPARATOR . $strFilename;
+    }
     return $strFilename;
 }
 
@@ -164,7 +181,8 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
  * @param int $depth
  * @return string
  */
-function safe_json_encode($value, $options = 0, $depth = 512) {
+function safe_json_encode($value, $options = 0, $depth = 512)
+{
     $encoded = json_encode($value, $options, $depth);
     if ($encoded === false && $value && json_last_error() == JSON_ERROR_UTF8) {
         $encoded = json_encode(utf8ize($value), $options, $depth);
@@ -179,7 +197,8 @@ function safe_json_encode($value, $options = 0, $depth = 512) {
  * @param $mixed
  * @return array|mixed|string
  */
-function utf8ize($mixed) {
+function utf8ize($mixed)
+{
     if (is_array($mixed)) {
         foreach ($mixed as $key => $value) {
             $mixed[$key] = utf8ize($value);
@@ -212,7 +231,6 @@ function writeJSON($data, $filepath)
         $errMsg = "Error:  Unable to save JSON results to file " . $filepath . " due to error   " . $err;
         LogError($errMsg);
         throw new Exception($errMsg);
-
     }
 
     return $filepath;
@@ -220,30 +238,28 @@ function writeJSON($data, $filepath)
 
 function decodeJSON($strJsonText, $options=null, $boolEscapeBackSlashes=false)
 {
-    if(is_null($options))
+    if (is_null($options)) {
         $options = JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK;
+    }
 
 
-    if($boolEscapeBackSlashes === true)
+    if ($boolEscapeBackSlashes === true) {
         $strJsonText = str_replace('\\', '\\\\', $strJsonText);
+    }
     $data = json_decode($strJsonText, $assoc = true, $depth=512, $options);
     return $data;
-
 }
 
 function loadJSON($file, $options=null, $boolEscapeBackSlashes=false)
 {
-    if(is_file($file)) {
+    if (is_file($file)) {
         LogDebug("Reading json data from file " . $file);
         $jsonText = file_get_contents($file, FILE_TEXT);
         return decodeJSON($jsonText, $options, $boolEscapeBackSlashes);
-    }
-    else
-    {
+    } else {
         LogError("Unable to load json data from file " . $file);
         return null;
     }
-
 }
 
 
@@ -251,8 +267,9 @@ function file_prepend($prependText, $filepath)
 {
     $context = stream_context_create();
     $orig_file = fopen($filepath, 'r', 1, $context);
-    if($orig_file === false)
+    if ($orig_file === false) {
         throw new ErrorException("Unable to open file stream {$filepath} for reading.");
+    }
 
     $temp_filename = tempnam(sys_get_temp_dir(), 'php_prepend_');
     file_put_contents($temp_filename, $prependText);
@@ -261,6 +278,4 @@ function file_prepend($prependText, $filepath)
     fclose($orig_file);
     unlink($filepath);
     rename($temp_filename, $filepath);
-
 }
-

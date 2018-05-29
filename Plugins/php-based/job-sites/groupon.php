@@ -17,23 +17,23 @@
  */
 
 
-class PluginGroupon extends \JobScooper\BasePlugin\Classes\AjaxHtmlPlugin
+class PluginGroupon extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'Groupon';
     protected $JobPostingBaseUrl = 'https://jobs.groupon.com';
     protected $SearchUrlFormat = "https://jobs.groupon.com/locations/***LOCATION***";
-    protected $additionalBitFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $additionalBitFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_LOCATION_REQUIRES_LOWERCASE];
     protected $PaginationType = C__PAGINATION_NONE;
     protected $LocationType = 'location-city';
 
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return array|null|void
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    /**
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return array|null|void
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
 
@@ -42,11 +42,9 @@ class PluginGroupon extends \JobScooper\BasePlugin\Classes\AjaxHtmlPlugin
 
         $nCounter = -1;
 
-        foreach($nodesJobs as $node)
-        {
+        foreach ($nodesJobs as $node) {
             $nCounter += 1;
-            if($nCounter < 2)
-            {
+            if ($nCounter < 2) {
                 continue;
             }
 
@@ -56,12 +54,12 @@ class PluginGroupon extends \JobScooper\BasePlugin\Classes\AjaxHtmlPlugin
             $item['Url'] = $node->href;
             $item['Company'] = $this->JobSiteName;
             $item['JobSitePostId'] = $this->getIDFromLink('/\/jobs\/([^\/]+)/i', $item['Url']);
-            if($item['Title'] == '') continue;
+            if ($item['Title'] == '') {
+                continue;
+            }
             $ret[] = $item;
-
         }
 
         return $ret;
     }
-
 }

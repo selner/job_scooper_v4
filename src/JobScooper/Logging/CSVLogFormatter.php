@@ -1,9 +1,18 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: bryan
- * Date: 10/11/17
- * Time: 11:01 AM
+ * Copyright 2014-18 Bryan Selner
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License'); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  */
 
 namespace JobScooper\Logging;
@@ -32,13 +41,14 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
     /**
      * {@inheritdoc}
      */
-    function __destruct()
+    public function __destruct()
     {
-        if(!is_null($this->_fpcsv))
+        if (!is_null($this->_fpcsv)) {
             fclose($this->_fpcsv);
+        }
     }
 
-    function getColumnNames()
+    public function getColumnNames()
     {
         return $this->_columns;
     }
@@ -59,13 +69,10 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
                 $r = $this->_getValueArray($key, $val);
                 $ret = array_merge_recursive_distinct($ret, $r);
             }
-        }
-        else
-        {
+        } else {
             $this->checkColumnName($k);
             $ret[$k] = strval($v);
         }
-
     }
     public function format(array $record)
     {
@@ -81,15 +88,12 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
                     $outRecord[$key] = strval($val);
                 }
                 unset($record[$k]);
-            }
-            elseif(is_object($v))
-            {
+            } elseif (is_object($v)) {
                 foreach (object_to_array($v) as $key => $val) {
                     $this->checkColumnName($key);
                     $outRecord[$key] = strval($val);
                 }
-            }
-            else {
+            } else {
                 $this->checkColumnName($k);
                 $outRecord[$k] = strval($v);
             }
@@ -105,7 +109,6 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
         $str = stream_get_contents($fptmp);
         fclose($fptmp);
         return $str;
-
     }
 
     /**
@@ -117,7 +120,8 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
      */
     private function checkColumnName($columnName)
     {
-        if(!in_array(strval($columnName), $this->_columns))
+        if (!in_array(strval($columnName), $this->_columns)) {
             $this->_columns[] = strval($columnName);
+        }
     }
 }

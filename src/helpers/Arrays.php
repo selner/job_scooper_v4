@@ -32,19 +32,20 @@
  */
 function array_orderby()
 {
-	$args = func_get_args();
-	$data = array_shift($args);
-	foreach ($args as $n => $field) {
-		if (is_string($field)) {
-			$tmp = array();
-			foreach ($data as $key => $row)
-				$tmp[$key] = $row[$field];
-			$args[$n] = $tmp;
-		}
-	}
-	$args[] = &$data;
-	call_user_func_array('array_multisort', $args);
-	return array_pop($args);
+    $args = func_get_args();
+    $data = array_shift($args);
+    foreach ($args as $n => $field) {
+        if (is_string($field)) {
+            $tmp = array();
+            foreach ($data as $key => $row) {
+                $tmp[$key] = $row[$field];
+            }
+            $args[$n] = $tmp;
+        }
+    }
+    $args[] = &$data;
+    call_user_func_array('array_multisort', $args);
+    return array_pop($args);
 }
 
 
@@ -78,15 +79,12 @@ function countAssociativeArrayValues($arrToCount)
  */
 function getArrayDebugOutput($arr)
 {
-	try
-	{
-		$dbg = encodeJSON($arr);
-	}
-	catch( \Exception $ex)
-	{
-		$dbg = var_dump($arr, true);
-	}
-	return $dbg;
+    try {
+        $dbg = encodeJSON($arr);
+    } catch (\Exception $ex) {
+        $dbg = var_dump($arr, true);
+    }
+    return $dbg;
 }
 
 /**
@@ -123,7 +121,6 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
         } else {
             $strReturn .= $strVal;
         }
-
     }
 
 
@@ -152,10 +149,10 @@ function array_mapk($callback, $array)
  *
  * @return array
  */
-function array_iunique($array) {
-
-	$lowered = array_map('strtolower', $array);
-	return array_intersect_key($array, array_unique($lowered));
+function array_iunique($array)
+{
+    $lowered = array_map('strtolower', $array);
+    return array_intersect_key($array, array_unique($lowered));
 }
 
 
@@ -184,7 +181,7 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
 {
     $strReturn = "";
 
-    if (isset($arrDetails) && is_array($arrDetails)) {
+    if (!is_empty_value($arrDetails) && is_array($arrDetails)) {
         foreach (array_keys($arrDetails) as $key) {
             $strReturn .= getArrayItemDetailsAsString($arrDetails, $key, (strlen($strReturn) <= 0), $strDelimiter, $strIntro, $fIncludeKey);
         }
@@ -212,12 +209,9 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
 function inStr($haystack, $needle)
 {
     $pos=strpos($haystack, $needle);
-    if ($pos !== false)
-    {
+    if ($pos !== false) {
         return $pos;
-    }
-    else
-    {
+    } else {
         return -1;
     }
 }
@@ -233,16 +227,18 @@ function inStr($haystack, $needle)
  */
 function in_string_array($haystack, $needle)
 {
-    if(!is_array($needle))
-    {
-        if(!is_string($needle))
+    if (!is_array($needle)) {
+        if (!is_string($needle)) {
             $needle = strval($needle);
+        }
 
         $needle = array($needle);
     }
 
-    foreach($needle as $what) {
-        if(($pos = strpos($haystack, $what))===false) return false;
+    foreach ($needle as $what) {
+        if (($pos = strpos($haystack, $what))===false) {
+            return false;
+        }
     }
     return true;
 }
@@ -256,14 +252,18 @@ function in_string_array($haystack, $needle)
  *
  * @return array
  */
-function flattenWithKeys(array $array, $childPrefix = '.', $root = '', $result = array()) {
+function flattenWithKeys(array $array, $childPrefix = '.', $root = '', $result = array())
+{
     //if(!is_array($array)) return $result;
 
     ### print_r(array(__LINE__, 'arr' => $array, 'prefix' => $childPrefix, 'root' => $root, 'result' => $result));
 
-    foreach($array as $k => $v) {
-        if(is_array($v) || is_object($v)) $result = flattenWithKeys( (array) $v, $childPrefix, $root . $k . $childPrefix, $result);
-        else $result[ $root . $k ] = $v;
+    foreach ($array as $k => $v) {
+        if (is_array($v) || is_object($v)) {
+            $result = flattenWithKeys((array) $v, $childPrefix, $root . $k . $childPrefix, $result);
+        } else {
+            $result[ $root . $k ] = $v;
+        }
     }
     return $result;
 }
@@ -293,18 +293,14 @@ function flattenWithKeys(array $array, $childPrefix = '.', $root = '', $result =
  * @author Daniel <daniel (at) danielsmedegaardbuus (dot) dk>
  * @author Gabriel Sobrinho <gabriel (dot) sobrinho (at) gmail (dot) com>
  */
-function array_merge_recursive_distinct ( array &$array1, array &$array2 )
+function array_merge_recursive_distinct(array &$array1, array &$array2)
 {
     $merged = $array1;
 
-    foreach ( $array2 as $key => &$value )
-    {
-        if ( is_array ( $value ) && isset ( $merged [$key] ) && is_array ( $merged [$key] ) )
-        {
-            $merged [$key] = array_merge_recursive_distinct ( $merged [$key], $value );
-        }
-        else
-        {
+    foreach ($array2 as $key => &$value) {
+        if (is_array($value) && isset($merged [$key]) && is_array($merged [$key])) {
+            $merged [$key] = array_merge_recursive_distinct($merged [$key], $value);
+        } else {
             $merged [$key] = $value;
         }
     }
@@ -318,18 +314,29 @@ function array_merge_recursive_distinct ( array &$array1, array &$array2 )
  */
 function updateColumnsForCSVFlatArray(&$arr, \Propel\Runtime\Map\TableMap $tablemap)
 {
-    foreach(array_keys($arr) as $key) {
-	    if ($tablemap->hasColumnByPhpName($key)) {
-		    $col = $tablemap->getColumnByPhpName($key);
-		    if ($col->getType() == "ARRAY" && !empty($arr[$key])) {
-			    $arr[$key] = join("|", flattenWithKeys(array($key => $arr[$key])));
-		    } elseif ($col->getType() == "TIMESTAMP" && !empty($arr[$key])) {
-			    $date = DateTime::createFromFormat("Y-m-d\TH:i:sT", $arr[$key]);
-			    if (!empty($date)) {
-				    $arr[$key] = $date->format("Y-m-d");
-			    }
-		    }
-	    }
+    foreach (array_keys($arr) as $key) {
+        if ($tablemap->hasColumnByPhpName($key)) {
+            $col = $tablemap->getColumnByPhpName($key);
+            if ($col->getType() == "ARRAY" && !empty($arr[$key])) {
+                $arr[$key] = join("|", flattenWithKeys(array($key => $arr[$key])));
+            } elseif ($col->getType() == "TIMESTAMP" && !empty($arr[$key])) {
+                $date = DateTime::createFromFormat("Y-m-d\TH:i:sT", $arr[$key]);
+                if (!empty($date)) {
+                    $arr[$key] = $date->format("Y-m-d");
+                }
+            }
+        }
+    }
+}
+
+function array_change_key_order(&$arr, $newKeyOrder) {
+    if(is_empty_value($newKeyOrder) || is_empty_value($arr))
+        return;
+
+    foreach ($arr as $k => $v) {
+        unset($arr[$k]);
+        $rowOrder = array_fill_keys($newKeyOrder, null);
+        $arr[$k] = array_intersect_key(array_replace($rowOrder, $v), $rowOrder);
     }
 }
 
@@ -341,7 +348,7 @@ function updateColumnsForCSVFlatArray(&$arr, \Propel\Runtime\Map\TableMap $table
  */
 function array_subset(array $haystack, array $needle)
 {
-	return array_intersect_key($haystack, array_flip($needle));
+    return array_intersect_key($haystack, array_flip($needle));
 }
 
 /**
@@ -352,31 +359,32 @@ function array_subset(array $haystack, array $needle)
  */
 function array_subset_keys(array $haystack, array $keys)
 {
-	$arrKeys = array_combine($keys, $keys);
-	return array_intersect_key($haystack, $arrKeys);
+    $arrKeys = array_combine($keys, $keys);
+    return array_intersect_key($haystack, $arrKeys);
 }
 
 /**
- * @param      $coll
+ * @param \Propel\Runtime\Collection\Collection $coll
  * @param null $limitToKeys
  *
  * @return array
  */
 function collectionToArray($coll, $limitToKeys=null)
 {
-	if(!empty($limitToKeys) && !is_array($limitToKeys))
-		$limitToKeys = array($limitToKeys);
+    if (!empty($limitToKeys) && !is_array($limitToKeys)) {
+        $limitToKeys = array($limitToKeys);
+    }
 
-	$ret = array_map(function ($v) use ($limitToKeys) {
-		$arrV = $v->toArray();
-		if(!empty($limitToKeys))
-			return array_subset($arrV, $limitToKeys);
+    $ret = array_map(function ($v) use ($limitToKeys) {
+        $arrV = $v->toArray();
+        if (!empty($limitToKeys)) {
+            return array_subset($arrV, $limitToKeys);
+        }
 
-		return $arrV;
-		}
-		, $coll);
+        return $arrV;
+    }, $coll);
 
-	return $ret;
+    return $ret;
 }
 
 
@@ -389,13 +397,12 @@ function collectionToArray($coll, $limitToKeys=null)
 function array_from_orm_object_list_by_array_keys(array $list, array $keysToReturn, $keyIndex=null)
 {
     $ret = array_map(function ($v) use ($keysToReturn) {
-    	return array_subset($v->toArray(), $keysToReturn);}
-    , $list);
-    if(count($keysToReturn) == 1)
+        return array_subset($v->toArray(), $keysToReturn);
+    }, $list);
+    if (count($keysToReturn) == 1) {
         $ret = array_column($ret, $keysToReturn[0], $keysToReturn[0]);
-    else if(!empty($keyIndex) && is_array($ret) && in_array($keyIndex, array_keys($keysToReturn)))
-    {
-    	$ret = array_column($ret, null, $keyIndex);
+    } elseif (!empty($keyIndex) && is_array($ret) && array_key_exists($keyIndex, $keysToReturn)) {
+        $ret = array_column($ret, null, $keyIndex);
     }
     return $ret;
 }
@@ -425,17 +432,15 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
         if (0 < $count) {
             $findings[$name] = $pattern;
 
-            if ($boolMustMatchAllKeywords == true)
+            if ($boolMustMatchAllKeywords == true) {
                 return (sizeof($findings) === sizeof($patterns));
-
-        } else {
-            if (PREG_NO_ERROR !== ($code = preg_last_error() )) {
-                $errors[$name] = $code;
             }
-            else
-            {
+        } else {
+            if (PREG_NO_ERROR !== ($code = preg_last_error())) {
+                $errors[$name] = $code;
+            } else {
                 // No match was found, so don't return it in the findings
-             $findings[$name] = array();
+                $findings[$name] = array();
             }
         }
     }
@@ -451,11 +456,12 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
 function getArrayItem($key, $arr)
 {
     $ret = null;
-    if(array_key_exists($key, $arr)) {
-        if (is_numeric($arr[$key]))
+    if (array_key_exists($key, $arr)) {
+        if (is_numeric($arr[$key])) {
             $ret = $arr[$key];
-        else if (!empty($arr[$key]))
+        } elseif (!empty($arr[$key])) {
             $ret = $arr[$key];
+        }
     }
     return $ret;
 }
@@ -470,8 +476,7 @@ function setArrayItem(&$destArray, $destKey, $sourceArray, $sourceKey)
 {
     $ret = null;
     $val = getArrayItem($sourceKey, $sourceArray);
-    if(is_numeric($val) || !empty($val))
-    {
+    if (is_numeric($val) || !empty($val)) {
         $destArray[$destKey] = $val;
     }
 }
@@ -501,12 +506,13 @@ function getEmptyJobListingRecord()
  *
  * @return array
  */
-function array_copy(array $array ) {
+function array_copy(array $array)
+{
     $result = array();
-    foreach( $array as $key => $val ) {
-        if( is_array( $val ) ) {
-            $result[$key] = array_copy( $val );
-        } elseif ( is_object( $val ) ) {
+    foreach ($array as $key => $val) {
+        if (is_array($val)) {
+            $result[$key] = array_copy($val);
+        } elseif (is_object($val)) {
             $result[$key] = clone $val;
         } else {
             $result[$key] = $val;
@@ -521,14 +527,14 @@ function array_copy(array $array ) {
  *
  * @return int
  */
-function substr_count_array($haystack, $needle ) {
+function substr_count_array($haystack, $needle)
+{
     $count = 0;
-    if(!is_array($needle))
-    {
+    if (!is_array($needle)) {
         $needle = array($needle);
     }
     foreach ($needle as $substring) {
-        $count += substr_count( $haystack, $substring);
+        $count += substr_count($haystack, $substring);
     }
     return $count;
 }
@@ -541,9 +547,15 @@ function substr_count_array($haystack, $needle ) {
  */
 function is_array_multidimensional($a)
 {
-    if(!is_array($a)) return false;
-    foreach($a as $v) if(is_array($v)) return TRUE;
-    return FALSE;
+    if (!is_array($a)) {
+        return false;
+    }
+    foreach ($a as $v) {
+        if (is_array($v)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -553,7 +565,7 @@ function is_array_multidimensional($a)
  * @return array
  * @throws \Exception
  */
-function my_merge_add_new_keys($arr1, $arr2 )
+function my_merge_add_new_keys($arr1, $arr2)
 {
     // check if inputs are really arrays
     if (!is_array($arr1) || !is_array($arr2)) {
@@ -565,8 +577,8 @@ function my_merge_add_new_keys($arr1, $arr2 )
 
     $arrNewBlankCombinedRecord = array_fill_keys($arrCombinedKeys, 'unknown');
 
-    $arrMerged =  array_replace( $arrNewBlankCombinedRecord, $arr1 );
-    $arrMerged =  array_replace( $arrMerged, $arr2 );
+    $arrMerged =  array_replace($arrNewBlankCombinedRecord, $arr1);
+    $arrMerged =  array_replace($arrMerged, $arr2);
 
     return $arrMerged;
 }
@@ -601,25 +613,25 @@ function array_keys_multi(array $array)
  *
  * @return array
  */
-function objectToArray($d) {
-	if (is_object($d)) {
-		// Gets the properties of the given object
-		// with get_object_vars function
-		$d = get_object_vars($d);
-	}
+function objectToArray($d)
+{
+    if (is_object($d)) {
+        // Gets the properties of the given object
+        // with get_object_vars function
+        $d = get_object_vars($d);
+    }
 
-	if (is_array($d)) {
-		/*
-		* Return array converted to object
-		* Using __FUNCTION__ (Magic constant)
-		* for recursive call
-		*/
-		return array_map(__FUNCTION__, $d);
-	}
-	else {
-		// Return array
-		return $d;
-	}
+    if (is_array($d)) {
+        /*
+        * Return array converted to object
+        * Using __FUNCTION__ (Magic constant)
+        * for recursive call
+        */
+        return array_map(__FUNCTION__, $d);
+    } else {
+        // Return array
+        return $d;
+    }
 }
 
 
@@ -631,32 +643,20 @@ function objectToArray($d) {
  */
 function setGlobalSetting($root, $keyPath, $value)
 {
-	doGlobalSettingExists($root);
+    doGlobalSettingExists($root);
 
-	$dot = new \Adbar\Dot($GLOBALS[$root]);
-	if($dot->has($keyPath))
-		$dot->set($keyPath, $value);
-	else
-		$dot->add($keyPath, $value);
-	$GLOBALS[$root] = $dot->all();
+    $dot = new \Adbar\Dot($GLOBALS[$root]);
+    if ($dot->has($keyPath)) {
+        $dot->set($keyPath, $value);
+    } else {
+        $dot->add($keyPath, $value);
+    }
+    $GLOBALS[$root] = $dot->all();
 
-//	array_add_element($GLOBALS[$root], $keyPath, $value);
-	ksort($GLOBALS[$root]);
+    //	array_add_element($GLOBALS[$root], $keyPath, $value);
+    ksort($GLOBALS[$root]);
 }
 
-/**
- * @param $root
- * @param $keyPath
- */
-function removeGlobalSetting($root, $keyPath)
-{
-	doGlobalSettingExists($root);
-
-	$dot = new \Adbar\Dot($GLOBALS[$root]);
-	if($dot->has($keyPath))
-		$dot->delete($keyPath);
-	$GLOBALS[$root] = $dot->all();
-}
 
 /**
  * @param      $root
@@ -666,15 +666,16 @@ function removeGlobalSetting($root, $keyPath)
  */
 function getGlobalSetting($root, $keyPath=null, $default=null)
 {
-	doGlobalSettingExists($root);
+    doGlobalSettingExists($root);
 
-	// return the whole array if no keypath was given
-	if(empty($keyPath))
-		return $GLOBALS[$root];
+    // return the whole array if no keypath was given
+    if (empty($keyPath)) {
+        return $GLOBALS[$root];
+    }
 
-	$dot = new \Adbar\Dot($GLOBALS[$root]);
-	return $dot->get($keyPath, $default);
-//	return array_get_element($keyPath, $GLOBALS[$root]);
+    $dot = new \Adbar\Dot($GLOBALS[$root]);
+    return $dot->get($keyPath, $default);
+    //	return array_get_element($keyPath, $GLOBALS[$root]);
 }
 
 /**
@@ -682,21 +683,12 @@ function getGlobalSetting($root, $keyPath=null, $default=null)
  */
 function doGlobalSettingExists($root)
 {
-	if(!array_key_exists($root, $GLOBALS))
-		$GLOBALS[$root] = array();
+    if (!array_key_exists($root, $GLOBALS)) {
+        $GLOBALS[$root] = array();
+    }
 }
 
-const JOBSCOOPER_CONFIGSETTING_ROOT = "JSCOOP";
 const JOBSCOOPER_CACHES_ROOT = "JSCOOP_CACHES";
-
-/**
- * @param $keyPath
- * @param $value
- */
-function setConfigurationSetting($keyPath, $value)
-{
-	setGlobalSetting($root=JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath, $value);
-}
 
 /**
  * @param $keyPath
@@ -705,70 +697,7 @@ function setConfigurationSetting($keyPath, $value)
  */
 function getConfigurationSetting($keyPath, $default=null)
 {
-	return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT, $keyPath, $default);
-}
-
-/**
- * @return mixed
- */
-function getAllConfigurationSettings()
-{
-	doGlobalSettingExists(JOBSCOOPER_CONFIGSETTING_ROOT);
-
-	return getGlobalSetting(JOBSCOOPER_CONFIGSETTING_ROOT);
-}
-
-/**
- * @param $cacheName
- * @param $keyPath
- * @param $value
- */
-function setCacheItem($cacheName, $keyPath, $value)
-{
-	setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName.".".$keyPath, $value);
-}
-
-/**
- * @param $cacheName
- * @param $keyPath
- *
- * @return mixed
- */
-function getCacheItem($cacheName, $keyPath)
-{
-	return getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName.".".$keyPath);
-}
-
-/**
- * @param $cacheName
- *
- * @return mixed
- */
-function getCacheAsArray($cacheName)
-{
-	doGlobalSettingExists(JOBSCOOPER_CACHES_ROOT);
-
-	$cache = getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName);
-	if(empty($cache))
-	{
-		switch($cacheName)
-		{
-			case "all_jobsites_and_plugins":
-				\JobScooper\Builders\JobSitePluginBuilder::getAllJobSites();
-				break;
-
-			case "included_sites":
-				\JobScooper\Builders\JobSitePluginBuilder::setSitesAsExcluded();
-				break;
-
-			default:
-				break;
-		}
-
-		$cache = getGlobalSetting(JOBSCOOPER_CACHES_ROOT, $cacheName);
-	}
-
-	return $cache;
+    return \JobScooper\Utils\Settings::getValue($keyPath, $default);
 }
 
 /**
@@ -777,7 +706,7 @@ function getCacheAsArray($cacheName)
  */
 function setAsCacheData($cacheName, $value)
 {
-	setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName, $value);
+    setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName, $value);
 }
 
 /**
@@ -786,15 +715,5 @@ function setAsCacheData($cacheName, $value)
  */
 function getCacheData($cacheName)
 {
-	return getGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName);
+    return getGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName);
 }
-
-/**
- * @param $cacheName
- */
-function clearCache($cacheName)
-{
-	removeGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName);
-}
-
-

@@ -27,12 +27,13 @@ use DOMElement;
  */
 class ExtendedDiDomElement extends Element
 {
-	/**
-	 * @param string $name
-	 *
-	 * @return null|string
-	 */
-	function __get($name) {
+    /**
+     * @param string $name
+     *
+     * @return null|string
+     */
+    public function __get($name)
+    {
         switch ($name) {
             case 'text':
                 return $this->text();
@@ -45,55 +46,53 @@ class ExtendedDiDomElement extends Element
         }
     }
 
-	/**
-	 * @return bool
-	 */
-	function isVisible()
+    /**
+     * @return bool
+     */
+    public function isVisible()
     {
         $elemVisible = true;
         $style = $this->style;
-        if(!empty($style))
-        {
+        if (null !== $style) {
             $parts = explode(";", $style);
-            foreach($parts as $part)
-            {
+            foreach ($parts as $part) {
                 $kvPair = explode(':', $part);
-                if(!empty($kvPair) && count($kvPair) >1) {
+                if (!empty($kvPair) && count($kvPair) >1) {
                     $key = strtolower($kvPair[0]);
                     $val = strtolower($kvPair[1]);
                     switch ($key) {
                         case 'display':
-                            if (substr_count_multi($val, array('collapse', 'none')))
+                            if (substr_count_multi($val, array('collapse', 'none'))) {
                                 return false;
+                            }
                             break;
 
                         case 'visibility':
-                            if (substr_count_multi($val, array('collapse', 'hidden')))
+                            if (substr_count_multi($val, array('collapse', 'hidden'))) {
                                 return false;
+                            }
                             break;
                     }
-                }}
+                }
+            }
         }
 
-        if($elemVisible !== false) {
-            if (method_exists($this, 'parent') && !empty($this->parent()))
-            {
-                if(method_exists($this->parent(), 'getNode'))
-                {
+        if ($elemVisible !== false) {
+            if (method_exists($this, 'parent') && null !== $this->parent()) {
+                if (method_exists($this->parent(), 'getNode')) {
                     $parent = new ExtendedDiDomElement($this->parent()->getNode());
                     $elemVisible = $parent->isVisible();
                 }
             }
-
         }
 
         return $elemVisible;
     }
 
-	/**
-	 * @return \DiDom\Document|\JobScooper\Utils\ExtendedDiDomDocument|null
-	 */
-	function getDocument()
+    /**
+     * @return \DiDom\Document|\JobScooper\Utils\ExtendedDiDomDocument|null
+     */
+    public function getDocument()
     {
         if ($this->node->ownerDocument === null) {
             return null;
@@ -118,15 +117,15 @@ class ExtendedDiDomElement extends Element
         return $document;
     }
 
-	/**
-	 * @param        $expression
-	 * @param string $type
-	 * @param bool   $wrapElement
-	 *
-	 * @return array|\DiDom\Element[]|\DOMElement[]|\JobScooper\Utils\ExtendedDiDomElement
-	 * @throws \Exception
-	 */
-	function find($expression, $type = Query::TYPE_CSS, $wrapElement = true)
+    /**
+     * @param        $expression
+     * @param string $type
+     * @param bool   $wrapElement
+     *
+     * @return array|\DiDom\Element[]|\DOMElement[]|\JobScooper\Utils\ExtendedDiDomElement
+     * @throws \Exception
+     */
+    public function find($expression, $type = Query::TYPE_CSS, $wrapElement = true)
     {
         $ret = parent::find($expression, $type, $wrapElement);
         if (is_array($ret)) {
@@ -140,7 +139,6 @@ class ExtendedDiDomElement extends Element
         }
         throw new \Exception('Invalid return type from DiDom->Find');
     }
-
 }
 
 /**
@@ -149,17 +147,18 @@ class ExtendedDiDomElement extends Element
  */
 class ExtendedDiDomDocument extends Document
 {
-	/**
-	 * @var
-	 */
-	protected $_sourceUrl;
+    /**
+     * @var
+     */
+    protected $_sourceUrl;
 
-	/**
-	 * @param $name
-	 *
-	 * @return string
-	 */
-	function __get($name) {
+    /**
+     * @param $name
+     *
+     * @return string
+     */
+    public function __get($name)
+    {
         switch ($name) {
             case 'text':
                 return $this->text();
@@ -169,43 +168,43 @@ class ExtendedDiDomDocument extends Document
         }
     }
 
-	/**
-	 * @param $strUrl
-	 */
-	function setSource($strUrl)
+    /**
+     * @param $strUrl
+     */
+    public function setSource($strUrl)
     {
         $this->_sourceUrl = $strUrl;
     }
 
-	/**
-	 * @return mixed
-	 */
-	function getSource()
+    /**
+     * @return mixed
+     */
+    public function getSource()
     {
         return $this->_sourceUrl;
     }
 
-	/**
-	 * @param $xpath
-	 *
-	 * @return array|\DiDom\Element[]|\DOMElement[]|\JobScooper\Utils\ExtendedDiDomElement
-	 * @throws \Exception
-	 */
-	function findByXpath($xpath)
+    /**
+     * @param $xpath
+     *
+     * @return array|\DiDom\Element[]|\DOMElement[]|\JobScooper\Utils\ExtendedDiDomElement
+     * @throws \Exception
+     */
+    public function findByXpath($xpath)
     {
         return $this->find($xpath, Query::TYPE_XPATH);
     }
 
-	/**
-	 * @param string $expression
-	 * @param string $type
-	 * @param bool   $wrapNode
-	 * @param null   $contextNode
-	 *
-	 * @return array|\DiDom\Element[]|\DOMElement[]|\JobScooper\Utils\ExtendedDiDomElement
-	 * @throws \Exception
-	 */
-	function find($expression, $type = Query::TYPE_CSS, $wrapNode = true, $contextNode = null)
+    /**
+     * @param string $expression
+     * @param string $type
+     * @param bool   $wrapNode
+     * @param null   $contextNode
+     *
+     * @return array|\DiDom\Element[]|\DOMElement[]|\JobScooper\Utils\ExtendedDiDomElement
+     * @throws \Exception
+     */
+    public function find($expression, $type = Query::TYPE_CSS, $wrapNode = true, $contextNode = null)
     {
         try {
             $ret = parent::find($expression, $type, $wrapNode, $contextNode);
@@ -213,38 +212,33 @@ class ExtendedDiDomDocument extends Document
                 $retExt = array();
                 foreach ($ret as $elem) {
                     $foundNode = new ExtendedDiDomElement($elem->getNode());
-                    if($foundNode->isVisible())
-                    {
+                    if ($foundNode->isVisible()) {
                         $retExt[] = $foundNode;
                     }
                 }
                 return $retExt;
             } elseif (is_a($ret, 'Element', true)) {
                 $foundNode = new ExtendedDiDomElement($ret->getNode());
-                if($foundNode->isVisible())
-                {
+                if ($foundNode->isVisible()) {
                     return $foundNode;
                 }
-
             }
             throw new \Exception('Invalid return type from ExtendedDiDomDocument->Find');
-        }
-        catch (\Exception $ex)
-        {
+        } catch (\Exception $ex) {
             $this->debug_dump_to_file();
             throw $ex;
         }
     }
 
-	/**
-	 * @return string
-	 */
-	function debug_dump_to_file()
+    /**
+     * @return string
+     */
+    public function debug_dump_to_file()
     {
         $src = $this->getSource();
-        if(empty($src))
+        if (empty($src)) {
             $basefile = 'debug_dump_' . uniqid();
-        else {
+        } else {
             $parsed_url = parse_url($src);
             $basefile = preg_replace('/[^\w]/', '_', $parsed_url['host'] . $parsed_url['path']);
         }
@@ -261,42 +255,35 @@ class ExtendedDiDomDocument extends Document
  */
 class SimpleHTMLHelper extends ExtendedDiDomDocument
 {
-	/**
-	 * SimpleHTMLHelper constructor.
-	 *
-	 * @param $data
-	 */
-	function __construct($data)
+    /**
+     * SimpleHTMLHelper constructor.
+     *
+     * @param $data
+     */
+    public function __construct($data)
     {
         $isFile = false;
         $string = $data;
 
-        if(is_string($data))
-        {
-            if(strncasecmp($data, 'http', strlen('http')) === 0)
-            {
+        if (is_string($data)) {
+            if (strncasecmp($data, 'http', strlen('http')) === 0) {
                 $isFile = true;
                 $string = $data;
-            }
-            elseif(is_file($data) === true)
-            {
+            } elseif (is_file($data) === true) {
                 $isFile = true;
                 $string = $data;
-            }
-            else
-            {
+            } else {
                 $string = $data;
                 $isFile = false;
             }
-        }
-        elseif(is_object($data) === true) {
+        } elseif (is_object($data) === true) {
             $string = strval($data);
             $isFile = false;
         }
 
         parent::__construct($string, $isFile);
-        if($isFile)
+        if ($isFile) {
             $this->setSource($string);
+        }
     }
-
 }

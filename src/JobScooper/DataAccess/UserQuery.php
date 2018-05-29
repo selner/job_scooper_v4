@@ -35,96 +35,115 @@ use Propel\Runtime\Map\TableMap;
 class UserQuery extends BaseUserQuery
 {
 
-	/**
-	 *
-	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 *
-	 * @return User|null
-	 *
-	 */
-	static function findOrCreateUserByUserSlug($slug, $arrUserFactsToSet = array(), $overwriteFacts = false)
-	{
-		if (empty($slug))
-			throw new \Exception('Unable to search for user by user slug.  Missing required user slug parameter.');
+    /**
+     *
+     * @throws \Exception
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return User|null
+     *
+     */
+    public static function getUserByUserSlug($slug)
+    {
+        if (empty($slug)) {
+            throw new \Exception('Unable to search for user by user slug.  Missing required user slug parameter.');
+        }
 
-		$user = UserQuery::create()
-			->filterByUserSlug($slug)
-			->findOneOrCreate();
+        $user = UserQuery::create()
+            ->filterByUserSlug($slug)
+            ->findOne();
 
-		if($user->isNew() || $overwriteFacts === true)
-		{
-			UserQuery::updateUserFacts($user, $arrUserFactsToSet);
-			$user->setUserSlug($slug);
-		}
-		$user->save();
+        return $user;
+    }
 
-		return $user;
-	}
+    /**
+     *
+     * @throws \Exception
+     * @throws \Propel\Runtime\Exception\PropelException
+     *
+     * @return User|null
+     *
+     */
+    public static function findOrCreateUserByUserSlug($slug, $arrUserFactsToSet = array(), $overwriteFacts = false)
+    {
+        if (empty($slug)) {
+            throw new \Exception('Unable to search for user by user slug.  Missing required user slug parameter.');
+        }
 
-	/**
-	 * @param       $email_address
-	 * @param array $arrUserFactsToSet
-	 * @param bool  $overwriteFacts
-	 *
-	 * @throws \Exception
-	 * @return User|null
-	 */
-	static function findUserByEmailAddress($email_address, $arrUserFactsToSet = array(), $overwriteFacts = false)
-	{
-		$retUser = null;
-		try {
-			// Search for this email address in the database
-			// sort by the last created record first so that
-			// we return the most recent match if multiple exist
-			$data = UserQuery::create()
-				->filterByEmailAddress($email_address)
-				->orderByUserId(Criteria::DESC)
-				->find()
-				->getData();
+        $user = UserQuery::create()
+            ->filterByUserSlug($slug)
+            ->findOneOrCreate();
 
-			if (empty($data))
-				return null;
+        if ($user->isNew() || $overwriteFacts === true) {
+            UserQuery::updateUserFacts($user, $arrUserFactsToSet);
+            $user->setUserSlug($slug);
+        }
+        $user->save();
 
-			if (countAssociativeArrayValues($data) > 1) {
-				$retUser = $data[count($data) - 1];
-			} else {
-				$retUser = $data[0];
-			}
+        return $user;
+    }
 
-			if($retUser->isNew() || $overwriteFacts === true)
-			{
-				UserQuery::updateUserFacts($retUser, $arrUserFactsToSet);
-			}
+    /**
+     * @param       $email_address
+     * @param array $arrUserFactsToSet
+     * @param bool  $overwriteFacts
+     *
+     * @throws \Exception
+     * @return User|null
+     */
+    public static function findUserByEmailAddress($email_address, $arrUserFactsToSet = array(), $overwriteFacts = false)
+    {
+        $retUser = null;
+        try {
+            // Search for this email address in the database
+            // sort by the last created record first so that
+            // we return the most recent match if multiple exist
+            $data = UserQuery::create()
+                ->filterByEmailAddress($email_address)
+                ->orderByUserId(Criteria::DESC)
+                ->find()
+                ->getData();
 
-			$retUser->save();
+            if (empty($data)) {
+                return null;
+            }
 
-			return $retUser;
+            if (countAssociativeArrayValues($data) > 1) {
+                $retUser = $data[count($data) - 1];
+            } else {
+                $retUser = $data[0];
+            }
 
-		} catch (\Exception $ex) {
-			// No user found
-			return null;
-		}
-	}
+            if ($retUser->isNew() || $overwriteFacts === true) {
+                UserQuery::updateUserFacts($retUser, $arrUserFactsToSet);
+            }
 
-	/**
-	 * @param \JobScooper\DataAccess\User $user
-	 * @param                             $arrUserFactsToSet
-	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	static function updateUserFacts(User $user, $arrUserFactsToSet)
-	{
-		if(!empty($arrUserFactsToSet) && is_array($arrUserFactsToSet)) {
-			$user->fromArray($arrUserFactsToSet);
-		} else {
-			$thisKeys = UserTableMap::getFieldNames(TableMap::TYPE_PHPNAME);
-			foreach ($arrUserFactsToSet as $keyNew => $valNew) {
-				if (array_key_exists($keyNew, $thisKeys) && !empty(call_user_func_array([$user, 'get' . $keyNew], null))) {
-					call_user_func_array([$user, 'set' . $keyNew], $valNew);
-				}
-			}
-		}
+            $retUser->save();
 
-	}
+            return $retUser;
+        } catch (\Exception $ex) {
+            // No user found
+            return null;
+        }
+    }
+
+    /**
+     * @param \JobScooper\DataAccess\User $user
+     * @param                             $arrUserFactsToSet
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public static function updateUserFacts(User $user, $arrUserFactsToSet)
+    {
+        if (!empty($arrUserFactsToSet) && is_array($arrUserFactsToSet)) {
+            $user->fromArray($arrUserFactsToSet);
+        } else {
+            $thisKeys = UserTableMap::getFieldNames(TableMap::TYPE_PHPNAME);
+            foreach ($arrUserFactsToSet as $keyNew => $valNew) {
+                if (array_key_exists($keyNew, $thisKeys) && !empty(call_user_func_array([$user, 'get' . $keyNew], null))) {
+                    call_user_func_array([$user, 'set' . $keyNew], $valNew);
+                }
+            }
+        }
+    }
 }

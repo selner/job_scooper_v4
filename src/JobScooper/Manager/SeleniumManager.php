@@ -16,6 +16,7 @@
  * under the License.
  */
 namespace JobScooper\Manager;
+
 use Exception;
 use Facebook\WebDriver\Exception\WebDriverCurlException;
 use Facebook\WebDriver\Exception\WebDriverException;
@@ -31,46 +32,47 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
  */
 class SeleniumManager extends PropertyObject
 {
-	/**
-	 * @var RemoteWebDriver|null
-	 */
-	private $remoteWebDriver = null;
+    /**
+     * @var RemoteWebDriver|null
+     */
+    private $remoteWebDriver = null;
     private $additionalLoadDelaySeconds = null;
     private $_settings = null;
 
-	/**
-	 * SeleniumManager constructor.
-	 *
-	 * @param int $additionalLoadDelaySeconds
-	 *
-	 * @throws \Exception
-	 */
-	function __construct($additionalLoadDelaySeconds = 0)
+    /**
+     * SeleniumManager constructor.
+     *
+     * @param int $additionalLoadDelaySeconds
+     *
+     * @throws \Exception
+     */
+    public function __construct($additionalLoadDelaySeconds = 0)
     {
+        PropertyObject::__construct();
         $this->additionalLoadDelaySeconds = $additionalLoadDelaySeconds;
         $this->_settings = getConfigurationSetting('selenium');
-		if(empty($this->_settings))
-			$this->_settings = array();
+        if (empty($this->_settings)) {
+            $this->_settings = array();
+        }
     }
 
-	/**
-	 *
-	 * @throws \Exception
-	 */
-	function __destruct()
+    /**
+     *
+     * @throws \Exception
+     */
+    public function __destruct()
     {
         $this->doneWithRemoteWebDriver();
-
     }
 
-	/**
-	 * @param      $url
-	 * @param bool $recursed
-	 *
-	 * @return string
-	 * @throws \Exception
-	 */
-	function getPageHTML($url, $recursed = false)
+    /**
+     * @param      $url
+     * @param bool $recursed
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public function getPageHTML($url, $recursed = false)
     {
         try {
             $driver = $this->get_driver();
@@ -89,12 +91,12 @@ class SeleniumManager extends PropertyObject
         }
     }
 
-	/**
-	 * @param $url
-	 *
-	 * @throws \Exception
-	 */
-	function loadPage($url)
+    /**
+     * @param $url
+     *
+     * @throws \Exception
+     */
+    public function loadPage($url)
     {
         try {
             $driver = $this->get_driver();
@@ -111,59 +113,57 @@ class SeleniumManager extends PropertyObject
         }
     }
 
-	/**
-	 *
-	 * @throws \Exception
-	 */
-	function done()
+    /**
+     *
+     * @throws \Exception
+     */
+    public function done()
     {
         $this->doneWithRemoteWebDriver();
     }
 
-	/**
-	 * @throws \Exception
-	 */
-	function waitForAjax($framework='jquery')
-	{
-		// javascript framework
-		switch($framework){
-			case 'jquery':
-				$code = "return jQuery.active;"; break;
-			case 'prototype':
-				$code = "return Ajax.activeRequestCount;"; break;
-			case 'dojo':
-				$code = "return dojo.io.XMLHTTPTransport.inFlight.length;"; break;
-			default:
-				throw new Exception('Not supported framework');
-		}
-
-		// wait for at most 30s, retry every 2000ms (2s)
-		$driver = $this->get_driver();
-		$driver->wait(30, 2000)->until(
-			function ($driver, $code) {
-				return !($driver->executeScript($code));
-			}
-		);
-	}
-
-
-
-
-	/**
-	 * @throws \Exception
-	 */
-	protected function doneWithRemoteWebDriver()
+    /**
+     * @throws \Exception
+     */
+    public function waitForAjax($framework='jquery')
     {
-//	    $logs_browse = $this->remoteWebDriver->manage()->getLog("browser");
-//	    $logs_client = $this->remoteWebDriver->manage()->getLog("client");
+        // javascript framework
+        switch ($framework) {
+            case 'jquery':
+                $code = "return jQuery.active;"; break;
+            case 'prototype':
+                $code = "return Ajax.activeRequestCount;"; break;
+            case 'dojo':
+                $code = "return dojo.io.XMLHTTPTransport.inFlight.length;"; break;
+            default:
+                throw new Exception('Not supported framework');
+        }
+
+        // wait for at most 30s, retry every 2000ms (2s)
+        $driver = $this->get_driver();
+        $driver->wait(30, 2000)->until(
+            function ($driver, $code) {
+                return !($driver->executeScript($code));
+            }
+        );
+    }
+
+
+
+
+    /**
+     * @throws \Exception
+     */
+    protected function doneWithRemoteWebDriver()
+    {
+        //	    $logs_browse = $this->remoteWebDriver->manage()->getLog("browser");
+        //	    $logs_client = $this->remoteWebDriver->manage()->getLog("client");
 //
-//	    LogMessage("Selenium browser log:  " . getArrayDebugOutput($logs_browse));
-//	    LogMessage("Selenium client log:  " . getArrayDebugOutput($logs_client));
+        //	    LogMessage("Selenium browser log:  " . getArrayDebugOutput($logs_browse));
+        //	    LogMessage("Selenium client log:  " . getArrayDebugOutput($logs_client));
 
-	    try {
-
-            if(!is_null($this->remoteWebDriver))
-            {
+        try {
+            if (!is_null($this->remoteWebDriver)) {
                 $this->remoteWebDriver->quit();
             }
         } catch (WebDriverCurlException $ex) {
@@ -172,9 +172,7 @@ class SeleniumManager extends PropertyObject
             handleException($ex, "Failed to quit Webdriver: ", false);
         } catch (Exception $ex) {
             handleException($ex, "Failed to quit Webdriver: ", false);
-        }
-        finally
-        {
+        } finally {
             $driver = null;
             $this->remoteWebDriver = null;
         }
@@ -187,81 +185,79 @@ class SeleniumManager extends PropertyObject
      * @return \Facebook\WebDriver\Remote\RemoteWebDriver|null
      *
      */
-    function get_driver()
+    public function get_driver()
     {
         try {
-            if (is_null($this->remoteWebDriver))
+            if (is_null($this->remoteWebDriver)) {
                 $this->create_remote_webdriver();
+            }
             return $this->remoteWebDriver;
-
         } catch (WebDriverCurlException $ex) {
             $this->create_remote_webdriver();
             return $this->remoteWebDriver;
-
         } catch (WebDriverException $ex) {
             $this->create_remote_webdriver();
             return $this->remoteWebDriver;
-
         } catch (Exception $ex) {
             $this->create_remote_webdriver();
             return $this->remoteWebDriver;
         }
     }
 
-	/**
-	 * @return mixed|null|string
-	 */
-	function getWebDriverKind()
+    /**
+     * @return mixed|null|string
+     */
+    public function getWebDriverKind()
     {
         $webdriver = (array_key_exists('webdriver', $this->_settings)) ? $this->_settings['webdriver'] : null;
-        if(is_null($webdriver)) {
+        if (is_null($webdriver)) {
             $webdriver = "phantomjs";
-            if (PHP_OS == "Darwin")
+            if (PHP_OS == "Darwin") {
                 $webdriver = "safari";
+            }
         }
 
         return $webdriver;
     }
 
-	/**
-	 * @return null|\Facebook\WebDriver\Remote\RemoteWebDriver
-	 * @throws \Exception
-	 */
-	private function create_remote_webdriver()
+    /**
+     * @return null|\Facebook\WebDriver\Remote\RemoteWebDriver
+     * @throws \Exception
+     */
+    private function create_remote_webdriver()
     {
         $hubUrl = $this->_settings['host_location'] . '/wd/hub';
         LogMessage("Creating Selenium remote web driver to host {$hubUrl}...");
 
         try {
-
             $webdriver = $this->getWebDriverKind();
             $hubUrl = $this->_settings['host_location'] . '/wd/hub';
             $driver = null;
 
-	        /** @var DesiredCapabilities $capabilities */
-	        $capabilities = call_user_func(array("Facebook\WebDriver\Remote\DesiredCapabilities", $webdriver));
+            /** @var DesiredCapabilities $capabilities */
+            $capabilities = call_user_func(array("Facebook\WebDriver\Remote\DesiredCapabilities", $webdriver));
 
 //
-//	        $capabilities->setCapability(
-//		        'moz:firefoxOptions',
-//		        ['args' => ['-headless']]
-//	        );
-//	        $capabilities->setCapability(
-//		        'moz:webdriverClick',
-//		        false
-//	        );
+            //	        $capabilities->setCapability(
+            //		        'moz:firefoxOptions',
+            //		        ['args' => ['-headless']]
+            //	        );
+            //	        $capabilities->setCapability(
+            //		        'moz:webdriverClick',
+            //		        false
+            //	        );
 
-//	        $prof = $capabilities->getCapability(FirefoxDriver::PROFILE);
+            //	        $prof = $capabilities->getCapability(FirefoxDriver::PROFILE);
 //
-//	        $fflog = getOutputDirectory('debug') . "/firefox_webdriver_log.csv";
-//	        $prof->setPreference("setEnableNativeEvents", true);
-//	        $prof->setPreference("webdriver.log.file", $fflog);
-//	        $prof->setPreference("webdriver.log.driver", "INFO");
-//	        $capabilities->setCapability(FirefoxDriver::PROFILE, $prof);
+            //	        $fflog = getOutputDirectory('debug') . "/firefox_webdriver_log.csv";
+            //	        $prof->setPreference("setEnableNativeEvents", true);
+            //	        $prof->setPreference("webdriver.log.file", $fflog);
+            //	        $prof->setPreference("webdriver.log.driver", "INFO");
+            //	        $capabilities->setCapability(FirefoxDriver::PROFILE, $prof);
 
 
-	        $capabilities->setCapability('acceptInsecureCerts', true);
-	        $capabilities->setCapability("setThrowExceptionOnScriptError", false);
+            $capabilities->setCapability('acceptInsecureCerts', true);
+            $capabilities->setCapability("setThrowExceptionOnScriptError", false);
             $capabilities->setCapability("unexpectedAlertBehaviour", "dismiss");
             $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
             $capabilities->setCapability(WebDriverCapabilityType::APPLICATION_CACHE_ENABLED, true);
@@ -280,10 +276,10 @@ class SeleniumManager extends PropertyObject
             );
 
 //
-//	        $window = new WebDriverDimension(1024, 768);
-//	        $this->remoteWebDriver->manage()->window()->setSize($window);
+            //	        $window = new WebDriverDimension(1024, 768);
+            //	        $this->remoteWebDriver->manage()->window()->setSize($window);
 
-	        LogMessage("Remote web driver instantiated.");
+            LogMessage("Remote web driver instantiated.");
 
             return $this->remoteWebDriver;
         } catch (WebDriverCurlException $ex) {
@@ -295,6 +291,4 @@ class SeleniumManager extends PropertyObject
         }
         return null;
     }
-
-
 }

@@ -15,25 +15,23 @@
  * under the License.
  */
 
-namespace JobScooper\BasePlugin\Classes;
+namespace JobScooper\SitePlugins;
 
+use JobScooper\Manager\SeleniumManager;
+use JobScooper\SitePlugins\Base\SitePlugin;
 
-/**
- * Class AjaxHtmlSimplePlugin
- * @package JobScooper\BasePlugin\Classes
- */
-abstract class AjaxHtmlSimplePlugin extends SimplePlugin
+abstract class AjaxSitePlugin extends SitePlugin
 {
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
-
-	/**
-	 * AjaxHtmlSimplePlugin constructor.
-	 * @throws \Exception
-	 */
-	function __construct()
+    public function __construct($strBaseDir = null)
     {
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
         $this->additionalBitFlags[] = C__JOB_USE_SELENIUM;
-        parent::__construct();
+        try {
+            $this->_selenium = new SeleniumManager();
+        } catch (\Exception $ex) {
+            handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+        }
 
+        parent::__construct();
     }
 }

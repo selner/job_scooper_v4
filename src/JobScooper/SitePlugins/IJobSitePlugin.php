@@ -15,7 +15,7 @@
  * under the License.
  */
 
-namespace JobScooper\BasePlugin\Interfaces;
+namespace JobScooper\SitePlugins;
 
 // Declare the interface 'iJobSitePlugin'
 use JobScooper\Utils\SimpleHTMLHelper;
@@ -35,7 +35,7 @@ interface IJobSitePlugin
      * @param $objSimpHTML
      * @return string|null
      */
-    function parseTotalResultsCount(SimpleHTMLHelper $objSimpHTML);
+    public function parseTotalResultsCount(SimpleHTMLHelper $objSimpHTML);
 
     /**
      * /**
@@ -49,7 +49,5 @@ interface IJobSitePlugin
      * @return array|null|void
      * @throws \Exception
      */
-    function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML);
-
-
+    public function parseJobsListForPage(SimpleHTMLHelper $objSimpHTML);
 }

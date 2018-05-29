@@ -18,7 +18,7 @@
 
 
 
-class PluginSmashingMagazine extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class PluginSmashingMagazine extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'SmashingMagazine';
     protected $childSiteURLBase = 'http://jobs.smashingmagazine.com';
@@ -32,5 +32,4 @@ class PluginSmashingMagazine extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimp
         'JobSitePostId' =>  array(array('tag' => 'article'), 'return_attribute' => 'id'),
         'Company' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'entry-company'),
         );
-
 }

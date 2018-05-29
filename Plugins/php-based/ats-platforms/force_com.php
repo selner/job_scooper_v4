@@ -17,32 +17,32 @@
  */
 
 
-abstract class BaseForceComClass extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class BaseForceComClass extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $additionalLoadDelaySeconds = 3;
     protected $JobListingsPerPage = 25;
     protected $PaginationType = C__PAGINATION_PAGE_VIA_CALLBACK;
 
-	/**
-	 * BaseForceComClass constructor.
-	 */
-	function __construct()
+    /**
+     * BaseForceComClass constructor.
+     */
+    public function __construct()
     {
         parent::__construct();
 
-        if(is_null($this->SearchUrlFormat) || strlen($this->SearchUrlFormat) == 0) {
+        if (is_null($this->SearchUrlFormat) || strlen($this->SearchUrlFormat) == 0) {
             $this->JobPostingBaseUrl = "http://" . strtolower($this->JobSiteName) . ".force.com/careers";
             $this->SearchUrlFormat = "http://" . strtolower($this->JobSiteName) . ".force.com/careers";
         }
     }
 
-	/**
-	 * @param null $nItem
-	 * @param null $nPage
-	 */
-	function takeNextPageAction($nItem=null, $nPage=null)
-	{
-		$nextPageJS = "function contains(selector, text) {
+    /**
+     * @param null $nItem
+     * @param null $nPage
+     */
+    public function takeNextPageAction($nItem=null, $nPage=null)
+    {
+        $nextPageJS = "function contains(selector, text) {
                 var elements = document.querySelectorAll(selector);
                 return Array.prototype.filter.call(elements, function(element){
                 return RegExp(text).test(element.textContent);
@@ -56,12 +56,12 @@ abstract class BaseForceComClass extends \JobScooper\BasePlugin\Classes\AjaxHtml
             }
         ";
 
-		$this->runJavaScriptSnippet($nextPageJS, false);
-	}
+        $this->runJavaScriptSnippet($nextPageJS, false);
+    }
 
 
 
-	protected $arrListingTagSetup = array(
+    protected $arrListingTagSetup = array(
         'TotalPostCount' => array('selector' => 'div#atsSearchResultsText', 'return_value_regex' => '/(\d+).*?/'),
         'JobPostItem' => array('selector' => "table.atsSearchResultsTable tbody tr"),
         'Title' =>  array('selector' => 'td a', 'index' => 0, 'return_attribute' => 'text'),
@@ -71,17 +71,16 @@ abstract class BaseForceComClass extends \JobScooper\BasePlugin\Classes\AjaxHtml
         'Location' =>  array('selector' => 'td span', 'index' => 1, 'return_attribute' => 'text'),
         'PostedAt' =>  array('selector' => 'td span', 'index' => 2, 'return_attribute' => 'text')
     );
-
 }
 
 
 
 abstract class BaseNoDeptForceComClass extends BaseForceComClass
 {
-	/**
-	 * BaseNoDeptForceComClass constructor.
-	 */
-	function __construct()
+    /**
+     * BaseNoDeptForceComClass constructor.
+     */
+    public function __construct()
     {
         parent::__construct();
         $this->arrListingTagSetup['Department'] = null;

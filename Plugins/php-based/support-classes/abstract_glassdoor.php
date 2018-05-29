@@ -22,33 +22,31 @@
  *
  *       Used by glassdoor.json plugin configuration to override single method
  */
-abstract class AbstractGlassdoor extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+abstract class AbstractGlassdoor extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
-	/**
-	 * AbstractGlassdoor constructor.
-	 * @throws \Exception
-	 */
-	function __construct()
-	{
-
-		parent::__construct();
-		$this->_flags_ &= ~C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
-
-	}
+    /**
+     * AbstractGlassdoor constructor.
+     * @throws \Exception
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->_flags_ &= ~C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
+    }
 
 
-	/**
-	 * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-	 *
-	 * @return string
-	 * @throws \ErrorException
-	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
-	{
-		LogMessage("Setting search location via JavaScript on load of first page...");
-		$jsCode = /** @lang javascript */ <<<JSCODE
+    /**
+     * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+     *
+     * @return string
+     * @throws \ErrorException
+     * @throws \Exception
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+    {
+        LogMessage("Setting search location via JavaScript on load of first page...");
+        $jsCode = /** @lang javascript */ <<<JSCODE
             fetch('https://www.glassdoor.com/findPopularLocationAjax.htm?term=" . $searchDetails->getGeoLocationURLValue() . "&maxLocationsToReturn=10').then(function(response) {
               if(response.ok) {
                 response.json().then(function(json) {
@@ -67,36 +65,31 @@ abstract class AbstractGlassdoor extends \JobScooper\BasePlugin\Classes\AjaxHtml
         });
 JSCODE;
 
-		$this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
-		$jsonApi = "https://www.glassdoor.com/findPopularLocationAjax.htm?term={$searchDetails->getGeoLocationURLValue()}&LocationsToReturn=10";
-		$locations = $this->getJsonApiResult($jsonApi, $searchDetails, $searchDetails->getSearchStartUrl());
-		if (empty($locations))
-			throw new Exception("Could not find and set search location for Glassdoor search {$searchDetails->getUserSearchSiteRunKey()}.");
+        $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
+        $jsonApi = "https://www.glassdoor.com/findPopularLocationAjax.htm?term={$searchDetails->getGeoLocationURLValue()}&LocationsToReturn=10";
+        $locations = $this->getJsonApiResult($jsonApi, $searchDetails, $searchDetails->getSearchStartUrl());
+        if (empty($locations)) {
+            throw new Exception("Could not find and set search location for Glassdoor search {$searchDetails->getUserSearchSiteRunKey()}.");
+        }
 
-		$searchLoc = $locations[0];
-		$driver = $this->getActiveWebdriver();
+        $searchLoc = $locations[0];
+        $driver = $this->getActiveWebdriver();
 
-		try {
-			$jsCode = /** @lang javascript */ <<<JSCODE
+        try {
+            $jsCode = /** @lang javascript */ <<<JSCODE
 	            document.getElementById('sc.location').value = "{$searchLoc->longName}";
 	            document.getElementById('HeroSearchButton').click();
 JSCODE;
-			$this->runJavaScriptSnippet($jsCode, false);
-			sleep($this->additionalLoadDelaySeconds + 2);
-		}
-		catch (Exception $ex)
-		{
-			handleException($ex, "Could not find form element to set search location for Glassdoor:");
-		}
+            $this->runJavaScriptSnippet($jsCode, false);
+            sleep($this->additionalLoadDelaySeconds + 2);
+        } catch (Exception $ex) {
+            handleException($ex, "Could not find form element to set search location for Glassdoor:");
+        }
 
-		$url = $this->getActiveWebdriver()->getCurrentURL();
-		LogMessage("Search URL changed to {$url}");
-		$searchDetails->setStartingUrlForSearch($url);
-		$html = $this->getActiveWebdriver()->getPageSource();
+        $url = $this->getActiveWebdriver()->getCurrentURL();
+        LogMessage("Search URL changed to {$url}");
+        $searchDetails->setSearchStartUrl($url);
 
-		return $html;
-
-	}
-
-
+        return $this->getActiveWebdriver()->getPageSource();
+    }
 }

@@ -16,5 +16,4 @@ use JobScooper\DataAccess\Base\UserSearchSiteRunQuery as BaseUserSearchSiteRunQu
  */
 class UserSearchSiteRunQuery extends BaseUserSearchSiteRunQuery
 {
-
 }

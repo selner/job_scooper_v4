@@ -17,7 +17,6 @@
 
 namespace JobScooper\Tools;
 
-
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use Propel\Runtime\Map\TableMap;
 
@@ -61,25 +60,21 @@ if (!$allJobsPager->isEmpty()) {
     $outdir = dirname($outFile);
     LogMessage("... exporting to files at {$outdir}...");
 
-    while ($allJobsPager->getPage() <= $allJobsPager->getLastPage())
-    {
+    while ($allJobsPager->getPage() <= $allJobsPager->getLastPage()) {
         $arrOutputList = array();
         $nJobsExportPageEnd = $nJobsExported + RESULTS_PER_PAGE;
         $outFile = generateOutputFileName("job_postings-{$nJobsExported}-{$nJobsExportPageEnd}", "json", false);
         LogMessage("... exporting job postings {$nJobsExported} - {$nJobsExportPageEnd}...");
         foreach ($allJobsPager as $job) {
             $arrJob = $job->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, array(), true);
-            if (array_key_exists('Location', $arrJob) && array_key_exists('JobPostings', $arrJob['Location']))
+            if (array_key_exists('Location', $arrJob) && array_key_exists('JobPostings', $arrJob['Location'])) {
                 unset($arrJob['Location']['JobPostings']);
+            }
             $arrOutputList[$job->getKeySiteAndPostId()] = $arrJob;
         }
         $pageJsonData = encodeJSON($arrOutputList);
         file_put_contents($outFile, $pageJsonData);
         $nJobsExported += RESULTS_PER_PAGE;
         $allJobsPager->getNextPage();
-
     }
 }
-
-
-

@@ -18,7 +18,7 @@
 
 use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
-use \JobScooper\BasePlugin\Classes\ApiPlugin;
+use \JobScooper\SitePlugins\ApiPlugin;
 
 class PluginUSAJobs extends ApiPlugin
 {
@@ -28,14 +28,14 @@ class PluginUSAJobs extends ApiPlugin
     protected $JobListingsPerPage = 25;
     protected $LocationType = 'location-city-comma-state';
 
-	/**
-	 * @param     $searchDetails
-	 * @param int $pageNumber
-	 *
-	 * @return array|null
-	 * @throws \JobApis\Jobs\Client\Exceptions\MissingParameterException
-	 */
-	function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
+    /**
+     * @param     $searchDetails
+     * @param int $pageNumber
+     *
+     * @return array|null
+     * @throws \JobApis\Jobs\Client\Exceptions\MissingParameterException
+     */
+    public function getSearchJobsFromAPI($searchDetails, $pageNumber = 1)
     {
         // Add parameters to the query via the constructor
         $options = [
@@ -45,12 +45,8 @@ class PluginUSAJobs extends ApiPlugin
         ];
         $query = new UsajobsQuery($options);
         $client = new UsajobsProvider($query);
-        LogMessage("Getting jobs from " . $query->getUrl() . "[". $searchDetails->getUserSearchSiteRunKey() );
+        LogMessage("Getting jobs from " . $query->getUrl() . "[". $searchDetails->getUserSearchSiteRunKey());
         $apiJobs = $client->getJobs();
         return $apiJobs->all();
-
     }
 }
-
-
-

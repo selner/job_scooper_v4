@@ -31,58 +31,47 @@ class CurlWrapper
 
     private $fDebugLogging = false;
 
-    function __construct()
+    public function __construct()
     {
         $this->fDebugLogging = isDebug();
     }
 
-    function setDebug($fDebug = true)
+    public function setDebug($fDebug = true)
     {
         $this->fDebugLogging = $fDebug;
     }
 
-    private function __handleCallback__($callback, &$val, $fReturnType = C__API_RETURN_TYPE_OBJECT__ )
+    private function handleCallback($callback, &$val, $fReturnType = C__API_RETURN_TYPE_OBJECT__)
     {
-
-        if($fReturnType == C__API_RETURN_TYPE_ARRAY__)
-        {
+        if ($fReturnType == C__API_RETURN_TYPE_ARRAY__) {
             $val =  json_decode(json_encode($val, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE), true);
         }
 
-        if ($callback && is_callable($callback))
-        {
+        if ($callback && is_callable($callback)) {
             call_user_func_array($callback, array(&$val));
         }
 
-        if($fReturnType == C__API_RETURN_TYPE_ARRAY__)
-        {
+        if ($fReturnType == C__API_RETURN_TYPE_ARRAY__) {
             $val = json_decode(json_encode($val, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE), false);
         }
     }
 
-    function getObjectsFromAPICall( $baseURL, $objName = '', $fReturnType = C__API_RETURN_TYPE_OBJECT__, $callback = null, $pagenum = 0)
+    public function getObjectsFromAPICall($baseURL, $objName = '', $fReturnType = C__API_RETURN_TYPE_OBJECT__, $callback = null, $pagenum = 0)
     {
         $retData = null;
 
         $curl_obj = $this->cURL($baseURL, '', 'GET', 'application/json', $pagenum);
 
         $srcdata = json_decode($curl_obj['output']);
-        if(isset($srcdata))
-        {
-            if($objName == '')
-            {
-                if($callback != null)
-                {
-                    $this->__handleCallback__($callback, $srcdata, $fReturnType);
+        if (!is_empty_value($srcdata)) {
+            if (!is_empty_value($objName)) {
+                if (!is_empty_value($callback)) {
+                    $this->handleCallback($callback, $srcdata, $fReturnType);
                 }
                 $retData = $srcdata;
-            }
-            else
-            {
-
-                foreach($srcdata->$objName as $key => $value)
-                {
-                    $this->__handleCallback__($callback, $value, $fReturnType);
+            } else {
+                foreach ($srcdata->$objName as $key => $value) {
+                    $this->handleCallback($callback, $value, $fReturnType);
                     $retData[$key] = $value;
                 }
 
@@ -90,9 +79,10 @@ class CurlWrapper
                 // If the data returned has a next_page value, then we have more results available
                 // for this query that we need to also go get.  Do that now.
                 //
-                if(isset($srcdata->next_page))
-                {
-                    if($this->fDebugLogging == true) { LogMessage('Multipage results detected. Getting results for ' . $srcdata->next_page . '...' . PHP_EOL); }
+                if (isset($srcdata->next_page)) {
+                    if ($this->fDebugLogging == true) {
+                        LogMessage('Multipage results detected. Getting results for ' . $srcdata->next_page . '...' . PHP_EOL);
+                    }
 
                     // $patternPage = '/.*page=([0-9]{1,})/";
                     $patternPagePrefix = '/.*page=/';
@@ -105,9 +95,8 @@ class CurlWrapper
                     // before return.  This allows for multiple page result sets from Zendesk API
                     //
 
-                    foreach($retSecondary as $moreKey => $moreVal)
-                    {
-                        $this->__handleCallback__($callback, $moreVal, $fReturnType);
+                    foreach ($retSecondary as $moreKey => $moreVal) {
+                        $this->handleCallback($callback, $moreVal, $fReturnType);
                         $retData[$moreKey] = $moreVal;
                     }
                 }
@@ -115,8 +104,7 @@ class CurlWrapper
         }
 
 
-        switch ($fReturnType)
-        {
+        switch ($fReturnType) {
             case  C__API_RETURN_TYPE_ARRAY__:
                 $retData = json_decode(json_encode($retData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE), true);
                 break;
@@ -133,44 +121,50 @@ class CurlWrapper
     }
 
 
-	/**
-	 * @param        $full_url
-	 * @param null   $json
-	 * @param string $action
-	 * @param null   $content_type
-	 * @param null   $pagenum
-	 * @param null   $onbehalf
-	 * @param null   $fileUpload
-	 * @param null   $secsTimeout
-	 * @param null   $cookies
-	 * @param null   $referrer
-	 *
-	 * @return array
-	 * @throws \ErrorException
-	 */
-	function cURL($full_url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = null)
+    /**
+     * @param        $full_url
+     * @param null   $json
+     * @param string $action
+     * @param null   $content_type
+     * @param null   $pagenum
+     * @param null   $onbehalf
+     * @param null   $fileUpload
+     * @param null   $secsTimeout
+     * @param null   $cookies
+     * @param null   $referrer
+     *
+     * @return array
+     * @throws \ErrorException
+     */
+    public function cURL($full_url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = null, $referrer = null)
     {
-        if(!isset($secsTimeout))
-        {
+        if (is_empty_value($secsTimeout)) {
             $secsTimeout= 30;
         }
 
         $curl_object = array('input_url' => '', 'actual_site_url' => '', 'error_number' => 0, 'output' => '', 'output_decoded'=>'', 'cookies'=>null, 'headers'=>null);
 
-        if($pagenum > 0)
-        {
+        if ($pagenum > 0) {
             $full_url .= '?page=' . $pagenum;
         }
         $header = array();
-        if(!is_null($onbehalf)) $header[] = 'X-On-Behalf-Of: ' . $onbehalf;
-        if(!is_null($content_type)) $header[] = 'Content-type: ' . $content_type;
-        if(!is_null($content_type)) $header[] = 'Accept: ' . $content_type;
+        if (!is_empty_value($onbehalf)) {
+            $header[] = 'X-On-Behalf-Of: ' . $onbehalf;
+        }
+        if (!is_empty_value($content_type)) {
+            $header[] = 'Content-type: ' . $content_type;
+        }
+        if (!is_empty_value($content_type)) {
+            $header[] = 'Accept: ' . $content_type;
+        }
 
         $ch = curl_init();
-        if(!is_null($referrer)) curl_setopt($ch, CURLOPT_REFERER, $referrer);
+        if (!is_empty_value($referrer)) {
+            curl_setopt($ch, CURLOPT_REFERER, $referrer);
+        }
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 10 );
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_URL, $full_url);
         curl_setopt($ch, CURLOPT_USERAGENT, \C__STR_USER_AGENT__);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -182,25 +176,22 @@ class CurlWrapper
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
-        if($cookies)
-            curl_setopt($ch, CURLOPT_COOKIE,  $cookies);
+        if ($cookies) {
+            curl_setopt($ch, CURLOPT_COOKIE, $cookies);
+        }
 
 
-        switch($action)
-        {
+        switch ($action) {
             case 'POST':
 
-                if($fileUpload != null)
-                {
+                if ($fileUpload != null) {
                     $fileh = fopen($fileUpload, 'r');
                     $size = filesize($fileUpload);
-                    $fildata = fread($fileh,$size);
+                    $fildata = fread($fileh, $size);
                     curl_setopt($ch, CURLOPT_POSTFIELDS, $fildata);
                     curl_setopt($ch, CURLOPT_INFILE, $fileh);
                     curl_setopt($ch, CURLOPT_INFILESIZE, $size);
-                }
-                else
-                {
+                } else {
                     curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
                 }
                 break;
@@ -225,12 +216,13 @@ class CurlWrapper
 
         $header_size = $curl_info['header_size'];
         $header = substr($output, 0, $header_size);
-        $headerlines = explode(PHP_EOL, $header );
+        $headerlines = explode(PHP_EOL, $header);
         $body = substr($output, $header_size);
         foreach ($headerlines as $line) {
             $exploded = explode(':', $line);
-            if(count($exploded) > 1)
+            if (count($exploded) > 1) {
                 $curl_object['headers'][$exploded[0]] = $exploded[1];
+            }
         }
 
 
@@ -246,32 +238,23 @@ class CurlWrapper
         $curl_object = array_merge($curl_object, $curl_info);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         /* If the document has loaded successfully without any redirection or error */
-        if ($httpCode < 200 || $httpCode >= 400)
-        {
+        if ($httpCode < 200 || $httpCode >= 400) {
             $strErr = 'CURL received an HTTP error #'. $httpCode;
             $curl_object['http_error_number'] = $httpCode;
             $curl_object['error_number'] = -1;
             curl_close($ch);
-            throw new \ErrorException($strErr, $httpCode,E_RECOVERABLE_ERROR );
-        }
-        elseif (curl_errno($ch))
-        {
+            throw new \ErrorException($strErr, $httpCode, E_RECOVERABLE_ERROR);
+        } elseif (curl_errno($ch)) {
             $strErr = 'Error #' . curl_errno($ch) . ': ' . curl_error($ch);
             $curl_object['error_number'] = curl_errno($ch);
             $curl_object['output'] = curl_error($ch);
             curl_close($ch);
-            throw new \ErrorException($strErr,curl_errno($ch),E_RECOVERABLE_ERROR );
-        }
-        else
-        {
+            throw new \ErrorException($strErr, curl_errno($ch), E_RECOVERABLE_ERROR);
+        } else {
             $curl_object['output'] = $body;
             curl_close($ch);
         }
 
         return $curl_object;
-
     }
-
 }
-
-

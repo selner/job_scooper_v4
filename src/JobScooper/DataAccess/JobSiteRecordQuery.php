@@ -31,5 +31,4 @@ use JobScooper\DataAccess\Base\JobSiteRecordQuery as BaseJobSiteRecordQuery;
  */
 class JobSiteRecordQuery extends BaseJobSiteRecordQuery
 {
-
 }

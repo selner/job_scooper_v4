@@ -27,14 +27,15 @@ use Monolog\Logger;
 
 function getLogger($channel=null)
 {
-	if (array_key_exists('logger', $GLOBALS)) {
-		if (!empty($channel))
-			return getChannelLogger($channel);
+    if (array_key_exists('logger', $GLOBALS)) {
+        if (!empty($channel)) {
+            return getChannelLogger($channel);
+        }
 
-		return $GLOBALS['logger'];
-	}
+        return $GLOBALS['logger'];
+    }
 
-	return null;
+    return null;
 }
 /**
  * @param $headerText
@@ -43,15 +44,12 @@ function getLogger($channel=null)
  */
 function startLogSection($headerText)
 {
-	$logger = getLogger();
-	if(empty($logger))
-	{
-		print($headerText. "\r\n");
-	}
-	else
-	{
-		$logger->startLogSection($headerText);
-	}
+    $logger = getLogger();
+    if (empty($logger)) {
+        print($headerText. "\r\n");
+    } else {
+        $logger->startLogSection($headerText);
+    }
 }
 
 /**
@@ -61,15 +59,12 @@ function startLogSection($headerText)
  */
 function endLogSection($headerText)
 {
-	$logger = getLogger();
-	if(empty($logger))
-	{
-		print($headerText. "\r\n");
-	}
-	else
-	{
-		$logger->endLogSection($headerText);
-	}
+    $logger = getLogger();
+    if (empty($logger)) {
+        print($headerText. "\r\n");
+    } else {
+        $logger->endLogSection($headerText);
+    }
 }
 
 
@@ -80,17 +75,15 @@ function endLogSection($headerText)
  */
 function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $channel=null)
 {
-	$logger = getLogger();
-	if(empty($logger))
-	{
-		print($msg . "\r\n");
-	}
-	else
-	{
-		if(empty($logLevel))
-			$logLevel = Logger::INFO;
-		$logger->logRecord($logLevel, $msg, $extras, $ex, $channel);
-	}
+    $logger = getLogger();
+    if (empty($logger)) {
+        print($msg . "\r\n");
+    } else {
+        if (empty($logLevel)) {
+            $logLevel = Logger::INFO;
+        }
+        $logger->logRecord($logLevel, $msg, $extras, $ex, $channel);
+    }
 }
 
 
@@ -99,7 +92,7 @@ function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $c
  */
 function LogError($msg, $extras=array(), $ex=null, $channel=null)
 {
-	LogMessage($msg, Logger::ERROR, $extras, $ex, $channel);
+    LogMessage($msg, Logger::ERROR, $extras, $ex, $channel);
 }
 
 
@@ -108,7 +101,7 @@ function LogError($msg, $extras=array(), $ex=null, $channel=null)
  */
 function LogWarning($msg, $extras=array(), $channel=null)
 {
-	LogMessage($msg, Logger::WARNING, $extras, null, $channel);
+    LogMessage($msg, Logger::WARNING, $extras, null, $channel);
 }
 
 /**
@@ -117,10 +110,9 @@ function LogWarning($msg, $extras=array(), $channel=null)
  */
 function LogDebug($msg, $extras=array(), $channel=null)
 {
-	if(isDebug())
-	{
-		LogMessage($msg, Logger::DEBUG, $extras, null, $channel);
-	}
+    if (isDebug()) {
+        LogMessage($msg, Logger::DEBUG, $extras, null, $channel);
+    }
 }
 
 /**
@@ -129,14 +121,14 @@ function LogDebug($msg, $extras=array(), $channel=null)
  */
 function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $channel=null)
 {
-	$textParts = preg_split("/[\\r\\n|" . PHP_EOL . "]/", $msg);
-	if(($textParts === false) || is_null($textParts))
-		LogMessage($msg);
-	else {
-		foreach ($textParts as $part) {
-			LogMessage($part, $logLevel, $extras, null, $channel);
-		}
-	}
+    $textParts = preg_split("/[\\r\\n|" . PHP_EOL . "]/", $msg);
+    if (($textParts === false) || is_null($textParts)) {
+        LogMessage($msg);
+    } else {
+        foreach ($textParts as $part) {
+            LogMessage($part, $logLevel, $extras, null, $channel);
+        }
+    }
 }
 
 
@@ -148,12 +140,12 @@ function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $channel=
  */
 function getChannelLogger($channel)
 {
-	$logger = getLogger();
-	if(empty($logger)) {
-		return $logger->getChannelLogger($channel);
-	}
+    $logger = getLogger();
+    if (empty($logger)) {
+        return $logger->getChannelLogger($channel);
+    }
 
-	return null;
+    return null;
 }
 
 /**
@@ -165,32 +157,27 @@ function getChannelLogger($channel)
  */
 function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null, $channel=null)
 {
-	$toThrow = $ex;
-	if (empty($toThrow))
-		$toThrow = new Exception($fmtLogMsg);
+    $toThrow = $ex;
+    if (null === $toThrow) {
+        $toThrow = new Exception($fmtLogMsg);
+    }
 
 
-	$msg = $fmtLogMsg;
-	if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0)
-	{
-		if(stristr($fmtLogMsg, "%s") !== false)
-		{
-			$msg = sprintf($fmtLogMsg, $toThrow->getMessage());
-			$toThrow = new Exception($msg, null, $ex);
-		}
-		else
-		{
-			$msg = $fmtLogMsg . PHP_EOL . " ~ " . $toThrow->getMessage();
-		}
-	}
-	elseif(!is_null($ex))
-	{
-		$msg = $toThrow->getMessage();
-	}
+    $msg = $fmtLogMsg;
+    if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0) {
+        if (stristr($fmtLogMsg, '%s') !== false) {
+            $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
+            $toThrow = new Exception($msg, null, $ex);
+        } else {
+            $msg = $fmtLogMsg . PHP_EOL . ' ~ ' . $toThrow->getMessage();
+        }
+    } elseif (!is_null($ex)) {
+        $msg = $toThrow->getMessage();
+    }
 
-	LogMessage($msg, Logger::ERROR, $extras=$extraData, $ex=$toThrow, $channel);
+    LogMessage($msg, Logger::ERROR, $extras=$extraData, $ex=$toThrow, $channel);
 
-	if ($raise == true) {
-		throw $toThrow;
-	}
+    if ($raise == true) {
+        throw $toThrow;
+    }
 }

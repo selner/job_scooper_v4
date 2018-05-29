@@ -1,24 +1,6 @@
 {
     "jobsite_plugins": [
-        {
 
-            "PhpClassName": "AbstractMadgexATSVariant1",
-            "PluginExtendsClassName": "AbstractMadgexATS",
-            "Collections": [
-                {
-                    "Name": "PageFields",
-                    "Fields": [
-                        {
-                            "Name": "TotalPostCount",
-                            "Selector": "h2",
-                            "Index": 0,
-                            "Pattern": "/.*?\\s([\\d,]+)\\s*/",
-                            "Type": "CSS"
-                        }
-                    ]
-                }
-            ]
-        },
         {
             "JobSiteName": "IndependentUK",
             "SiteSearchBaseUrl" : "http://independentjobs.independent.co.uk",
@@ -31,22 +13,9 @@
             "JobSiteName": "HotelJobs",
             "SiteSearchBaseUrl" : "https://www.hoteljobs.co.uk/jobs/hotel-jobs/",
             "PluginExtendsClassName": "AbstractMadgexATS",
+            "SiteVariant": "JobCountInH2",
             "CountryCodes": [
                 "UK"
-            ],
-            "Collections": [
-                {
-                    "Name": "PageFields",
-                    "Fields": [
-                        {
-                            "Name": "TotalPostCount",
-                            "Selector": "h2",
-                            "Index": 1,
-                            "Pattern": "/.*?\\s([\\d,]+)\\s*/",
-                            "Type": "CSS"
-                        }
-                    ]
-                }
             ]
         },
         {
@@ -80,7 +49,8 @@
         {
             "JobSiteName": "OnlyDigitalJobs",
             "SiteSearchBaseUrl": "https://www.onlydigitaljobs.com/jobs",
-            "PluginExtendsClassName": "AbstractMadgexATSVariant1",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "SiteVariant": "JobCountInH2",
             "CountryCodes": [
                 "UK"
             ]
@@ -135,8 +105,10 @@
         },
         {
             "JobSiteName": "JobfinderUSA",
-            "SiteReferenceKey": "www.jobfinderusa",
+            "SearchUrlFormat": "https://www.jobfinderusa.com/jobs/?kw=***KEYWORDS***",
             "PluginExtendsClassName": "AbstractMadgexATS",
+            "SiteVariant": "JobCountInH1",
+            "LocationCallback" : "setLocationFromJobTaxonomy",
             "CountryCodes": [
                 "US"
             ]

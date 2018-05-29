@@ -4,7 +4,7 @@
             "JobSiteName": "WiredSussex",
             "BaseURL": "https://www.wiredsussex.com/jobs/search/all_jobs",
             "SourceURL": "https://www.wiredsussex.com/jobs/search/all_jobs",
-            "PluginExtendsClassName": "JobScooper\\BasePlugin\\Classes\\AjaxMicrodataOnlyPlugin",
+            "PluginExtendsClassName": "JobScooper\\SitePlugins\\AjaxMicrodataOnlyPlugin",
             "CountryCodes": [
                 "GB"
             ],

@@ -1,4 +1,6 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
+/** @noinspection SpellCheckingInspection */
+
 /**
  * Copyright 2014-18 Bryan Selner
  *
@@ -21,7 +23,7 @@ class DocOptions extends PropertyObject
 {
     public $arguments = array();
 
-private $doc = '{APP_RUN_COMMAND}
+    private $doc = '{APP_RUN_COMMAND}
 
 Usage:
   {APP_RUN_COMMAND} [--config=<config_file_path>] [--user=<config_user_key>] [--jobsite=<jobsitekey>]... [--stages=<stage_numbers>] [--recap] [--delete] [--debug] [--ignore_recent] [--disable-notifications] 
@@ -36,55 +38,61 @@ Options:
   --user=<config_user_key>  Which set of user configuration settings should we run.  
   --stages=<stage_numbers>  Comma-separated list of stage numbers to run from 1 - 4. [default: 1,2,3]
   --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey. [default: all]
-  --debug  Show debug output. [default: false]
-  --ignore_recent    Run a search regardless of whether it was run recently.
-  --delete  Removes the user data associated with specified users.
-  --recap  Sends a weekly jobs recap notification to specified users.  
-  --disable-notifications   Do not send email alerts for new jobs. [default: false]
+  --debug                   Show debug output
+  --ignore_recent           Run a search regardless of whether it was run recently.
+  --delete                  Removes the user data associated with specified users.
+  --recap                   Sends a weekly jobs recap notification to specified users.  
+  --disable-notifications   Do not send email alerts for new jobs.
 ';
 
-    public function __construct($commandFile)
+    public function __construct($commandfile, $input = array())
     {
-        $file = new \SplFileInfo($commandFile);
+        PropertyObject::__construct($input);
+
+        $file = new \SplFileInfo($commandfile);
         $opts = str_ireplace('{APP_RUN_COMMAND}', $file->getFilename(), $this->doc);
 
         $args = \Docopt::handle($opts, array('version'=>__APP_VERSION__));
-        foreach($args->args as $k => $v) {
+        foreach ($args->args as $k => $v) {
             $argkey = $k;
-	        $argkey = cleanupTextValue($argkey, '<', '>');
-	        $argkey = cleanupTextValue($argkey, '--', '');
+            $argkey = cleanupTextValue($argkey, '<', '>');
+            $argkey = cleanupTextValue($argkey, '--', '');
 
-	        $argval = $v;
+            $argval = $v;
 
 
-	        // If the command line option was empty, check for a matching environment variable
-	        // and use the value from it if it exists.  All environment setting values start
-	        // with JOBSCOOPER_ and then the all caps name of the command line switch.
-	        // e.g.  JOBSCOOPER_CONFIG or JOBSCOOPER_USER
-	        if(empty($argval))
-            {
-	            $envkey = strtoupper('JOBSCOOPER_' . strtoupper($argkey));
-	            $envval = getenv($envkey);
-	            if(!empty($envval))
-		            $argval = $envval;
+            // If the command line option was empty, check for a matching environment variable
+            // and use the value from it if it exists.  All environment setting values start
+            // with JOBSCOOPER_ and then the all caps name of the command line switch.
+            // e.g.  JOBSCOOPER_CONFIG or JOBSCOOPER_USER
+            if (empty($argval) || $argval === false) {
+                $envkey = strtoupper('JOBSCOOPER_' . strtoupper($argkey));
+                $envval = getenv($envkey);
+                if (!empty($envval)) {
+                    $argval=$envval;
+                    Settings::setValue("environment.{$argkey}", $argval);
+                }
             }
 
-            if(is_array($argval) && in_array($argkey, array('jobsite', 'stages')))
-	            $argval = strtolower(join(",", $argval));
+            if (is_array($argval) && in_array($argkey, array('jobsite', 'stages'))) {
+                $argval = strtolower(join(",", $argval));
+            }
             if (is_string($argval)) {
                 $argval = cleanupTextValue($argval, '\"', '\"');
-	            if(in_array($argkey, array('jobsite', 'stages')) && is_string($argval))
-	                $argval = strtolower($argval);
+                if (in_array($argkey, array('jobsite', 'stages')) && is_string($argval)) {
+                    $argval = strtolower($argval);
+                }
                 $arrVals = preg_split('/\s*,\s*/', $argval);
-                if (count($arrVals) > 1)
+                if (count($arrVals) > 1) {
                     $argval = $arrVals;
+                }
 
-                if(in_array($argkey, array('jobsite', 'stages')) && !is_array($argval) && !empty($argval))
-                	$argval = array($argval);
+                if (in_array($argkey, array('jobsite', 'stages')) && !is_array($argval) && !empty($argval)) {
+                    $argval = array($argval);
+                }
             }
 
             $this->arguments[$argkey] = $argval;
-
         }
     }
 
@@ -93,23 +101,23 @@ Options:
         return $this->arguments;
     }
 
-    static function get($argKey)
+    public static function get($argKey)
     {
         $arguments = getConfigurationSetting('command_line_args');
-        if(!empty($arguments) && array_key_exists($argKey, $arguments))
+        if (!empty($arguments) && array_key_exists($argKey, $arguments)) {
             return $arguments[$argKey];
+        }
 
         return null;
     }
 
-    static function equalsTrue($argKey)
+    public static function equalsTrue($argKey)
     {
-        $cmdline = DocOptions::get($argKey);
-        if(is_null($cmdline))
+        $cmdline = self::get($argKey);
+        if (empty($cmdline)) {
             return false;
+        }
 
         return filter_var($cmdline, FILTER_VALIDATE_BOOLEAN);
     }
-
 }
-

@@ -18,14 +18,7 @@ class {{PhpClassName}} {{#if PluginExtendsClassName}} extends {{PluginExtendsCla
     {{/each}}
 }
 
+$ob = new {{PhpClassName}}();
+$ob = null;
 
-try
-{
-    $ob = new {{PhpClassName}}();
-    return (is_a($ob, "{{PhpClassName}}") === true);
-}
-catch (Exception $ex)
-{
-    print("Failed to instantiate ${{PhpCLassName}}");
-    return false;
-}
+

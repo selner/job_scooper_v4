@@ -17,41 +17,41 @@
  */
 
 
-abstract class AbstractResumatorFall2017  extends \JobScooper\BasePlugin\Classes\ServerHtmlSimplePlugin
+abstract class AbstractResumatorFall2017 extends \JobScooper\SitePlugins\Base\SitePlugin
 {
-	protected $arrListingTagSetup = array(
-		'JobPostItem' => array('selector' => 'ul.list-group li.list-group-item'),
-		'Title' => array('selector' => 'h4.list-group-item-heading a'),
-		'Url' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href'),
-		'Location' => array('selector' => 'ul li', 'index' => 0),
-		'Department' => array('selector' => 'ul li', 'index' => 1),
-		'JobSitePostId' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href', 'return_value_regex' => '/.com\/apply\/(\S*)\//i'),
-	);
+    protected $arrListingTagSetup = array(
+        'JobPostItem' => array('selector' => 'ul.list-group li.list-group-item'),
+        'Title' => array('selector' => 'h4.list-group-item-heading a'),
+        'Url' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href'),
+        'Location' => array('selector' => 'ul li', 'index' => 0),
+        'Department' => array('selector' => 'ul li', 'index' => 1),
+        'JobSitePostId' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href', 'return_value_regex' => '/.com\/apply\/(\S*)\//i'),
+    );
 
-	function __construct()
-	{
-		$this->additionalBitFlags["COMPANY"] = C__JOB_USE_SITENAME_AS_COMPANY;
-		parent::__construct();
-	}
+    public function __construct()
+    {
+        $this->additionalBitFlags["COMPANY"] = C__JOB_USE_SITENAME_AS_COMPANY;
+        parent::__construct();
+    }
 
-	/**
-	 * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
-	 *
-	 * @return \JobScooper\DataAccess\JobPosting[]|null
-	 * @throws \Exception
-	 */
-	function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
-	{
-	$retItems = parent::parseJobsListForPage($objSimpHTML);
+    /**
+     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     *
+     * @return \JobScooper\DataAccess\JobPosting[]|null
+     * @throws \Exception
+     */
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    {
+        $retItems = parent::parseJobsListForPage($objSimpHTML);
 
-		foreach(array_keys($retItems) as $k => $ret)
-		{
-			if(!array_key_exists('Company', $ret) || empty($ret['Company']))
-				$retItems[$k]['Company'] = $this->getJobSiteKey();
-		}
+        foreach (array_keys($retItems) as $k => $ret) {
+            if (!array_key_exists('Company', $ret) || empty($ret['Company'])) {
+                $retItems[$k]['Company'] = $this->JobSiteKey;
+            }
+        }
 
-		return $retItems;
-	}
+        return $retItems;
+    }
 }
 
 class PluginAtlanticMedia extends AbstractResumatorFall2017
@@ -69,12 +69,4 @@ class PluginMashableCorporate extends AbstractResumatorFall2017
     protected $JobSiteName = 'MashableCorporate';
     protected $childSiteURLBase = 'http://mashable.theresumator.com/';
     protected $childSiteListingPage = 'http://mashable.theresumator.com/';
-
 }
-
-
-
-
-
-
-

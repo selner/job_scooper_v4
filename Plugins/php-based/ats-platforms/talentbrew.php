@@ -34,29 +34,31 @@ class PluginBoeing extends AbstractTalentBrew
         'NextButton' => array('selector' => '#pagination-bottom a.next')
     );
 
-    function __construct()
+    public function __construct()
     {
         $this->arrListingTagSetup['TotalPostCount'] = array('selector' => 'h1[role="status"]');
         parent::__construct();
     }
 
-	/**
-	 * @param $var
-	 *
-	 * @return null|string
-	 * @throws \Exception
-	 */
-	function parseLocation($var)
+    /**
+     * @param $var
+     *
+     * @return null|string
+     * @throws \Exception
+     */
+    public function parseLocation($var)
     {
-	    if(count($var) < 2)
-		    throw new \Exception("parseLocation was not passed enough callback parameters to continue. " . getArrayDebugOutput($var));
+        if (count($var) < 2) {
+            throw new \Exception("parseLocation was not passed enough callback parameters to continue. " . getArrayDebugOutput($var));
+        }
 
-	    if(empty($var[0]))
-		    return null;
+        if (empty($var[0])) {
+            return null;
+        }
 
-	    $var[0] = preg_replace("/,\s*/", ", ", $var[0]);
+        $var[0] = preg_replace("/,\s*/", ", ", $var[0]);
 
-	    return $this->splitValue($var);
+        return $this->splitValue($var);
     }
 }
 
@@ -67,7 +69,7 @@ class PluginDisney extends AbstractTalentBrew
     protected $additionalBitFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE__ ];
     protected $JobListingsPerPage = 15;
 
-    function __construct()
+    public function __construct()
     {
         parent::__construct();
         unset($this->arrListingTagSetup['TotalPostCount']);
@@ -77,10 +79,9 @@ class PluginDisney extends AbstractTalentBrew
 
         $this->SearchUrlFormat = $this->JobPostingBaseUrl . "/search-jobs?k=&alp=6252001-5815135&alt=3";
     }
-
 }
 
-class AbstractTalentBrew extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePlugin
+class AbstractTalentBrew extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $SearchUrlFormat = "/search-jobs/***KEYWORDS***/***LOCATION***";
     //
@@ -103,9 +104,9 @@ class AbstractTalentBrew extends \JobScooper\BasePlugin\Classes\AjaxHtmlSimplePl
         'PostedAt' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
         'NextButton' => array('selector' => '#pagination-bottom a.next')
     );
-    function __construct()
+    public function __construct()
     {
-	    $this->additionalBitFlags["COMPANY"] = C__JOB_USE_SITENAME_AS_COMPANY;
+        $this->additionalBitFlags["COMPANY"] = C__JOB_USE_SITENAME_AS_COMPANY;
         parent::__construct();
         $this->SearchUrlFormat = $this->JobPostingBaseUrl . $this->SearchUrlFormat;
     }
