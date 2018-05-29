@@ -10,7 +10,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
-#    ca-certificates \  ## in base image
     apt-transport-https \
     apt-utils \
     bzip2 \
@@ -105,11 +104,6 @@ RUN wget https://getcomposer.org/download/1.1.1/composer.phar -O composer \
     && chmod +x /usr/bin/composer \
     && composer self-update
 
-#COPY --from=composer:1.5 /usr/bin/composer /usr/bin/composer
-
-# Install Composer and make it available in the PATH
-#RUN curl https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
-
 ## Display version information.
 RUN composer --version
 
@@ -143,20 +137,6 @@ ENV PATH /opt/conda/bin:$PATH
 RUN which python
 RUN echo PATH=$PATH
 RUN python -v
-
-
-#######################################################
-##
-## Install Docker exe so we can stop/start Selenium
-##
-#######################################################
-#RUN mkdir /etc/apk/
-#RUN echo "http://dl-3.alpinelinux.org/alpine/latest-stable/community/x86_64/" >> /etc/apk/repositories
-#
-#RUN apt-get install -y \
-#    docker
-#
-#RUN echo "chown -R dev:dev /var/run/docker.sock" >> ~/.bash_profile
 
 ########################################################
 ###
@@ -195,13 +175,9 @@ RUN python -v
 # RUN gcc -fPIC -lm -shared /opt/sqlite/extensions/extension-functions.c -o /opt/sqlite/extensions/libsqlitefunctions.so
 # ADD ./Config/etc/30-pdo_sqlite_ext.ini /etc/php5/cli/conf.d/30-pdo_sqlite_ext.ini
 
-########################################################
-###
-### Set up data volume for job output that will be
-### mapped to the local hard drive of the actual PC
-###
-########################################################
-VOLUME "/var/local/jobs_scooper"
+RUN ls -al /usr/bin
+RUN docker-php-ext-enable zip
+RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/docker-php-memory.ini
 
 ########################################################
 ###
@@ -213,13 +189,22 @@ RUN mkdir /opt/jobs_scooper
 
 ########################################################
 ###
+### Set up data volume for job output that will be
+### mapped to the local hard drive of the actual PC
+###
+########################################################
+VOLUME "/var/local/jobs_scooper"
+
+# Dockerfile
+# add this and below command will run without cache
+ARG GIT_COMMIT_HASH
+
+########################################################
+###
 ### Add the PHP composer configuration file into image
 ### and install the dependencies
 ###
 ########################################################
-RUN ls -al /usr/bin
-RUN docker-php-ext-enable zip
-
 WORKDIR /opt/jobs_scooper
 ADD composer.json /opt/jobs_scooper/
 RUN composer install --no-interaction -vv
@@ -232,10 +217,6 @@ RUN composer install --no-interaction -vv
 ADD python/pyJobNormalizer/requirements.txt /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
 
-
-# Dockerfile
-# add this and below command will run without cache
-ARG GIT_COMMIT_HASH
 
 ########################################################
 ###
@@ -256,4 +237,6 @@ RUN ls -al /opt/jobs_scooper
 ###
 ########################################################
 WORKDIR /opt/jobs_scooper
+
 CMD ["php", "run_job_scooper.php"]
+# CMD ["bash", "-c", "php ./run_job_scooper.php $JSCOOP_ARGS"]
