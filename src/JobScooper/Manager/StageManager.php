@@ -311,17 +311,17 @@ class StageManager
      */
     public function doFinalStage()
     {
-        $this->_initConfig();
-        try {
-            startLogSection("Processing any developer alerts for plugin errors...");
-            $devNotifier = new NotifierDevAlerts();
-            $devNotifier->processPluginErrorAlert();
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        } finally {
-            endLogSection("End of dev alerts for plugin errors");
-        }
-
+//        $this->_initConfig();
+//        try {
+//            startLogSection("Processing any developer alerts for plugin errors...");
+//            $devNotifier = new NotifierDevAlerts();
+//            $devNotifier->processPluginErrorAlert();
+//        } catch (\Exception $ex) {
+//            handleException($ex, null, true);
+//        } finally {
+//            endLogSection("End of dev alerts for plugin errors");
+//        }
+//
         $runStartTime = getConfigurationSetting('app_run_start_datetime');
 
         if (!empty($runStartTime)) {
