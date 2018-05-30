@@ -55,15 +55,16 @@ class StageManager
      */
     private function _initConfig()
     {
+        $runStartTime = Settings::getValue('app_run_start_datetime');
+        if (empty($runStartTime)) {
+	        Settings::setValue('app_run_start_datetime', new \DateTime());
+        }
+
         if (empty($this->classConfig)) {
             $this->classConfig = new ConfigInitializer();
             $this->classConfig->initialize();
         }
 
-        $runStartTime = Settings::getValue('app_run_start_datetime');
-        if (empty($runStartTime)) {
-	        Settings::setValue('app_run_start_datetime', new \DateTime());
-        }
     }
 
     /**
