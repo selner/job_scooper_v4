@@ -65,7 +65,7 @@ abstract class AbstractGlassdoor extends \JobScooper\SitePlugins\AjaxSitePlugin
         });
 JSCODE;
 
-        $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
+        $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
         $jsonApi = "https://www.glassdoor.com/findPopularLocationAjax.htm?term={$searchDetails->getGeoLocationURLValue()}&LocationsToReturn=10";
         $locations = $this->getJsonApiResult($jsonApi, $searchDetails, $searchDetails->getSearchStartUrl());
         if (empty($locations)) {

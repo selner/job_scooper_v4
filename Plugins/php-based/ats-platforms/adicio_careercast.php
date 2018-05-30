@@ -105,7 +105,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
         }
 
         $ret = array();
-        $respdata = $this->getJsonApiResult($apiUri, $this->currentJsonSearchDetails, $hostPageUri);
+        $respdata = $this->getJsonApiResult($apiUri, $this->currentJsonSearchDetails);
         if (!is_empty_value($respdata)) {
             $this->lastResponseData = $respdata;
             try {
@@ -174,6 +174,9 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
         $this->currentJsonSearchDetails = $searchDetails;
         $hostPage = $searchDetails->getSearchStartUrl();
         LogMessage("Loading first page for {$this->JobSiteKey} from {$hostPage}");
+		$this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $hostPage);
+		
+        LogMessage("Loading first page JSON for {$this->JobSiteKey} from {$hostPage}");
         $jsonUrl = $this->_getJsonSearchUrl($searchDetails);
         unset($retData);
         try {

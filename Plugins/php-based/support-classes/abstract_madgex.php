@@ -76,7 +76,7 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $SiteReferenceKey = null;
 
     protected $LocationType = 'location-city-comma-state';
-
+	private $LocationCallback = null;
 
 
     /**
@@ -86,7 +86,7 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
     {
-        $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
+        $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
 
         $url = $this->getActiveWebdriver()->getCurrentURL();
         if (empty($this->locationid)) {

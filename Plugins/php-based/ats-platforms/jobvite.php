@@ -78,7 +78,7 @@ abstract class AbstractJobviteATS extends \JobScooper\SitePlugins\AjaxSitePlugin
             $srcurl = $frame[0]->attr["src"];
             if (!empty($srcurl)) {
                 $newUrl = parse_url($srcurl);
-                $currentUrl = parse_url($this->getActiveWebdriver()->getCurrentUrl());
+                $currentUrl = parse_url($this->getActiveWebdriver()->getCurrentURL());
                 $newUrl['scheme'] = $currentUrl['scheme'];
                 $url = http_build_url($newUrl);
                 $objSimpHTML = $this->getSimpleHtmlDomFromSeleniumPage($this->_currentSearchDetails, $url);

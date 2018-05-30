@@ -441,7 +441,6 @@ abstract class SitePlugin implements IJobSitePlugin
 
     protected $CountryCodes = null;
     private $_curlWrapper = null;
-    protected $searchResultsPageUrl = null;
 
     /**
      * @param \JobScooper\DataAccess\GeoLocation|null $location
@@ -1569,12 +1568,12 @@ abstract class SitePlugin implements IJobSitePlugin
     /**
      * @param string $apiUri
      * @param UserSearchSiteRun &$searchDetails
-     * @param string $hostPageUri
+     * @param string|null $hostPageUri
      *
      * @return mixed|null
      * @throws \Exception
      */
-    protected function getJsonApiResult($apiUri, $searchDetails, $hostPageUri)
+    protected function getJsonApiResult($apiUri, $searchDetails, $hostPageUri=null)
     {
         if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && null === $this->selenium) {
             try {
@@ -1586,6 +1585,9 @@ abstract class SitePlugin implements IJobSitePlugin
 
         try {
             $driver = $this->getActiveWebdriver();
+            if(null === $hostPageUri) {
+            	$hostPageUri = $searchDetails->getSearchStartUrl();
+            }
             $this->log("Getting host page for JSON query {$hostPageUri}");
             $driver->get($hostPageUri);
             $apiNodeId = 'jobs_api_data';
@@ -1666,7 +1668,11 @@ JSCODE;
             }
             return $data;
         } catch (Exception $ex) {
-            $this->log("Failed to download JSON data from API call {$apiUri}.  Error:  " . $ex->getMessage(), \Monolog\Logger::ERROR, $ex);
+			$msg = "Failed to download JSON data from API call {$apiUri}.";
+        	if(null !== $response && null !== $response->error) {
+        		$msg = "{$msg} {$response->error}";
+        	}
+            handleException($ex, "{$msg} Error:  ", true);
         }
 
         return null;
@@ -1704,7 +1710,16 @@ JSCODE;
 
             $html = $this->getActiveWebdriver()->getPageSource();
             $objSimpleHTML = new SimpleHtmlHelper($html);
-            $objSimpleHTML->setSource($this->getActiveWebdriver()->getCurrentUrl());
+            $objSimpleHTML->setSource($this->getActiveWebdriver()->getCurrentURL());
+            
+            /*
+               Often we will have a different starting URL from the URL that the results were returned on.  That URL
+               can even change schemes from http to https and then fail future JSON and other calls.  So we update
+                the searchDetails object to use the page we ended up on rather than what we were told to start with.
+            */
+            if($this->getActiveWebdriver()->getCurrentURL() !== $url) {
+            	$searchDetails->searchResultsPageUrl = $this->getActiveWebdriver()->getCurrentURL();
+            }
         } catch (Exception $ex) {
             $strError = 'Failed to get dynamic HTML via Selenium due to error:  ' . $ex->getMessage();
             handleException(new Exception($strError), null, true);
@@ -1741,10 +1756,10 @@ JSCODE;
                     if (method_exists($this, 'doFirstPageLoad') && $nPageCount == 1) {
                         $html = $this->doFirstPageLoad($searchDetails);
                         if (empty($html) && $this->getActiveWebdriver()->getCurrentURL() === 'about:blank') {
-                            $html = $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
+		                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
                         }
                     } else {
-                        $html = $this->selenium->getPageHTML($searchDetails->getSearchStartUrl());
+	                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
                     }
                     $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
                 } catch (Exception $ex) {
