@@ -80,7 +80,7 @@ class JobsAutoMarker
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);
         }
-
+        
         try {
 
             // Get all the postings that are in the table but not marked as ready-to-send
@@ -209,17 +209,27 @@ class JobsAutoMarker
             }
 
             $recentJobPostings = $dupeQuery->find();
-
+			unset($dupeQuery);
+			
             //			$outfile = generateOutputFileName('dedupe', 'csv', true, 'debug');
             //			LogMessage("Writing results to CSV {$outfile}");
             //			file_put_contents($outfile, $recentJobPostings->toCSV(false, false));
 //
 
+	        if(is_empty_value($recentJobPostings)) {
+		        LogWarning('Automarker: No jobs found to check for duplicates.');
+		        return;
+	        }
+	
+
             $arrRecentJobs = array();
             LogMessage('Reducing full resultset data to just the columns needed for deduplication...');
             foreach ($recentJobPostings->toKeyIndex('JobPostingId') as $id => $job) {
                 $arrRecentJobs[$id] = $job->toFlatArrayForCSV(false, $itemKeysToExport);
+                unset($job);
             }
+			unset($recentJobPostings);
+            
             $cntJobs = countAssociativeArrayValues($arrRecentJobs);
 
             $jsonObj = array(
@@ -280,6 +290,7 @@ class JobsAutoMarker
                     $con = Propel::getWriteConnection('default');
                     LogMessage("... marked {$totalMarked} duplicate job postings...");
                 }
+                unset($jobRecord);
             }
 
             LogMessage("Marked {$totalMarked} job listings as duplicate of an earlier job posting with the same company and job title.");
@@ -386,12 +397,14 @@ class JobsAutoMarker
 
             LogMessage('Marking user job matches as out of area for ' . count($arrJobsOutOfArea) . ' matches ...');
 
+            $nJobsMarkedAutoExcluded = count($arrJobsOutOfArea);
+            $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
+
             foreach ($arrJobsOutOfArea as &$jobOutofArea) {
                 $jobOutofArea->setOutOfUserArea(true);
                 $jobOutofArea->save();
-            }
-            $nJobsMarkedAutoExcluded = count($arrJobsOutOfArea);
-            $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
+                unset($jobOutofArea);
+           }
 
 
             LogMessage('Jobs excluded as out of area: marked '. $nJobsMarkedAutoExcluded . '/' . countAssociativeArrayValues($arrJobsList) .';  not marked ' . $nJobsNotMarked . ' / ' . countAssociativeArrayValues($arrJobsList));
@@ -473,9 +486,10 @@ class JobsAutoMarker
             if (!empty($arrJobIdsOutOfArea)) {
                 foreach (array_chunk($arrJobIdsOutOfArea, 50) as $chunk) {
                     $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-                    UserJobMatchQuery::create()
+                    $query = UserJobMatchQuery::create()
                         ->filterByUserJobMatchId($chunk)
                         ->update(array('OutOfUserArea' => true), $con);
+                    unset($query);
                 }
             }
 
@@ -521,6 +535,7 @@ class JobsAutoMarker
                     if (preg_match($rxInput, strScrub($jobMatch->getJobPostingFromUJM()->getCompany(), DEFAULT_SCRUB))) {
                         $jobMatch->setMatchedNegativeCompanyKeywords(array($rxInput));
                         $jobMatch->save();
+                        unset($jobMatch);
                         $nJobsMarkedAutoExcluded++;
                         $matched_exclusion = true;
                         break;
@@ -591,18 +606,23 @@ class JobsAutoMarker
             'MatchedNegativeTitleKeywords',
             'MatchedUserKeywords'
         ));
-        if (!empty($arrJobMatchFacts['MatchedUserKeywords'])) {
+        if (!is_empty_value($arrJobMatchFacts['MatchedUserKeywords'])) {
             if (is_string($arrJobMatchFacts['MatchedUserKeywords'])) {
                 $split = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
-                if (!empty($split)) {
+                if (!is_empty_value($split)) {
                     $arrJobMatchFacts['MatchedUserKeywords'] = $split;
                 }
             }
         }
-        if (!empty($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
+        else
+        {
+            $arrJobMatchFacts['MatchedUserKeywords'] = "no";
+        }
+
+        if (!is_empty_value($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
             if (is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
                 $split = preg_split("/\|/", $arrJobMatchFacts['MatchedNegativeTitleKeywords'], -1, PREG_SPLIT_NO_EMPTY);
-                if (!empty($split)) {
+                if (!is_empty_value($split)) {
                     $arrJobMatchFacts['MatchedNegativeTitleKeywords'] = $split;
                 }
             }
@@ -679,6 +699,7 @@ class JobsAutoMarker
                         $this->_updateKeywordMatchForSingleJob($dbMatch, $arrMatchRecs[$id]);
                         $dbMatch->save();
                         $retUJMIds[] = $id;
+                        unset($dbMatch);
                     }
 
                     // commit the last 50 to the database and then fetch
@@ -705,6 +726,11 @@ class JobsAutoMarker
      */
     private function _markJobsList_KeywordMatches_(&$arrJobsList)
     {
+    	if(is_empty_value($arrJobsList)) {
+	        LogWarning('Automarker: No jobs found to match against user search keywords.');
+	        return;
+    	}
+
         startLogSection('Automarker: Starting matching of ' . count($arrJobsList) . ' job role titles against user search keywords ...');
 
         try {
@@ -775,9 +801,7 @@ class JobsAutoMarker
                 }
             }
         }
-        $negKwdForTokens = array_unique($arrNegKwds, SORT_REGULAR);
-
-        return $negKwdForTokens;
+        return array_unique($arrNegKwds, SORT_REGULAR);
     }
 
     /**
