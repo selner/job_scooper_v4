@@ -329,7 +329,10 @@ function updateColumnsForCSVFlatArray(&$arr, \Propel\Runtime\Map\TableMap $table
     }
 }
 
-function array_change_key_order(&$arr, $newKeyOrder) {
+/**
+* @param $arr
+* @param $newKeyOrder
+*/function array_change_key_order(&$arr, $newKeyOrder) {
     if(is_empty_value($newKeyOrder) || is_empty_value($arr))
         return;
 
@@ -406,7 +409,12 @@ function convert_propel_objects_to_arrays(&$arrPropelObj, $keyColumn = null)
     return $arrArrays;
 }
 
-function array_child_columns($arr, $columns=null, $keyColumn=null)
+ /**
+ * @param $arr
+ * @param null $columns
+ * @param null $keyColumn
+ * @return array
+*/function array_child_columns($arr, $columns=null, $keyColumn=null)
 {
 	$arrColsKeys = null;
 	if(null !== $columns) {
@@ -420,7 +428,7 @@ function array_child_columns($arr, $columns=null, $keyColumn=null)
 		$ret = $arr;
 	}
 
-	if(null !== $keyColumn and in_array($keyColumn, $columns)) {
+	if(null !== $keyColumn && null !== $columns && in_array($keyColumn, $columns)) {
 		$ret = array_column($ret, null, $keyColumn);
 	}
 
