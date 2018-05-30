@@ -151,7 +151,7 @@ class SitePluginFactory
     private function _loadJsonPluginConfigFiles_()
     {
         $this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . '*.json');
-        LogMessage('Loading JSON-based, jobsite plugin configurations from ' . count($this->_configJsonFiles) . ' files under {$this->_dirJsonConfigs}...', null, null, null, $channel='plugins');
+        LogMessage('Loading JSON-based, jobsite plugin configurations from ' . count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...", null, null, null, $channel='plugins');
 
         foreach ($this->_configJsonFiles as $f) {
             $dataPlugins = loadJSON($f, null, true);
