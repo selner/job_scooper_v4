@@ -76,7 +76,6 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $SiteReferenceKey = null;
 
     protected $LocationType = 'location-city-comma-state';
-	private $LocationCallback = null;
 
 
     /**
