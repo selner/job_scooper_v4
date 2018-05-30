@@ -406,25 +406,39 @@ function convert_propel_objects_to_arrays(&$arrPropelObj, $keyColumn = null)
     return $arrArrays;
 }
 
+function array_child_columns($arr, $columns=null, $keyColumn=null)
+{
+	$arrColsKeys = null;
+	if(null !== $columns) {
+		$arrColsKeys = array_combine($columns, $columns);
+		$ret = array_map(function ($v) use ($arrColsKeys) {
+			return array_intersect_key($v, $arrColsKeys);
+	    }, $arr);
+	}
+	else
+	{
+		$ret = $arr;
+	}
 
+	if(null !== $keyColumn and in_array($keyColumn, $columns)) {
+		$ret = array_column($ret, null, $keyColumn);
+	}
+
+	return $ret;
+}
 
 /**
  * @param array $list
  * @param array $keysToReturn
+ * @param string $keyIndex
  *
  * @return array
  */
-function array_from_orm_object_list_by_array_keys(array $list, array $keysToReturn, $keyIndex=null)
+function get_child_facts_from_propel_objects(array $list, array $keysToReturn, $keyIndex=null)
 {
-    $ret = array_map(function ($v) use ($keysToReturn) {
-        return array_subset($v->toArray(), $keysToReturn);
-    }, $list);
-    if (count($keysToReturn) == 1) {
-        $ret = array_column($ret, $keysToReturn[0], $keysToReturn[0]);
-    } elseif (!empty($keyIndex) && is_array($ret) && array_key_exists($keyIndex, $keysToReturn)) {
-        $ret = array_column($ret, null, $keyIndex);
-    }
-    return $ret;
+	$arrList = convert_propel_objects_to_arrays($list, $keyIndex);
+	$ret = array_child_columns($arrList, $keysToReturn, $keyIndex);
+	return $ret;
 }
 
 /**
