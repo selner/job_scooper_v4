@@ -31,7 +31,7 @@ abstract class AbstractWordPress extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
-        $this->arrListingTagSetup['JobListingsPerPage'] =  array("selector" => "div.job_listings", "return_attribute" => "data-per_page");
+        $this->arrListingTagSetup['JobListingsPerPage'] =  array('selector' => 'div.job_listings', 'return_attribute' => 'data-per_page');
         $count = \JobScooper\Utils\DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobListingsPerPage'], null, $this);
         if (!empty($count)) {
             $this->JobListingsPerPage = (int) $count;
@@ -43,14 +43,14 @@ abstract class AbstractWordPress extends \JobScooper\SitePlugins\AjaxSitePlugin
 
     protected $arrBaseListingTagSetup = array(
         'JobPostItem' => array('selector' => 'ul.job_listings li.job_listing'),
-        'Title' => array('tag' => 'h3'),
-        'Url' => array('tag' => 'a.job_listing-clickbox', 'index' => 0, 'return_attribute' => 'href'),
+        'Title' => array('selector' => 'h3'),
+        'Url' => array('selector' => 'a.job_listing-clickbox', 'index' => 0, 'return_attribute' => 'href'),
         'Company' => array('selector' => 'div.job_listing-company strong', 'return_attribute' => 'text'),
         'Location' => array('selector' => 'div.job_listing-location a', 'return_attribute' => 'text'),
         'PostedAt' => array('selector' => 'date', 'index' => 0),
         'Category' => array('selector' => 'ul.meta li', 'index' => 0),
         'company_logo' => array('selector' => 'img.company_logo'),
-        'JobSitePostId' =>  array('tag' => 'a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/job\/(.*)/i'),
+        'JobSitePostId' =>  array('selector' => 'a', 'index' => 0, 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/job\/(.*)/i'),
         'LoadMoreControl' => array('selector' => 'a.load_more_jobs')
     );
 }
