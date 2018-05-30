@@ -1055,21 +1055,10 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     public function combineTextAllChildren($var)
     {
-        $recursed = true;
-        $delim = '';
         if (count($var) > 1) {
-            $param = $var[1];
             $var = $var[0];
         }
-        if (!empty($param) && is_array($param)) {
-            if (array_key_exists('delimiter', $param)) {
-                $delim = $param['delimiter'];
-            }
-            if (array_key_exists('recursed', $param)) {
-                $recursed = $param['recursed'];
-            }
-        }
-        return combineTextAllChildren($var, $recursed, $delim);
+        return combineTextAllChildren($var);
     }
 
     /**

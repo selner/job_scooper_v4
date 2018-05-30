@@ -85,7 +85,7 @@ class PluginBetalist extends \JobScooper\SitePlugins\AjaxSitePlugin
         'Url' => array('selector' => 'div.jobCard', 'return_attribute' => 'data-clickable-url'),
         'Company' => array('selector' => 'div.jobCard__details__company', 'index'=>0),
         'Location' => array('selector' => 'div.jobCard__details__location', 'index'=>0),
-        'Category' => array('selector' => 'div.jobCard__tags', 'index'=>0, 'return_attribute' => 'node', 'return_value_callback' => "combineTextAllChildren", 'callback_parameter' => array('delimiter' => " ")),
+        'Category' => array('selector' => 'div.jobCard__tags', 'index'=>0, 'return_attribute' => 'node', 'return_value_callback' => "combineTextAllChildren"),
         'JobSitePostId' => array('selector' => 'a.jobCard__details__title', 'index'=>0, 'return_attribute' => 'href', 'return_value_regex' =>'/jobs\/([^\/]+)/i'),
     );
 }

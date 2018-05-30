@@ -6,7 +6,7 @@
   "CountryCodes" : ["US"],
   "AdditionalFlags" : [ "C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER"],
   "PluginExtendsClassName" : "AbstractDotJobs",
-  "nMaxJobsToReturn" : 3000,
+  "nMaxJobsToReturn" : 500,
   "Collections": [
     {
       "Name": "PageFields",

@@ -178,12 +178,12 @@ function getRunDateRange($configNumDays=null)
  *
  * @return null|string
  */
-function combineTextAllChildren($node, $fRecursed = false, $delim=" ", $arrChildStrings=[])
+function combineTextAllChildren($node)
 {
-    if (empty($node)) {
-        return null;
-    }
-
+	if(is_empty_value($node)) {
+		return null;
+	}
+	
     if (is_array($node) && count($node) > 1) {
         $strError = sprintf("Warning:  " . count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
         LogWarning($strError);
@@ -192,13 +192,9 @@ function combineTextAllChildren($node, $fRecursed = false, $delim=" ", $arrChild
     if (is_array($node) && count($node) >= 1) {
         $node = $node[0];
     }
-
-    $nodeKey = $node->getNode()->getNodePath();
-
-    if ($fRecursed === true) {
-        LogDebug("Combining text for all child from node {$nodeKey}");
-    } else {
-        LogDebug("... processing text from {$nodeKey} and related elements...");
+    
+    if (null === $node) {
+        return null;
     }
 
     //
@@ -229,7 +225,7 @@ function combineTextAllNodes($nodes, $delim=" ")
         foreach ($nodes as $node) {
             $nodeKey = $node->getNode()->getNodePath();
             if ($node->hasChildren()) {
-                $arrNodeStrings[$nodeKey] = combineTextAllChildren($node, true, $delim, $arrNodeStrings);
+                $arrNodeStrings[$nodeKey] = combineTextAllChildren($node);
             } else {
                 $arrNodeStrings[$nodeKey] = $node->text();
             }
