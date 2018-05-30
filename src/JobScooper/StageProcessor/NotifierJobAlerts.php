@@ -440,9 +440,7 @@ class NotifierJobAlerts extends JobsMailSender
                 'JobMatches' => $matches['isUserJobMatchAndNotExcluded']
             );
 
-            $user = User::getUserObjById($userFacts['UserId']);
-            $kwds = $user->getSearchKeywords();
-            $data['Search']['Keywords'] = implode(', ', $kwds);
+            $data['Search']['Keywords'] = implode(', ', $userFacts['SearchKeywords']);
 
             if (!empty($geoLocationId)) {
                 $geoLocation = GeoLocationQuery::create()
@@ -453,8 +451,9 @@ class NotifierJobAlerts extends JobsMailSender
                     $data['Search']['Locations'] = '[unknown]';
                 }
             } else {
+	            $user = User::getUserObjById($userFacts['UserId']);
                 $locations = $user->getSearchGeoLocations();
-
+                $user = null;
                 $searchLocNames = array();
                 if (!empty($locations)) {
                     foreach ($locations as $loc) {
@@ -462,6 +461,7 @@ class NotifierJobAlerts extends JobsMailSender
                     }
 
                     $data['Search']['Locations'] = implode(', ', $searchLocNames);
+                    $locations = null;
                 }
             }
 
