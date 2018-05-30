@@ -59,23 +59,24 @@ Options:
             $argkey = cleanupTextValue($argkey, '--', '');
 
             $argval = $v;
-
-
-            // If the command line option was empty, check for a matching environment variable
+            
+            // If the command line option was empty, false or a default value, check for a matching environment variable
             // and use the value from it if it exists.  All environment setting values start
             // with JOBSCOOPER_ and then the all caps name of the command line switch.
             // e.g.  JOBSCOOPER_CONFIG or JOBSCOOPER_USER
-            if (empty($argval) || $argval === false) {
+            if (empty($argval) || $argval === false ||
+                ($argkey === 'jobsite' && $argval === ['all']) ||
+                ($argkey === 'stages' && $argval === '1,2,3')) {
                 $envkey = strtoupper('JOBSCOOPER_' . strtoupper($argkey));
                 $envval = getenv($envkey);
-                if (!empty($envval)) {
+                if ($envval !== false) {
                     $argval=$envval;
                     Settings::setValue("environment.{$argkey}", $argval);
                 }
             }
 
             if (is_array($argval) && in_array($argkey, array('jobsite', 'stages'))) {
-                $argval = strtolower(implode(",", $argval));
+                $argval = strtolower(implode(',', $argval));
             }
             if (is_string($argval)) {
                 $argval = cleanupTextValue($argval, '\"', '\"');
@@ -103,7 +104,7 @@ Options:
 
     public static function get($argKey)
     {
-        $arguments = getConfigurationSetting('command_line_args');
+        $arguments = Settings::getValue('command_line_args');
         if (!empty($arguments) && array_key_exists($argKey, $arguments)) {
             return $arguments[$argKey];
         }
