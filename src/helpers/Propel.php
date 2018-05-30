@@ -194,11 +194,11 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
     $continueLoop = true;
 
     $nResults = 0;
-    while (null !== $chunkResults || $continueLoop === true) {
+    while ((null !== $chunkResults && !is_empty_value($chunkResults)) || $continueLoop === true) {
         $chunkResults = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $userFacts);
-        if (null !== $chunkResults) {
+        if (null !== $chunkResults && !is_empty_value($chunkResults)) {
             $nSetResults = $nResults + count($chunkResults) - 1;
-            LogMessage("Processing user match results #{$nResults} - {$nSetResults} via callback '{$callback}'...");
+            LogMessage("Processing user match results #{$nResults} - {$nSetResults} via callback...");
             $callback($chunkResults);
             $nResults += ($nResults + count($chunkResults) - 1);
         } else {
