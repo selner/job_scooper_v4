@@ -561,7 +561,7 @@ class JobsAutoMarker
         }
 
         $searchKeywords = array();
-        $keywords = $this->_markingUserFacts->getSearchKeywords();
+        $keywords = $this->_markingUserFacts['SearchKeywords'];
         if (empty($keywords)) {
             return null;
         }
