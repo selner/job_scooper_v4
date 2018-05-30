@@ -389,6 +389,26 @@ function collectionToArray($coll, $limitToKeys=null)
 
 
 /**
+ * @param array $arrPropelObj
+ *
+ * @return array[]
+ */
+function convert_propel_objects_to_arrays(&$arrPropelObj, $keyColumn = null)
+{
+	$arrArrays = array_map(function (&$v) {
+    	return $v->toArray();
+    }, $arrPropelObj);
+
+	if(null !== $keyColumn) {
+		return array_column($arrArrays, null, $keyColumn);
+	}
+
+    return $arrArrays;
+}
+
+
+
+/**
  * @param array $list
  * @param array $keysToReturn
  *

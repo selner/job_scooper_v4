@@ -148,7 +148,7 @@ class SeleniumManager extends PropertyObject
         // wait for at most 30s, retry every 2000ms (2s)
         $driver = $this->get_driver();
         if(null === $driver) {
-        	throw new \Exception("Failed to get WebDriver");
+        	throw new \Exception('Failed to get WebDriver');
         }
         $driver->wait(30, 2000)->until(
             function ($driver) use ($code) {

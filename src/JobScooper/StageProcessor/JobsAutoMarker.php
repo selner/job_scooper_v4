@@ -235,11 +235,14 @@ class JobsAutoMarker
             unset($arrRecentJobs, $jsonObj);
 
             try {
-                startLogSection("Calling python to dedupe new job postings...");
-                $PYTHONPATH = realpath(__ROOT__ . "/python/pyJobNormalizer/mark_duplicates.py");
-                $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($outfile) . " -o " . escapeshellarg($resultsfile);
+                startLogSection('Calling python to dedupe new job postings...');
+                $PYTHONPATH = realpath(__ROOT__ . '/python/pyJobNormalizer/mark_duplicates.py');
+                $cmd = 'python ' . $PYTHONPATH . ' -i ' . escapeshellarg($outfile) . ' -o ' . escapeshellarg($resultsfile);
 
-                #					$cmd = "source " . realpath(__ROOT__) . "/python/pyJobNormalizer/venv/bin/activate; " . $cmd;
+                $venvDir = __ROOT__ . '/python/.venv/bin';
+                if(is_dir($venvDir)) {
+                    $cmd = preg_replace("/python /", "source {$venvDir}/activate; python ", $cmd);
+                }
 
                 LogMessage(PHP_EOL . "    ~~~~~~ Running command: {$cmd}  ~~~~~~~" . PHP_EOL);
                 doExec($cmd);
@@ -407,44 +410,65 @@ class JobsAutoMarker
     {
         try {
             startLogSection('Automarker: marking jobs as out of area using geospatial data...');
-            $searchLocations = $this->_markingUserFacts->getSearchGeoLocations();
+            if(is_empty_value($this->_markingUserFacts['UserId'])) {
+            	throw new \InvalidArgumentException('Unable to automark jobs:  UserId not found.');
+            }
+            $user = User::getUserObjById($this->_markingUserFacts['UserId']);
+            if(null === $user) {
+            	throw new \InvalidArgumentException("Unable to mark jobs:  user ID {$this->_markingUserFacts['UserId']} not found.");
+            }
+            
+            
+            $arrNearbyGeoLocIds = array();
 
-            $arrNearbyIds = array();
+            $searchLocations = $user->getSearchGeoLocations();
+            $user = null;
+            if(is_empty_value($searchLocations)) {
+            	LogWarning("No search locations were found for user ID {$this->_markingUserFacts['UserId']}.");
+            	return;
+            }
+            
 
             /* Find all locations that are within 50 miles of any of our search locations */
 
             LogMessage('Getting locationIDs within 50 miles of search locations...');
             foreach ($searchLocations as $searchloc) {
                 if (null !== $searchloc) {
-                    $arrNearbyIds = array_merge($arrNearbyIds, getGeoLocationsNearby($searchloc));
+                    $arrNearbyGeoLocIds = array_merge(array_values($arrNearbyGeoLocIds), array_values(getGeoLocationsNearby($searchloc)));
                 }
+				$searchloc = null;
             }
-
-            LogMessage('Marking job postings in the ' . count($arrNearbyIds) . ' matching areas ...');
-            $arrJobListIds = array_unique(array_from_orm_object_list_by_array_keys($arrJobsList, array('UserJobMatchId')));
-            $arrInAreaJobs = array_filter($arrJobsList, function (UserJobMatch $var) use ($arrNearbyIds) {
+			$searchLocations = null;
+            
+            $arrJobListFacts = convert_propel_objects_to_arrays($arrJobsList, 'UserJobMatchId');
+            $arrJobListIds = array_keys($arrJobListFacts);
+            $arrJobListFacts = null;
+			
+            LogMessage('Marking job postings in the ' . count($arrNearbyGeoLocIds) . ' nearby GeoLocations...');
+            $arrInAreaJobs = array_filter($arrJobsList, function (UserJobMatch &$var) use ($arrNearbyGeoLocIds) {
                 if (null !== $var->getJobPostingFromUJM()) {
                     $geoId = $var->getJobPostingFromUJM()->getGeoLocationId();
-                    if (!empty($geoId) && in_array($geoId, $arrNearbyIds)) {
+                    if (!is_empty_value($geoId) && !is_empty_value(array_intersect($arrNearbyGeoLocIds, array($geoId)))) {
                         return true;
                     }
                 }
                 return false;
             });
 
-            $arrInAreaIds = array_column($arrInAreaJobs, 'UserJobMatchId', 'UserJobMatchId');
+            $arrJobIdsInArea = array_keys($arrInAreaJobs);
+            $arrInAreaJobs = null;
+            $arrJobIdsOutOfArea = array_diff($arrJobListIds, $arrJobIdsInArea);
 
-            foreach (array_chunk($arrInAreaIds, 50) as $chunk) {
+            foreach (array_chunk($arrJobIdsInArea, 50) as $chunk) {
                 $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
                 UserJobMatchQuery::create()
                     ->filterByUserJobMatchId($chunk)
                     ->update(array('OutOfUserArea' => false), $con);
             }
 
-            LogMessage('Marking job postings outside ' . count($arrNearbyIds) . ' matching areas ...');
-            $arrOutOfAreaIds = array_diff($arrJobListIds, $arrInAreaIds);
-            if (!empty($arrOutOfAreaIds)) {
-                foreach (array_chunk($arrOutOfAreaIds, 50) as $chunk) {
+            LogMessage('Marking job postings outside ' . count($arrNearbyGeoLocIds) . ' matching areas ...');
+            if (!empty($arrJobIdsOutOfArea)) {
+                foreach (array_chunk($arrJobIdsOutOfArea, 50) as $chunk) {
                     $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
                     UserJobMatchQuery::create()
                         ->filterByUserJobMatchId($chunk)
@@ -452,10 +476,11 @@ class JobsAutoMarker
                 }
             }
 
-            $nJobsMarkedAutoExcluded = count($arrOutOfAreaIds);
-            $nJobsNotMarked = count($arrInAreaJobs);
+            $nJobsMarkedAutoExcluded = count($arrJobIdsOutOfArea);
+            $nJobsNotMarked = count($arrJobIdsInArea);
+            $nJobsTotal = count($arrJobListIds);
 
-            LogMessage('Jobs excluded as out of area:  marked out of area '. $nJobsMarkedAutoExcluded . '/' . countAssociativeArrayValues($arrJobsList) .'; marked in area = ' . $nJobsNotMarked . '/' . countAssociativeArrayValues($arrJobsList));
+            LogMessage("Jobs excluded as out of area:  marked out of area {$nJobsMarkedAutoExcluded}/{$nJobsTotal}; marked in area = {$nJobsNotMarked}/{$nJobsTotal}");
         } catch (Exception $ex) {
             handleException($ex, 'Error in _markJobsList_OutOfArea_Geospatial: %s', true);
         } finally {

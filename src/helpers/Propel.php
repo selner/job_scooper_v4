@@ -194,7 +194,7 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
     $continueLoop = true;
 
     $nResults = 0;
-    while (null !== $chunkResults && $continueLoop === true) {
+    while (null !== $chunkResults || $continueLoop === true) {
         $chunkResults = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $userFacts);
         if (null !== $chunkResults) {
             $nSetResults = $nResults + count($chunkResults) - 1;
@@ -218,17 +218,13 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
  */
 function getGeoLocationsNearby(\JobScooper\DataAccess\GeoLocation $sourceGeoLocation)
 {
-    $arrNearbyIds = [$sourceGeoLocation->getGeoLocationId()];
-    $nearbyLocations = \JobScooper\DataAccess\GeoLocationQuery::create()
+    $arrNearbyIds = \JobScooper\DataAccess\GeoLocationQuery::create()
         ->filterByDistanceFrom($sourceGeoLocation->getLatitude(), $sourceGeoLocation->getLongitude(), 50, \JobScooper\DataAccess\Map\GeoLocationTableMap::MILES_UNIT, Criteria::LESS_THAN)
-        ->find();
+        ->find()
+        ->toKeyValue("GeoLocationId", "GeoLocationId");
 
-    if (!empty($nearbyLocations)) {
-        foreach ($nearbyLocations as $near) {
-            $arrNearbyIds[] = $near->getGeoLocationId();
-        }
-    }
-
+    $arrNearbyIds[] = $sourceGeoLocation->getGeoLocationId();
+    
     return $arrNearbyIds;
 }
 
@@ -241,7 +237,7 @@ function getGeoLocationsNearby(\JobScooper\DataAccess\GeoLocation $sourceGeoLoca
  */
 function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 {
-    LogMessage("Marking " . count($arrUserJobMatchIds) . " user job matches as {$strNewStatus}...");
+    LogMessage('Marking ' . count($arrUserJobMatchIds) . " user job matches as {$strNewStatus}...");
     $con = \Propel\Runtime\Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
     $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
     $statusInt = array_search($strNewStatus, $valueSet);
