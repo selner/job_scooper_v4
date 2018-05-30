@@ -1895,7 +1895,7 @@ JSCODE;
                         throw new \ErrorException("Error:  unable to get SimpleHTML object for {$strURL}");
                     }
 
-                    $this->log("Getting jobs page # {$nPageCount} of {$totalPagesCount} from {$strURL}.  Total listings loaded:  " . ($nItemCount == 1 ? 0 : $nItemCount) . '/{$nTotalListings}.');
+                    $this->log("Getting jobs page # {$nPageCount} of {$totalPagesCount} from {$strURL}.  Total listings loaded:  " . ($nItemCount == 1 ? 0 : $nItemCount) . "/{$nTotalListings}.");
                     try {
                         $arrJsonLDJobs = $this->parseJobsFromLdJson($objSimpleHTML);
 
