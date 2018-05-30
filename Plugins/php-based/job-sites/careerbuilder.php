@@ -57,30 +57,30 @@ class PluginCareerBuilder extends \JobScooper\SitePlugins\AjaxSitePlugin
             $secs = 1000;
         }
 
-        LogMessage("Clicking button [" . $this->selectorMoreListings . "] to go to the next page of results...");
+        LogMessage("Clicking button [{$this->selectorMoreListings}] to go to the next page of results...");
 
-        $js = "
+	    $jsCode = /** @lang javascript */ <<<JSCODE
+            document.getElementById('direct_moreLessLinks_listingDiv').setAttribute('data-num-items', 50);
             scroll = setTimeout(doNextPage, 5000);
             function doNextPage() 
             {
-                var loadnext = document.querySelector(\"{$this->selectorMoreListings}\");
+                var loadnext = document.querySelector('{$this->selectorMoreListings}');
                 if(loadnext != null && !typeof(loadnext.click) !== \"function\" && loadnext.length >= 1) {
                     loadnext = loadnext[0];  
                 } 
                 if(loadnext != null) {    
-                    console.log(\"Clicked load next results control a#next-button...\");
+                    console.log('Clicked load next results control a#next-button...');
                     loadnext.click();  
                 } 
                 else 
                 { 
-                    console.log(\"No next button found to click.\"); 
+                    console.log('No next button found to click.');
                 }
             }
-              scroll = setTimeout(doNextPage, " . $secs . ");
+              scroll = setTimeout(doNextPage, {$secs});
+JSCODE;
 
-        ";
-
-        $this->runJavaScriptSnippet($js, false);
+        $this->runJavaScriptSnippet($jsCode, false);
 
         sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
 
@@ -122,13 +122,13 @@ class PluginCareerBuilderUK extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
     {
-        $jsCode = "
-			var elem = document.querySelector(\"a.close-reveal-modal\");
+	    $jsCode = /** @lang javascript */ <<<JSCODE
+			var elem = document.querySelector('a.close-reveal-modal');
 			if(elem != null)
 			{
 				elem.click();
 			}
-		";
+JSCODE;
         $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
         $this->runJavaScriptSnippet($jsCode);
     }

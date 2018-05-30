@@ -29,11 +29,11 @@ abstract class AbstractDotJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
     {
         $this->selectorMoreListings = "#button_moreJobs";
 
-        $js = "
-            document.getElementById(\"direct_moreLessLinks_listingDiv\").setAttribute(\"data-num-items\", 50);
-        ";
+	    $jsCode = /** @lang javascript */ <<<JSCODE
+            document.getElementById('direct_moreLessLinks_listingDiv').setAttribute('data-num-items', 50);
+JSCODE;
 
-        $this->runJavaScriptSnippet($js, false);
+        $this->runJavaScriptSnippet($jsCode, false);
         $this->JobListingsPerPage = 50;
 
         parent::goToEndOfResultsSetViaLoadMore($nTotalListings);

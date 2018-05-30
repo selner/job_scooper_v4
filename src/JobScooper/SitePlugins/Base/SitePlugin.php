@@ -520,7 +520,7 @@ abstract class SitePlugin implements IJobSitePlugin
             $secs = 1000;
         }
 
-        $js = "
+	    $jsCode = /** @lang javascript */ <<<JSCODE
             localStorage.setItem('startTime', Date.now());
             localStorage.setItem('prevHeight', 0);
             scroll = setTimeout(gotoPageBottom, 250);
@@ -541,7 +541,7 @@ abstract class SitePlugin implements IJobSitePlugin
                 if(prevHeight == null || (prevHeight < document.body.scrollHeight && runtime <= 60))
                 {
                     localStorage.setItem('prevHeight', document.body.scrollHeight);
-                    setTimeout(gotoPageBottom, " . $secs . ");
+                    setTimeout(gotoPageBottom, {$secs});
                 }
                 else
                 {
@@ -552,8 +552,7 @@ abstract class SitePlugin implements IJobSitePlugin
 
                 }
             }  
-        ";
-
+JSCODE;
 
         if (null === $nTotalItems) {
             $nTotalItems = $this->nMaxJobsToReturn;
@@ -567,7 +566,7 @@ abstract class SitePlugin implements IJobSitePlugin
 
         LogMessage("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results");
 
-        $this->runJavaScriptSnippet($js, false);
+        $this->runJavaScriptSnippet($jsCode, false);
 
         sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
@@ -671,11 +670,11 @@ abstract class SitePlugin implements IJobSitePlugin
             $secs = 1000;
         }
 
-        $js = "
+	    $jsCode = /** @lang javascript */ <<<JSCODE
             scroll = setTimeout(doLoadMore, 250);
             function getRunTime()
             {
-                var startTime = localStorage.getItem(\"startTime\");
+                var startTime = localStorage.getItem('startTime');
                 var endTime = Date.now();
                 runtime = Math.floor((endTime-startTime)/(1000));
                 return (runtime + ' seconds');
@@ -683,34 +682,34 @@ abstract class SitePlugin implements IJobSitePlugin
 
             function doLoadMore() 
             {
-                var startTime = localStorage.getItem(\"startTime\");
+                var startTime = localStorage.getItem('startTime');
                 if(startTime == null) 
                 {
-                    localStorage.setItem(\"startTime\", Date.now());
-                    localStorage.setItem(\"pageNum\", 1);
+                    localStorage.setItem('startTime', Date.now());
+                    localStorage.setItem('pageNum', 1);
                 }
 
                 window.scrollTo(0,document.body.scrollHeight);
                 console.log('paged-down-before-click');
 
-                var loadmore = document.querySelector(\"" . $this->selectorMoreListings . "\");
-                if(loadmore != null && !typeof(loadmore.click) !== \"function\" && loadmore.length >= 1) {
+                var loadmore = document.querySelector('{$this->selectorMoreListings}');
+                if(loadmore != null && !typeof(loadmore.click) !== 'function' && loadmore.length >= 1) {
                     loadmore = loadmore[0];
                 } 
     
                 runtime = getRunTime();
-                if(loadmore != null && loadmore.style.display === \"\") 
+                if(loadmore != null && loadmore.style.display === '')
                 { 
-                    var pageNum = parseInt(localStorage.getItem(\"pageNum\"));
+                    var pageNum = parseInt(localStorage.getItem('pageNum'));
                     if (pageNum != null)
                     {   
                         console.log('Results for page # ' + pageNum + ' loaded.  Time spent so far:  ' + runtime + ' Going to next page...');
-                        localStorage.setItem(\"pageNum\", pageNum + 1);
+                        localStorage.setItem('pageNum', pageNum + 1);
                     }
                     loadmore.click();  
-                    console.log(\"Clicked load more control...\");
+                    console.log('Clicked load more control...');
                         
-                    scroll = setTimeout(doLoadMore, " . $secs . ");
+                    scroll = setTimeout(doLoadMore, {$secs});
                     window.scrollTo(0,document.body.scrollHeight);
                     console.log('paged-down-after-click');
                 }
@@ -718,11 +717,10 @@ abstract class SitePlugin implements IJobSitePlugin
                 {
                     console.log('Load more button no longer active; done paginating the results.');
                     console.log('Script needed a minimum of ' + runtime + ' seconds to load all the results.');
-                    localStorage.removeItem(\"startTime\");
-
+                    localStorage.removeItem('startTime');
                 }
             }  
-        ";
+JSCODE;
 
 
         if (is_empty_value($nTotalItems)) {
@@ -737,7 +735,7 @@ abstract class SitePlugin implements IJobSitePlugin
 
         LogMessage("Sleeping for {$nSleepTimeToLoad} seconds to allow browser to page down through all the results");
 
-        $this->runJavaScriptSnippet($js, false);
+        $this->runJavaScriptSnippet($jsCode, false);
 
         sleep($nSleepTimeToLoad > 0 ? $nSleepTimeToLoad : 2);
 
@@ -927,24 +925,24 @@ abstract class SitePlugin implements IJobSitePlugin
 
         $this->log('Clicking button [' . $this->selectorMoreListings . '] to go to the next page of results...');
 
-        $js = '
-            scroll = setTimeout(doNextPage, " . $secs . ");
+        $jsCode = /** @lang javascript */ <<<JSCODE
+            scroll = setTimeout(doNextPage, {$secs});
             function doNextPage() 
             {
-                var loadnext = document.querySelector(" . $this->selectorMoreListings . ");
-                if(loadnext != null && !typeof(loadnext .click) !== "function" && loadnext.length >= 1) {
+                var loadnext = document.querySelector('{$this->selectorMoreListings}');
+                if(loadnext != null && !typeof(loadnext.click) !== 'function' && loadnext.length >= 1) {
                     loadnext = loadnext[0];
                 } 
     
-                if(loadnext != null && loadnext.style.display === "") 
+                if(loadnext != null && loadnext.style.display === '')
                 { 
                     loadnext.click();  
-                    console.log("Clicked load next results control " . $this->selectorMoreListings . "...");
+                    console.log("Clicked load next results control '{$this->selectorMoreListings}'...");
                 }
             }  
-        ';
+JSCODE;
 
-        $this->runJavaScriptSnippet($js, false);
+        $this->runJavaScriptSnippet($jsCode, false);
 
         sleep($this->additionalLoadDelaySeconds > 0 ? $this->additionalLoadDelaySeconds : 2);
         $this->log('Page Url is now ' . $this->getActiveWebdriver()->getCurrentURL());

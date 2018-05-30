@@ -77,27 +77,27 @@ class PluginAmazon extends \JobScooper\SitePlugins\AjaxSitePlugin
     }
 
     /**
-     * @param $searchDetails
+     * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
      *
      * @return mixed
      * @throws \Exception
      */
     public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
     {
-        $js = "
-            setTimeout(clickSearchButton, " . (string) $this->additionalLoadDelaySeconds .");
+	    $jsCode = /** @lang javascript */ <<<JSCODE
+            setTimeout(clickSearchButton, {$this->additionalLoadDelaySeconds});
 
             function clickSearchButton() 
             {
-                var btnSearch = document.querySelectorAll(\"button.search-button\");
-                if(btnSearch != null && !typeof(btnSearch.click) !== \"function\" && btnSearch.length >= 1) {
+                var btnSearch = document.querySelectorAll('button.search-button');
+                if(btnSearch != null && !typeof(btnSearch.click) !== 'function' && btnSearch.length >= 1) {
                     btnSearch = btnSearch[0];
                 } 
                 
-                if(btnSearch != null && btnSearch.style.display === \"\") 
+                if(btnSearch != null && btnSearch.style.display === '')
                 { 
                     btnSearch.click();  
-                    console.log(\"Clicked search button control...\");
+                    console.log('Clicked search button control...');
                 }
                 else
                 {
@@ -105,16 +105,16 @@ class PluginAmazon extends \JobScooper\SitePlugins\AjaxSitePlugin
                 }
             }  
             
-          document.addEventListener(\"DOMContentLoaded\", function(event) {
-			 var elem = document.createElement(\"<span id='pageurl'></span>\" );
+          document.addEventListener('DOMContentLoaded', function(event) {
+			 var elem = document.createElement("<span id='pageurl'></span>" );
 			 document.body.appendChild(elem);
 			 elem.textContent = window.location;
 		  });
-        ";
+JSCODE;
 
         $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
 
-        $this->runJavaScriptSnippet($js, false);
+        $this->runJavaScriptSnippet($jsCode, false);
         sleep($this->additionalLoadDelaySeconds + 2);
 
         $html = $this->getActiveWebdriver()->getPageSource();
