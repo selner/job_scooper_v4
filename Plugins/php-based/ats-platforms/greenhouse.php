@@ -19,11 +19,13 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
 {
     private $gh_api_fmt = "https://api.greenhouse.io/v1/boards/%s/embed/jobs";
     private $searchJsonUrlFmt = null;
+    private $currentJsonSearchDetails = null;
+    private $lastResponseData = null;
     protected $SiteReferenceKey = null;
     protected $JobListingsPerPage = 1000;
     protected $nTotalJobs = null;
     protected $additionalBitFlags = [C__JOB_USE_SITENAME_AS_COMPANY];
-
+	
     protected $arrListingTagSetup = array(
 //		'JobPostItem' => array('selector' => 'ul.list-group li.list-group-item'),
 //		'Title' => array('selector' => 'h4.list-group-item-heading a'),
@@ -36,6 +38,21 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
     {
         $this->searchJsonUrlFmt = sprintf($this->gh_api_fmt, $this->SiteReferenceKey);
         parent::__construct();
+    }
+
+        /**
+     * @param $searchDetails
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
+    {
+        $this->nTotalJobs = 0;
+        $this->lastResponseData = 0;
+
+        $this->currentJsonSearchDetails = $searchDetails;
+
     }
 
     /**
@@ -64,7 +81,7 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
     public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
     {
         try {
-            $retData = $this->getJsonResultsPage(0);
+            $retData = $this->getJsonResultsPage('jobs', "meta->total");
             $this->nTotalJobs = $retData['count'];
             return $this->nTotalJobs;
         } catch (Exception $ex) {
@@ -109,41 +126,46 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
     }
 
     /**
-     * @param $offset
+     * @param int $jobsKey
+     * @param int|array|null $countKey
      *
      * @throws \ErrorException
      * @throws \Exception
      * @return array
      */
-    private function getJsonResultsPage($jobsKey="jobs", $countKey=null)
+    private function getJsonResultsPage($jobsKey='jobs', $countKey=null)
     {
-        $curl = new \JobScooper\Utils\CurlWrapper();
-        if (isDebug()) {
-            $curl->setDebug(true);
-        }
-
-        $ret = array("count" => null, "jobs" => null);
-        $url = $this->searchJsonUrlFmt;
-        $lastCookies = $this->getActiveWebdriver()->manage()->getCookies();
-
-        $retObj = $curl->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = $lastCookies);
-        if (null !== $retObj && array_key_exists('output', $retObj) && strlen($retObj['output']) > 0) {
-            $respdata = json_decode($retObj['output']);
-            if (!empty($respdata)) {
-                $this->lastResponseData = $respdata;
-                try {
-                    $ret['jobs'] = $respdata->$jobsKey;
-                    $ret['count'] = 0;
-                    if (!empty($countKey)) {
-                        $ret['count'] = $respdata->$countKey;
-                    } elseif (!is_empty_value($ret['Jobs'])) {
-                        $ret['count'] = count($ret['jobs']);
+	    LogMessage("Downloading JSON listing data from {$this->searchJsonUrlFmt} for {$this->JobSiteKey}...");
+        $hostPageUri = $this->currentJsonSearchDetails->getSearchStartUrl();
+        
+        $ret = array();
+        $respdata = $this->getJsonApiResult($this->searchJsonUrlFmt, $this->currentJsonSearchDetails, $hostPageUri);
+        if (!empty($respdata)) {
+            $this->lastResponseData = $respdata;
+            try {
+                $ret['jobs'] = $respdata->$jobsKey;
+                $ret['count'] = 0;
+                if (null !== $countKey) {
+                	if(false !== strpos($countKey, '->')) {
+                		$keys = explode('->', $countKey);
+                		$counts = $respdata;
+                		foreach($keys as $k) {
+                			$counts = $counts->$k;
+                		}
+                		$ret['count'] = $counts;
+                	 }
+                	 else {
+	                    $ret['count'] = $respdata->$countKey;
                     }
-                } catch (Exception $ex) {
-                    throw new Exception($respdata->error);
+                } elseif (!is_empty_value($ret['jobs'])) {
+                    $ret['count'] = count($ret['jobs']);
                 }
+            } catch (Exception $ex) {
+                throw new Exception($respdata->error);
             }
         }
+
         return $ret;
     }
+    
 }
