@@ -116,7 +116,6 @@ abstract class SitePlugin implements IJobSitePlugin
         //
         $this->additionalBitFlags["LOCATION"] = C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED;
         $this->additionalBitFlags["KEYWORDS"] = C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED;
-        $this->additionalBitFlags["NUMBER_DAYS"] = C__JOB_DAYS_VALUE_NOTAPPLICABLE__;
 
         //
         // Now based on what we find in the Search Format URL, unset the default
