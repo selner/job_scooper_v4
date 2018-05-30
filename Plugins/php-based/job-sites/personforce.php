@@ -22,37 +22,24 @@ class PluginPersonForce extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'PersonForce';
     protected $JobPostingBaseUrl = 'http://www.personforce.com';
-    protected $SearchUrlFormat = 'https://www.personforce.com/jobs/tags/***KEYWORDS***/in/***LOCATION***/p/***PAGE_NUMBER***';
+    protected $SearchUrlFormat = 'https://www.personforce.com/jobs/';
     protected $LocationType = 'location-city-comma-statecode';
-    protected $JobListingsPerPage = 20;
-    protected $additionalLoadDelaySeconds = 5;
-    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
+    protected $JobListingsPerPage = 6;
+    protected $additionalLoadDelaySeconds = 1;
+    protected $PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
+    protected $additionalBitFlags = [C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
 
 
     protected $arrListingTagSetup = array(
-
-    'TotalPostCount' => array(array('tag' => 'div', 'attribute'=>'class', 'attribute_value' => 'module_jobs'), array('tag' => 'div', 'attribute_value' =>'text'), 'return_value_regex' => '/.*?of total (\d+).*?/'),
-    'JobPostItem' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'content-col-content hir left'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row'),array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'row')),
-    'Title' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'text'),
-    'Url' => array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
-    'Company' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/(.*?) \- .*/'),
-    'Location' => array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'hir-company-title', 'return_value_regex' => '/.*? \- (.*)/'),
-    'NextButton' => array('selector' => 'div.pagination ul li.active a'),
-    'JobSitePostId' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' => 'hir-job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
+    'JobPostItem' => ['selector' => '#listdata .display-box.row'],
+    'Title' => ['selector' => 'div.jobTitle h5 a b', 'return_attribute' => 'text'],
+    'Url' => ['selector' => 'div.jobTitle h5 a', 'return_attribute' => 'href'],
+    'Company' => ['selector' => 'div.jobTitle2 b', 'return_attribute' => 'text'],
+    'Category' => ['selector' => 'div.jobTitle4'],
+    'DatePosted' => ['selector' => 'div.jobTitle3'],
+    'Location' => ['selector' => ' span.address', 'return_attribute' => 'text', 'return_value_regex' => '/\(([^\]+)\)/'],
+    'NextButton' => ['selector' => 'ul.pagination li:last-child a', 'index' => 0],
+    'JobSitePostId' =>  ['selector' => 'div.jobTitle h5 a', 'return_attribute' => 'href', 'return_value_regex' => '/.*jobs\/(\d+)\/.*?/']
     );
 
-
-    protected function normalizeJobItem($arrItem)
-    {
-        $arrItem ['PostedAt'] = strScrub($arrItem['PostedAt'], REMOVE_EXTRA_WHITESPACE | LOWERCASE | HTML_DECODE);
-        $dateVal = strtotime($arrItem ['PostedAt'], $now = time());
-        if (!($dateVal === false)) {
-            $arrItem['PostedAt'] = date('Y-m-d', $dateVal);
-        }
-
-
-        $arrItem['JobSitePostId'] = strScrub($arrItem['Company'], FOR_LOOKUP_VALUE_MATCHING) . strScrub($arrItem['Title'], FOR_LOOKUP_VALUE_MATCHING). strScrub($arrItem['PostedAt'], FOR_LOOKUP_VALUE_MATCHING);
-
-        return parent::normalizeJobItem($arrItem);
-    }
 }
