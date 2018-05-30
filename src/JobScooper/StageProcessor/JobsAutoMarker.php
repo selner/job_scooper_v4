@@ -742,7 +742,9 @@ class JobsAutoMarker
     {
         assert(!empty($this->_markingUserFacts));
 
-        $inputfiles = $this->_markingUserFacts->getInputFiles('negative_title_keywords');
+        $user = User::getUserObjById($this->_markingUserFacts['UserId']);
+        $inputfiles = $user->getInputFiles('negative_title_keywords');
+        $user = null;
 
         if (!is_array($inputfiles)) {
             // No files were found, so bail
