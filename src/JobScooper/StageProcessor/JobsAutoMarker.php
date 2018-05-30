@@ -399,6 +399,9 @@ class JobsAutoMarker
             handleException($ex, 'Error in _markJobsList_OutOfArea_CountyFiltered: %s', true);
         } finally {
             endLogSection('Out of area job marking by county finished.');
+            $user = null;
+            $arrJobsOutOfArea = null;
+            $searchLocations = null;
         }
     }
 
@@ -562,14 +565,14 @@ class JobsAutoMarker
 
         $searchKeywords = array();
         $keywords = $this->_markingUserFacts['SearchKeywords'];
-        if (empty($keywords)) {
+        if (is_empty_value($keywords)) {
             return null;
         }
 
         $neg_kwds = $this->_loadUserNegativeTitleKeywords();
 
         $jsonObj = array(
-            'user' => $this->_markingUserFacts->toArray(),
+            'user' => $this->_markingUserFacts,
             'job_matches' => $arrJobItems,
             'search_keywords' => $searchKeywords,
             'negative_title_keywords' => $neg_kwds
@@ -741,8 +744,14 @@ class JobsAutoMarker
     private function _loadUserNegativeTitleKeywords()
     {
         assert(!empty($this->_markingUserFacts));
-
+        if(is_empty_value($this->_markingUserFacts['UserId'])) {
+            throw new \InvalidArgumentException('Unable to automark jobs:  UserId not found.');
+        }
         $user = User::getUserObjById($this->_markingUserFacts['UserId']);
+        if(null === $user) {
+            throw new \InvalidArgumentException("Unable to mark jobs:  user ID {$this->_markingUserFacts['UserId']} not found.");
+        }
+        
         $inputfiles = $user->getInputFiles('negative_title_keywords');
         $user = null;
 
@@ -810,7 +819,17 @@ class JobsAutoMarker
             LogDebug('Using previously loaded ' . count($this->companies_regex_to_filter) . ' regexed company strings to exclude.');
             return;
         }
-        $inputfiles = $this->_markingUserFacts['InputFiles']['regex_filter_companies'];
+
+        if(is_empty_value($this->_markingUserFacts['UserId'])) {
+            throw new \InvalidArgumentException('Unable to automark jobs:  UserId not found.');
+        }
+        $user = User::getUserObjById($this->_markingUserFacts['UserId']);
+        if(null === $user) {
+            throw new \InvalidArgumentException("Unable to mark jobs:  user ID {$this->_markingUserFacts['UserId']} not found.");
+        }
+        
+        $inputfiles = $user->getInputFiles('regex_filter_companies');
+		$user = null;
         if (is_empty_value($inputfiles) ||  !is_array($inputfiles)) {
             return;
         }
