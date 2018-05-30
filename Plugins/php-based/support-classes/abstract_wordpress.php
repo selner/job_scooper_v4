@@ -34,7 +34,7 @@ abstract class AbstractWordPress extends \JobScooper\SitePlugins\AjaxSitePlugin
         $this->arrListingTagSetup['JobListingsPerPage'] =  array("selector" => "div.job_listings", "return_attribute" => "data-per_page");
         $count = \JobScooper\Utils\DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobListingsPerPage'], null, $this);
         if (!empty($count)) {
-            $this->JobListingsPerPage = intval($count);
+            $this->JobListingsPerPage = (int) $count;
         }
         unset($this->arrListingTagSetup['JobListingsPerPage']);
 

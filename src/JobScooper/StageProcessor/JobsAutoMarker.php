@@ -365,14 +365,14 @@ class JobsAutoMarker
             $arrJobsOutOfArea = array_filter($arrJobsList, function (UserJobMatch $v) use ($arrIncludeCounties) {
                 $posting = $v->getJobPostingFromUJM();
                 $locId = $posting->getGeoLocationId();
-                if (is_null($locId)) {
+                if (null === $locId) {
                     return false;
                 }  // if we don't have a location, assume nearby
 
                 $location = $posting->getGeoLocationFromJP();
                 $county = $location->getCounty();
                 $state = $location->getRegion();
-                if (!is_null($county) && !is_null($state)) {
+                if (null !== $county && null !== $state) {
                     $match = $county . '~' . $state;
                     if (!in_array($match, $arrIncludeCounties)) {
                         return true;
@@ -481,7 +481,7 @@ class JobsAutoMarker
             $nJobsMarkedAutoExcluded = 0;
             $nJobsNotMarked = 0;
 
-            if (count($arrJobsList) == 0 || is_null($this->companies_regex_to_filter) || count($this->companies_regex_to_filter) == 0) {
+            if (count($arrJobsList) == 0 || null === $this->companies_regex_to_filter || count($this->companies_regex_to_filter) == 0) {
                 return;
             }
 

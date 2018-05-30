@@ -163,7 +163,7 @@ class SeleniumManager extends PropertyObject
         //	    LogMessage("Selenium client log:  " . getArrayDebugOutput($logs_client));
 
         try {
-            if (!is_null($this->remoteWebDriver)) {
+            if (null === $this->remoteWebDriver) {
                 $this->remoteWebDriver->quit();
             }
         } catch (WebDriverCurlException $ex) {
@@ -188,7 +188,7 @@ class SeleniumManager extends PropertyObject
     public function get_driver()
     {
         try {
-            if (is_null($this->remoteWebDriver)) {
+            if (null === $this->remoteWebDriver) {
                 $this->create_remote_webdriver();
             }
             return $this->remoteWebDriver;
@@ -210,7 +210,7 @@ class SeleniumManager extends PropertyObject
     public function getWebDriverKind()
     {
         $webdriver = (array_key_exists('webdriver', $this->_settings)) ? $this->_settings['webdriver'] : null;
-        if (is_null($webdriver)) {
+        if (null === $webdriver) {
             $webdriver = "phantomjs";
             if (PHP_OS == "Darwin") {
                 $webdriver = "safari";
@@ -235,7 +235,7 @@ class SeleniumManager extends PropertyObject
             $driver = null;
 
             /** @var DesiredCapabilities $capabilities */
-            $capabilities = call_user_func(array("Facebook\WebDriver\Remote\DesiredCapabilities", $webdriver));
+            $capabilities = call_user_func(array(DesiredCapabilities::class, $webdriver));
 
 //
             //	        $capabilities->setCapability(

@@ -62,7 +62,7 @@ class PluginAmazon extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     public function getGeoLocationSettingType(\JobScooper\DataAccess\GeoLocation $location=null)
     {
-        if (!is_null($location)) {
+        if (null !== $location) {
             switch ($location->getCountryCode()) {
                 case "US":
                     return 'location-city-comma-statecode-comma-country';
@@ -85,7 +85,7 @@ class PluginAmazon extends \JobScooper\SitePlugins\AjaxSitePlugin
     public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
     {
         $js = "
-            setTimeout(clickSearchButton, " . strval($this->additionalLoadDelaySeconds) .");
+            setTimeout(clickSearchButton, " . (string) $this->additionalLoadDelaySeconds .");
 
             function clickSearchButton() 
             {
@@ -230,7 +230,7 @@ class PluginAmazon extends \JobScooper\SitePlugins\AjaxSitePlugin
         $lastCookies = $this->getActiveWebdriver()->manage()->getCookies();
 
         $retObj = $curl->cURL($url, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = null, $cookies = $lastCookies);
-        if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
+        if (null !== $retObj && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
             $respdata = json_decode($retObj['output']);
             if (!empty($respdata)) {
                 $this->lastResponseData = $respdata;
@@ -266,7 +266,7 @@ class PluginAmazon extends \JobScooper\SitePlugins\AjaxSitePlugin
         $ret = "";
         $parts = preg_split("/,\s?/", $var);
         $revparts = array_reverse($parts);
-        $ret = join(", ", $revparts);
+        $ret = implode(", ", $revparts);
         return $ret;
     }
 }

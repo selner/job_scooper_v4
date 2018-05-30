@@ -37,7 +37,7 @@ class CSVLogHandler extends StreamHandler
     private function _rewriteStreamWithHeader($fileUrl)
     {
         $columns = $this->getDefaultFormatter()->getColumnNames();
-        $txtColumns = join(",", $columns) . PHP_EOL;
+        $txtColumns = implode(",", $columns) . PHP_EOL;
         file_prepend($txtColumns, $fileUrl);
     }
 

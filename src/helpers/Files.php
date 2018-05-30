@@ -238,7 +238,7 @@ function writeJSON($data, $filepath)
 
 function decodeJSON($strJsonText, $options=null, $boolEscapeBackSlashes=false)
 {
-    if (is_null($options)) {
+    if (null === $options) {
         $options = JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP |  JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK;
     }
 

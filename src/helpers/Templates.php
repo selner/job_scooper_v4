@@ -47,7 +47,7 @@ function loadTemplate($path)
             },
             'Utils' => array(
                 'getEvenOdd' => function ($arg1) {
-                    if ((floatval($arg1) % 2) == 0) {
+                    if (((float) $arg1 % 2) == 0) {
                         return "even";
                     } else {
                         return "odd";

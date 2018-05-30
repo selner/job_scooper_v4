@@ -40,7 +40,7 @@ class AbstractIcimsATS extends \JobScooper\SitePlugins\AjaxSitePlugin
         $this->PaginationType = C__PAGINATION_PAGE_VIA_URL;
 
         foreach (array_keys($this->TagIndexes) as $tagKey) {
-            if (array_key_exists($tagKey, $this->TagIndexes) === true && is_null($this->TagIndexes[$tagKey]) !== true &&
+            if (array_key_exists($tagKey, $this->TagIndexes) === true && null !== $this->TagIndexes[$tagKey] &&
                 array_key_exists($tagKey, $this->arrBaseListingTagSetup)) {
                 if (array_key_exists(0, $this->arrBaseListingTagSetup[$tagKey]) && is_array($this->arrBaseListingTagSetup[$tagKey]) === true) {
                     $this->arrBaseListingTagSetup[$tagKey][0]['index'] = $this->TagIndexes[$tagKey];
@@ -106,7 +106,7 @@ class AbstractIcimsATS extends \JobScooper\SitePlugins\AjaxSitePlugin
             $matched = preg_match("/pr=(\d+)/", $href, $matches);
             if ($matched) {
                 $lastPage = $matches[1];
-                $nLastPage = intval($lastPage);
+                $nLastPage = (int) $lastPage;
                 $nTotalItemsMax = $nLastPage * $this->JobListingsPerPage;
 
                 return $nTotalItemsMax;
@@ -116,7 +116,7 @@ class AbstractIcimsATS extends \JobScooper\SitePlugins\AjaxSitePlugin
         $nodeDropdownItem = $objSimpHTML->find("div.iCIMS_Paginator_Bottom select[paginator='true'] option:last-child");
         if (!empty($nodeDropdownItem) && is_array($nodeDropdownItem)) {
             $lastPage = $nodeDropdownItem[0]->text();
-            $nLastPage = intval($lastPage);
+            $nLastPage = (int) $lastPage;
             $nTotalItemsMax = $nLastPage * $this->JobListingsPerPage;
 
             return $nTotalItemsMax;

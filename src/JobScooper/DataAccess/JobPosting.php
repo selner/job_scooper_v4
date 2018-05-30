@@ -70,7 +70,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         updateColumnsForCSVFlatArray($arrJobPosting, new JobPostingTableMap());
         if ($includeGeolocation === true) {
             $jobloc = $this->getGeoLocationFromJP();
-            if (!is_null($jobloc)) {
+            if (null !== $jobloc) {
                 $location = $jobloc->toFlatArrayForCSV();
             }
 
@@ -105,7 +105,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
      */
     public function setAutoColumnRelatedProperty($method, $v)
     {
-        if (is_null($v) || strlen($v) <= 0) {
+        if (null === $v || strlen($v) <= 0) {
             $v = "_VALUENOTSET_";
         }
         $ret = parent::$method($v);
@@ -138,7 +138,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
 
         $val = "";
         $location = $this->getGeoLocationFromJP();
-        if (!is_null($location)) {
+        if (null !== $location) {
             $val = $location->getDisplayName();
         } else {
             $val = $this->getLocation();
@@ -446,7 +446,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         }
 
         if (empty($newV) && preg_match('/^\d+$/', $v)) {
-            $vstr = strval($v);
+            $vstr = (string) $v;
             if (strlen($vstr) == strlen("20170101")) {
                 try {
                     $datestr = substr($vstr, 4, 2) . "/" . substr($vstr, 6, 2) . "/" . substr($vstr, 0, 4);
@@ -472,9 +472,9 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
             $date = "";
             foreach (array("month", "day", "year") as $dateval) {
                 if ($info[$dateval] !== false) {
-                    $date .= strval($info[$dateval]);
+                    $date .= (string) $info[$dateval];
                 } else {
-                    $date .= strval(getdate()[$dateval]);
+                    $date .= (string) getdate()[$dateval];
                 }
             }
             $newV = $date;

@@ -133,7 +133,7 @@ class ConfigInitializer
 
         $globalDirs = ['debug', 'logs', 'caches'];
         foreach ($globalDirs as $d) {
-            $path = join(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString('-'), $d));
+            $path = implode(DIRECTORY_SEPARATOR, array($outputDirectory, getTodayAsString('-'), $d));
             $details = parsePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
             $arrOututDirs[$d] = realpath($details->getPathname());
         }
@@ -438,7 +438,7 @@ class ConfigInitializer
         }
 
         // if we didn't match a user, look for one as the key name in a config file section under [users.*]
-        if (empty($currentUser) && array_key_exists($cmd_line_user_to_run, $user_recs)) {
+        if (null === $currentUser && array_key_exists($cmd_line_user_to_run, $user_recs)) {
             $currentUser = $user_recs[$cmd_line_user_to_run];
         }
 

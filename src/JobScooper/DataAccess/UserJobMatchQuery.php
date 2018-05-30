@@ -52,7 +52,7 @@ class UserJobMatchQuery extends BaseUserJobMatchQuery
      */
     public function filterByDaysAgo($nNumDaysBack = null)
     {
-        if (!empty($nNumDaysBack) && is_integer($nNumDaysBack)) {
+        if (!empty($nNumDaysBack) && is_int($nNumDaysBack)) {
             $startDate = new \DateTime();
             $strMod = "-{$nNumDaysBack} days";
             $dateDaysAgo = $startDate->modify($strMod);

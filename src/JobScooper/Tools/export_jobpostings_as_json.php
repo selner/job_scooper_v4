@@ -20,7 +20,7 @@ namespace JobScooper\Tools;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use Propel\Runtime\Map\TableMap;
 
-define('__ROOT__', dirname(__FILE__));
+define('__ROOT__', __DIR__);
 ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 define('MAX_FILE_SIZE', 5000000);
 const C__APPNAME__ = "jobs_scooper";
@@ -28,7 +28,7 @@ define('__APP_VERSION__', "v4.1.0-use-propel-orm");
 $lineEnding = ini_get('auto_detect_line_endings');
 ini_set('auto_detect_line_endings', true);
 
-$autoload = realpath(join(DIRECTORY_SEPARATOR, array("..", "..", "..", 'vendor', 'autoload.php')));
+$autoload = realpath(implode(DIRECTORY_SEPARATOR, array("..", "..", "..", 'vendor', 'autoload.php')));
 if (file_exists($autoload)) {
     require_once($autoload);
 } else {
@@ -36,7 +36,7 @@ if (file_exists($autoload)) {
 }
 
 $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
-$propelConfig = realpath(join(DIRECTORY_SEPARATOR, array("..", "..", "..", 'Config', 'config.php')));
+$propelConfig = realpath(implode(DIRECTORY_SEPARATOR, array("..", "..", "..", 'Config', 'config.php')));
 if (file_exists($propelConfig)) {
     require_once($propelConfig);
 } else {

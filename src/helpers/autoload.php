@@ -16,7 +16,7 @@
  */
 
 
-$files = glob(realpath(dirname(__FILE__))  . '/*.php');
+$files = glob(realpath(__DIR__)  . '/*.php');
 foreach ($files as $file) {
     print "Autoloading {$file}...".PHP_EOL;
     require_once($file);

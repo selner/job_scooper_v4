@@ -259,7 +259,7 @@ class SitePluginFactory
         }
 
 
-        if (array_key_exists('Collections', $arrConfigData) && !is_null($arrConfigData['Collections']) && is_array($arrConfigData['Collections']) && count($arrConfigData['Collections']) > 0 && array_key_exists('Fields', $arrConfigData['Collections'][0])) {
+        if (array_key_exists('Collections', $arrConfigData) && null !== $arrConfigData['Collections'] && is_array($arrConfigData['Collections']) && count($arrConfigData['Collections']) > 0 && array_key_exists('Fields', $arrConfigData['Collections'][0])) {
             if (!is_array($pluginData[$listingTagBucket])) {
                 $pluginData[$listingTagBucket] = array();
             }

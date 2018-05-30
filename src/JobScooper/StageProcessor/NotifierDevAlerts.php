@@ -80,7 +80,7 @@ class NotifierDevAlerts extends JobsMailSender
 
     public function getRunResultHtml($arrPluginResults)
     {
-        $renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "partials", "html_email_run_counts.tmpl")));
+        $renderer = loadTemplate(implode(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "partials", "html_email_run_counts.tmpl")));
         $subject = "JobScooper Run Result Counts[" . gethostname() . "]: for " . getRunDateRange(5);
         $data = array(
             "Email"         => array(

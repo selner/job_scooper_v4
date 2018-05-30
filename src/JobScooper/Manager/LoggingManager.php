@@ -278,7 +278,7 @@ class LoggingManager extends \Monolog\Logger
     {
         $this->flushErrorNotifications();
 
-        if (!is_null($this->_csvHandle)) {
+        if (null !== $this->_csvHandle) {
             fclose($this->_csvHandle);
         }
     }
@@ -351,12 +351,12 @@ class LoggingManager extends \Monolog\Logger
     {
         if ($nType == LoggingManager::C__LOG_SECTION_BEGIN) {
             $indentCount = $this->_openSections * 2;
-            $lineChar = strval($this->_openSections + 1);
+            $lineChar = (string) $this->_openSections + 1;
             $intro = 'BEGIN: ';
             $this->_openSections += 1;
         } else {
             $this->_openSections -= 1;
-            $lineChar = strval($this->_openSections + 1);
+            $lineChar = (string) $this->_openSections + 1;
             $indentCount = $this->_openSections * 2;
             $intro = 'END: ';
         }
@@ -458,7 +458,7 @@ class LoggingManager extends \Monolog\Logger
 
 
         $context['class_call'] = $class;
-        $context['channel'] = is_null($jobsiteKey) ? 'default' : 'plugins';
+        $context['channel'] = null === $jobsiteKey ? 'default' : 'plugins';
         $context['jobsite'] = $jobsiteKey;
 
 

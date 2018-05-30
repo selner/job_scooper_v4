@@ -90,7 +90,7 @@ class GeoLocationManager
         elseif (count($zipSplits) === 2) {
             $lookupAddress = str_ireplace(" area", "", $zipSplits[1]) . " " . $zipSplits[0];
         } elseif (count($zipSplits) > 2) {
-            $lookupAddress = join(" ", $zipSplits);
+            $lookupAddress = implode(" ", $zipSplits);
         }
 
         $lookupAddress = strip_punctuation($lookupAddress);

@@ -219,7 +219,7 @@ function cleanupSlugPart($slug, $replacement = '_')
  * @return string
 */function getNowAsString($delim = "-")
 {
-    $fmt = join($delim, array("%Y", "%m", "%d", "%H", "%M", "%S"));
+    $fmt = implode($delim, array("%Y", "%m", "%d", "%H", "%M", "%S"));
     return strftime($fmt, time());
 }
 
@@ -306,12 +306,12 @@ function strScrub($str, $flags = null)
 function intceil($number)
 {
     if (is_string($number)) {
-        $number = floatval($number);
+        $number = (float) $number;
     }
 
     $ret = (is_numeric($number)) ? ceil($number) : false;
     if ($ret != false) {
-        $ret = intval($ret);
+        $ret = (int) $ret;
     }
 
     return $ret;

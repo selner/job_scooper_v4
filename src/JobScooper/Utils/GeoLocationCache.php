@@ -91,7 +91,7 @@ class GeoLocationCache
      */
     public function __construct($cacheName = 'geolocation_id_lookup')
     {
-        $cacheDir = join(DIRECTORY_SEPARATOR, array(getOutputDirectory('caches'), $cacheName));
+        $cacheDir = implode(DIRECTORY_SEPARATOR, array(getOutputDirectory('caches'), $cacheName));
         $this->log(LogLevel::INFO, "Creating {$cacheName} cache in directory {$cacheDir}...");
 
         $config = array(

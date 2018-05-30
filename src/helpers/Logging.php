@@ -122,7 +122,7 @@ function LogDebug($msg, $extras=array(), $channel=null)
 function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $channel=null)
 {
     $textParts = preg_split("/[\\r\\n|" . PHP_EOL . "]/", $msg);
-    if (($textParts === false) || is_null($textParts)) {
+    if (($textParts === false) || null === $textParts) {
         LogMessage($msg);
     } else {
         foreach ($textParts as $part) {
@@ -164,14 +164,14 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
 
 
     $msg = $fmtLogMsg;
-    if (!is_null($toThrow) && !is_null($fmtLogMsg) && !is_null($ex) && strlen($fmtLogMsg) > 0) {
+    if (null !== $toThrow && null !== $fmtLogMsg && null !== $ex && strlen($fmtLogMsg) > 0) {
         if (stristr($fmtLogMsg, '%s') !== false) {
             $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
             $toThrow = new Exception($msg, null, $ex);
         } else {
             $msg = $fmtLogMsg . PHP_EOL . ' ~ ' . $toThrow->getMessage();
         }
-    } elseif (!is_null($ex)) {
+    } elseif (null !== $ex) {
         $msg = $toThrow->getMessage();
     }
 

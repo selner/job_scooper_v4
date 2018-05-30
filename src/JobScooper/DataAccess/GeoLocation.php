@@ -299,7 +299,7 @@ class GeoLocation extends BaseGeoLocation
 
     public function setRegionCode($v)
     {
-        if (!is_null($v) && strlen($v) > 0) {
+        if (null !== $v && strlen($v) > 0) {
             $v = strtoupper($v);
         }
 
@@ -307,14 +307,14 @@ class GeoLocation extends BaseGeoLocation
 
         $newState = $this->getRegionFromRegionCode($v);
 
-        if (is_null($this->getRegion())) {
+        if (null === $this->getRegion()) {
             $this->setRegion($newState);
         }
     }
 
     public function addAlternateNames($value)
     {
-        if (!is_null($value) && is_array($value)) {
+        if (null !== $value && is_array($value)) {
             $names = $value;
         } else {
             $names = preg_split('/\s*\|\s*/', $value, $limit = -1, PREG_SPLIT_NO_EMPTY);
@@ -326,7 +326,7 @@ class GeoLocation extends BaseGeoLocation
 
     public function setAlternateNames($value)
     {
-        if (!is_null($value) && is_array($value)) {
+        if (null !== $value && is_array($value)) {
             $value = array_unique($value);
         }
         parent::setAlternateNames($value);
@@ -360,7 +360,7 @@ class GeoLocation extends BaseGeoLocation
                 case 'alternate_names':
                     $names = $this->getAlternateNames();
                     $arrVals['alternate_names'] = $geocode['alternate_names'];
-                    if (is_null($names) || count($names) == 0) {
+                    if (null === $names || count($names) == 0) {
                         $mergednames = array_merge($arrVals['alternate_names'], $names);
                         $arrVals['alternate_names'] = array_unique($mergednames);
                     }

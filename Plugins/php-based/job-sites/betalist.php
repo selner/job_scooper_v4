@@ -58,7 +58,7 @@ class PluginBetalist extends \JobScooper\SitePlugins\AjaxSitePlugin
         if ($nodeCounts != null && is_array($nodeCounts) && isset($nodeCounts[0])) {
             foreach ($nodeCounts as $spanCount) {
                 $strVal = $spanCount->text();
-                $nVal = intval(str_replace(",", "", $strVal));
+                $nVal = (int) str_replace(",", "", $strVal);
                 if ($nTotalResults == C__TOTAL_ITEMS_UNKNOWN__) {
                     $nTotalResults = $nVal;
                 } else {

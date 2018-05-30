@@ -277,7 +277,7 @@ class SimpleHTMLHelper extends ExtendedDiDomDocument
                 $isFile = false;
             }
         } elseif (is_object($data) === true) {
-            $string = strval($data);
+            $string = (string) $data;
             $isFile = false;
         }
 

@@ -28,9 +28,9 @@ const C__SRC_LOCATION = "https://github.com/selner/job_scooper_v4";
 const C__STR_USER_AGENT__ = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
 
 define('MAX_FILE_SIZE', 5000000);
-define('__ROOT__', dirname(__FILE__));
+define('__ROOT__', __DIR__);
 
-$autoload = join(DIRECTORY_SEPARATOR, array(__ROOT__, 'vendor', 'autoload.php'));
+$autoload = implode(DIRECTORY_SEPARATOR, array(__ROOT__, 'vendor', 'autoload.php'));
 if (file_exists($autoload)) {
     require_once($autoload);
 } else {

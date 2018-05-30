@@ -114,7 +114,7 @@ class DomItemParser
         if (!(is_a($domNodeData, ExtendedDiDomElement::class) ||
             is_a($domNodeData, SimpleHtmlHelper::class))) {
             try {
-                $content = strval($domNodeData);
+                $content = (string) $domNodeData;
                 $this->_domNodeData = new ExtendedDiDomElement($content);
             } catch (Exception $ex) {
                 throw new Exception('Unable to get DomElement from passed node data.');

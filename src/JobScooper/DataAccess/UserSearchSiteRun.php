@@ -90,11 +90,11 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
     public function failRunWithErrorMessage($err, SimpleHTMLHelper $objPageHtml=null)
     {
         $arrV = '';
-        if (is_a($err, "\Exception") || is_subclass_of($err, "\Exception")) {
-            $arrV = array(strval($err));
+        if (is_a($err, \Exception::class) || is_subclass_of($err, \Exception::class)) {
+            $arrV = array((string) $err);
         } elseif (is_object($err)) {
             $arrV = get_object_vars($err);
-            $arrV["toString"] = strval($err);
+            $arrV["toString"] = (string) $err;
         } elseif (is_string($err)) {
             $arrV = array($err);
         }

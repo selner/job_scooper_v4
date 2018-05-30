@@ -136,7 +136,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
                 'Title' =>  $job->JobTitle,
                 'Url' => $job->Url,
                 'Location' => $job->FormattedCityStateCountry,
-                'Category' => is_array($job->CategoryDisplay) ? join(" | ", $job->CategoryDisplay) : null,
+                'Category' => is_array($job->CategoryDisplay) ? implode(" | ", $job->CategoryDisplay) : null,
                 'PostedAt' => $job->PostDate
             );
         }
@@ -290,7 +290,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
         $urlParts['path'] = "/jobs/search/results";
         $baseUrl = new http\Url($urlParts, $urlParts, Url::REPLACE);
         $url = $baseUrl->toString();
-        if (is_null($this->selenium)) {
+        if (null === $this->selenium) {
             try {
                 $this->selenium = new \JobScooper\Manager\SeleniumManager();
             } catch (Exception $ex) {

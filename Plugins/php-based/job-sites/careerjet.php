@@ -208,7 +208,7 @@ class Careerjet_API
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
             $ip = $_SERVER['REMOTE_ADDR'];
         } else {
-            $ip = gethostbyname(trim(`hostname`));
+            $ip = gethostbyname(trim(shell_exec("hostname")));
         }
 
         $url .= '&user_ip=' . $ip;

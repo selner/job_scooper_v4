@@ -101,7 +101,7 @@ class UserJobMatch extends BaseUserJobMatch
         $arrUserJobMatch = $this->toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false);
         foreach ($arrUserJobMatch as $k => $v) {
             if (is_array($v)) {
-                $arrUserJobMatch[$k] = join("|", $v);
+                $arrUserJobMatch[$k] = implode("|", $v);
             }
         }
         updateColumnsForCSVFlatArray($arrUserJobMatch, new UserJobMatchTableMap());

@@ -75,7 +75,7 @@ Options:
             }
 
             if (is_array($argval) && in_array($argkey, array('jobsite', 'stages'))) {
-                $argval = strtolower(join(",", $argval));
+                $argval = strtolower(implode(",", $argval));
             }
             if (is_string($argval)) {
                 $argval = cleanupTextValue($argval, '\"', '\"');

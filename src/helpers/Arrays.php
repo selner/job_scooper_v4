@@ -44,7 +44,7 @@ function array_orderby()
         }
     }
     $args[] = &$data;
-    call_user_func_array('array_multisort', $args);
+    array_multisort(...$args);
     return array_pop($args);
 }
 
@@ -106,7 +106,7 @@ function getArrayItemDetailsAsString($arrItem, $key, $fIsFirstItem = true, $strD
         if (is_string($val) && strlen($val) > 0) {
             $strVal = $val;
         } elseif (is_array($val) && !(is_array_multidimensional($val))) {
-            $strVal = join(" | ", $val);
+            $strVal = implode(" | ", $val);
         } else {
             $strVal = print_r($val, true);
         }
@@ -229,7 +229,7 @@ function in_string_array($haystack, $needle)
 {
     if (!is_array($needle)) {
         if (!is_string($needle)) {
-            $needle = strval($needle);
+            $needle = (string) $needle;
         }
 
         $needle = array($needle);
@@ -318,7 +318,7 @@ function updateColumnsForCSVFlatArray(&$arr, \Propel\Runtime\Map\TableMap $table
         if ($tablemap->hasColumnByPhpName($key)) {
             $col = $tablemap->getColumnByPhpName($key);
             if ($col->getType() == "ARRAY" && !empty($arr[$key])) {
-                $arr[$key] = join("|", flattenWithKeys(array($key => $arr[$key])));
+                $arr[$key] = implode("|", flattenWithKeys(array($key => $arr[$key])));
             } elseif ($col->getType() == "TIMESTAMP" && !empty($arr[$key])) {
                 $date = DateTime::createFromFormat("Y-m-d\TH:i:sT", $arr[$key]);
                 if (!empty($date)) {
@@ -433,7 +433,7 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
             $findings[$name] = $pattern;
 
             if ($boolMustMatchAllKeywords == true) {
-                return (sizeof($findings) === sizeof($patterns));
+                return (count($findings) === count($patterns));
             }
         } else {
             if (PREG_NO_ERROR !== ($code = preg_last_error())) {
@@ -444,7 +444,7 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
             }
         }
     }
-    return !(0 === sizeof($findings));
+    return !(0 === count($findings));
 }
 
 /**

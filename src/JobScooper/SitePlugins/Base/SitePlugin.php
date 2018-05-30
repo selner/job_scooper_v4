@@ -43,7 +43,7 @@ use JobScooper\Utils\SimpleHTMLHelper;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Propel;
-use Psr\Log\LogLevel;
+use Psr\Log\LogLevel;use JobScooper\DataAccess\JobPosting;use JobScooper\DataAccess\UserJobMatch;
 
 /**
  * Class SitePlugin
@@ -369,7 +369,7 @@ abstract class SitePlugin implements IJobSitePlugin
             throw $ex;
         } finally {
             try {
-                if (!is_null($this->selenium)) {
+                if (null !== $this->selenium) {
                     $this->selenium->done();
                 }
             } catch (Exception $ex) {
@@ -484,7 +484,7 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     protected function getActiveWebdriver()
     {
-        if (!is_null($this->selenium)) {
+        if (null !== $this->selenium) {
             return $this->selenium->get_driver();
         } else {
             throw new Exception("Error:  active webdriver for Selenium not found as expected.");
@@ -554,7 +554,7 @@ abstract class SitePlugin implements IJobSitePlugin
         ";
 
 
-        if (is_null($nTotalItems)) {
+        if (null === $nTotalItems) {
             $nTotalItems = $this->nMaxJobsToReturn;
         }
 
@@ -857,7 +857,7 @@ abstract class SitePlugin implements IJobSitePlugin
 
         $nodesJobRows = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobPostItem'], null, $this);
 
-        if ($nodesJobRows !== false && !is_null($nodesJobRows) && is_array($nodesJobRows) && count($nodesJobRows) > 0) {
+        if ($nodesJobRows !== false && null !== $nodesJobRows && is_array($nodesJobRows) && count($nodesJobRows) > 0) {
             foreach ($nodesJobRows as $node) {
                 $job = $this->parseSingleJob($node);
                 if (!empty($job)) {
@@ -1097,7 +1097,7 @@ abstract class SitePlugin implements IJobSitePlugin
         foreach ($splitLocs as $k => $v) {
             $splitLocs[$k] = trim($v);
         }
-        return join("|~", $splitLocs);
+        return implode("|~", $splitLocs);
     }
 
 
@@ -1137,13 +1137,13 @@ abstract class SitePlugin implements IJobSitePlugin
             }
         } catch (Exception $ex) {
             $strError = "Failed to download jobs from " . $this->JobSiteName . " jobs for search '" . $searchDetails->getUserSearchSiteRunKey() . "[URL=" . $searchDetails->getSearchStartUrl() . "]. Exception Details: ";
-            $this->_setSearchResult_($searchDetails, false, new Exception($strError . strval($ex)));
+            $this->_setSearchResult_($searchDetails, false, new Exception($strError . (string) $ex));
             handleException($ex, $strError, false);
         } finally {
             endLogSection("Finished data pull for " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "]");
         }
 
-        if (!is_null($ex)) {
+        if (null !== $ex) {
             throw $ex;
         }
     }
@@ -1180,9 +1180,9 @@ abstract class SitePlugin implements IJobSitePlugin
             throw new \Exception("Invalid user search site run object passed to method.");
         }
 
-        if (!is_null($runWasSkipped) && is_bool($runWasSkipped) && $runWasSkipped === true) {
+        if (null !== $runWasSkipped && is_bool($runWasSkipped) && $runWasSkipped === true) {
             $searchDetails->setRunResultCode("skipped");
-        } elseif (!is_null($success) && is_bool($success)) {
+        } elseif (null !== $success && is_bool($success)) {
             if ($success === true) {
                 $searchDetails->setRunSucceeded();
             } else {
@@ -1245,7 +1245,7 @@ abstract class SitePlugin implements IJobSitePlugin
                 }
 
                 $retObj = $this->_curlWrapper->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
-                if (!is_null($retObj) && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
+                if (null !== $retObj && array_key_exists("output", $retObj) && strlen($retObj['output']) > 0) {
                     $objSimpleHTML = new SimpleHtmlHelper($retObj['output']);
                     $objSimpleHTML->setSource($strURL);
                     $this->prevCookies = $retObj['cookies'];
@@ -1285,7 +1285,7 @@ abstract class SitePlugin implements IJobSitePlugin
         while ($noMoreJobs != true) {
             $arrPageJobsList = [];
             $apiJobs = $this->getSearchJobsFromAPI($searchDetails);
-            if (is_null($apiJobs)) {
+            if (null === $apiJobs) {
                 $this->log("Warning: " . $this->JobSiteName . "[" . $searchDetails->getUserSearchSiteRunKey() . "] returned zero jobs from the API." . PHP_EOL, \Monolog\Logger::WARNING);
 
                 return;
@@ -1465,7 +1465,7 @@ abstract class SitePlugin implements IJobSitePlugin
                 $conWrite = Propel::getServiceContainer()->getWriteConnection(JobPostingTableMap::DATABASE_NAME);
 
                 $bulkUpsert = new ObjectCollection();
-                $bulkUpsert->setModel('\JobScooper\DataAccess\JobPosting');
+                $bulkUpsert->setModel(JobPosting::class);
                 $bulkUpsert->fromArray($arrJobsToAdd);
                 $bulkUpsert->save($conWrite);
 
@@ -1510,7 +1510,7 @@ abstract class SitePlugin implements IJobSitePlugin
             $conWrite = Propel::getServiceContainer()->getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
 
             $bulkUpsert = new ObjectCollection();
-            $bulkUpsert->setModel('\JobScooper\DataAccess\UserJobMatch');
+            $bulkUpsert->setModel(UserJobMatch::class);
             $bulkUpsert->fromArray($arrUserMatches);
             $bulkUpsert->save($conWrite);
         }
@@ -1524,7 +1524,7 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     private function _addJobMatchesToUser(UserSearchSiteRun $searchDetails)
     {
-        if (array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs) && !is_null($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]) && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()])) {
+        if (array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs) && null !== $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()] && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()])) {
         	$arrNewJobIds = array_column($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()], null, 'JobPostingId');
 
             $this->_addJobMatchIdsToUser(array_keys($arrNewJobIds), $searchDetails);
@@ -1577,7 +1577,7 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     protected function getJsonApiResult($apiUri, $searchDetails, $hostPageUri)
     {
-        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && is_null($this->selenium)) {
+        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && null === $this->selenium) {
             try {
                 $this->selenium = new SeleniumManager();
             } catch (Exception $ex) {
@@ -1787,7 +1787,7 @@ JSCODE;
 
             if (!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
-                $nTotalListings = intval(str_replace(",", "", $strTotalResults));
+                $nTotalListings = (int) str_replace(",", "", $strTotalResults);
                 if ($nTotalListings == 0) {
                     $totalPagesCount = 0;
                 } elseif ($nTotalListings != C__TOTAL_ITEMS_UNKNOWN__) {
@@ -1868,7 +1868,7 @@ JSCODE;
                                     break;
 
                                 case C__PAGINATION_INFSCROLLPAGE_VIA_JS:
-                                    if (is_null($this->nextPageScript)) {
+                                    if (null === $this->nextPageScript) {
                                         throw new Exception("Plugin " . $this->JobSiteName . " is missing nextPageScript settings for the defined pagination type.");
                                     }
                                     $this->selenium->loadPage($strURL);
@@ -2004,7 +2004,7 @@ JSCODE;
                         $this->log($warnMsg, \Monolog\Logger::WARNING);
                     }
 
-                    if (!is_null($err)) {
+                    if (null !== $err) {
                         if ($this->isBitFlagSet(C__JOB_IGNORE_MISMATCHED_JOB_COUNTS) || $this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) === true) {
                             $this->log("Warning: " . $err, \Monolog\Logger::WARNING);
                         } else {
@@ -2033,7 +2033,7 @@ JSCODE;
                                     break;
 
                                 case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
-                                    if (is_null($this->selectorMoreListings)) {
+                                    if (null === $this->selectorMoreListings) {
                                         throw(new Exception("Plugin " . $this->JobSiteName . " is missing selectorMoreListings setting for the defined pagination type."));
                                     }
                                     $this->selenium->loadPage($strURL);

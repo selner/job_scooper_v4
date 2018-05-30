@@ -43,7 +43,7 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
      */
     public function __destruct()
     {
-        if (!is_null($this->_fpcsv)) {
+        if (null !== $this->_fpcsv) {
             fclose($this->_fpcsv);
         }
     }
@@ -71,7 +71,7 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
             }
         } else {
             $this->checkColumnName($k);
-            $ret[$k] = strval($v);
+            $ret[$k] = (string) $v;
         }
     }
     public function format(array $record)
@@ -85,17 +85,17 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
             } elseif (is_array($v)) {
                 foreach ($record[$k] as $key => $val) {
                     $this->checkColumnName($key);
-                    $outRecord[$key] = strval($val);
+                    $outRecord[$key] = (string) $val;
                 }
                 unset($record[$k]);
             } elseif (is_object($v)) {
                 foreach (object_to_array($v) as $key => $val) {
                     $this->checkColumnName($key);
-                    $outRecord[$key] = strval($val);
+                    $outRecord[$key] = (string) $val;
                 }
             } else {
                 $this->checkColumnName($k);
-                $outRecord[$k] = strval($v);
+                $outRecord[$k] = (string) $v;
             }
         }
 
@@ -120,8 +120,8 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
      */
     private function checkColumnName($columnName)
     {
-        if (!in_array(strval($columnName), $this->_columns)) {
-            $this->_columns[] = strval($columnName);
+        if (!in_array((string) $columnName, $this->_columns)) {
+            $this->_columns[] = (string) $columnName;
         }
     }
 }

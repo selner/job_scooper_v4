@@ -94,7 +94,7 @@ function getPhpMemoryUsage()
 
     $unit = array(' bytes', 'KB', 'MB', 'GB', 'TB', 'PN');
 
-    return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
+    return @round($size / (1024 ** ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
 }
 
 /**
@@ -235,7 +235,7 @@ function combineTextAllNodes($nodes, $delim=" ")
             }
         }
 
-        $retStr = join($delim, $arrNodeStrings);
+        $retStr = implode($delim, $arrNodeStrings);
     }
     return $retStr;
 }

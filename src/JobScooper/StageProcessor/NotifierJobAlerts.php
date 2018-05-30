@@ -418,7 +418,7 @@ class NotifierJobAlerts extends JobsMailSender
     private function _generateHTMLEmailContent($subject, &$matches, $totalJobs, $userFacts, $geoLocationId=null)
     {
         try {
-            $renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, 'src', 'assets', 'templates', 'html_email_results_responsive.tmpl')));
+            $renderer = loadTemplate(implode(DIRECTORY_SEPARATOR, array(__ROOT__, 'src', 'assets', 'templates', 'html_email_results_responsive.tmpl')));
 
             assert(array_key_exists('isUserJobMatchAndNotExcluded', $matches));
 
@@ -461,7 +461,7 @@ class NotifierJobAlerts extends JobsMailSender
                         $searchLocNames[] = $loc->getDisplayName();
                     }
 
-                    $data['Search']['Locations'] = join(', ', $searchLocNames);
+                    $data['Search']['Locations'] = implode(', ', $searchLocNames);
                 }
             }
 

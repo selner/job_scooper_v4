@@ -30,7 +30,7 @@ abstract class BaseForceComClass extends \JobScooper\SitePlugins\AjaxSitePlugin
     {
         parent::__construct();
 
-        if (is_null($this->SearchUrlFormat) || strlen($this->SearchUrlFormat) == 0) {
+        if (null === $this->SearchUrlFormat || strlen($this->SearchUrlFormat) == 0) {
             $this->JobPostingBaseUrl = "http://" . strtolower($this->JobSiteName) . ".force.com/careers";
             $this->SearchUrlFormat = "http://" . strtolower($this->JobSiteName) . ".force.com/careers";
         }
