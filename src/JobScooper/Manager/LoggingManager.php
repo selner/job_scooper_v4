@@ -110,7 +110,7 @@ class LoggingManager extends \Monolog\Logger
 
         parent::__construct($name, $handlers = $this->_handlersByType);
 
-        $logOptions = getConfigurationSetting('logging', array());
+        $logOptions = \JobScooper\Utils\Settings::getValue('logging', array());
         $this->_shouldLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
         if (array_key_exists('log_level', $logOptions) and !empty($logOptions['log_level'])) {
             if (strtoupper($logOptions['log_level']) === 'DEBUG') {
@@ -210,7 +210,7 @@ class LoggingManager extends \Monolog\Logger
      */
     private function _addSentryHandler()
     {
-        $settings = getConfigurationSetting('config_file_settings.sentry');
+        $settings = Settings::getValue('config_file_settings.sentry');
         if (!empty($settings)) {
             if (array_key_exists('dsn', $settings)) {
                 LogMessage('Found Sentry config properties; setting up Sentry logging...');
@@ -391,7 +391,7 @@ class LoggingManager extends \Monolog\Logger
     public function getDebugContext($context=array(), \Exception $thrownExc = null)
     {
         $runtime_fmt = '';
-        $runStartTime = getConfigurationSetting('app_run_start_datetime');
+        $runStartTime = Settings::getValue('app_run_start_datetime');
         if (!empty($runStartTime)) {
             $runtime = $runStartTime->diff(new \DateTime());
             $runtime_fmt = $runtime->format('%h:%d:%s');

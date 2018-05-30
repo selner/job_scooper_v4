@@ -17,8 +17,10 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Map\JobSiteRecordTableMap;use JobScooper\Utils\SimpleHTMLHelper;
-use Propel\Runtime\ActiveQuery\Criteria;use Propel\Runtime\ActiveQuery\ModelCriteria;
+use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
+use JobScooper\Utils\SimpleHTMLHelper;
+use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\ActiveQuery\ModelCriteria;
 
 
 class UserSearchSiteRunManager {

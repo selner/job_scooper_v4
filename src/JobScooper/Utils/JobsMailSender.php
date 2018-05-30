@@ -81,7 +81,7 @@ class JobsMailSender
 
 
 
-            $smtpSettings = getConfigurationSetting('alerts.configuration.smtp');
+            $smtpSettings = \JobScooper\Utils\Settings::getValue('alerts.configuration.smtp');
 
             if ($smtpSettings != null && is_array($smtpSettings)) {
                 $this->phpmailer->isSMTP();
@@ -101,7 +101,7 @@ class JobsMailSender
                 $this->phpmailer->addAddress($toUser->getEmailAddress(), $toUser->getName());
             }
 
-            $alerts_users = getConfigurationSetting('alerts.' . $emailKind);
+            $alerts_users = \JobScooper\Utils\Settings::getValue('alerts.' . $emailKind);
             if (empty($alerts_users)) {
                 //
                 // hardcoded in the case where we were unable to load the email addresses for some reason

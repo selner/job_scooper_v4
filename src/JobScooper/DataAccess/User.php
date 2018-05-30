@@ -18,7 +18,8 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\User as BaseUser;
-use JobScooper\DataAccess\Map\JobSiteRecordTableMap;use JobScooper\Utils\Settings;
+use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
+use JobScooper\Utils\Settings;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
@@ -512,7 +513,7 @@ class User extends BaseUser
 		                    $searchrun = new UserSearchSiteRun();
 		                    $searchrun->setUserSearchPairId($searchPair->getUserSearchPairId());
 		                    $searchrun->setJobSiteKey($site);
-		                    $searchrun->setAppRunId(getConfigurationSetting('app_run_id'));
+		                    $searchrun->setAppRunId(Settings::getValue('app_run_id'));
 		                    $searchrun->setStartedAt(time());
 		                    $searchrun->save();
 		                    if (!array_key_exists($jobsiteKey, $this->_userSearchSiteRunsByJobSite)) {

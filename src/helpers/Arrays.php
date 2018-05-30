@@ -678,26 +678,6 @@ function objectToArray($d)
 
 
 
-/**
- * @param $root
- * @param $keyPath
- * @param $value
- */
-function setGlobalSetting($root, $keyPath, $value)
-{
-    doGlobalSettingExists($root);
-
-    $dot = new \Adbar\Dot($GLOBALS[$root]);
-    if ($dot->has($keyPath)) {
-        $dot->set($keyPath, $value);
-    } else {
-        $dot->add($keyPath, $value);
-    }
-    $GLOBALS[$root] = $dot->all();
-
-    //	array_add_element($GLOBALS[$root], $keyPath, $value);
-    ksort($GLOBALS[$root]);
-}
 
 
 /**
@@ -708,54 +688,5 @@ function setGlobalSetting($root, $keyPath, $value)
  */
 function getGlobalSetting($root, $keyPath=null, $default=null)
 {
-    doGlobalSettingExists($root);
-
-    // return the whole array if no keypath was given
-    if (empty($keyPath)) {
-        return $GLOBALS[$root];
-    }
-
-    $dot = new \Adbar\Dot($GLOBALS[$root]);
-    return $dot->get($keyPath, $default);
     //	return array_get_element($keyPath, $GLOBALS[$root]);
-}
-
-/**
- * @param $root
- */
-function doGlobalSettingExists($root)
-{
-    if (!array_key_exists($root, $GLOBALS)) {
-        $GLOBALS[$root] = array();
-    }
-}
-
-const JOBSCOOPER_CACHES_ROOT = "JSCOOP_CACHES";
-
-/**
- * @param $keyPath
- *
- * @return mixed
- */
-function getConfigurationSetting($keyPath, $default=null)
-{
-    return \JobScooper\Utils\Settings::getValue($keyPath, $default);
-}
-
-/**
- * @param $cacheName
- * @param $value
- */
-function setAsCacheData($cacheName, $value)
-{
-    setGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName, $value);
-}
-
-/**
- * @param $cacheName
- * @param $value
- */
-function getCacheData($cacheName)
-{
-    return getGlobalSetting($root=JOBSCOOPER_CACHES_ROOT, $cacheName);
 }

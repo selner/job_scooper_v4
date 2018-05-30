@@ -29,6 +29,7 @@ use JobScooper\Utils\GeoLocationResultsFactory;
 use JobScooper\Utils\GoogleGeocoderHttpAdapter;
 use JobScooper\Utils\GoogleMapsLoggedProvider;
 
+use JobScooper\Utils\Settings;
 use Monolog\Logger;
 use Psr\Cache\InvalidArgumentException;
 
@@ -49,9 +50,9 @@ class GeoLocationManager
      */
     public static function getLocationManager()
     {
-        $loc = getCacheData('GeoLocationManager');
+        $loc = Settings::getValue('caches.' . self::class);
         if (empty($loc)) {
-            $loc = GeoLocationManager::create();
+            $loc = self::create();
         }
         return $loc;
     }
@@ -63,7 +64,7 @@ class GeoLocationManager
     public static function create()
     {
         $loc = new GeoLocationManager();
-        setAsCacheData('GeoLocationManager', $loc);
+        Settings::setValue('caches.' . self::class, $loc);
         return $loc;
     }
 
@@ -236,20 +237,20 @@ class GeoLocationManager
     {
         LogMessage('Loading Geolocation cache ...');
 
-        $googleApiKey = getConfigurationSetting('google_maps_api_key');
+        $googleApiKey = \JobScooper\Utils\Settings::getValue('google_maps_api_key');
         if (is_empty_value($googleApiKey) || !is_string($googleApiKey)) {
             throw new Exception('No Google Geocode API key found in configuration.  Instructions for getting an API key are at https://developers.google.com/maps/documentation/geocoding/get-api-key.');
         }
 
         $regionBias = null;
-        $country_codes = getConfigurationSetting('country_codes');
+        $country_codes = \JobScooper\Utils\Settings::getValue('country_codes');
         if (null !== $country_codes && is_array($country_codes)) {
             $regionBias = $country_codes[0];
         }
 
         $geocoder = new Geocoder();
 
-        $geoapi_srvr = getConfigurationSetting('geocodeapi_server');
+        $geoapi_srvr = \JobScooper\Utils\Settings::getValue('geocodeapi_server');
         if (!empty($geoapi_srvr)) {
             $curl = new GeocodeApiHttpAdapter();
             $geocoder->registerProviders(array(

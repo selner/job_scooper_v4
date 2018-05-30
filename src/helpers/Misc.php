@@ -149,7 +149,7 @@ function noJobStringMatch($var, $matchString)
 function getRunDateRange($configNumDays=null)
 {
     if (is_empty_value($configNumDays)) {
-        $configNumDays = getConfigurationSetting('number_days');
+        $configNumDays = \JobScooper\Utils\Settings::getValue('number_days');
     }
     
     $num_days = filter_var($configNumDays, FILTER_VALIDATE_INT);

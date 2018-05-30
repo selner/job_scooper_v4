@@ -17,7 +17,9 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;use JobScooper\SitePlugins\SitePluginFactory;use Propel\Runtime\Connection\ConnectionInterface;
+use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;
+use JobScooper\SitePlugins\SitePluginFactory;
+use Propel\Runtime\Connection\ConnectionInterface;
 
 /**
  * Skeleton subclass for representing a row from the 'job_site' table.

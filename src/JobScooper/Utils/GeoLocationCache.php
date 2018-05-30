@@ -53,10 +53,12 @@ class GeoLocationCache
     public static function getCacheInstance()
     {
         $name = 'geolocation_id_lookup';
-        $geoLocCache = getCacheData($name);
-        if (empty($geoLocCache)) {
+        
+        $geoLocCache = Settings::getValue("caches.{$name}");
+        
+        if (null === $geoLocCache) {
             $geoLocCache = new GeoLocationCache();
-            setAsCacheData($name, $geoLocCache);
+            Settings::setValue("caches.{$name}", $geoLocCache);
         }
 
         return $geoLocCache;

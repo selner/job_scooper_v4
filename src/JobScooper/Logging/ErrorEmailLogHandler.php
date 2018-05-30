@@ -47,7 +47,7 @@ class ErrorEmailLogHandler extends MailHandler
             'monolog_error_content' => $content,
             'search_parameters_content' => $searchParams,
             'app_version' => __APP_VERSION__,
-            'app_run_id' => getConfigurationSetting('app_run_id'),
+            'app_run_id' => Settings::getValue('app_run_id'),
             "server" => gethostname()
         );
         $renderer = loadTemplate(__ROOT__ . '/src/assets/templates/html_email_error_alerts.tmpl');

@@ -50,7 +50,7 @@ class SeleniumManager extends PropertyObject
     {
         PropertyObject::__construct();
         $this->additionalLoadDelaySeconds = $additionalLoadDelaySeconds;
-        $this->_settings = getConfigurationSetting('selenium');
+        $this->_settings = \JobScooper\Utils\Settings::getValue('selenium');
         if (empty($this->_settings)) {
             $this->_settings = array();
         }

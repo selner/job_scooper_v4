@@ -39,11 +39,14 @@ const BASE_URL_TAG_LOCATION = '***LOCATION***';
 const BASE_URL_TAG_KEYWORDS = '***KEYWORDS***';
 use Exception;
 use JobScooper\Utils\CurlWrapper;
+use JobScooper\Utils\Settings;
 use JobScooper\Utils\SimpleHTMLHelper;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Propel;
-use Psr\Log\LogLevel;use JobScooper\DataAccess\JobPosting;use JobScooper\DataAccess\UserJobMatch;
+use Psr\Log\LogLevel;
+use JobScooper\DataAccess\JobPosting;
+use JobScooper\DataAccess\UserJobMatch;
 
 /**
  * Class SitePlugin
@@ -109,7 +112,7 @@ abstract class SitePlugin implements IJobSitePlugin
             }
         }
 
-        $this->_otherPluginSettings = getConfigurationSetting('plugin_settings.' . $this->JobSiteKey);
+        $this->_otherPluginSettings = Settings::getValue('plugin_settings.' . $this->JobSiteKey);
 
         //
         // Set all the flag defaults to be not supported

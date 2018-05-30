@@ -18,7 +18,7 @@
 
 function getGlobalConfigOptionBoolean($key)
 {
-    return filter_var(getConfigurationSetting($key), FILTER_VALIDATE_BOOLEAN);
+    return filter_var(\JobScooper\Utils\Settings::getValue($key), FILTER_VALIDATE_BOOLEAN);
 }
 
 function isDebug()

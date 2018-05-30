@@ -17,7 +17,8 @@
 
 namespace JobScooper\Utils;
 
-use JobScooper\DataAccess\User;use JobScooper\DataAccess\UserQuery;
+use JobScooper\DataAccess\User;
+use JobScooper\DataAccess\UserQuery;
 use JobScooper\DataAccess\UserSearchPairQuery;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use Propel\Runtime\ActiveQuery\Criteria;

@@ -74,7 +74,7 @@ function parsePathDetailsFromString($strFilePath, $flags = C__FILEPATH_NO_FLAGS)
 
 function getOutputDirectory($key)
 {
-    $ret = getConfigurationSetting("output_directories.".$key);
+    $ret = \JobScooper\Utils\Settings::getValue("output_directories.".$key);
     if (empty($ret)) {
         $ret =  sys_get_temp_dir();
     }

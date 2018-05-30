@@ -17,7 +17,8 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\SitePlugins\SitePluginFactory;use JobScooper\Utils\Settings;
+use JobScooper\SitePlugins\SitePluginFactory;
+use JobScooper\Utils\Settings;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 /**
@@ -233,7 +234,7 @@ class JobSiteManager
     public static function getJobSitesCmdLineIncludedInRun()
     {
 
-        $cmdLineSites = getConfigurationSetting('command_line_args.jobsite');
+        $cmdLineSites = Settings::getValue('command_line_args.jobsite');
         if(is_empty_value($cmdLineSites)) {
         	return array();
         }
@@ -244,43 +245,6 @@ class JobSiteManager
         }
 
         return $cmdLineSites;
-    }
-
-
-    /**
-     * @param array &$sites
-     * @param string[] $countryCodes
-     *
-	 * @return array
-*    * @throws \Exception
-     */
-    public static function doesCoverCountryCode($countryCode)
-    {
-    	if(is_empty_value($sites) || is_empty_value($countryCodes)) {
-    		return $sites;
-        }
-
-        $ccRun = array_unique($countryCodes);
-        $siteKeysOutOfSearchArea = array();
-
-        if (null !== $sites) {
-            foreach ($sites as $jobsiteKey => $site) {
-                $ccSite = $site->getSupportedCountryCodes();
-                $ccMatches = array_intersect($ccRun, $ccSite);
-                if (is_empty_value($ccMatches)) {
-		            self::setSitesAsExcluded(array($jobsiteKey));
-		            $sites[$jobsiteKey] = null;
-		            unset($sites[$jobsiteKey]);
-                    $siteKeysOutOfSearchArea[$jobsiteKey] = $jobsiteKey;
-                }
-                $site = null;
-            }
-        }
-
-        if (!is_empty_value($siteKeysOutOfSearchArea)) {
-            LogMessage('Skipped ' . count($siteKeysOutOfSearchArea) .' JobSites not covering ' . implode(', ', $ccRun) .': ' . implode(', ', $siteKeysOutOfSearchArea) );
-        }
-
     }
 
     /**

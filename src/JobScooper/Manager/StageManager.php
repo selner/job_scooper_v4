@@ -60,7 +60,7 @@ class StageManager
             $this->classConfig->initialize();
         }
 
-        $runStartTime = getConfigurationSetting('app_run_start_datetime');
+        $runStartTime = Settings::getValue('app_run_start_datetime');
         if (empty($runStartTime)) {
 	        Settings::setValue('app_run_start_datetime', new \DateTime());
         }
@@ -77,18 +77,18 @@ class StageManager
             /*
              * Run specific stages requested via command-line
              */
-            $usersForRun = getConfigurationSetting("users_for_run");
+            $usersForRun = Settings::getValue("users_for_run");
             if(is_empty_value($usersForRun)) {
             	throw new \InvalidArgumentException("No user information was set to be run.  Aborting.");
             }
 
-            $cmds = getConfigurationSetting("command_line_args");
+            $cmds = Settings::getValue("command_line_args");
             if (array_key_exists("recap", $cmds) && !empty($cmds['recap'])) {
                 $this->doWeeklyRecaps($usersForRun);
             } elseif (array_key_exists("delete", $cmds) && !empty($cmds['delete'])) {
                 $this->removeUserData($usersForRun);
             } elseif (array_key_exists("stages", $cmds) && !empty($cmds['stages'])) {
-                $arrRunStages = getConfigurationSetting("command_line_args.stages");
+                $arrRunStages = Settings::getValue("command_line_args.stages");
 
                 foreach ($usersForRun as $user) {
                     foreach ($arrRunStages as $stage) {
@@ -322,7 +322,7 @@ class StageManager
 //            endLogSection("End of dev alerts for plugin errors");
 //        }
 //
-        $runStartTime = getConfigurationSetting('app_run_start_datetime');
+        $runStartTime = Settings::getValue('app_run_start_datetime');
 
         if (!empty($runStartTime)) {
             $runtime = $runStartTime->diff(new \DateTime());
