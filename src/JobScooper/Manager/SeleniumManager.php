@@ -100,7 +100,10 @@ class SeleniumManager extends PropertyObject
     {
         try {
             $driver = $this->get_driver();
-            if (strncmp($driver->getCurrentURL(), $url, strlen($url)) != 0) {
+            if(null === $driver) {
+            	throw new Exception("Failed to get WebDriver to load page.");
+            }
+            if (strncmp($driver->getCurrentURL(), $url, strlen($url)) !== 0) {
                 $driver->get($url);
                 sleep(2 + $this->additionalLoadDelaySeconds);
             }
@@ -193,7 +196,7 @@ class SeleniumManager extends PropertyObject
     public function get_driver()
     {
         try {
-            if (null !== $this->remoteWebDriver) {
+            if (null === $this->remoteWebDriver) {
                 $this->create_remote_webdriver();
             }
             return $this->remoteWebDriver;
