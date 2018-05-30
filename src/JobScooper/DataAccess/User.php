@@ -527,7 +527,7 @@ class User extends BaseUser
 		            }
                 }
             } else {
-                LogDebug("JobSite {$jobsiteKey}'s country codes [" . implode('|', $ccJobSite) . "] do not include the user's search pair's country codes [{$countryCodes}].  Skipping {$jobsiteKey} searches...");
+                LogMessage("JobSite {$jobsiteKey}'s country codes [" . implode('|', $ccJobSite) . "] do not include the user's search pair's country codes [{$countryCodes}].  Skipping {$jobsiteKey} searches...");
             }
 			$site = null;
 	        $sites[$jobsiteKey] = null;
