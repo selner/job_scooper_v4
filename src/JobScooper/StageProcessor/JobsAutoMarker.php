@@ -592,7 +592,7 @@ class JobsAutoMarker
             'MatchedUserKeywords'
         ));
         if (!empty($arrJobMatchFacts['MatchedUserKeywords'])) {
-            if (is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
+            if (is_string($arrJobMatchFacts['MatchedUserKeywords'])) {
                 $split = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
                 if (!empty($split)) {
                     $arrJobMatchFacts['MatchedUserKeywords'] = $split;
