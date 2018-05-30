@@ -133,7 +133,7 @@ function noJobStringMatch($var, $matchString)
         throw new Exception("Invalid match string passed to helper noJobStringMatch.");
     }
 
-    if (stristr(strtoupper($var), strtoupper($matchString)) !== false) {
+    if (false !== stripos(strtoupper($var), strtoupper($matchString))) {
         return 0;
     }
 

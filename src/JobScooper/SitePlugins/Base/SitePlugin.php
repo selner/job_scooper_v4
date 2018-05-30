@@ -750,11 +750,11 @@ abstract class SitePlugin implements IJobSitePlugin
      */
     public function matchesNoResultsPattern($var)
     {
-        $val = $var[0];
-        $match_value = $var[1];
+        $val = $var['current_value'];
+        $match_value = $var['parameter'];
 
         if (is_empty_value($match_value)) {
-            throw new \Exception('Plugin {$this->JobSiteName} definition missing pattern match value for matchesNoResultsPattern callback.');
+            throw new \Exception("Plugin {$this->JobSiteName} definition missing pattern match value for matchesNoResultsPattern callback.");
         }
         return noJobStringMatch($val, $match_value);
     }

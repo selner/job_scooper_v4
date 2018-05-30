@@ -255,7 +255,7 @@ class DomItemParser
                     $params['parameter'] = $this->_tagParseInfo['callback_parameter'];
                 }
                 
-                $ret = call_user_func_array($callback, $params);
+                $ret = $callback($params);
             }
         }
         return $ret;
