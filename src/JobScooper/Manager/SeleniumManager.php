@@ -127,22 +127,31 @@ class SeleniumManager extends PropertyObject
      */
     public function waitForAjax($framework='jquery')
     {
+    	$code = '';
+    	
         // javascript framework
         switch ($framework) {
             case 'jquery':
-                $code = "return jQuery.active;"; break;
+                $code = 'return jQuery.active;';
+                break;
             case 'prototype':
-                $code = "return Ajax.activeRequestCount;"; break;
+                $code = 'return Ajax.activeRequestCount;';
+                break;
             case 'dojo':
-                $code = "return dojo.io.XMLHTTPTransport.inFlight.length;"; break;
+                $code = 'return dojo.io.XMLHTTPTransport.inFlight.length;';
+                break;
+                
             default:
                 throw new Exception('Not supported framework');
         }
 
         // wait for at most 30s, retry every 2000ms (2s)
         $driver = $this->get_driver();
+        if(null === $driver) {
+        	throw new \Exception("Failed to get WebDriver");
+        }
         $driver->wait(30, 2000)->until(
-            function ($driver, $code) {
+            function ($driver) use ($code) {
                 return !($driver->executeScript($code));
             }
         );
@@ -163,15 +172,11 @@ class SeleniumManager extends PropertyObject
         //	    LogMessage("Selenium client log:  " . getArrayDebugOutput($logs_client));
 
         try {
-            if (null === $this->remoteWebDriver) {
+            if (null !== $this->remoteWebDriver) {
                 $this->remoteWebDriver->quit();
             }
-        } catch (WebDriverCurlException $ex) {
-            handleException($ex, "Failed to quit Webdriver: ", false);
-        } catch (WebDriverException $ex) {
-            handleException($ex, "Failed to quit Webdriver: ", false);
         } catch (Exception $ex) {
-            handleException($ex, "Failed to quit Webdriver: ", false);
+            handleException($ex, 'Failed to quit Webdriver: ', false);
         } finally {
             $driver = null;
             $this->remoteWebDriver = null;
@@ -188,15 +193,9 @@ class SeleniumManager extends PropertyObject
     public function get_driver()
     {
         try {
-            if (null === $this->remoteWebDriver) {
+            if (null !== $this->remoteWebDriver) {
                 $this->create_remote_webdriver();
             }
-            return $this->remoteWebDriver;
-        } catch (WebDriverCurlException $ex) {
-            $this->create_remote_webdriver();
-            return $this->remoteWebDriver;
-        } catch (WebDriverException $ex) {
-            $this->create_remote_webdriver();
             return $this->remoteWebDriver;
         } catch (Exception $ex) {
             $this->create_remote_webdriver();
@@ -211,9 +210,9 @@ class SeleniumManager extends PropertyObject
     {
         $webdriver = (array_key_exists('webdriver', $this->_settings)) ? $this->_settings['webdriver'] : null;
         if (null === $webdriver) {
-            $webdriver = "phantomjs";
-            if (PHP_OS == "Darwin") {
-                $webdriver = "safari";
+            $webdriver = 'phantomjs';
+            if (PHP_OS === 'Darwin') {
+                $webdriver = 'safari';
             }
         }
 
@@ -257,8 +256,8 @@ class SeleniumManager extends PropertyObject
 
 
             $capabilities->setCapability('acceptInsecureCerts', true);
-            $capabilities->setCapability("setThrowExceptionOnScriptError", false);
-            $capabilities->setCapability("unexpectedAlertBehaviour", "dismiss");
+            $capabilities->setCapability('setThrowExceptionOnScriptError', false);
+            $capabilities->setCapability('unexpectedAlertBehaviour', 'dismiss');
             $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
             $capabilities->setCapability(WebDriverCapabilityType::APPLICATION_CACHE_ENABLED, true);
             $capabilities->setCapability(WebDriverCapabilityType::CSS_SELECTORS_ENABLED, true);
@@ -279,13 +278,9 @@ class SeleniumManager extends PropertyObject
             //	        $window = new WebDriverDimension(1024, 768);
             //	        $this->remoteWebDriver->manage()->window()->setSize($window);
 
-            LogMessage("Remote web driver instantiated.");
+            LogMessage('Remote web driver instantiated.');
 
             return $this->remoteWebDriver;
-        } catch (WebDriverCurlException $ex) {
-            handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
-        } catch (WebDriverException $ex) {
-            handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
         } catch (Exception $ex) {
             handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
         }

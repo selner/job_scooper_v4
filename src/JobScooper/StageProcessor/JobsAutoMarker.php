@@ -477,11 +477,10 @@ class JobsAutoMarker
             //
             $this->_loadCompanyRegexesToFilter();
 
-            $nJobsSkipped = 0;
             $nJobsMarkedAutoExcluded = 0;
             $nJobsNotMarked = 0;
 
-            if (count($arrJobsList) == 0 || null === $this->companies_regex_to_filter || count($this->companies_regex_to_filter) == 0) {
+            if (null === $this->companies_regex_to_filter  || count($arrJobsList) === 0 || count($this->companies_regex_to_filter) === 0) {
                 return;
             }
 
@@ -499,9 +498,10 @@ class JobsAutoMarker
                         break;
                     }
                 }
+				unset($jobMatch);
 
                 if ($matched_exclusion !== true) {
-                    $nJobsNotMarked += 1;
+                    ++$nJobsNotMarked;
                 }
             }
 
