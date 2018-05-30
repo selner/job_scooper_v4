@@ -22,8 +22,8 @@ use JobScooper\Logging\ErrorEmailLogHandler;
 use JobScooper\Utils\Settings;
 use Monolog\ErrorHandler;
 use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\DeduplicationHandler;
-use Monolog\Handler\RavenHandler;
+
+use Monolog\Handler\BufferHandler;use Monolog\Handler\RavenHandler;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
@@ -60,7 +60,7 @@ class JobsErrorHandler extends ErrorHandler
         }
 
         LogError(sprintf('Uncaught Exception: %s', $e->getMessage()));
-        handleException($e, 'Uncaught Exception: %s');
+        handleException($e, 'Uncaught Exception: %s', false);
 //        exit(255);
     }
 }
@@ -77,8 +77,7 @@ class LoggingManager extends \Monolog\Logger
     private $_loggerName = 'default';
     private $_loggers = array();
     private $_csvHandle = null;
-    private $_dedupeHandle = null;
-    private $_doLogContext = false;
+    private $_emailHandle = null;
     private $_sentryClient = null;
 
     private $_shouldLogContext = false;
@@ -262,11 +261,13 @@ class LoggingManager extends \Monolog\Logger
         $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started to CSV file at {$csvlog}");
 
         $now = getNowAsString('-');
-        $dedupeLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-dedupe_log_errors.csv";
-        $this->_dedupeHandle = fopen($dedupeLog, 'w');
-        $this->_handlersByType['dedupe_email'] = new DeduplicationHandler(new ErrorEmailLogHandler(Logger::ERROR, true), $deduplicationStore = $dedupeLog, $deduplicationLevel = Logger::ERROR, $time = 60, $bubble = true);
-        $this->pushHandler($this->_handlersByType['dedupe_email']);
-        $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started for deduped email log file at {$dedupeLog}");
+        $emailLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-email_error_log_errors.csv";
+        $this->_emailHandle = fopen($emailLog, 'w');
+        $this->_handlersByType['email_errors'] = new BufferHandler(
+        	    new ErrorEmailLogHandler(Logger::ERROR, true),
+                1000);
+        $this->pushHandler($this->_handlersByType['email_errors']);
+        $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started for emailed error log file at {$emailLog}");
 
         $this->updatePropelLogging();
     }
@@ -390,24 +391,16 @@ class LoggingManager extends \Monolog\Logger
      */
     public function getDebugContext($context=array(), \Exception $thrownExc = null)
     {
-        $runtime_fmt = '';
+    	$runtime_secs = 0;
         $runStartTime = Settings::getValue('app_run_start_datetime');
         if (!empty($runStartTime)) {
-            $runtime = $runStartTime->diff(new \DateTime());
-            $runtime_fmt = $runtime->format('%h:%d:%s');
+            $runtime_interval = $runStartTime->diff(new \DateTime());
+            $runtime_secs = (int)$runtime_interval->format('%s');
         }
 
-
         $baseContext = [
-            'class_call' => '',
-            'exception_message' => '',
-            'exception_file' => '',
-            'exception_line' => '',
-//		'exception_trace' => '',
-            'hostname' => gethostname(),
-            'channel' => '',
-            'jobsite' => '',
-            'runtime' => $runtime_fmt
+            'runtime' => $runtime_secs,
+            'memory_usage' => getPhpMemoryUsage()
         ];
 
         if (is_array($context)) {
@@ -416,53 +409,66 @@ class LoggingManager extends \Monolog\Logger
             $context = $baseContext;
         }
 
-        //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
-        $dbg = debug_backtrace();
-        $i = 0;
-        $jobsiteKey = null;
-        $usersearch = null;
+        if(null !== $thrownExc)
+        {
+            $errContext = [
+            'class_call' => '',
+            'exception_message' => '',
+            'exception_file' => '',
+            'exception_line' => '',
+//		'exception_trace' => '',
+            'hostname' => gethostname(),
+            'channel' => '',
+            'jobsite' => ''];
 
-        $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-        while ($i < count($dbg) - 1) {
-            if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
-                (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array('getDebugContent', 'handleException')))) {
-                $class = $dbg[$i]['class'] . '->' . $dbg[$i]['function'] .'()';
-                if (!empty($dbg[$i]['object'])) {
-                    $objclass = get_class($dbg[$i]['object']);
-                    if (strcasecmp($objclass, $dbg[$i]['class']) != 0) {
-                        $class = "{$objclass} -> {$class}";
-                        try {
-                            if (is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], 'getName')) {
-                                $jobsiteKey = $dbg[$i]['object']->getName();
-                            }
-                        } catch (Exception $ex) {
-                            $jobsiteKey = '';
-                        }
-                        try {
-                            if (array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args'])) {
-                                if (is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), 'getUserSearchSiteRunKey')) {
-                                    $usersearch = $dbg[$i]['args'][0]->getUserSearchSiteRunKey();
-                                } else {
-                                    $usersearch = '';
-                                }
-                            }
-                        } catch (Exception $ex) {
-                            $usersearch = '';
-                        }
-                    }
-                    break;
-                }
-            }
-            $i++;
-        }
+            $context = array_merge($errContext, $context);
 
 
-        $context['class_call'] = $class;
-        $context['channel'] = null === $jobsiteKey ? 'default' : 'plugins';
-        $context['jobsite'] = $jobsiteKey;
+	        //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
+	        $dbg = debug_backtrace();
+	        $i = 0;
+	        $jobsiteKey = null;
+	        $usersearch = null;
+	
+	        $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
+	        while ($i < count($dbg) - 1) {
+	            if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
+	                (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array('getDebugContent', 'handleException')))) {
+	                $class = $dbg[$i]['class'] . '->' . $dbg[$i]['function'] .'()';
+	                if (!empty($dbg[$i]['object'])) {
+	                    $objclass = get_class($dbg[$i]['object']);
+	                    if (strcasecmp($objclass, $dbg[$i]['class']) != 0) {
+	                        $class = "{$objclass} -> {$class}";
+	                        try {
+	                            if (is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], 'getName')) {
+	                                $jobsiteKey = $dbg[$i]['object']->getName();
+	                            }
+	                        } catch (Exception $ex) {
+	                            $jobsiteKey = '';
+	                        }
+	                        try {
+	                            if (array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args'])) {
+	                                if (is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), 'getUserSearchSiteRunKey')) {
+	                                    $usersearch = $dbg[$i]['args'][0]->getUserSearchSiteRunKey();
+	                                } else {
+	                                    $usersearch = '';
+	                                }
+	                            }
+	                        } catch (Exception $ex) {
+	                            $usersearch = '';
+	                        }
+	                    }
+	                    break;
+	                }
+	            }
+	            $i++;
+	        }
+	
+	
+	        $context['class_call'] = $class;
+	        $context['channel'] = null === $jobsiteKey ? 'default' : 'plugins';
+	        $context['jobsite'] = $jobsiteKey;
 
-
-        if (null !== $thrownExc) {
             $context['exception_message'] = $thrownExc->getMessage();
             $context['exception_file'] = $thrownExc->getFile();
             $context['exception_line'] = $thrownExc->getLine();
@@ -482,8 +488,6 @@ class LoggingManager extends \Monolog\Logger
                 $this->_sentryClient->context = $sentryContext;
             }
         }
-
-        $context['memory_usage'] = getPhpMemoryUsage();
 
         return $context;
     }

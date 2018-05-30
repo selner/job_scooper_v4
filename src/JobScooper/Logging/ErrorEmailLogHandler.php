@@ -35,8 +35,7 @@ class ErrorEmailLogHandler extends MailHandler
     protected function send($content, array $records)
     {
         $newErrContent = $this->getEmailErrorLogContent() . PHP_EOL . $content;
-        return Settings::setValue("email_error_log_content", $newErrContent);
-
+        Settings::setValue("email_error_log_content", $newErrContent);
 
         $searchParams = $this->_getUserSearchSiteRunContent();
 

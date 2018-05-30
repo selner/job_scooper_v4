@@ -174,6 +174,7 @@ class NotifierJobAlerts extends JobsMailSender
 
             LogMessage("Building job notification list for {$userFacts['UserSlug']}'s keyword matches in {$geoLocation->getDisplayName()}...");
             $place = $geoLocation->getDisplayName();
+			$geoLocationId = $geoLocation->getGeoLocationId();
             $arrNearbyIds = getGeoLocationsNearby($geoLocation);
             unset($geoLocation);
 
@@ -207,7 +208,7 @@ class NotifierJobAlerts extends JobsMailSender
             if (countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) == 0) {
                 $subject = 'No New Job Postings Found for ' . getRunDateRange();
             } else {
-                $subject = countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) . ' New {$place} Job Postings: ' . getRunDateRange();
+                $subject = countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) . " New {$place} Job Postings: " . getRunDateRange();
             }
 
 
