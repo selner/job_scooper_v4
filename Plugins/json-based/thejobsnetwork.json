@@ -20,10 +20,11 @@
           "Fields": [
             {
               "Name": "NoPostsFound",
-              "Selector": "div#search-results-title div span",
+              "Selector": "div#search-results-title div.No-results-title span",
               "Index": 0,
               "Callback": "matchesNoResultsPattern",
-              "CallbackParameter": "No jobs"
+              "CallbackParameter": "No jobs",
+              "Type": "CSS"
             },
             {
               "Name": "TotalPostCount",
@@ -85,7 +86,7 @@
               "Name": "PostedAt",
               "Selector": "span.Position-row-desc span.col-xs-12 span.visible-xs",
               "Index": 0,
-              "Attribute": "node",
+              "Attribute": "collection",
               "Type": "CSS",
               "Callback": "combineTextAllChildren"
             }
