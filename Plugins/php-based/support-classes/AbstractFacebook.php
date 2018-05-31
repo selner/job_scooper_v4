@@ -59,9 +59,13 @@ class AbstractFacebook extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     public function getLocations($var)
     {
-        $delim = "~";
-        $strLocations = combineTextAllNodes($var, $delim);
-        $arrLocations = preg_split("/{$delim}/", $strLocations);
-        return $arrLocations;
+    	if(!is_empty_value($var) && array_key_exists('current_value', $var)) {
+    		$val = $var['current_value'];
+	        $delim = '~';
+	        $strLocations = combineTextAllNodes($val, $delim);
+	        $arrLocations = preg_split("/{$delim}/", $strLocations);
+	        return $arrLocations;
+        }
+        return null;
     }
 }
