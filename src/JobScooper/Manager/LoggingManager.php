@@ -59,7 +59,7 @@ class JobsErrorHandler extends ErrorHandler
             $GLOBALS['logger'] = getChannelLogger('default');
         }
 
-        LogError(sprintf('Uncaught Exception: %s', $e->getMessage()));
+        LogError(sprintf('Uncaught Exception: %s', $e->getMessage()), null, $e);
         handleException($e, 'Uncaught Exception: %s', false);
 //        exit(255);
     }
@@ -308,7 +308,7 @@ class LoggingManager extends \Monolog\Logger
 
         $context = array();
         $monologLevel = \Monolog\Logger::toMonologLevel($level);
-        if ($this->_shouldLogContext === true || in_array($level, array(
+        if ($this->_shouldLogContext === true || in_array($monologLevel, array(
             \Monolog\Logger::WARNING, \Monolog\Logger::EMERGENCY, \Monolog\Logger::ERROR, \Monolog\Logger::DEBUG, \Monolog\Logger::CRITICAL))) {
             $context = $this->getDebugContext($extras, $ex);
         }
