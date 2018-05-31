@@ -18,6 +18,7 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
+use JobScooper\Utils\Settings;
 use JobScooper\Utils\SimpleHTMLHelper;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -163,6 +164,12 @@ class UserSearchSiteRunManager {
      */
     public static function filterRecentlyRunUserSearchRuns(&$searchRuns)
     {
+    	$ignoreRecent = Settings::getValue('command_line_args.ignore_recent');
+    	if(null !== $ignoreRecent && $ignoreRecent === true) {
+    		LogMessage('--ignore_recent set.  Not filtering out recently run searches.');
+			return;
+    	}
+
         $skippedSearchRuns = array();
         $dtSiteWaitPrevRunCutOff = date_sub(new \DateTime(), date_interval_create_from_date_string('23 hours'));
         $srKeys = array_keys($searchRuns);

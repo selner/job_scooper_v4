@@ -154,6 +154,7 @@ class JobSiteManager
     /**
      * @param array $sitesKeysInclude
      * @throws \Exception
+     * @return array
 	*/
     public static function getJobSiteKeysIncludedInRun()
     {
@@ -169,64 +170,23 @@ class JobSiteManager
 	            }
 		        $cfgExcluded = Settings::getValue('config_excluded_sites');
 	            if(!is_empty_value($cfgExcluded)) {
+					LogMessage('The following job sites have been set as excluded in the config file: ' . implode(", ", $cfgExcluded));
 		            $siteKeysToRun = array_diff($siteKeysToRun, $cfgExcluded);
 	            }
 	        }
 	
+	        /** @noinspection NotOptimalIfConditionsInspection */
+	        if(is_empty_value($siteKeysToRun)) {
+	        	LogWarning('No job sites set to run.  They were all excluded or marked disabled.');
+	        }
 	        Settings::setValue('included_jobsite_keys', $siteKeysToRun);
-		}
+			
+        }
+
+		sort($siteKeysToRun);
     	return $siteKeysToRun;
     }
-
-
-    /**
-	* @throws \Propel\Runtime\Exception\PropelException
-	* @throws \Exception
-	*/
-    public static function filterRecentlyRunJobSites(&$sites)
-    {
-    	if(is_empty_value($sites)) {
-    		return $sites;
-        }
-
-    	$stillIncluded = array_keys($sites);
-        $siteWaitCutOffTime = date_sub(new \DateTime(), date_interval_create_from_date_string('23 hours'));
-		$filteredSites = array();
-
-		$completedSitesAllOnly = UserSearchSiteRunQuery::create()
-            ->useJobSiteFromUSSRQuery()
-            ->filterByResultsFilterType('all-only')
-            ->withColumn('JobSiteFromUSSR.ResultsFilterType', 'ResultsFilterType')
-            ->endUse()
-            ->addAsColumn('LastCompleted', 'MAX(user_search_site_run.date_ended)')
-            ->select(array('JobSiteKey', 'ResultsFilterType', 'LastCompleted'))
-            ->filterByRunResultCode(array('successful', 'failed'), Criteria::IN)
-            ->groupBy(array('JobSiteKey', 'ResultsFilterType'))
-            ->find()
-            ->getData();
-        if (!empty($completedSitesAllOnly)) {
-	        $completedSiteKeys = array_column($completedSitesAllOnly, null, 'JobSiteKey');
-        	foreach($sites as $k => $site)
-            {
-	            if(array_key_exists($k, $completedSiteKeys) && !is_empty_value($completedSiteKeys[$k]['LastCompleted'])) {
-                  if(new \DateTime($completedSiteKeys[$k]['LastCompleted']) >= $siteWaitCutOffTime) {
-						$filteredSites[] = $k;
-						unset($stillIncluded[$k]);
-						$site = null;
-		                $sites[$k] = null;
-		                unset($sites[$k]);
-                  }
-                }
-	        }
-        }
-
-        $sites = self::getJobSitesByKeys($stillIncluded);
-        if(!is_empty_value($filteredSites)) {
-        	LogMessage('Filtered ' . count($filteredSites) . ' job sites that were completed too recently:  ' . getArrayDebugOutput($filteredSites));
-        }
-    }
-
-
+    
     /**
      * @return array|mixed
      * @throws \Exception
@@ -282,13 +242,14 @@ class JobSiteManager
         LogMessage('Synchronizing database JobSite records with JobSite plugin installation status...', null, null, null, $channel='plugins');
         $declaredPluginsBySiteKey = SitePluginFactory::getInstalledPlugins();
 
-        $allDBJobSitesByKey = \JobScooper\DataAccess\JobSiteRecordQuery::create()
+        $allDBJobSitesByKey = JobSiteRecordQuery::create()
             ->find()
             ->toArray('JobSiteKey');
         if(is_empty_value($allDBJobSitesByKey)) {
 			$allDBJobSitesByKey = array();
         }
 
+        ksort($allDBJobSitesByKey);
         foreach($allDBJobSitesByKey as $jobSiteKey => $jobSiteFacts) {
 			$objJobSite = self::getJobSiteByKey($jobSiteKey);
 			if(null === $objJobSite)
@@ -326,13 +287,14 @@ class JobSiteManager
                 $dbrec = null;
         }
 
-        $allEnabledJobSites = \JobScooper\DataAccess\JobSiteRecordQuery::create()
+        $allEnabledJobSites = JobSiteRecordQuery::create()
             ->findByisDisabled(false)
             ->toArray('JobSiteKey');
         if(is_empty_value($allEnabledJobSites)) {
 			throw new \Exception("Error:  all JobSites are disabled due to plugin installation issues.  Cannot continue.");
         }
 
+        ksort($allEnabledJobSites);
         $nEnabledSites = count($allEnabledJobSites);
         LogMessage("Loaded {$nEnabledSites} enabled jobsite plugins.");
         $dbJobSitesByKey = null;

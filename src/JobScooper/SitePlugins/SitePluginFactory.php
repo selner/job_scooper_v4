@@ -19,6 +19,7 @@ namespace JobScooper\SitePlugins;
 
 use Exception;
 use JobScooper\DataAccess\JobSiteRecordQuery;
+use JobScooper\SitePlugins\Base\SitePlugin;
 use JobScooper\Utils\Settings;
 
 class SitePluginFactory
@@ -98,7 +99,7 @@ class SitePluginFactory
                 $this->_initializeAllJsonPlugins();
 
             } catch (Exception $ex) {
-                throw new Exception("Failed to load and verify plugin code for installed JobSite plugins: %s", $ex->getCode(), $ex);
+                throw new Exception('Failed to load and verify plugin code for installed JobSite plugins: %s', $ex->getCode(), $ex);
             }
     }
 
@@ -153,6 +154,9 @@ class SitePluginFactory
         $this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . '*.json');
         LogMessage('Loading JSON-based, jobsite plugin configurations from ' . count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...", null, null, null, $channel='plugins');
 
+        sort($this->_configJsonFiles);
+
+
         foreach ($this->_configJsonFiles as $f) {
             $dataPlugins = loadJSON($f, null, true);
             if (empty($dataPlugins)) {
@@ -183,8 +187,9 @@ class SitePluginFactory
     private function _loadPhpPluginFiles_()
     {
         $files = glob_recursive($this->_dirPluginsRoot . DIRECTORY_SEPARATOR . '*.php');
+		sort($files);
         foreach ($files as $file) {
-            require_once($file);
+            require_once $file;
         }
     }
 
@@ -414,12 +419,15 @@ class SitePluginFactory
         foreach ($pluginClasses as $class) {
             $jobsitekey = cleanupSlugPart(str_replace('Plugin', '', $class));
             $classListBySite[$jobsitekey] = $class;
-            if (in_array(IJobSitePlugin::class, class_implements($class))) {
+            if (in_array(IJobSitePlugin::class, class_implements($class)) ||
+               (in_array(SitePlugin::class, class_parents($class)))) {
                 $classListBySite[$jobsitekey] = $class;
             } else {
-                LogWarning("{$jobsitekey} does not support iJobSitePlugin: " . getArrayDebugOutput(class_implements($class)));
+                LogWarning("{$jobsitekey} does not support iJobSitePlugin nor has the base SitePlugin as a parent: " . getArrayDebugOutput(class_implements($class)));
             }
         }
+
+        ksort($classListBySite);
 
         return $classListBySite;
     }
@@ -433,10 +441,10 @@ class SitePluginFactory
 
         $allClasses = array_flip($allSites);
 
-        if(array_key_exists($className,$allClasses)) {
+        if(array_key_exists($className, $allClasses)) {
             return $allClasses[$className];
         }
-
+		
         return null;
     }
 
