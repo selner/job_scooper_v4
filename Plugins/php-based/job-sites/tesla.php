@@ -31,11 +31,11 @@ class PluginTesla extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $JobListingsPerPage = C_JOB_MAX_RESULTS_PER_SEARCH;
 
     protected $arrListingTagSetup = array(
-        'JobPostItem' => array('selector' => "table tr.table-row" ),
-        'Title' => array('selector' => 'th.listing-title a', 'return_attribute' => 'text'),
-        'Url' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href'),
-        'JobSitePostId' => array('selector' => 'th.listing-title a', 'return_attribute' => 'href', 'return_value_regex' =>  '/.*?([-\d]+)$/'),
-        'Department' => array('selector' => 'td.listing-department'),
-        'Location' => array('selector' => 'td.listing-location')
+        'JobPostItem' => array('Selector' => "table tr.table-row" ),
+        'Title' => array('Selector' => 'th.listing-title a', 'Attribute' => 'text'),
+        'Url' => array('Selector' => 'th.listing-title a', 'Attribute' => 'href'),
+        'JobSitePostId' => array('Selector' => 'th.listing-title a', 'Attribute' => 'href', 'Pattern' =>  '/.*?([-\d]+)$/'),
+        'Department' => array('Selector' => 'td.listing-department'),
+        'Location' => array('Selector' => 'td.listing-location')
     );
 }

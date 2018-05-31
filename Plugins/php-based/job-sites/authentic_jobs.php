@@ -20,29 +20,24 @@
 class PluginAuthenticJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'AuthenticJobs';
-    protected $JobPostingBaseUrl = "https://authenticjobs.com";
+    protected $JobPostingBaseUrl = 'https://authenticjobs.com';
     protected $SearchUrlFormat = 'https://authenticjobs.com/#location=***LOCATION***';
     #    protected $SearchUrlFormat = 'https://authenticjobs.com/#location=***LOCATION***&query=***KEYWORDS***';
     protected $LocationType = 'location-city';
     protected $JobListingsPerPage = 50;
     private $_currentSearchDetails = null;
 
-    protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'ul#listings li#no-results h1', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
-        'JobPostItem'      => array('selector' => 'ul#listings li'),
-        'Title'                 =>  array('selector' => 'a div h3', 'return_attribute' => 'text'),
-        'Url'                  =>  array('selector' => 'a', 'return_attribute' => 'href'),
-        'Company'               =>  array('selector' => 'a div h4', 'return_attribute' => 'text'),
-        'Location'              =>  array('selector' => 'a ul li.location', 'return_attribute' => 'text'),
-        'EmploymentType'       =>  array('selector' => 'a ul li', 'index' => 0, 'return_attribute' => 'text'),
-        'JobSitePostId'                =>  array('selector' => 'a', 'return_attribute' => 'href', 'return_value_regex' =>  '/\/jobs\/([^?]+)/i'),
-        'LoadMoreControl'             =>  array('selector' => 'a.ladda-button')
-    );
-
-    public function checkNoJobResults($var)
-    {
-        return noJobStringMatch($var, "No results found");
-    }
+    protected $arrListingTagSetup = [
+        'NoPostsFound'    => ['Selector' => 'ul#listings li#no-results h1', 'Attribute' => 'text', 'Callback' => 'matchesNoResultsPattern', 'CallbackParameter' => '/no results/'],
+        'JobPostItem'      => ['Selector' => 'ul#listings li'],
+        'Title'                 =>  ['Selector' => 'a div h3', 'Attribute' => 'text'],
+        'Url'                  =>  ['Selector' => 'a', 'Attribute' => 'href'],
+        'Company'               =>  ['Selector' => 'a div h4', 'Attribute' => 'text'],
+        'Location'              =>  ['Selector' => 'a ul li.location', 'Attribute' => 'text'],
+        'EmploymentType'       =>  ['Selector' => 'a ul li', 'Index' => 0, 'Attribute' => 'text'],
+        'JobSitePostId'                =>  ['Selector' => 'a', 'Attribute' => 'href', 'Pattern' =>  '/\/jobs\/([^?]+)/i'],
+        'LoadMoreControl'             =>  ['Selector' => 'a.ladda-button']
+    ];
 
     public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
     {
@@ -53,11 +48,11 @@ class PluginAuthenticJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
     {
         $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage($this->_currentSearchDetails);
 
-        $node = $objSimplHtml->find("p.more");
+        $node = $objSimplHtml->find('p.more');
         if ($node == null || count($node) == 0) {
             return false;
         } else {
-            if (stristr($node[0]->attr["style"], "display: none") !== false) {
+            if (false !== stripos($node[0]->attr['style'], 'display: none')) {
                 return false;
             }
         }

@@ -33,28 +33,17 @@ class PluginZipRecruiter extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
     protected $LocationType = 'location-city-comma-statecode';
 
-    protected $arrListingTagSetup = array(
-        'NoPostsFound'    => array('selector' => 'section.no-results h2', 'return_attribute' => 'text', 'return_value_callback' => "checkNoJobResults"),
-        'TotalPostCount'        => array('selector' => 'h1.headline', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b([\d,]+)\+?\b/i'),
-        'JobPostItem'      => array('selector' => '#job_list div article'),
-        'Title'                 => array('selector' => 'span.just_job_title', 'return_attribute' => 'text'),
-        'Url'                  => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 'job_link', 'return_attribute' => 'href'),
-        'Company'               => array('tag' => 'a', 'attribute'=>'class', 'attribute_value' => 't_org_link name', 'return_attribute' => 'text'),
-        'Location'              => array('tag' => '*', 'attribute'=>'class', 'attribute_value' => 'Location', 'return_attribute' => 'text'),
-        'JobSitePostId'                => array('tag' => 'span', 'attribute'=>'class', 'attribute_value' => 'just_job_title', 'return_attribute' => 'data-job-id'),
-    );
-
-    /**
-     * @param $var
-     *
-     * @return int|null
-     * @throws \Exception
-     */
-    public function checkNoJobResults($var)
-    {
-        return noJobStringMatch($var, "No jobs");
-    }
-
+    protected $arrListingTagSetup = [
+        'NoPostsFound'    => ['Selector' => 'section.no-results h2', 'Attribute' => 'text', 'Callback' => 'matchesNoResultsPattern', 'CallbackParameter' => 'no jobs'],
+        'TotalPostCount'        => ['Selector' => 'h1.headline', 'Attribute' => 'text', 'Pattern' =>  '/\b([\d,]+)\+?\b/i'],
+        'JobPostItem'      => ['Selector' => '#job_list div article'],
+        'Title'                 => ['Selector' => 'span.just_job_title', 'Attribute' => 'text'],
+        'Url'                  => ['Selector' => 'a.job_link', 'Attribute' => 'href'],
+        'Company'               => ['Selector' => 'a.t_org_link name', 'Attribute' => 'text'],
+        'Location'              => ['Selector' => '*.Location', 'Attribute' => 'text'],
+        'JobSitePostId'                => ['Selector' => 'span.just_job_title', 'Attribute' => 'data-job-id']
+    ];
+    
     /**
      * @param $objSimpHTML
      *

@@ -31,17 +31,6 @@ abstract class AbstractJobviteATS extends \JobScooper\SitePlugins\AjaxSitePlugin
     }
 
     /**
-     * @param $var
-     *
-     * @return int|null
-     * @throws \Exception
-     */
-    public static function checkNoJobResults($var)
-    {
-        return noJobStringMatch($var, "Found 0 jobs");
-    }
-
-    /**
      * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
      */
     public function doFirstPageLoad(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
@@ -53,12 +42,12 @@ abstract class AbstractJobviteATS extends \JobScooper\SitePlugins\AjaxSitePlugin
      * @var array
      */
     protected $arrListingTagSetup = array(
-//        'JobPostItem'      => array('frame' => 'jobvite_careersite_iframe', 'selector' => 'table.jv-job-list tr'),
-        'JobPostItem'      => array('selector' => 'table.jv-job-list tr'),
-        'Title'                 => array('selector' => 'td.jv-job-list-name a'),
-        'Url'                 => array('selector' => 'td.jv-job-list-name a', 'return_attribute' => 'href'),
-        'Location'              => array('selector' => 'td.jv-job-list-location', 'return_attribute' => 'text'),
-        'JobSitePostId'                 => array('selector' => 'td.jv-job-list-name a', 'return_attribute' => 'href', 'return_value_regex' =>  '/job\/(.*)/i'),
+//        'JobPostItem'      => array('frame' => 'jobvite_careersite_iframe', 'Selector' => 'table.jv-job-list tr'),
+        'JobPostItem'      => array('Selector' => 'table.jv-job-list tr'),
+        'Title'                 => array('Selector' => 'td.jv-job-list-name a'),
+        'Url'                 => array('Selector' => 'td.jv-job-list-name a', 'Attribute' => 'href'),
+        'Location'              => array('Selector' => 'td.jv-job-list-location', 'Attribute' => 'text'),
+        'JobSitePostId'                 => array('Selector' => 'td.jv-job-list-name a', 'Attribute' => 'href', 'Pattern' =>  '/job\/(.*)/i'),
     );
     /**
      * @var null

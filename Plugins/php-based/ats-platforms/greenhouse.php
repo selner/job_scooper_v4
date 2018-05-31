@@ -27,11 +27,11 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
     protected $additionalBitFlags = [C__JOB_USE_SITENAME_AS_COMPANY];
 	
     protected $arrListingTagSetup = array(
-//		'JobPostItem' => array('selector' => 'ul.list-group li.list-group-item'),
-//		'Title' => array('selector' => 'h4.list-group-item-heading a'),
-//		'Url' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href'),
-//		'Location' => array('selector' => 'ul li', 'index' => 0),
-//		'Department' => array('selector' => 'ul li', 'index' => 1),
+//		'JobPostItem' => array('Selector' => 'ul.list-group li.list-group-item'),
+//		'Title' => array('Selector' => 'h4.list-group-item-heading a'),
+//		'Url' => array('Selector' => 'h4.list-group-item-heading a', 'Attribute' => 'href'),
+//		'Location' => array('Selector' => 'ul li', 'Index' => 0),
+//		'Department' => array('Selector' => 'ul li', 'Index' => 1),
     );
 
     public function __construct()

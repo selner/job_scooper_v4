@@ -243,16 +243,16 @@ class SitePluginFactory
                 switch (strtoupper($arrConfigData['Pagination']['Type'])) {
                     case 'NEXT-BUTTON':
                         $pluginData[$listingTagBucket]['NextButton'] = array(
-                            'selector' => $arrConfigData['Pagination']['Selector'],
-                            'index' => $arrConfigData['Pagination']['Index'],
+                            'Selector' => $arrConfigData['Pagination']['Selector'],
+                            'Index' => $arrConfigData['Pagination']['Index'],
                             'type' => 'CSS'
                         );
                         break;
 
                     case 'LOAD-MORE':
                         $pluginData[$listingTagBucket]['LoadMoreControl'] = array(
-                            'selector' => $arrConfigData['Pagination']['Selector'],
-                            'index' => $arrConfigData['Pagination']['Index'],
+                            'Selector' => $arrConfigData['Pagination']['Selector'],
+                            'Index' => $arrConfigData['Pagination']['Index'],
                             'type' => 'CSS'
                         );
                         break;
@@ -269,29 +269,11 @@ class SitePluginFactory
                 $pluginData[$listingTagBucket] = array();
             }
             foreach ($arrConfigData['Collections'] as $coll) {
-                foreach ($coll['Fields'] as $field) {
-                    $name = getArrayItem('Name', $field);
-
-                    $pluginData[$listingTagBucket][$name] = array();
-                    $MAP_VALUES = array(
-                        ['selector', 'Selector'],
-                        ['index', 'Index'],
-                        ['return_attribute', 'Attribute'],
-                        ['type', 'Type'],
-                        ['field', 'Field'],
-                        ['value', 'Value'],
-                        ['return_value_regex', 'Pattern'],
-                        ['return_value_callback', 'Callback'],
-                        ['callback_parameter', 'CallbackParameter']
-                    );
-
-                    foreach ($MAP_VALUES as $mapping) {
-                        setArrayItem($pluginData[$listingTagBucket][$name], $mapping[0], $field, $mapping[0]);
-                    }
-
-                    foreach ($MAP_VALUES as $mapping) {
-                        setArrayItem($pluginData[$listingTagBucket][$name], $mapping[0], $field, $mapping[1]);
-                    }
+            	if(array_key_exists('Fields', $coll)) {
+					foreach ($coll['Fields'] as $field) {
+	                    $name = getArrayItem('Name', $field);
+						$pluginData[$listingTagBucket][$name] = $field;
+	                }
                 }
             }
         }

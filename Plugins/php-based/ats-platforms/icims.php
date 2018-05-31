@@ -43,9 +43,9 @@ class AbstractIcimsATS extends \JobScooper\SitePlugins\AjaxSitePlugin
             if (array_key_exists($tagKey, $this->TagIndexes) === true && null !== $this->TagIndexes[$tagKey] &&
                 array_key_exists($tagKey, $this->arrBaseListingTagSetup)) {
                 if (array_key_exists(0, $this->arrBaseListingTagSetup[$tagKey]) && is_array($this->arrBaseListingTagSetup[$tagKey]) === true) {
-                    $this->arrBaseListingTagSetup[$tagKey][0]['index'] = $this->TagIndexes[$tagKey];
+                    $this->arrBaseListingTagSetup[$tagKey][0]['Index'] = $this->TagIndexes[$tagKey];
                 } else {
-                    $this->arrBaseListingTagSetup[$tagKey]['index'] = $this->TagIndexes[$tagKey];
+                    $this->arrBaseListingTagSetup[$tagKey]['Index'] = $this->TagIndexes[$tagKey];
                 }
             }
         }
@@ -55,15 +55,15 @@ class AbstractIcimsATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 
     protected $arrBaseListingTagSetup = array(
 
-        'JobPostItem'          => array('selector' => 'div.iCIMS_JobsTable div.row'),
-        'Title'                => array('selector' => 'div.title a span'),
-        'Url'                  => array('selector' => 'div.title a', 'return_attribute' => 'href'),
-        'JobSitePostId'        => array('selector' => 'div.title a', 'return_attribute' => 'title', 'return_value_regex' => '/(\d+)/'),
-        'Location'             => array('selector' => 'div span', 'index' => 0),
-        'PostedAt'             => array('selector' => 'span.sr-only'),
+        'JobPostItem'          => array('Selector' => 'div.iCIMS_JobsTable div.row'),
+        'Title'                => array('Selector' => 'div.title a span'),
+        'Url'                  => array('Selector' => 'div.title a', 'Attribute' => 'href'),
+        'JobSitePostId'        => array('Selector' => 'div.title a', 'Attribute' => 'title', 'Pattern' => '/(\d+)/'),
+        'Location'             => array('Selector' => 'div span', 'Index' => 0),
+        'PostedAt'             => array('Selector' => 'span.sr-only'),
         // TotalResultPageCount tag is a placeholder needed to trigger the right code paths, but is overridden by the
         // custom parseTotalResultsCount() method below
-        'TotalResultPageCount' => array('selector' => 'a', 'return_value_regex' => '/pr=(\d+)/', 'type' => 'XPATH')
+        'TotalResultPageCount' => array('Selector' => 'a', 'Pattern' => '/pr=(\d+)/', 'Type' => 'XPATH')
     );
 
     /**

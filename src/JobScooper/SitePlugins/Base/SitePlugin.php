@@ -171,11 +171,11 @@ abstract class SitePlugin implements IJobSitePlugin
         if (!empty($this->arrListingTagSetup) && is_array($this->arrListingTagSetup)) {
             foreach (array_keys($this->arrListingTagSetup) as $k) {
                 if (is_array($this->arrListingTagSetup[$k])) {
-                    if (array_key_exists('type', $this->arrListingTagSetup[$k])) {
-                        switch ($this->arrListingTagSetup[$k]['type']) {
+                    if (array_key_exists('Type', $this->arrListingTagSetup[$k])) {
+                        switch ($this->arrListingTagSetup[$k]['Type']) {
                             case 'CSS':
-                                if (array_key_exists('return_attribute', $this->arrListingTagSetup[$k]) &&
-                                    in_array(strtoupper($this->arrListingTagSetup[$k]['return_attribute']), array('NODE', 'COLLECTION')) === true) {
+                                if (array_key_exists('Attribute', $this->arrListingTagSetup[$k]) &&
+                                    in_array(strtoupper($this->arrListingTagSetup[$k]['Attribute']), array('NODE', 'COLLECTION')) === true) {
                                     $rank = 10;
                                 } else {
                                     $rank = 50;
@@ -744,20 +744,29 @@ JSCODE;
 
 
     /**
-     * @param $var
+     * @param array $var  Array['current_value', 'parameter']   Paramter can be either a plain string or a regex pattern
      *
-     * @return int|null
+     * @return int|null  Returns 0 for count if it matches; otherwise returns null for no match
      * @throws \Exception
      */
     public function matchesNoResultsPattern($var)
     {
-        $val = $var['current_value'];
-        $match_value = $var['parameter'];
+        $current_value = $var['current_value'];
+        $match_string = $var['parameter'];
 
-        if (is_empty_value($match_value)) {
-            throw new \Exception("Plugin {$this->JobSiteName} definition missing pattern match value for matchesNoResultsPattern callback.");
+        if (is_empty_value($match_string)) {
+            throw new \InvalidArgumentException("Plugin {$this->JobSiteName} definition missing pattern match value for matchesNoResultsPattern callback.");
         }
-        return noJobStringMatch($val, $match_value);
+
+        if(is_empty_value($current_value) || !is_string($current_value)) {
+                return null;
+        }
+        
+        if (false !== preg_match($match_string,$current_value)) {
+	        return 0;
+	    }
+		
+        return null;
     }
 
     /**
@@ -801,7 +810,7 @@ JSCODE;
             }
         } elseif (array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalResultPageCount']) && count($this->arrListingTagSetup['TotalResultPageCount']) > 0) {
             $retPageCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalResultPageCount'], null, $this);
-            if (is_empty_value($retJobCount)) {
+            if (is_empty_value($retPageCount)) {
                 throw new \Exception('Unable to determine number of pages for the defined tag:  ' . getArrayValuesAsString($this->arrListingTagSetup['TotalResultPageCount']));
             }
 
@@ -850,8 +859,8 @@ JSCODE;
         $ret = null;
         $item = null;
 
-        if (array_key_exists('return_attribute', $this->arrListingTagSetup['JobPostItem']) === false) {
-            $this->arrListingTagSetup['JobPostItem']['return_attribute'] = 'collection';
+        if (array_key_exists('Attribute', $this->arrListingTagSetup['JobPostItem']) === false) {
+            $this->arrListingTagSetup['JobPostItem']['Attribute'] = 'collection';
         }
 
         $nodesJobRows = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobPostItem'], null, $this);
@@ -1808,8 +1817,11 @@ JSCODE;
 
             if ($nTotalListings <= 0) {
                 $this->log("No new job listings were found on {$this->JobSiteName} for search {$searchDetails->getUserSearchSiteRunKey()}.");
+
                 return;
+
             } else {
+
                 $nJobsFound = 0;
 
                 $this->log("Querying {$this->JobSiteName} for {$totalPagesCount}  pages with " . ($nTotalListings === C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of jobs" : "{$nTotalListings} jobs:  ") . $searchDetails->getSearchStartUrl());

@@ -33,17 +33,17 @@ class PluginCareerBuilder extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $JobListingsPerPage = 25;
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound' => array('selector' => 'div.noresults h3', 'return_attribute' => 'text', 'return_value_callback' => "matchesNoResultsPattern", 'callback_parameter' => 'no results were found'),
-        'TotalPostCount' => array('selector' => 'div.count', 'return_value_regex' => '/.*?([\d]+).*?Job/'),
-        'JobPostItem' => array('selector' => 'div.job-row'),
-        'Title' =>  array('selector' => 'h2 a', 'return_attribute' => 'text', 'index' => 0),
-        'Url' =>  array('selector' => 'h2 a', 'return_attribute' => 'href', 'index' => 0),
-        'JobSitePostId' =>  array('selector' => 'h2 a', 'index' => 0, 'return_attribute' => 'data-job-did'),
-        'Company' =>  array('selector' => 'h4.job-text a', 'index' => 0),
-        'EmploymentType' =>  array('selector' => 'h4.employment-info', 'index'=> 0),
-        'Location' =>  array('selector' => 'h4.job-text', 'index'=> 2),
-        'PostedAt' =>  array('selector' => 'div.time-posted div em', 'index' => 0, 'return_attribute' => 'text'),
-        'NextButton' =>  array('selector' => 'a#next-button'),
+        'NoPostsFound' => array('Selector' => 'div.noresults h3', 'Attribute' => 'text', 'Callback' => "matchesNoResultsPattern", 'CallbackParameter' => 'no results were found'),
+        'TotalPostCount' => array('Selector' => 'div.count', 'Pattern' => '/.*?([\d]+).*?Job/'),
+        'JobPostItem' => array('Selector' => 'div.job-row'),
+        'Title' =>  array('Selector' => 'h2 a', 'Attribute' => 'text', 'Index' => 0),
+        'Url' =>  array('Selector' => 'h2 a', 'Attribute' => 'href', 'Index' => 0),
+        'JobSitePostId' =>  array('Selector' => 'h2 a', 'Index' => 0, 'Attribute' => 'data-job-did'),
+        'Company' =>  array('Selector' => 'h4.job-text a', 'Index' => 0),
+        'EmploymentType' =>  array('Selector' => 'h4.employment-info', 'Index'=> 0),
+        'Location' =>  array('Selector' => 'h4.job-text', 'Index'=> 2),
+        'PostedAt' =>  array('Selector' => 'div.time-posted div em', 'Index' => 0, 'Attribute' => 'text'),
+        'NextButton' =>  array('Selector' => 'a#next-button'),
     );
 
     /**
@@ -101,17 +101,17 @@ class PluginCareerBuilderUK extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $CountryCodes = array("UK");
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound' => array('selector' => 'div.row.section-body-container.full-width div div strong', 'index' => 0, 'return_attribute' => 'text',  'return_value_callback' => 'matchesNoResultsPattern', 'callback_parameter' => "no results"),
-        'TotalPostCount' => array('selector' => 'h1', 'index'=> 0, 'return_attribute' => 'text', 'return_value_regex' => '/(\d+).*?/'),
-        'JobPostItem' => array('selector' => 'article.job-list'),
-        'Url' => array('selector' => 'a.job-title', 'return_attribute' => 'href'),
-        'Title' => array('selector' => 'a.job-title', 'return_attribute' => 'text'),
-        'Location' => array('selector' => 'ul.inline-list li', 'index' => 0, 'return_attribute' => 'text', 'return_value_regex' => '/\s*Location\s*(.*)/'),
-        'PayRange' => array('selector' => 'ul.inline-list li', 'index' => 1, 'return_attribute' => 'text', 'return_value_regex' => '/\s*Pay\s*(.*)/'),
-        'Category' => array('selector' => 'ul.inline-list li', 'index' => 2, 'return_attribute' => 'text', 'return_value_regex' => '/\s*Type\s*(\w+)\s*/'),
-        'PostedAt' => array('selector' => 'ul.inline-list li span', 'index' => 4, 'return_attribute' => 'text', 'return_value_regex' => '/\s*Posted\s*(.*)/'),
-        'Company' => array('selector' => 'a.show-for-large-up', 'index' => 0, 'return_attribute' => 'text'),
-        'JobSitePostId' => array('selector' => 'a.job-title', 'return_attribute' => 'href', 'return_value_regex' => '/\/([^\/]*)\/\?.*/'),
+        'NoPostsFound' => array('Selector' => 'div.row.section-body-container.full-width div div strong', 'Index' => 0, 'Attribute' => 'text',  'Callback' => 'matchesNoResultsPattern', 'CallbackParameter' => "no results"),
+        'TotalPostCount' => array('Selector' => 'h1', 'Index'=> 0, 'Attribute' => 'text', 'Pattern' => '/(\d+).*?/'),
+        'JobPostItem' => array('Selector' => 'article.job-list'),
+        'Url' => array('Selector' => 'a.job-title', 'Attribute' => 'href'),
+        'Title' => array('Selector' => 'a.job-title', 'Attribute' => 'text'),
+        'Location' => array('Selector' => 'ul.inline-list li', 'Index' => 0, 'Attribute' => 'text', 'Pattern' => '/\s*Location\s*(.*)/'),
+        'PayRange' => array('Selector' => 'ul.inline-list li', 'Index' => 1, 'Attribute' => 'text', 'Pattern' => '/\s*Pay\s*(.*)/'),
+        'Category' => array('Selector' => 'ul.inline-list li', 'Index' => 2, 'Attribute' => 'text', 'Pattern' => '/\s*Type\s*(\w+)\s*/'),
+        'PostedAt' => array('Selector' => 'ul.inline-list li span', 'Index' => 4, 'Attribute' => 'text', 'Pattern' => '/\s*Posted\s*(.*)/'),
+        'Company' => array('Selector' => 'a.show-for-large-up', 'Index' => 0, 'Attribute' => 'text'),
+        'JobSitePostId' => array('Selector' => 'a.job-title', 'Attribute' => 'href', 'Pattern' => '/\/([^\/]*)\/\?.*/'),
     );
 
     /**

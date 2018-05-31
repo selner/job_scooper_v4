@@ -22,21 +22,20 @@ class PluginBoeing extends AbstractTalentBrew
     protected $JobPostingBaseUrl = 'https://jobs.boeing.com';
     protected $JobListingsPerPage = 20;
     protected $SearchUrlFormat = "/search-jobs";
-    protected $arrListingTagSetup = array(
-        'TotalPostCount' => array('selector' => 'h1[role="status"]'),
-        'JobPostItem' => array('selector' => 'section#search-results-list ul li'),
-//        'Title' =>  array('selector' => 'a h2', 'return_value_regex' =>  '/([^–]*)/i'),
-        'Title' =>  array('selector' => 'a h2'),
-        'Url' =>  array('selector' => 'a', 'return_attribute' => 'href'),
-        'JobSitePostId' =>  array('selector' => 'a', 'return_attribute' => 'data-job-id'),
-        'Location' =>  array('selector' => 'li a', 'return_value_callback' =>  'parseLocation', 'callback_parameter' => array("\n", 2)),
-        'PostedAt' =>  array('selector' => 'li a span.job-date-posted'),
-        'NextButton' => array('selector' => '#pagination-bottom a.next')
-    );
+    protected $arrListingTagSetup = [
+        'TotalPostCount' => ['Selector' => 'h1[role="status"]'],
+        'JobPostItem' => ['Selector' => 'section#search-results-list ul li'],
+        'Title' =>  ['Selector' => 'a h2'],
+        'Url' =>  ['Selector' => 'a', 'Attribute' => 'href'],
+        'JobSitePostId' =>  ['Selector' => 'a', 'Attribute' => 'data-job-id'],
+        'Location' => ['Selector' => 'li a', 'Callback' =>  'parseLocation', 'CallbackParameter' => ['\n', 2]],
+        'PostedAt' => ['Selector' => 'li a span.job-date-posted'],
+        'NextButton' => ['Selector' => '#pagination-bottom a.next']
+    ];
 
     public function __construct()
     {
-        $this->arrListingTagSetup['TotalPostCount'] = array('selector' => 'h1[role="status"]');
+        $this->arrListingTagSetup['TotalPostCount'] = array('Selector' => 'h1[role="status"]');
         parent::__construct();
     }
 
@@ -73,8 +72,8 @@ class PluginDisney extends AbstractTalentBrew
     {
         parent::__construct();
         unset($this->arrListingTagSetup['TotalPostCount']);
-        $this->arrListingTagSetup['JobPostItem'] = array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'table'),array('tag' => 'tr'));
-        $this->arrListingTagSetup['NextButton'] = array(array('tag' => 'a', 'attribute' => 'class', 'attribute_value' => 'next', 'index' => 0));
+        $this->arrListingTagSetup['JobPostItem'] = ['Selector' => 'section#search-results-list table tr'];
+        $this->arrListingTagSetup['NextButton'] = ['Selector' => 'a.next', 'Index' => 0];
 
 
         $this->SearchUrlFormat = $this->JobPostingBaseUrl . "/search-jobs?k=&alp=6252001-5815135&alt=3";
@@ -93,20 +92,21 @@ class AbstractTalentBrew extends \JobScooper\SitePlugins\AjaxSitePlugin
 
     protected $JobListingsPerPage = 50;
 
-    protected $arrListingTagSetup = array(
-        'TotalPostCount' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results'), array('tag' => 'h1'), 'return_attribute' => 'text', 'return_value_regex' =>  '/(.*?) .*/'),
-        'TotalResultPageCount' => array(array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'pagination-total-pages'), 'return_attribute' => 'text', 'return_value_regex' =>  '/of (.*)/'),
-        'JobPostItem' => array(array('tag' => 'section', 'attribute' => 'id', 'attribute_value' => 'search-results-list'), array('tag' => 'ul'),array('tag' => 'li')),
-        'Title' =>  array('selector' => 'a h2'),
-        'Url' =>  array('tag' => 'a', 'return_attribute' => 'href'),
-        'JobSitePostId' =>  array('tag' => 'a', 'return_attribute' => 'data-job-id'),
-        'Location' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-location'),
-        'PostedAt' =>  array('tag' => 'span', 'attribute' => 'class', 'attribute_value' => 'job-date-posted'),
-        'NextButton' => array('selector' => '#pagination-bottom a.next')
-    );
+    protected $arrListingTagSetup = [
+        'TotalPostCount' => ['selector' => 'section#search-results h1', 'Attribute' => 'text', 'Pattern' =>  '/(.*?) .*/'],
+        'TotalResultPageCount' => ['selector' => 'span.pagination-total-pages', 'Attribute' => 'text', 'Pattern' =>  '/of (.*)/'],
+        'JobPostItem' => ['tag' => 'section#search-results-list ul li'],
+        'Title' =>  ['Selector' => 'a h2'],
+        'Url' =>  ['Selector' => 'a', 'Attribute' => 'href'],
+        'JobSitePostId' =>  ['Selector' => 'a', 'Attribute' => 'data-job-id'],
+        'Location' =>  ['Selector' => 'span', 'Attribute' => 'job-location'],
+        'PostedAt' =>  ['Selector' => 'span', 'Attribute' => 'job-date-posted'],
+        'NextButton' => ['Selector' => '#pagination-bottom a.next']
+    ];
+
     public function __construct()
     {
-        $this->additionalBitFlags["COMPANY"] = C__JOB_USE_SITENAME_AS_COMPANY;
+        $this->additionalBitFlags['COMPANY'] = C__JOB_USE_SITENAME_AS_COMPANY;
         parent::__construct();
         $this->SearchUrlFormat = $this->JobPostingBaseUrl . $this->SearchUrlFormat;
     }

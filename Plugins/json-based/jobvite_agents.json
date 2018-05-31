@@ -12,6 +12,11 @@
             "PluginExtendsClassName": "AbstractJobviteATS"
         },
         {
+            "JobSiteName": "InternetBrands",
+            "SourceURL": "https://jobs.jobvite.com/internetbrands/?nl=1",
+            "PluginExtendsClassName": "AbstractJobviteATS"
+        },
+        {
             "JobSiteName": "AnotherSource",
             "SourceURL": "https://jobs.jobvite.com/another-source/?nl=1",
             "PluginExtendsClassName": "AbstractJobviteATS"

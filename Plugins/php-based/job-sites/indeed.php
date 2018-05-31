@@ -30,43 +30,43 @@ class PluginIndeed extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
 
     protected $arrListingTagSetup = array(
-        'TotalPostCount' =>  array('selector' => 'div#searchCount', 'return_value_regex' => '/.*?of\s*([\d,]+).*?/'),
-        'NoPostsFound' =>  array('selector' => 'body', 'index' => 0, 'return_attribute' => 'collection', 'return_value_callback' => "checkNoJobResults"),
-        'NextButton' => array('selector' => 'span.np'),
-        'JobPostItem' => array('selector' => 'td#resultsCol div[data-tn-component=\'organicJob\']'),
-        'Url' => array('selector' => 'a[data-tn-element=\'jobTitle\']', 'index'=> 0, 'return_attribute' => 'href'),
-        'Title' => array('selector' => 'a[data-tn-element=\'jobTitle\']', 'index'=> 0, 'return_attribute' => 'text'),
-        'JobSitePostId' => array('selector' => 'span.tt_set a', 'index'=> 0, 'return_attribute' => 'id', 'return_value_regex' => '/[sj_]{0,3}(.*)/'),
-        'Company' => array('selector' => 'span.company', 'index'=> 0),
-        'Location' => array('selector' => 'span.location', 'index'=> 0),
-        'PostedAt' => array('selector' => 'span.date', 'index'=> 0)
+        'TotalResultPageCount' =>  ['Selector' => 'div#searchCount', 'Pattern' => '/.*?of\s*([\d,]+).*?/'],
+        'NoPostsFound' =>  ['Selector' => 'div.no_results', 'Index' => 0, 'Callback' => 'matchesNoResultsPattern', 'CallbackParameter' => '/no jobs|did not match/'],
+        'NextButton' => array('Selector' => 'span.np'),
+        'JobPostItem' => ['Selector' => "td#resultsCol div[data-tn-component='organicJob']"],
+        'Url' => array('Selector' => 'a[data-tn-element=\'jobTitle\']', 'Index'=> 0, 'Attribute' => 'href'),
+        'Title' => array('Selector' => 'a[data-tn-element=\'jobTitle\']', 'Index'=> 0, 'Attribute' => 'text'),
+        'JobSitePostId' => array('Selector' => 'span.tt_set a', 'Index'=> 0, 'Attribute' => 'id', 'Pattern' => '/[sj_]{0,3}(.*)/'),
+        'Company' => array('Selector' => 'span.company', 'Index'=> 0),
+        'Location' => array('Selector' => 'span.location', 'Index'=> 0),
+        'PostedAt' => array('Selector' => 'span.date', 'Index'=> 0)
         );
 
-    /**
-     * @param $var
-     *
-     * @return int|null
-     * @throws \Exception
-     */
-    public static function checkNoJobResults($var)
-    {
-        $ret = null;
-        if (!empty($var) && is_array($var)) {
-            $var = $var[0];
-            $node1 = $var->find("p.message");
-            if (!empty($node1)) {
-                $text = $node1[0]->text();
-                $ret = noJobStringMatch($text, "No jobs match your search");
-            } else {
-                $node2 = $var->find("div.bad_query h2");
-                if (null !== $node2 && count($node2) > 0) {
-                    $text = $node2[0]->text();
-                    $ret = noJobStringMatch($text, "did not match");
-                }
-            }
-        }
-        return $ret;
-    }
+//    /**
+//     * @param $var
+//     *
+//     * @return int|null
+//     * @throws \Exception
+//     */
+//    public static function checkNoJobResults($var)
+//    {
+//        $ret = null;
+//        if (!empty($var) && is_array($var)) {
+//            $var = $var[0];
+//            $node1 = $var->find("p.message");
+//            if (!empty($node1)) {
+//                $text = $node1[0]->text();
+//                $ret = noJobStringMatch($text, "No jobs match your search");
+//            } else {
+//                $node2 = $var->find("div.bad_query h2");
+//                if (null !== $node2 && count($node2) > 0) {
+//                    $text = $node2[0]->text();
+//                    $ret = noJobStringMatch($text, "did not match");
+//                }
+//            }
+//        }
+//        return $ret;
+//    }
 
 
     /**

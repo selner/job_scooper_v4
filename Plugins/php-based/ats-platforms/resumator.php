@@ -20,12 +20,12 @@
 abstract class AbstractResumatorFall2017 extends \JobScooper\SitePlugins\Base\SitePlugin
 {
     protected $arrListingTagSetup = array(
-        'JobPostItem' => array('selector' => 'ul.list-group li.list-group-item'),
-        'Title' => array('selector' => 'h4.list-group-item-heading a'),
-        'Url' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href'),
-        'Location' => array('selector' => 'ul li', 'index' => 0),
-        'Department' => array('selector' => 'ul li', 'index' => 1),
-        'JobSitePostId' => array('selector' => 'h4.list-group-item-heading a', 'return_attribute' => 'href', 'return_value_regex' => '/.com\/apply\/(\S*)\//i'),
+        'JobPostItem' => array('Selector' => 'ul.list-group li.list-group-item'),
+        'Title' => array('Selector' => 'h4.list-group-item-heading a'),
+        'Url' => array('Selector' => 'h4.list-group-item-heading a', 'Attribute' => 'href'),
+        'Location' => array('Selector' => 'ul li', 'Index' => 0),
+        'Department' => array('Selector' => 'ul li', 'Index' => 1),
+        'JobSitePostId' => array('Selector' => 'h4.list-group-item-heading a', 'Attribute' => 'href', 'Pattern' => '/.com\/apply\/(\S*)\//i'),
     );
 
     public function __construct()

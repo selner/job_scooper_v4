@@ -173,27 +173,13 @@ class DomItemParser
         }
 
         $parseKeys = array_keys($this->_tagParseInfo);
-        if (!(in_array('selector', $parseKeys) || in_array('tag', $parseKeys))) {
+        if (!in_array('Selector', $parseKeys)) {
             throw (new \Exception('Invalid tag configuration ' . getArrayValuesAsString($this->_tagParseInfo)));
         }
         $strMatch = '';
 
-        if (array_key_exists('selector', $this->_tagParseInfo)) {
-            $strMatch = $strMatch . $this->_tagParseInfo['selector'];
-        } elseif (array_key_exists('tag', $this->_tagParseInfo)) {
-            if (strlen($strMatch) > 0) {
-                $strMatch = $strMatch . ' ';
-            }
-            {
-                $strMatch = $strMatch . $this->_tagParseInfo['tag'];
-                if (array_key_exists('attribute', $this->_tagParseInfo) && strlen($this->_tagParseInfo['attribute']) > 0) {
-                    $strMatch = $strMatch . '[' . $this->_tagParseInfo['attribute'];
-                    if (array_key_exists('attribute_value', $this->_tagParseInfo) && strlen($this->_tagParseInfo['attribute_value']) > 0) {
-                        $strMatch = $strMatch . '="' . $this->_tagParseInfo['attribute_value'] . '"';
-                    }
-                    $strMatch = $strMatch . ']';
-                }
-            }
+        if (array_key_exists('Selector', $this->_tagParseInfo)) {
+            $strMatch = $strMatch . $this->_tagParseInfo['Selector'];
         }
 
         return $strMatch;
@@ -213,11 +199,11 @@ class DomItemParser
             return null;
         }
 
-        if (!array_key_exists('type', $this->_tagParseInfo) || empty($this->_tagParseInfo['type'])) {
-            $this->_tagParseInfo['type'] = 'CSS';
+        if (!array_key_exists('Type', $this->_tagParseInfo) || empty($this->_tagParseInfo['Type'])) {
+            $this->_tagParseInfo['Type'] = 'CSS';
         }
 
-        switch (strtoupper($this->_tagParseInfo['type'])) {
+        switch (strtoupper($this->_tagParseInfo['Type'])) {
             case 'CSS':
                 $ret = $this->_getTagMatchValueViaFind_($this->_domNodeData, Query::TYPE_CSS);
                 break;
@@ -239,20 +225,20 @@ class DomItemParser
                 break;
 
             default:
-                throw new \Exception('Unknown field definition type of ' . $this->_tagParseInfo['type']);
+                throw new \Exception('Unknown field definition type of ' . $this->_tagParseInfo['Type']);
         }
 
         if (null !== $ret) {
-            if (array_key_exists('return_value_callback', $this->_tagParseInfo) && (strlen($this->_tagParseInfo['return_value_callback']) > 0)) {
+            if (array_key_exists('Callback', $this->_tagParseInfo) && (strlen($this->_tagParseInfo['Callback']) > 0)) {
                 if (null !== $this->_callbackObject) {
-                    $callback = array($this->_callbackObject, $this->_tagParseInfo['return_value_callback']);
+                    $callback = array($this->_callbackObject, $this->_tagParseInfo['Callback']);
                 } else {
-                    $callback = $this->_tagParseInfo['return_value_callback'];
+                    $callback = $this->_tagParseInfo['Callback'];
                 }
                 
                 $params = array('current_value' => $ret);
-                if (array_key_exists('callback_parameter', $this->_tagParseInfo) && null !== $this->_tagParseInfo['callback_parameter']) {
-                    $params['parameter'] = $this->_tagParseInfo['callback_parameter'];
+                if (array_key_exists('CallbackParameter', $this->_tagParseInfo) && null !== $this->_tagParseInfo['CallbackParameter']) {
+                    $params['parameter'] = $this->_tagParseInfo['CallbackParameter'];
                 }
                 
                 $ret = $callback($params);
@@ -269,8 +255,8 @@ class DomItemParser
     protected function _getTagMatchValueStatic_($arrTag)
     {
         $ret = null;
-        if (array_key_exists('value', $arrTag) && null !== $arrTag['value']) {
-            $value  = $arrTag['value'];
+        if (array_key_exists('Value', $arrTag) && null !== $arrTag['Value']) {
+            $value  = $arrTag['Value'];
 
             if (is_empty_value($value)) {
                 $ret = null;
@@ -293,16 +279,13 @@ class DomItemParser
         $arrTag = $this->getTagParserDetails();
 
         $ret = null;
-        if (array_key_exists('return_value_regex', $arrTag) && !empty($arrTag['return_value_regex'])) {
-            $arrTag['pattern'] = $arrTag['return_value_regex'];
-        }
 
-        if (array_key_exists('pattern', $arrTag) && !empty($arrTag['pattern'])) {
-            $pattern = $arrTag['pattern'];
+        if (array_key_exists('Pattern', $arrTag) && !empty($arrTag['Pattern'])) {
+            $pattern = $arrTag['Pattern'];
             $value = '';
 
-            if (array_key_exists('field', $arrTag) && !empty($arrTag['field'])) {
-                $value = $this->getItemDataValue($arrTag['field']);
+            if (array_key_exists('Field', $arrTag) && !empty($arrTag['Field'])) {
+                $value = $this->getItemDataValue($arrTag['Field']);
             }
 
             if (is_empty_value($value)) {
@@ -312,7 +295,7 @@ class DomItemParser
 
                 if (preg_match($newPattern, $value, $matches) > 0) {
                     array_shift($matches);
-                    $ret = $this->_getReturnValueByIndex($matches, $arrTag['index']);
+                    $ret = $this->_getReturnValueByIndex($matches, $arrTag['Index']);
                 }
             }
         }
@@ -386,16 +369,14 @@ class DomItemParser
         $propertyRegEx = null;
         $arrTag = $this->getTagParserDetails();
 
-        if (!empty($arrTag['return_attribute'])) {
-            $returnAttribute = $arrTag['return_attribute'];
+        if (!empty($arrTag['Attribute'])) {
+            $returnAttribute = $arrTag['Attribute'];
         } else {
             $returnAttribute = 'text';
         }
 
-        if (array_key_exists('return_value_regex', $arrTag)) {
-            $propertyRegEx = $arrTag['return_value_regex'];
-        } elseif (array_key_exists('pattern', $arrTag)) {
-            $propertyRegEx = $arrTag['pattern'];
+        if (array_key_exists('Pattern', $arrTag)) {
+            $propertyRegEx = $arrTag['Pattern'];
         }
 
         $strMatch = $this->getTagSelector();
@@ -407,13 +388,13 @@ class DomItemParser
             if ($returnAttribute === 'collection') {
                 $ret = $nodeMatches;
             // do nothing.  We already have the node set correctly
-            } elseif (!empty($nodeMatches) && array_key_exists('index', $arrTag) && is_array($nodeMatches)) {
-                $index = (int)$arrTag['index'];
+            } elseif (!empty($nodeMatches) && array_key_exists('Index', $arrTag) && is_array($nodeMatches)) {
+                $index = (int)$arrTag['Index'];
                 if ($index > count($nodeMatches) - 1) {
                     $this->log("Tag specified index {$index} but only " . count($nodeMatches) . " were matched.  Defaulting to first node.", LogLevel::WARNING);
                     $index = 0;
                 } elseif (empty($index) && $index !== 0) {
-                    $this->log("Tag specified index value was invalid {$arrTag['index']}.  Defaulting to first node.", LogLevel::WARNING);
+                    $this->log("Tag specified index value was invalid {$arrTag['Index']}.  Defaulting to first node.", LogLevel::WARNING);
                     $index = 0;
                 }
                 $ret = $this->_getReturnValueByIndex($nodeMatches, $index);

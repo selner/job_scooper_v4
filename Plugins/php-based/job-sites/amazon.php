@@ -246,13 +246,13 @@ JSCODE;
     }
 
     protected $arrListingTagSetup = array(
-        'TotalPostCount' =>  array('selector' => 'div.job-count-info', 'return_value_regex' => '/.*?of\s(\d+)/'),
-        'JobPostItem' => array('selector' => 'div.job-tile'),
-        'Title' =>  array('selector' => 'h2.job-title'),
-        'Url' =>  array('selector' => 'a.job-link', 'return_attribute' => 'href'),
-        'JobSitePostId' =>  array('selector' => 'div.job', 'return_attribute' => 'data-job-id'),
-        'Location' =>  array('selector' => 'div.location-and-id', 'return_value_regex' => '/(.*?)\|/', 'return_value_callback' => "cleanupLocationValue"),
-        'PostedAt' =>  array('selector' => 'div.posting-date', 'return_value_regex' => '/Posted at (.*)/')
+        'TotalPostCount' =>  array('Selector' => 'div.job-count-info', 'Pattern' => '/.*?of\s(\d+)/'),
+        'JobPostItem' => array('Selector' => 'div.job-tile'),
+        'Title' =>  array('Selector' => 'h2.job-title'),
+        'Url' =>  array('Selector' => 'a.job-link', 'Attribute' => 'href'),
+        'JobSitePostId' =>  array('Selector' => 'div.job', 'Attribute' => 'data-job-id'),
+        'Location' =>  array('Selector' => 'div.location-and-id', 'Pattern' => '/(.*?)\|/', 'Callback' => 'cleanupLocationValue'),
+        'PostedAt' =>  array('Selector' => 'div.posting-date', 'Pattern' => '/Posted at (.*)/')
     );
 
 

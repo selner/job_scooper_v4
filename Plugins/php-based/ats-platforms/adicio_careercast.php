@@ -42,27 +42,27 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $currentJsonSearchDetails = null;
 
     protected $arrBaseListingTagSetupNationalSearch = array(
-        'TotalPostCount' => ['selector'=> 'span#retCount span'],  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
-        'NoPostsFound' => ['selector'=> 'div#aiSearchResultsSuccess h2', 'return_attribute'=> 'text', 'return_value_callback'=> "matchesNoResultsPattern", 'callback_parameter'=> 'Oops'],
-        'JobPostItem' => ['selector'=> 'div.aiResultsWrapper'],
-        'Title' => ['selector'=> 'div.aiResultTitle h3 a'],
-        'Url' => ['selector'=> 'div.aiResultTitle h3 a', 'return_attribute'=> 'href'],
-        'JobSitePostId' => array('selector' => 'div.aiResultsMainDiv', 'return_attribute' => 'id', 'return_value_regex' =>  '/aiResultsMainDiv(.*)/'),
-        'Company' => array('selector' => 'li.aiResultsCompanyName'),
-        'Location' => array('selector' => 'span.aiResultsLocationSpan'),
-        'PostedAt' => array('selector' => 'div.aiDescriptionPod ul li', 'index' => 2),
-        'Category' => array('selector' => 'div.aiDescriptionPod ul li', 'index' => 3)
+        'TotalPostCount' => ['Selector'=> 'span#retCount span'],  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
+        'NoPostsFound' => ['Selector'=> 'div#aiSearchResultsSuccess h2', 'Attribute'=> 'text', 'Callback'=> "matchesNoResultsPattern", 'CallbackParameter'=> 'Oops'],
+        'JobPostItem' => ['Selector'=> 'div.aiResultsWrapper'],
+        'Title' => ['Selector'=> 'div.aiResultTitle h3 a'],
+        'Url' => ['Selector'=> 'div.aiResultTitle h3 a', 'Attribute'=> 'href'],
+        'JobSitePostId' => array('Selector' => 'div.aiResultsMainDiv', 'Attribute' => 'id', 'Pattern' =>  '/aiResultsMainDiv(.*)/'),
+        'Company' => array('Selector' => 'li.aiResultsCompanyName'),
+        'Location' => array('Selector' => 'span.aiResultsLocationSpan'),
+        'PostedAt' => array('Selector' => 'div.aiDescriptionPod ul li', 'Index' => 2),
+        'Category' => array('Selector' => 'div.aiDescriptionPod ul li', 'Index' => 3)
     );
 
     protected $arrBaseListingTagSetupJobsResponsive = array(
-        'TotalPostCount' => array('selector' => 'h1#search-title-holder', 'return_value_regex' => '/(.*) [Jj]obs/'),
-        'JobPostItem' => array('selector' => 'div.arJobPodWrap'),
-        'Title' => array('selector' => 'div.arJobTitle h3 a'),
-        'Url' => array('selector' => 'div.arJobTitle h3 a', 'return_attribute' => 'href'),
-        'JobSitePostId' => array('selector' => 'div.arSaveJob a', 'return_attribute' => 'data-jobid'),
-        'Company' => array('selector' => 'div.arJobCoLink'),
-        'Location' => array('selector' => 'div.arJobCoLoc'),
-        'PostedAt' => array('selector' => 'div.arJobPostDate span')
+        'TotalPostCount' => array('Selector' => 'h1#search-title-holder', 'Pattern' => '/(.*) [Jj]obs/'),
+        'JobPostItem' => array('Selector' => 'div.arJobPodWrap'),
+        'Title' => array('Selector' => 'div.arJobTitle h3 a'),
+        'Url' => array('Selector' => 'div.arJobTitle h3 a', 'Attribute' => 'href'),
+        'JobSitePostId' => array('Selector' => 'div.arSaveJob a', 'Attribute' => 'data-jobid'),
+        'Company' => array('Selector' => 'div.arJobCoLink'),
+        'Location' => array('Selector' => 'div.arJobCoLoc'),
+        'PostedAt' => array('Selector' => 'div.arJobPostDate span')
     );
 
     protected $_layout = null;
@@ -353,7 +353,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 
             case "jobsearchresults":
                 $tags = $this->arrBaseListingTagSetupNationalSearch;
-                $this->arrListingTagSetup['TotalPostCount']['selector'] = "span#retCountNumber";
+                $this->arrListingTagSetup['TotalPostCount']['Selector'] = "span#retCountNumber";
                 break;
 
             default:
@@ -709,7 +709,7 @@ class PluginCareerCastTempJobs extends AbstractAdicio
     protected $LastKnownSiteLayout = "jobsresponsivedefault";
 
     protected $arrListingTagSetup = array(
-        'NoPostsFound' =>  array('selector' => 'h5', 'index' => 0, 'return_attribute' => 'node', 'return_value_callback' => "matchesNoResultsPattern", 'callback_parameter' => 'Oops! Nothing')
+        'NoPostsFound' =>  array('Selector' => 'h5', 'Index' => 0, 'Attribute' => 'node', 'Callback' => "matchesNoResultsPattern", 'CallbackParameter' => 'Oops! Nothing')
     );
 }
 

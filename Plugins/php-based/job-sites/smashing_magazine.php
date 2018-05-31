@@ -25,11 +25,11 @@ class PluginSmashingMagazine extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $childSiteListingPage = 'http://jobs.smashingmagazine.com';
     protected $PaginationType = C__PAGINATION_NONE;
 
-    protected $arrListingTagSetup = array(
-        'JobPostItem' => array(array('tag' => 'ul', 'attribute' => 'class', 'attribute_value' =>'entry-list compact'), array('tag' => 'li')),
-        'Title' => array('tag' => 'h2'),
-        'Url' =>  array(array('tag' => 'a'), 'return_attribute' => 'href'),
-        'JobSitePostId' =>  array(array('tag' => 'article'), 'return_attribute' => 'id'),
-        'Company' => array('tag' => 'span', 'attribute' => 'class', 'attribute_value' =>'entry-company'),
-        );
+    protected $arrListingTagSetup = [
+        'JobPostItem' => ['Selector' => 'ul.entry-list compact li'],
+        'Title' => ['Selector' => 'h2'],
+        'Url' =>  ['Selector' => 'a', 'Attribute' => 'href'],
+        'JobSitePostId' => ['Selector' => 'article', 'Attribute' => 'id'],
+        'Company' => ['Selector' => 'span.entry-company'],
+    ];
 }

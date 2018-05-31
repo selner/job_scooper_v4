@@ -121,27 +121,6 @@ function exportToDebugJSON($obj, $strBaseFileName)
 }
 
 /**
- * @param string $var
- * @param string $matchString
- *
- * @return int|null
- * @throws \Exception
- */
-function noJobStringMatch($var, $matchString)
-{
-    if (is_empty_value($matchString)) {
-        throw new Exception("Invalid match string passed to helper noJobStringMatch.");
-    }
-
-    if (false !== stripos(strtoupper($var), strtoupper($matchString))) {
-        return 0;
-    }
-
-    return null;
-}
-
-
-/**
  * @param int|null $configNumDays
  *
  * @return string

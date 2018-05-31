@@ -80,12 +80,12 @@ class PluginBetalist extends \JobScooper\SitePlugins\AjaxSitePlugin
 
 
     protected $arrListingTagSetup = array(
-        'JobPostItem' => array('selector' => 'div.jobCard'),
-        'Title' => array('selector' => 'a.jobCard__details__title'),
-        'Url' => array('selector' => 'div.jobCard', 'return_attribute' => 'data-clickable-url'),
-        'Company' => array('selector' => 'div.jobCard__details__company', 'index'=>0),
-        'Location' => array('selector' => 'div.jobCard__details__location', 'index'=>0),
-        'Category' => array('selector' => 'div.jobCard__tags', 'index'=>0, 'return_attribute' => 'node', 'return_value_callback' => "combineTextAllChildren"),
-        'JobSitePostId' => array('selector' => 'a.jobCard__details__title', 'index'=>0, 'return_attribute' => 'href', 'return_value_regex' =>'/jobs\/([^\/]+)/i'),
+        'JobPostItem' => array('Selector' => 'div.jobCard'),
+        'Title' => array('Selector' => 'a.jobCard__details__title'),
+        'Url' => array('Selector' => 'div.jobCard', 'Attribute' => 'data-clickable-url'),
+        'Company' => array('Selector' => 'div.jobCard__details__company', 'Index'=>0),
+        'Location' => array('Selector' => 'div.jobCard__details__location', 'Index'=>0),
+        'Category' => array('Selector' => 'div.jobCard__tags', 'Index'=>0, 'Attribute' => 'node', 'Callback' => "combineTextAllChildren"),
+        'JobSitePostId' => array('Selector' => 'a.jobCard__details__title', 'Index'=>0, 'Attribute' => 'href', 'Pattern' =>'/jobs\/([^\/]+)/i'),
     );
 }

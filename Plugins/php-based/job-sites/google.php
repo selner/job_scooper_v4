@@ -34,7 +34,7 @@ class PluginGoogle extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $nextPageScript = "var elem = document.getElementById('gjsrpn');  if (elem != null) { console.log('attempting next button click on element ID gjsrpn'); elem.click(); };";
 
     protected $arrListingTagSetup = array(
-        'NextButton' => array('selector' => 'button[aria-label=\'Next page\']')
+        'NextButton' => array('Selector' => 'button[aria-label=\'Next page\']')
     );
 
 

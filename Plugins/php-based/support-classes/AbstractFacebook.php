@@ -29,19 +29,19 @@ class AbstractFacebook extends \JobScooper\SitePlugins\AjaxSitePlugin
         $ret = parent::parseJobsListForPage($objSimpHTML);
 
         if ($ret === null) {
-            throw new Exception("Unable to parse any jobs from Facebook site.");
+            throw new Exception('Unable to parse any jobs from Facebook site.');
         }
 
         foreach ($ret as $k => $job) {
-            if (array_key_exists("Location", $job)) {
-                if (count($job["Location"]) == 1) {
-                    $ret[$k]["Location"] = $job["Location"][0];
-                } elseif (count($job["Location"]) > 1) {
-                    $jobSiteId = $job["JobSitePostId"];
-                    foreach ($job["Location"] as $loc) {
+            if (array_key_exists('Location', $job)) {
+                if (count($job['Location']) == 1) {
+                    $ret[$k]['Location'] = $job['Location'][0];
+                } elseif (count($job['Location']) > 1) {
+                    $jobSiteId = $job['JobSitePostId'];
+                    foreach ($job['Location'] as $loc) {
                         $newJob = array_copy($job);
-                        $newJob["Location"] = $loc;
-                        $newJob["JobSitePostId"] = "{$jobSiteId}-{$loc}";
+                        $newJob['Location'] = $loc;
+                        $newJob['JobSitePostId'] = "{$jobSiteId}-{$loc}";
                         $ret[] = $newJob;
                     }
                     unset($ret[$k]);

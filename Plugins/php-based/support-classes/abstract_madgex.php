@@ -28,10 +28,10 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 
     private $tagsBySiteVariant = [
     	'JobCountInH1' => [
-	        'TotalPostCount'        => ['selector' => 'div#results h1', 'return_attribute' => 'text', 'return_value_regex' =>  '/.*?\s([\d,]+)\s*/']
+	        'TotalPostCount'        => ['Selector' => 'div#results h1', 'Attribute' => 'text', 'Pattern' =>  '/.*?\s([\d,]+)\s*/']
 		],
     	'JobCountInH2' => [
-	        'TotalPostCount'        => ['selector' => 'h2', 'return_attribute' => 'text', 'return_value_regex' =>  '/.*?\s([\d,]+)\s*/']
+	        'TotalPostCount'        => ['Selector' => 'h2', 'Attribute' => 'text', 'Pattern' =>  '/.*?\s([\d,]+)\s*/']
 		]
 	];
 
@@ -112,24 +112,24 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 			return val;
 ');
         if (null !== $jobitemsTarget) {
-            $this->arrListingTagSetup['JobPostItem']['selector'] = $jobitemsTarget;
+            $this->arrListingTagSetup['JobPostItem']['Selector'] = $jobitemsTarget;
         }
     }
 
     protected $arrBaseListingTagSetup = array(
-        'NoPostsFound'          => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_callback' => 'matchesNoResultsPattern', 'callback_parameter' => "Found 0 jobs"),
-        'TotalPostCount'        => array('selector' => 'h1#searching', 'return_attribute' => 'text', 'return_value_regex' =>  '/\b([,\d]+)\b/i'),
-//        'JobPostItem'           => array('selector' => 'li.lister__item'),
-        'JobPostItem'           => array('selector' => 'ul#listing li.cf'),
-        'Title'                 => array('selector' => 'h3.lister__header a span', 'return_attribute' => 'text', 'index' =>0),
-        'Url'                   => array('selector' => 'h3.lister__header a', 'return_attribute' => 'href', 'index' =>0),
-        'Company'               => array('selector' => 'ul li.lister__meta-item--recruiter', 'return_attribute' => 'text', 'index' =>0),
-        'PageRange'             => array('selector' => 'ul li.lister__meta-item--salary', 'return_attribute' => 'text', 'index' =>0),
-        'Location'              => array('selector' => 'ul li.lister__meta-item--location', 'return_attribute' => 'text', 'index' =>0),
-        'JobSitePostId'         => array('selector' => 'li', 'return_attribute' => 'id', 'return_value_regex' =>  '/item\-(\d+)/i', 'index' =>0),
-        'PostedAt'              => array('selector' => 'li.job-actions__action', 'index' =>0),
-        'company_logo'          => array('selector' => 'img.lister__logo', 'return_attribute' => 'src', 'index' =>0),
-        'NextButton'            => array('selector' => 'a[rel="next"]', 'index' =>0)
+        'NoPostsFound'          => array('Selector' => 'h1#searching', 'Attribute' => 'text', 'Callback' => 'matchesNoResultsPattern', 'CallbackParameter' => "Found 0 jobs"),
+        'TotalPostCount'        => array('Selector' => 'h1#searching', 'Attribute' => 'text', 'Pattern' =>  '/\b([,\d]+)\b/i'),
+//        'JobPostItem'           => array('Selector' => 'li.lister__item'),
+        'JobPostItem'           => array('Selector' => 'ul#listing li.cf'),
+        'Title'                 => array('Selector' => 'h3.lister__header a span', 'Attribute' => 'text', 'Index' =>0),
+        'Url'                   => array('Selector' => 'h3.lister__header a', 'Attribute' => 'href', 'Index' =>0),
+        'Company'               => array('Selector' => 'ul li.lister__meta-item--recruiter', 'Attribute' => 'text', 'Index' =>0),
+        'PageRange'             => array('Selector' => 'ul li.lister__meta-item--salary', 'Attribute' => 'text', 'Index' =>0),
+        'Location'              => array('Selector' => 'ul li.lister__meta-item--location', 'Attribute' => 'text', 'Index' =>0),
+        'JobSitePostId'         => array('Selector' => 'li', 'Attribute' => 'id', 'Pattern' =>  '/item\-(\d+)/i', 'Index' =>0),
+        'PostedAt'              => array('Selector' => 'li.job-actions__action', 'Index' =>0),
+        'company_logo'          => array('Selector' => 'img.lister__logo', 'Attribute' => 'src', 'Index' =>0),
+        'NextButton'            => array('Selector' => 'a[rel="next"]', 'Index' =>0)
     );
 
 
