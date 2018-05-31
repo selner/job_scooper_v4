@@ -170,11 +170,12 @@ function strip_punctuation_from_html($text)
  * Cleanup a string to make a slug of it
  * Removes special characters, replaces blanks with a separator, and trim it
  *
- * @param     string|null $slug        the text to slugify
- * @param     string $replacement the separator used by slug
- * @return    string|null              the slugified text
- */
-function cleanupSlugPart($slug, $replacement = '_')
+* @param     string|null $slug        the text to slugify
+* @param     string $replacement the separator used by slug
+* @param     bool   $fDoNotLowercase
+* @return    string|null              the slugified text
+*/
+function cleanupSlugPart($slug, $replacement = '_', $fDoNotLowercase=false)
 {
     $slug = cleanupTextValue($slug);
 
@@ -184,11 +185,13 @@ function cleanupSlugPart($slug, $replacement = '_')
     $slug = mb_convert_encoding($slug, "ASCII", "auto");
 
     // lowercase
-    if (function_exists('mb_strtolower')) {
-        $slug = mb_strtolower($slug);
-    } else {
-        $slug = strtolower($slug);
-    }
+    if($fDoNotLowercase === false) {
+	    if (function_exists('mb_strtolower')) {
+	        $slug = mb_strtolower($slug);
+	    } else {
+	        $slug = strtolower($slug);
+	    }
+	}
 
     $slug = Slug::filter($slug, $replacement, $cssMode = false);
 

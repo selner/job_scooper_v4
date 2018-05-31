@@ -1306,7 +1306,7 @@ JSCODE;
                 }
                 $item['Url'] = $job->url;
 
-                $strCurrentJobIndex = cleanupSlugPart($this->JobSiteName) . cleanupSlugPart($item['JobSitePostId']);
+                $strCurrentJobIndex = cleanupSlugPart($this->JobSiteName) . cleanupSlugPart($item['JobSitePostId'], $replacement="_", $doNotLowercase=true);
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
             }
@@ -1394,7 +1394,7 @@ JSCODE;
         }
 
         $arrItem['JobSitePostId'] = preg_replace(REXPR_MATCH_URL_DOMAIN, '', $arrItem['JobSitePostId']);
-        $arrItem ['JobSitePostId'] = strScrub($arrItem['JobSitePostId'], FOR_LOOKUP_VALUE_MATCHING);
+        $arrItem ['JobSitePostId'] = strScrub($arrItem['JobSitePostId'], REMOVE_PUNCT | HTML_DECODE | REMOVE_EXTRA_WHITESPACE | REMOVE_ALL_SPACES);
 
 
         if ($this->isBitFlagSet(C__JOB_SUPPORTS_MULTIPLE_LOCS_PER_JOB)) {

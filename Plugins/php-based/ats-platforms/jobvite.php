@@ -47,7 +47,7 @@ abstract class AbstractJobviteATS extends \JobScooper\SitePlugins\AjaxSitePlugin
         'Title'                 => array('Selector' => 'td.jv-job-list-name a'),
         'Url'                 => array('Selector' => 'td.jv-job-list-name a', 'Attribute' => 'href'),
         'Location'              => array('Selector' => 'td.jv-job-list-location', 'Attribute' => 'text'),
-        'JobSitePostId'                 => array('Selector' => 'td.jv-job-list-name a', 'Attribute' => 'href', 'Pattern' =>  '/job\/(.*)/i'),
+        'JobSitePostId'                 => array('Selector' => 'td.jv-job-list-name a', 'Attribute' => 'href', 'Pattern' =>  '/job\/(\w+)/i'),
     );
     /**
      * @var null
@@ -73,14 +73,6 @@ abstract class AbstractJobviteATS extends \JobScooper\SitePlugins\AjaxSitePlugin
                 $objSimpHTML = $this->getSimpleHtmlDomFromSeleniumPage($this->_currentSearchDetails, $url);
             }
         }
-        $retItems = parent::parseJobsListForPage($objSimpHTML);
-
-        foreach ($retItems as $k => $ret) {
-            if (!array_key_exists('Company', $ret) || empty($ret['Company'])) {
-                $retItems[$k]['Company'] = $this->JobSiteKey;
-            }
-        }
-
-        return $retItems;
+        return parent::parseJobsListForPage($objSimpHTML);
     }
 }

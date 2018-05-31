@@ -174,6 +174,9 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         $fields = $this->getModifiedColumnsPhpNames();
         if (!is_empty_value($fields)) {
             foreach ($fields as $phpField) {
+            	if(in_array($phpField, ['JobSitePostId', 'Url', 'KeyCompanyAndTitle'])) {
+            		continue;
+            	}
                 $getFunc = "get{$phpField}";
                 $setFunc = "set{$phpField}";
                 $val = $this->$getFunc;
@@ -493,7 +496,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
     public function getKeySiteAndPostId()
     {
         if (!empty($this->getJobSiteKey()) && !empty($this->getJobSitePostId())) {
-            return cleanupSlugPart(sprintf("%s_%s", $this->getJobSiteKey(), $this->getJobSitePostId()));
+            return cleanupSlugPart(sprintf("%s_%s", $this->getJobSiteKey(), $this->getJobSitePostId()), $replacement = '_', $fDoNotLowercase=false);
         }
 
         return null;
