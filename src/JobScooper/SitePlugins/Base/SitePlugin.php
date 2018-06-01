@@ -1441,9 +1441,7 @@ JSCODE;
                 $this->arrSearchReturnedJobs[$siteRunKey] = array();
             }
             $jobSiteKey = $searchDetails->getJobSiteKey();
-            
-            $arrJobSitePostIds = array_column($arrJobsToAdd, 'JobSitePostId', 'JobSitePostId');
-            
+           
             foreach ($arrJobList as $k => $v) {
 				try {
 					$jp = JobPostingQuery::create()
