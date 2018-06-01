@@ -1440,38 +1440,32 @@ JSCODE;
             if (!array_key_exists($siteRunKey, $this->arrSearchReturnedJobs)) {
                 $this->arrSearchReturnedJobs[$siteRunKey] = array();
             }
-
+            $jobSiteKey = $searchDetails->getJobSiteKey();
+            
             $arrJobSitePostIds = array_column($arrJobsToAdd, 'JobSitePostId', 'JobSitePostId');
-
-            $alreadyExist = JobPostingQuery::create()
-                ->filterByJobSiteKey($this->JobSiteKey)
-                ->filterByJobSitePostId($arrJobSitePostIds, Criteria::IN)
-                ->find()
-                ->toKeyIndex('JobSitePostId');
-            if (!is_empty_value($alreadyExist)) {
-                $arrExistJobCols = get_child_facts_from_propel_objects($alreadyExist, array('JobPostingId', 'JobSitePostId', 'FirstSeenAt'), 'JobPostingId');
-                $arrExistJobSitePostIds = array_column($arrExistJobCols, 'JobSitePostId', 'JobSitePostId');
-                $this->arrSearchReturnedJobs[$siteRunKey] = $this->arrSearchReturnedJobs[$siteRunKey] + $arrExistJobCols;
-
-                $arrJobsToAdd = array_filter($arrJobsToAdd, function ($var) use ($arrExistJobSitePostIds) {
-                    return !(in_array($var['JobSitePostId'], $arrExistJobSitePostIds));
-                });
-            };
-
-            if (!is_empty_value($arrJobsToAdd)) {
-                $conWrite = Propel::getServiceContainer()->getWriteConnection(JobPostingTableMap::DATABASE_NAME);
-
-                $bulkUpsert = new ObjectCollection();
-                $bulkUpsert->setModel(JobPosting::class);
-                $bulkUpsert->fromArray($arrJobsToAdd);
-                $bulkUpsert->save($conWrite);
-
-                $insertedJobs = $bulkUpsert->toKeyIndex('JobPostingId');
-                $arrJobCols = get_child_facts_from_propel_objects($insertedJobs, array('JobPostingId', 'JobSitePostId', 'FirstSeenAt'), 'JobPostingId');
-
-                $this->arrSearchReturnedJobs[$siteRunKey] += $arrJobCols;
-            }
-
+            
+            foreach ($arrJobList as $k => $v) {
+				try {
+					$jp = JobPostingQuery::create()
+						->filterByJobSiteKey($jobSiteKey)
+						->filterByJobSitePostId($v['JobSitePostId'])
+						->findOneOrCreate();
+					
+					$jp->fromArray($v);
+					$jp->save();
+					$arrJobList[$k] = $jp->toArray();
+				} catch (Exception $ex) {
+					handleException($ex, "Failed to save JobPosting: %s", false);
+					unset($arrJobList[$k]);
+				}
+				finally {
+					$jp = null;
+				}
+		    }
+		    $arrJobCols = array_child_columns($arrJobList, ['JobPostingId', 'JobSitePostId', 'FirstSeenAt'], 'JobSitePostId');
+	        
+            $this->arrSearchReturnedJobs[$siteRunKey] = array_merge($this->arrSearchReturnedJobs[$siteRunKey], $arrJobCols);
+    
             $nCountNewJobs = count($arrJobsToAdd);
         } catch (Exception $ex) {
             handleException($ex, 'Unable to save job search results to database.', true);
