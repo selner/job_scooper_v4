@@ -24,6 +24,7 @@ use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\DataAccess\GeoLocationManager;
+use JobScooper\Utils\PythonRunner;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Propel;
 
@@ -50,36 +51,27 @@ class JobsAutoMarker
     /**
      * JobsAutoMarker constructor.
      *
-     * @param array $userFacts
      * @throws \Exception
      */
-    public function __construct(array $userFacts)
+    public function __construct()
     {
-        $this->_markingUserFacts = $userFacts;
         $this->_locmgr = GeoLocationManager::getLocationManager();
     }
 
     /**
      *
+     * @param array $userFacts
      * @throws \Exception
      */
-    public function markJobs()
+    public function markJobs($userFacts)
     {
-
+		$this->_markingUserFacts = $userFacts;
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Filter the full jobs list looking for duplicates, etc.
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         LogMessage(PHP_EOL . '**************  Updating jobs list for known filters ***************' . PHP_EOL);
-
-        try {
-            // Dupes aren't affected by the user's matches so do that marking first
-            //
-            $this->_findAndMarkRecentDuplicatePostings();
-        } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
-        }
         
         try {
 
@@ -90,7 +82,7 @@ class JobsAutoMarker
                 [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, Criteria::EQUAL],
                 null,
                 null,
-                $this->_markingUserFacts
+                $userFacts
             );
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);
@@ -188,118 +180,7 @@ class JobsAutoMarker
         }
     }
 
-    /**
-     * @throws \Exception
-     */
-    private function _findAndMarkRecentDuplicatePostings()
-    {
-        startLogSection('Finding new duplicate company / job title pairs in the past 7 days to mark as dupe...');
-        try {
-            $daysBack = 7;
-            $sinceWhen = date_add(new \DateTime(), date_interval_create_from_date_string("{$daysBack} days ago"));
-            $included_sites = JobSiteManager::getJobSiteKeysIncludedInRun();
-            $itemKeysToExport = array('JobPostingId', 'Title', 'Company', 'JobSite', 'KeyCompanyAndTitle', 'GeoLocationId', 'FirstSeenAt', 'DuplicatesJobPostingId');
 
-            LogMessage("Querying for all job postings created in the last {$daysBack} days");
-            $dupeQuery = JobPostingQuery::create()
-                ->filterByFirstSeenAt(array('min' => $sinceWhen));
-
-            if (!empty($included_sites)) {
-                $dupeQuery->filterByJobSiteKey($included_sites, Criteria::IN);
-            }
-
-            $recentJobPostings = $dupeQuery->find();
-			unset($dupeQuery);
-			
-            //			$outfile = generateOutputFileName('dedupe', 'csv', true, 'debug');
-            //			LogMessage("Writing results to CSV {$outfile}");
-            //			file_put_contents($outfile, $recentJobPostings->toCSV(false, false));
-//
-
-	        if(is_empty_value($recentJobPostings)) {
-		        LogWarning('Automarker: No jobs found to check for duplicates.');
-		        return;
-	        }
-	
-
-            $arrRecentJobs = array();
-            LogMessage('Reducing full resultset data to just the columns needed for deduplication...');
-            foreach ($recentJobPostings->toKeyIndex('JobPostingId') as $id => $job) {
-                $arrRecentJobs[$id] = $job->toFlatArrayForCSV(false, $itemKeysToExport);
-                unset($job);
-            }
-			unset($recentJobPostings);
-            
-            $cntJobs = countAssociativeArrayValues($arrRecentJobs);
-
-            $jsonObj = array(
-                'user' => $this->_markingUserFacts,
-                'job_postings' => $arrRecentJobs
-            );
-
-            $outfile = generateOutputFileName('dedupe', 'json', true, 'debug');
-            $resultsfile = generateOutputFileName('deduped_jobs_results', 'json', true, 'debug');
-            LogMessage("Exporting {$cntJobs} job postings to {$outfile} for deduplication...");
-            writeJson($jsonObj, $outfile);
-
-            unset($arrRecentJobs, $jsonObj);
-
-            try {
-                startLogSection('Calling python to dedupe new job postings...');
-                $PYTHONPATH = realpath(__ROOT__ . '/python/pyJobNormalizer/mark_duplicates.py');
-                $cmd = 'python ' . $PYTHONPATH . ' -i ' . escapeshellarg($outfile) . ' -o ' . escapeshellarg($resultsfile);
-
-                $venvDir = __ROOT__ . '/python/.venv/bin';
-                if(is_dir($venvDir)) {
-                    $cmd = preg_replace("/python /", "source {$venvDir}/activate; python ", $cmd);
-                }
-
-                LogMessage(PHP_EOL . "    ~~~~~~ Running command: {$cmd}  ~~~~~~~" . PHP_EOL);
-                doExec($cmd);
-            } catch (Exception $ex) {
-                throw $ex;
-            } finally {
-                endLogSection('Python command call finished.');
-            }
-            
-            if (!is_file($resultsfile)) {
-                throw new Exception("Job posting deduplication failed.  No dedupe results file was found to load into the database at {$resultsfile}");
-            }
-
-            LogMessage("Loading list of duplicate job postings from {$resultsfile}...");
-            $jobsToMarkDupe = loadJSON($resultsfile);
-
-            $cntJobsToMark = countAssociativeArrayValues($jobsToMarkDupe['duplicate_job_postings']);
-
-            LogMessage("Marking {$cntJobsToMark} jobs as duplicate in the database...");
-
-            $totalMarked = 0;
-            $con = Propel::getWriteConnection('default');
-
-            foreach ($jobsToMarkDupe['duplicate_job_postings'] as $key=>$job) {
-                $jobRecord =  \JobScooper\DataAccess\JobPostingQuery::create()
-                    ->filterByPrimaryKey($key)
-                    ->findOneOrCreate();
-                assert($jobRecord->isNew() === false);
-                $jobRecord->setDuplicatesJobPostingId($job['isDuplicateOf']);
-                $jobRecord->save($con);
-                ++$totalMarked;
-                if ($totalMarked % 100 === 0) {
-                    $con->commit();
-                    // fetch a new connection
-                    $con = Propel::getWriteConnection('default');
-                    LogMessage("... marked {$totalMarked} duplicate job postings...");
-                }
-                unset($jobRecord);
-            }
-
-            LogMessage("Marked {$totalMarked} job listings as duplicate of an earlier job posting with the same company and job title.");
-        } catch (\Exception $ex) {
-            handleException($ex, null, false);
-        } finally {
-            endLogSection('Finished processing job posting duplicates.');
-        }
-    }
 
     /**
      * @return bool
@@ -680,7 +561,7 @@ class JobsAutoMarker
             //
             if (!empty($arrMatchRecs)) {
                 $con = Propel::getWriteConnection('default');
-                $dbRecsById = array();
+
                 $chunks = array_chunk(array_keys($arrMatchRecs), 50);
                 foreach ($chunks as $idchunk) {
                     $dbRecsById = UserJobMatchQuery::create()
@@ -718,8 +599,6 @@ class JobsAutoMarker
         }
     }
 
-
-
     /**
      * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
      * @throws \Exception
@@ -742,14 +621,15 @@ class JobsAutoMarker
 
             try {
                 startLogSection('Calling python to do work of job title matching.');
-                $PYTHONPATH = realpath(__ROOT__ . '/python/pyJobNormalizer/matchTitlesToKeywords.py');
-                $cmd = 'python ' . $PYTHONPATH . ' -i ' . escapeshellarg($sourcefile) . ' -o ' . escapeshellarg($resultsfile);
 
-                #					$cmd = 'source ' . realpath(__ROOT__) . '/python/pyJobNormalizer/venv/bin/activate; ' . $cmd;
-
-                LogMessage(PHP_EOL . '    ~~~~~~ Running command: ' . $cmd . '  ~~~~~~~' . PHP_EOL);
-                doExec($cmd);
-
+				$runFile = 'pyJobNormalizer/matchTitlesToKeywords.py';
+				$params = [
+					'-i' => $sourcefile,
+					'-o' => $resultsfile
+				];
+				
+				$results = PythonRunner::execScript($runFile, $params);
+				
                 LogMessage('Updating database with new match results...');
                 $this->_updateUserJobMatchesFromJson($resultsfile, $arrJobsList);
             } catch (Exception $ex) {
@@ -769,7 +649,8 @@ class JobsAutoMarker
      */
     private function _loadUserNegativeTitleKeywords()
     {
-        assert(!empty($this->_markingUserFacts));
+        assert(null !== $this->_markingUserFacts);
+
         if(is_empty_value($this->_markingUserFacts['UserId'])) {
             throw new \InvalidArgumentException('Unable to automark jobs:  UserId not found.');
         }
@@ -819,7 +700,7 @@ class JobsAutoMarker
 
         $rx = $delim.preg_quote(trim($pattern), $delim).$delim.'i';
         try {
-            $testMatch = preg_match($rx, 'empty');
+            preg_match($rx, 'empty');
         } catch (\Exception $ex) {
             LogError($ex->getMessage());
             if (isDebug() == true) {
