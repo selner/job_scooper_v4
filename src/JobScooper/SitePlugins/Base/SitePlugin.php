@@ -932,7 +932,7 @@ JSCODE;
             $secs = 1000;
         }
 
-        $this->log('Clicking button [' . $this->selectorMoreListings . '] to go to the next page of results...');
+        $this->log("Clicking button [ . $this->selectorMoreListings . ] to go to the next page of results...");
 
         $jsCode = /** @lang javascript */ <<<JSCODE
             scroll = setTimeout(doNextPage, {$secs});
