@@ -742,37 +742,6 @@ JSCODE;
         $this->moveDownOnePageInBrowser();
     }
 
-
-    /**
-     * @param array $var  Array['current_value', 'parameter']   Paramter can be either a plain string or a regex pattern
-     *
-     * @return int|null  Returns 0 for count if it matches; otherwise returns null for no match
-     * @throws \Exception
-     */
-    public function matchesNoResultsPattern($var)
-    {
-        $current_value = $var['current_value'];
-        $match_string = $var['parameter'];
-
-        if (is_empty_value($match_string)) {
-            throw new \InvalidArgumentException("Plugin {$this->JobSiteName} definition missing pattern match value for matchesNoResultsPattern callback.");
-        }
-
-        if(is_empty_value($current_value) || !is_string($current_value)) {
-                return null;
-        }
-        
-        if($match_string[0] !== '/' && $match_string[strlen($match_string)-1] !== '/' ) {
-        	$match_string = "/{$match_string}/";
-        }
-
-        if (false !== preg_match($match_string,$current_value)) {
-	        return 0;
-	    }
-		
-        return null;
-    }
-
     /**
      * parseTotalResultsCount
      *
@@ -1037,14 +1006,50 @@ JSCODE;
 
 
     /**
+     * @param array $var  Array['current_value', 'parameter']   Paramter can be either a plain string or a regex pattern
+     *
+     * @return int|null  Returns 0 for count if it matches; otherwise returns null for no match
+     * @throws \Exception
+     */
+    public function matchesNoResultsPattern($var)
+    {
+        $current_value = $var['current_value'];
+        $match_string = $var['parameter'];
+
+        if (is_empty_value($match_string)) {
+            throw new \InvalidArgumentException("Plugin {$this->JobSiteName} definition missing pattern match value for matchesNoResultsPattern callback.");
+        }
+
+        if(is_empty_value($current_value) || !is_string($current_value)) {
+                return null;
+        }
+        
+        if($match_string[0] !== '/' && $match_string[strlen($match_string)-1] !== '/' ) {
+        	$match_string = "/{$match_string}/";
+        }
+
+        if (false !== preg_match($match_string,$current_value)) {
+	        return 0;
+	    }
+		
+        return null;
+    }
+
+
+    /**
      * @param $var
      *
      * @return string
      */
     public function hashValue($var)
     {
+        if(is_empty_value($var) || !is_string($var)) {
+                return null;
+        }
+
         return md5($var);
     }
+
 
     /**
      * @param $var

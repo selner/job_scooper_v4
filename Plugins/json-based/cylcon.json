@@ -56,7 +56,7 @@
           "Pattern": "/.*?[Rr]edirect[Ww][Ee][Bb]\\.php\\?q=(.*)/",
           "Type": "SOURCEFIELD",
           "Field": "Url",
-          "Callback" : "hashValue"
+          "Callback" : "hashValueCallback"
         },
 
         {
