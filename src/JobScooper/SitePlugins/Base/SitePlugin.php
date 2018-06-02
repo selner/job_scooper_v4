@@ -1056,7 +1056,13 @@ JSCODE;
      *
      * @return string
      */
-    public function combineTextAllNodes($var)
+    public function hashValueCallback($var)
+    {
+        $current_value = $var['current_value'];
+
+        return $this->hashValue($current_value);
+    }
+
     {
         $delim = ' ';
         if (count($var) > 1) {
