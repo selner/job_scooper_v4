@@ -2092,6 +2092,11 @@ JSCODE;
             $this->log('Failed to download new job postings for search run ' . $searchDetails->getUserSearchSiteRunKey() . '.  Continuing to next search.   Error details: ' . $ex->getMessage(), \Monolog\Logger::WARNING);
         } finally {
             unset($objSimpleHTML);
+            $arrPageJobsList = null;
+            $searchDetails = null;
+            $user = null;
+            $arrJsonLDJobs = null;
+            $arrPageJobsList = null;
         }
     }
 
