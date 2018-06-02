@@ -762,6 +762,10 @@ JSCODE;
                 return null;
         }
         
+        if($match_string[0] !== '/' && $match_string[strlen($match_string)-1] !== '/' ) {
+        	$match_string = "/{$match_string}/";
+        }
+
         if (false !== preg_match($match_string,$current_value)) {
 	        return 0;
 	    }
