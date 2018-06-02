@@ -18,7 +18,7 @@ namespace JobScooper\Manager;
 
 use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\User;
-use JobScooper\StageProcessor\JobPostingNormalizer;use JobScooper\StageProcessor\JobsAutoMarker;
+use JobScooper\StageProcessor\DataNormalizer;use JobScooper\StageProcessor\JobPostingNormalizer;use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Utils\ConfigInitializer;
@@ -214,7 +214,7 @@ class StageManager
 
         try {
             startLogSection('Stage 2:  Normalizing job posting details for recent posts...');
-            $normer = new JobPostingNormalizer();
+            $normer = new DataNormalizer();
             $normer->normalizeJobs();
         } catch (\Exception $ex) {
             handleException($ex, null, true);
