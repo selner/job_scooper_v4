@@ -17,7 +17,7 @@
 
 namespace JobScooper\SitePlugins\Base;
 
-require_once(__ROOT__ . '/src/helpers/Constants.php');
+require_once(__ROOT__ . 'src/helpers/Constants.php');
 
 use JobScooper\DataAccess\UserSearchSiteRunManager;
 use function JobScooper\DataAccess\getCountryCodeRemapping;
@@ -1063,11 +1063,20 @@ JSCODE;
         return $this->hashValue($current_value);
     }
 
+    /**
+     * @param $var
+     *
+     * @return string
+     */
+    protected function combineTextAllNodes($var)
     {
         $delim = ' ';
-        if (count($var) > 1) {
-            $var = $var[0];
-            $delim = $var[1];
+        if (count($var) > 1 && array_key_exists('current_value', $var)) {
+            $var = $var['current_value'];
+        }
+
+        if (count($var) > 1 && array_key_exists('parameter', $var)) {
+            $delim = $var['parameter'];
         }
 
         return combineTextAllNodes($var, $delim);
