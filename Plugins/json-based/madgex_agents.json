@@ -92,7 +92,7 @@
             "SiteSearchBaseUrl": "http://www.mediabistro.com/jobs/search",
             "PluginExtendsClassName": "AbstractMadgexATS",
             "CountryCodes": [
-                "S"
+                "US"
             ]
         },
         {
