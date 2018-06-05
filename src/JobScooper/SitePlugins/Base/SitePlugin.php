@@ -17,7 +17,7 @@
 
 namespace JobScooper\SitePlugins\Base;
 
-require_once(__ROOT__ . 'src/helpers/Constants.php');
+require_once(__ROOT__ . '/src/helpers/Constants.php');
 
 use JobScooper\DataAccess\UserSearchSiteRunManager;
 use function JobScooper\DataAccess\getCountryCodeRemapping;
