@@ -975,7 +975,7 @@ JSCODE;
 
 
     /**
-     * @param array $searchDetails
+     * @param array $searchFacts
      *
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
@@ -1120,7 +1120,6 @@ JSCODE;
         }
         return implode('|~', $splitLocs);
     }
-
 
     //************************************************************************
     //
@@ -1699,7 +1698,7 @@ JSCODE;
      * @param array $extras
      * @param Exception $ex
      */
-    public function log($msg, $logLevel=\Monolog\Logger::INFO, $extras=array(), $ex=null)
+    public function log($msg, $logLevel=\Monolog\Logger::INFO, array $extras=[], $ex=null)
     {
         LogMessage($msg, $logLevel, $extras, $ex, $channel='plugins');
     }
