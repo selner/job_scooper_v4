@@ -19,6 +19,7 @@ namespace JobScooper\Manager;
 use Bramus\Monolog\Formatter\ColorSchemes\DefaultScheme;
 use JobScooper\Logging\CSVLogHandler;
 use JobScooper\Logging\ErrorEmailLogHandler;
+use JobScooper\Utils\JobsExceptionHandler;
 use JobScooper\Utils\Settings;
 use Monolog\ErrorHandler;
 use Monolog\Formatter\LineFormatter;
@@ -37,33 +38,6 @@ use \Bramus\Monolog\Formatter\ColoredLineFormatter;
 /****         Helper Class:  Information and Error Logging                                               ****/
 /****                                                                                                        ****/
 /****************************************************************************************************************/
-
-/**
- * Class JobsErrorHandler
- * @package JobScooper\Manager
- */
-class JobsErrorHandler extends ErrorHandler
-{
-    /**
-     * @param $e
-     *
-     * @throws \Exception
-     */
-    public function handleException($e)
-    {
-        if (is_a($e, \Error::class)) {
-            $e = new \ErrorException($e->getMessage(), $e->getCode(), $severity = 1, $e->getFile(), $e->getLine(), $e->getPrevious());
-        }
-
-        if (empty($GLOBALS['logger'])) {
-            $GLOBALS['logger'] = getChannelLogger('default');
-        }
-
-        LogError(sprintf('Uncaught Exception: %s', $e->getMessage()), null, $e);
-        handleException($e, 'Uncaught Exception: %s', false);
-//        exit(255);
-    }
-}
 
 /**
  * Class LoggingManager
@@ -98,7 +72,7 @@ class LoggingManager extends \Monolog\Logger
 
         $logger = new Logger($name);
 
-        $handler = new JobsErrorHandler($logger);
+        $handler = new JobsExceptionHandler($logger);
         $handler->registerErrorHandler([], false);
         $handler->registerExceptionHandler();
         $handler->registerFatalHandler();

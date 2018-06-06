@@ -290,7 +290,20 @@ class ConfigInitializer
         if (isDebug()) {
             $con = Propel::getWriteConnection(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
             $con->useDebug(true);
+            
+			// Enabling logging for all DB calls in debug mode
+			$con->setLogMethods(array(
+			  'exec',
+			  'query',
+			  'execute', // these first three are the default
+			  'beginTransaction',
+			  'commit',
+			  'rollBack',
+			  'bindValue'
+			));
             LogMessage('Enabled debug logging for Propel.');
+
+
         }
     }
 

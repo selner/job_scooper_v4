@@ -18,12 +18,14 @@ namespace JobScooper\Manager;
 
 use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\User;
-use JobScooper\StageProcessor\DataNormalizer;use JobScooper\StageProcessor\JobPostingNormalizer;use JobScooper\StageProcessor\JobsAutoMarker;
+use JobScooper\StageProcessor\DataNormalizer;
+use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Utils\ConfigInitializer;
 use JobScooper\Utils\DBRecordRemover;
 use JobScooper\Utils\Settings;
+use Propel\Runtime\Exception\PropelException;
 
 const JOBLIST_TYPE_UNFILTERED = 'unfiltered';
 const JOBLIST_TYPE_MARKED = 'marked';
@@ -87,7 +89,11 @@ class StageManager
                     $stageFunc = "doStage{$stage}";
                     try {
                         $this->$stageFunc();
-                    } catch (\Exception $ex) {
+                    }
+                    catch (PropelException $pex) {
+                    	throw $pex;
+                    }
+					catch (\Exception $ex) {
                         throw new \Exception("Error:  failed to call method \$this->{$stageFunc}() for {$stage} from option --StageProcessor " . implode(",", $arrRunStages) . ".  Error: {$ex}");
                     }
                 }
@@ -100,6 +106,8 @@ class StageManager
                 $this->doStage3();
                 $this->doStage4();
             }
+        } catch (PropelException $pex) {
+            handleException($pex, null, true);
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         } finally {
@@ -186,6 +194,8 @@ class StageManager
 		                        endLogSection("Job downloads have ended for {$jobsiteKey}.");
 		                    }
 			            }
+		            } catch (PropelException $pex) {
+		                handleException($pex, null, true);
 		            } catch (\Exception $ex) {
 		                handleException($ex, null, false);
 		            } finally {
