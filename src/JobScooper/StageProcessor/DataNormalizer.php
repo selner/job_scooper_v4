@@ -62,7 +62,43 @@ class DataNormalizer
     }
 
 
-    
+	   
+	/**
+	 * @param $query
+	 * @param $callback
+	 *
+	 * @throws \Exception
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	function doBatchCallbackForQuery($query, $callback)
+	{
+	    $chunkResults = null;
+	    $continueLoop = true;
+        $con = \Propel\Runtime\Propel::getWriteConnection("default");
+
+	    $nResults = 0;
+	    $queryClass = get_class($query);
+		$nCurrentPage = 1;
+	    $jobsPager = $query->paginate($page = $nCurrentPage, $maxPerPage = 500, $con);
+		
+	    while ((null !== $jobsPager && !$jobsPager->isEmpty()) || $continueLoop === true) {
+            $nSetResults = $nResults + $jobsPager->count() - 1;
+            $jobsPageData = $jobsPager->getResults();
+            LogMessage("Processing query results #{$nResults} - {$nSetResults} of {$jobsPager->getNbResults() } total results via callback {$queryClass}...");
+            $nResults = $nResults + $nSetResults;
+            call_user_func($callback, $jobsPageData);
+            $nCurrentPage += 1;
+            
+            if (!$jobsPager->isEmpty()) {
+            
+			    $jobsPager = $query->paginate($page = $nCurrentPage, $maxPerPage = 200, $con);
+            } else {
+                $continueLoop = false;
+            }
+        }
+        
+    }
+	   
     /**
      * @throws \Exception
      */
@@ -81,12 +117,33 @@ class DataNormalizer
             if (!empty($included_sites)) {
                 $dupeQuery->filterByJobSiteKey($included_sites, Criteria::IN);
             }
+			$dupeQuery->orderByKeyCompanyAndTitle();
+            
+            $this->doBatchCallbackForQuery($dupeQuery, array($this, '_markDuplicatePostings'));
 
-            $recentJobPostings = $dupeQuery->find()
-                ->toArray("JobPostingId");
+            
+        } catch (\Exception $ex) {
+            handleException($ex, null, false);
+        } finally {
+            endLogSection('Finished processing job posting duplicates.');
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function _markDuplicatePostings($queryResults)
+    {
+
+    	if (is_empty_value($queryResults)) {
+    		return;
+        }
+        
+        try {
+	        $recentJobPostings = $queryResults->toArray("JobPostingId");
 			unset($dupeQuery);
 	
-            $itemKeysToExport = array('JobPostingId', 'Title', 'Company', 'JobSite', 'KeyCompanyAndTitle', 'GeoLocationId', 'FirstSeenAt', 'DuplicatesJobPostingId');
+	        $itemKeysToExport = array('JobPostingId', 'Title', 'Company', 'JobSite', 'KeyCompanyAndTitle', 'GeoLocationId', 'FirstSeenAt', 'DuplicatesJobPostingId');
 			$postsToExport = array_child_columns($recentJobPostings, $itemKeysToExport, "JobPostingId");
 			unset($recentJobPostings);
 	  
@@ -94,22 +151,22 @@ class DataNormalizer
 		        LogWarning('JobNormalizer: No jobs found to check for duplicates.');
 		        return;
 	        }
-
-            $cntJobs = countAssociativeArrayValues($postsToExport);
-
-            $jsonObj = array(
-                'job_postings' => $postsToExport,
-                'count' => count($postsToExport)
-            );
-
-            $outfile = generateOutputFileName('dedupe', 'json', true, 'debug');
-            $resultsfile = generateOutputFileName('deduped_jobs_results', 'json', true, 'debug');
-            LogMessage("Exporting {$cntJobs} job postings to {$outfile} for deduplication...");
-            writeJson($jsonObj, $outfile);
-
-            unset($postsToExport, $jsonObj);
-
-            startLogSection('Calling python to dedupe new job postings...');
+	
+	        $cntJobs = countAssociativeArrayValues($postsToExport);
+	
+	        $jsonObj = array(
+	            'job_postings' => $postsToExport,
+	            'count' => count($postsToExport)
+	        );
+	
+	        $outfile = generateOutputFileName('dedupe', 'json', true, 'debug');
+	        $resultsfile = generateOutputFileName('deduped_jobs_results', 'json', true, 'debug');
+	        LogMessage("Exporting {$cntJobs} job postings to {$outfile} for deduplication...");
+	        writeJson($jsonObj, $outfile);
+	
+	        unset($postsToExport, $jsonObj);
+	
+	        startLogSection('Calling python to dedupe new job postings...');
 			$runFile = 'pyJobNormalizer/mark_duplicates.py';
 			$params = [
 				'-i' => $outfile,
@@ -118,45 +175,45 @@ class DataNormalizer
 			
 			$results = PythonRunner::execScript($runFile, $params);
 			
-            endLogSection('Python command call finished.');
-            
-            if (!is_file($resultsfile)) {
-                throw new Exception("Job posting deduplication failed.  No dedupe results file was found to load into the database at {$resultsfile}");
-            }
-
-            LogMessage("Loading list of duplicate job postings from {$resultsfile}...");
-            $jobsToMarkDupe = loadJSON($resultsfile);
-
-            $cntJobsToMark = countAssociativeArrayValues($jobsToMarkDupe['duplicate_job_postings']);
-
-            LogMessage("Marking {$cntJobsToMark} jobs as duplicate in the database...");
-
-            $totalMarked = 0;
-            $con = Propel::getWriteConnection('default');
-
-            foreach ($jobsToMarkDupe['duplicate_job_postings'] as $key=>$job) {
-                $jobRecord =  \JobScooper\DataAccess\JobPostingQuery::create()
-                    ->filterByPrimaryKey($key)
-                    ->findOneOrCreate();
-                assert($jobRecord->isNew() === false);
-                $jobRecord->setDuplicatesJobPostingId($job['isDuplicateOf']);
-                $jobRecord->save($con);
-                ++$totalMarked;
-                if ($totalMarked % 100 === 0) {
-                    $con->commit();
-                    // fetch a new connection
-                    $con = Propel::getWriteConnection('default');
-                    LogMessage("... marked {$totalMarked} duplicate job postings...");
-                }
-                unset($jobRecord);
-            }
-
-            LogMessage("Marked {$totalMarked} job listings as duplicate of an earlier job posting with the same company and job title.");
-        } catch (\Exception $ex) {
-            handleException($ex, null, false);
-        } finally {
-            endLogSection('Finished processing job posting duplicates.');
-        }
+	        endLogSection('Python command call finished.');
+	        
+	        if (!is_file($resultsfile)) {
+	            throw new Exception("Job posting deduplication failed.  No dedupe results file was found to load into the database at {$resultsfile}");
+	        }
+	
+	        LogMessage("Loading list of duplicate job postings from {$resultsfile}...");
+	        $jobsToMarkDupe = loadJSON($resultsfile);
+	
+	        $cntJobsToMark = countAssociativeArrayValues($jobsToMarkDupe['duplicate_job_postings']);
+	
+	        LogMessage("Marking {$cntJobsToMark} jobs as duplicate in the database...");
+	
+	        $totalMarked = 0;
+	        $con = Propel::getWriteConnection('default');
+	
+	        foreach ($jobsToMarkDupe['duplicate_job_postings'] as $key=>$job) {
+	            $jobRecord =  \JobScooper\DataAccess\JobPostingQuery::create()
+	                ->filterByPrimaryKey($key)
+	                ->findOneOrCreate();
+	            assert($jobRecord->isNew() === false);
+	            $jobRecord->setDuplicatesJobPostingId($job['isDuplicateOf']);
+	            $jobRecord->save($con);
+	            ++$totalMarked;
+	            if ($totalMarked % 100 === 0) {
+	                $con->commit();
+	                // fetch a new connection
+	                $con = Propel::getWriteConnection('default');
+	                LogMessage("... marked {$totalMarked} duplicate job postings...");
+	            }
+	            unset($jobRecord);
+	        }
+	
+	        LogMessage("Marked {$totalMarked} job listings as duplicate of an earlier job posting with the same company and job title.");
+	    } catch (\Exception $ex) {
+	        handleException($ex, null, false);
+	    } finally {
+	        endLogSection('Finished processing job posting duplicates.');
+	    }
     }
 
 
