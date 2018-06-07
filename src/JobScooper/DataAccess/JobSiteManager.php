@@ -297,10 +297,11 @@ class JobSiteManager
         ksort($allEnabledJobSites);
         $nEnabledSites = count($allEnabledJobSites);
         LogMessage("Loaded {$nEnabledSites} enabled jobsite plugins.");
-        $dbJobSitesByKey = null;
-
 	    Settings::setValue(self::class . '.enabled_sites', array_keys($allEnabledJobSites));
 
+        $dbJobSitesByKey = null;
+		$allDBJobSitesByKey = null;
+		unset($allEnabledJobSites);
     }
 
 }
