@@ -16,12 +16,12 @@
  */
 namespace JobScooper\StageProcessor;
 
-use JobScooper\DataAccess\Base\GeoLocation;use JobScooper\DataAccess\JobSiteManager;
+use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\JobPostingQuery;
 use Exception;
-use JobScooper\DataAccess\GeoLocationManager;
-use JobScooper\DataAccess\LocationLookup;use JobScooper\DataAccess\LocationLookupQuery;use JobScooper\DataAccess\Map\JobPostingTableMap;use JobScooper\Utils\PythonRunner;
+use JobScooper\Utils\PythonRunner;
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
 
 /**
@@ -63,42 +63,6 @@ class DataNormalizer
 
 
 	   
-	/**
-	 * @param $query
-	 * @param $callback
-	 *
-	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	function doBatchCallbackForQuery($query, $callback)
-	{
-	    $chunkResults = null;
-	    $continueLoop = true;
-        $con = \Propel\Runtime\Propel::getWriteConnection("default");
-
-	    $nResults = 0;
-	    $queryClass = get_class($query);
-		$nCurrentPage = 1;
-	    $jobsPager = $query->paginate($page = $nCurrentPage, $maxPerPage = 500, $con);
-		
-	    while ((null !== $jobsPager && !$jobsPager->isEmpty()) || $continueLoop === true) {
-            $nSetResults = $nResults + $jobsPager->count() - 1;
-            $jobsPageData = $jobsPager->getResults();
-            LogMessage("Processing query results #{$nResults} - {$nSetResults} of {$jobsPager->getNbResults() } total results via callback {$queryClass}...");
-            $nResults = $nResults + $nSetResults;
-            call_user_func($callback, $jobsPageData);
-            $nCurrentPage += 1;
-            
-            if (!$jobsPager->isEmpty()) {
-            
-			    $jobsPager = $query->paginate($page = $nCurrentPage, $maxPerPage = 200, $con);
-            } else {
-                $continueLoop = false;
-            }
-        }
-        
-    }
-	   
     /**
      * @throws \Exception
      */
@@ -119,12 +83,10 @@ class DataNormalizer
             }
 			$dupeQuery->orderByKeyCompanyAndTitle();
             
-            // BUGBUG / TODO:  Duplicate job listings spanning two pages will likely not get caught correctly
-            //                 Paginate solves the large result set problem decently but added this new
-            //                 edge that should be fixed at some point
-            $this->doBatchCallbackForQuery($dupeQuery, array($this, '_markDuplicatePostings'));
+            doBatchCallbackForQuery($dupeQuery, array($this, 'markDuplicatePostings'), $backOffsetDelta = -1);
 
-            
+	    } catch (PropelException $pex) {
+	        handleException($pex, null, true);
         } catch (\Exception $ex) {
             handleException($ex, null, false);
         } finally {
@@ -133,9 +95,10 @@ class DataNormalizer
     }
 
     /**
+     * @param $queryResults
      * @throws \Exception
      */
-    private function _markDuplicatePostings($queryResults)
+    public static function markDuplicatePostings($queryResults)
     {
 
     	if (is_empty_value($queryResults)) {
@@ -178,7 +141,7 @@ class DataNormalizer
 			
 			$results = PythonRunner::execScript($runFile, $params);
 			
-	        endLogSection('Python command call finished.');
+	        LogMessage('Python command call finished.');
 	        
 	        if (!is_file($resultsfile)) {
 	            throw new Exception("Job posting deduplication failed.  No dedupe results file was found to load into the database at {$resultsfile}");
@@ -215,7 +178,7 @@ class DataNormalizer
 	    } catch (\Exception $ex) {
 	        handleException($ex, null, false);
 	    } finally {
-	        endLogSection('Finished processing job posting duplicates.');
+	        LogMessage('Processed job posting duplicate batch.');
 	    }
     }
 

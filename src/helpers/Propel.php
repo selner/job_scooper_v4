@@ -15,6 +15,7 @@
  * under the License.
  */
 
+define('MAX_RESULTS_PER_PAGE', 2500);
 
 /******************************************************************************
  *
@@ -174,6 +175,50 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
     return $results;
 }
 
+/**
+ * @param $query
+ * @param $callback
+ * @param $backOffsetDelta
+ * @param $maxResultsPerPage
+ *
+ * @throws \Exception
+ * @throws \Propel\Runtime\Exception\PropelException
+ */
+function doBatchCallbackForQuery($query, $callback, $backOffsetDelta = 0, $maxResultsPerPage = MAX_RESULTS_PER_PAGE)
+{
+    $resultsPageData = null;
+    $con = \Propel\Runtime\Propel::getWriteConnection('default');
+    
+    $nResults = 0;
+    $queryClass = get_class($query);
+	$totalResults = $query->count($con);
+    $nLastPage = round($totalResults / $maxResultsPerPage, 0, PHP_ROUND_HALF_UP);
+
+    for($nCurrentPage = 1; $nCurrentPage <= $nLastPage; $nCurrentPage++) {
+        $offset = $nCurrentPage * $maxResultsPerPage;
+        //
+        /// // go backwards one if we can so we don't miss dupes at the border of page sets
+        //
+        $backStepOffset = 0;
+        if($offset > 0) {
+            $backStepOffset = $backOffsetDelta;
+        }
+        $query->setOffset($offset + $backStepOffset);
+        $query->limit($maxResultsPerPage + abs($backStepOffset));
+        $resultsPageData = $query->find();
+
+        $nSetResults = $nResults + count($resultsPageData);
+        LogMessage("Processing query results #{($nResults+$backStepOffset)} - {($nSetResults+$backStepOffset)} of {$totalResults} total results via callback {$queryClass}...");
+        $nResults = $nResults + $nSetResults + $backStepOffset;
+        call_user_func($callback, $resultsPageData);
+	    $resultsPageData = null;
+    }
+
+    $con = null;
+    $jobsPager = null;
+    $query = null;
+ 
+}
 //
 // User Job Match List Functions
 //
