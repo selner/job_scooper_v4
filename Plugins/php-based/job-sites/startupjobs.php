@@ -18,15 +18,15 @@
 
 
 
-class PluginBetalist extends \JobScooper\SitePlugins\AjaxSitePlugin
+class PluginStartupJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
-    protected $JobSiteName = 'Betalist';
-    protected $JobPostingBaseUrl = "https://betalist.com";
+    protected $JobSiteName = 'StartupJobs';
+    protected $JobPostingBaseUrl = "https://startup.jobs";
     protected $JobListingsPerPage = 500;
 
     // Note:  Betalist has a short list of jobs (< 500-1000 total) so we exclude keyword search here as an optimization.  The trick we use is putting a blank space in the search text box.
     //        The space returns all jobs whereas blank returns a special landing page.
-    protected $SearchUrlFormat = "https://betalist.com/jobs?q=%20&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
+    protected $SearchUrlFormat = "https://startup.jobs/jobs?q=%20&hPP=500&p=***PAGE_NUMBER***&dFR%5Bcommitment%5D%5B0%5D=Full-Time&dFR%5Bcommitment%5D%5B1%5D=Part-Time&dFR%5Bcommitment%5D%5B2%5D=Contractor&dFR%5Bcommitment%5D%5B3%5D=Internship&is_v=1";
 
     protected $additionalBitFlags = [C__JOB_IGNORE_MISMATCHED_JOB_COUNTS];  // TODO:  Add Lat/Long support for BetaList location search.
     protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
