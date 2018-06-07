@@ -158,36 +158,4 @@ class UserJobMatch extends BaseUserJobMatch
 
         return parent::setMatchedUserKeywords($v);
     }
-
-    /**
-     *
-     */
-    public function clearUserMatchState()
-    {
-        $this->setIsJobMatch(null);
-        $this->setOutOfUserArea(null);
-
-        $kwds = $this->getMatchedNegativeCompanyKeywords();
-        if (!empty($kwds)) {
-            foreach ($kwds as $k) {
-                $this->removeMatchedNegativeCompanyKeyword($k);
-            }
-        }
-
-        $kwds = $this->getMatchedNegativeTitleKeywords();
-        if (!empty($kwds)) {
-            foreach ($kwds as $k) {
-                $this->removeMatchedNegativeTitleKeyword($k);
-            }
-        }
-
-        $kwds = $this->getMatchedUserKeywords();
-        if (!empty($kwds)) {
-            foreach ($kwds as $k) {
-                $this->removeMatchedUserKeyword($k);
-            }
-        }
-
-        $this->applyDefaultValues();
-    }
 }

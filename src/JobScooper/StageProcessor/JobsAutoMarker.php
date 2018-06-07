@@ -71,7 +71,7 @@ class JobsAutoMarker
         // Filter the full jobs list looking for duplicates, etc.
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        LogMessage(PHP_EOL . '**************  Updating jobs list for known filters ***************' . PHP_EOL);
+        LogMessage(PHP_EOL . '**************  Updating job match list for known filters ***************' . PHP_EOL);
         
         try {
 
@@ -102,7 +102,7 @@ class JobsAutoMarker
         LogMessage('Clearing old auto-marked facts from jobs we are re-marking...');
         try {
             foreach ($results as $jobMatch) {
-                $jobMatch->clearUserMatchState();
+                $jobMatch->clear();
             }
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);
@@ -495,10 +495,6 @@ class JobsAutoMarker
                 }
             }
         }
-        else
-        {
-            $arrJobMatchFacts['MatchedUserKeywords'] = "no";
-        }
 
         if (!is_empty_value($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
             if (is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
@@ -508,6 +504,7 @@ class JobsAutoMarker
                 }
             }
         }
+        
         $job->fromArray($arrJobMatchFacts);
     }
 
