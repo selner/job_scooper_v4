@@ -194,12 +194,14 @@ class StageManager
 		                        endLogSection("Job downloads have ended for {$jobsiteKey}.");
 		                    }
 			            }
+			            $siteRuns = null;
 		            } catch (PropelException $pex) {
 		                handleException($pex, null, true);
 		            } catch (\Exception $ex) {
 		                handleException($ex, null, false);
 		            } finally {
 						$user = null;
+						$siteRuns = null;
 		            }
 
 			        endLogSection("Done downloading jobs from {$jobsiteKey} for {$userFacts['UserSlug']}");
