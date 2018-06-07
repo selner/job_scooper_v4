@@ -188,6 +188,8 @@ class StageManager
 		                    try {
 		                        startLogSection("Downloading jobs for {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
 		                        $sitePlugin->downloadLatestJobsForAllSearches();
+				            } catch (PropelException $pex) {
+				                handleException($pex, null, true);
 		                    } catch (\Exception $classError) {
 		                        handleException($classError, "{$jobsiteKey} failed to download job postings: %s", $raise = false);
 		                    } finally {
