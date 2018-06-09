@@ -669,6 +669,7 @@ JSCODE;
         if ($secs <= 0) {
             $secs = 1000;
         }
+        $jsEscSelector = swapDoubleSingleQuotes($this->selectorMoreListings);
 
 	    $jsCode = /** @lang javascript */ <<<JSCODE
             scroll = setTimeout(doLoadMore, 250);
@@ -692,7 +693,7 @@ JSCODE;
                 window.scrollTo(0,document.body.scrollHeight);
                 console.log('paged-down-before-click');
 
-                var loadmore = document.querySelector('{$this->selectorMoreListings}');
+                var loadmore = document.querySelector("{$jsEscSelector}");
                 if(loadmore != null && !typeof(loadmore.click) !== 'function' && loadmore.length >= 1) {
                     loadmore = loadmore[0];
                 } 
@@ -904,14 +905,16 @@ JSCODE;
         if ($secs <= 0) {
             $secs = 1000;
         }
+        
+        $jsEscSelector = swapDoubleSingleQuotes($this->selectorMoreListings);
 
-        $this->log("Clicking button [ . $this->selectorMoreListings . ] to go to the next page of results...");
+        $this->log("Clicking button [ {$jsEscSelector} ] to go to the next page of results...");
 
         $jsCode = /** @lang javascript */ <<<JSCODE
             scroll = setTimeout(doNextPage, {$secs});
             function doNextPage() 
             {
-                var loadnext = document.querySelector('{$this->selectorMoreListings}');
+                var loadnext = document.querySelector("{$jsEscSelector}");
                 if(loadnext != null && !typeof(loadnext.click) !== 'function' && loadnext.length >= 1) {
                     loadnext = loadnext[0];
                 } 
@@ -919,7 +922,7 @@ JSCODE;
                 if(loadnext != null && loadnext.style.display === '')
                 { 
                     loadnext.click();  
-                    console.log("Clicked load next results control '{$this->selectorMoreListings}'...");
+                    console.log("Clicked load next results control {$jsEscSelector}...");
                 }
             }  
 JSCODE;

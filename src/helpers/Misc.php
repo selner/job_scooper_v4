@@ -274,3 +274,16 @@ if (! function_exists('glob_recursive')) {
         return $files;
     }
 }
+
+
+
+function swapDoubleSingleQuotes($var, $changeDoubles=true)
+{
+	if($changeDoubles) {
+		return preg_replace('/"/',"'", $var);
+	}
+	else
+	{
+		return preg_replace("/'/",'"', $var);
+	}
+}

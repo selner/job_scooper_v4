@@ -56,15 +56,18 @@ class PluginCareerBuilder extends \JobScooper\SitePlugins\AjaxSitePlugin
         if ($secs <= 0) {
             $secs = 1000;
         }
+        
+        $jsEscSelector = swapDoubleSingleQuotes($this->selectorMoreListings);
 
-        LogMessage("Clicking button [{$this->selectorMoreListings}] to go to the next page of results...");
+
+        LogMessage("Clicking button [{$jsEscSelector}] to go to the next page of results...");
 
 	    $jsCode = /** @lang javascript */ <<<JSCODE
             document.getElementById('direct_moreLessLinks_listingDiv').setAttribute('data-num-items', 50);
             scroll = setTimeout(doNextPage, 5000);
             function doNextPage() 
             {
-                var loadnext = document.querySelector('{$this->selectorMoreListings}');
+                var loadnext = document.querySelector("{$jsEscSelector}");
                 if(loadnext != null && !typeof(loadnext.click) !== \"function\" && loadnext.length >= 1) {
                     loadnext = loadnext[0];  
                 } 
