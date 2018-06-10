@@ -99,22 +99,7 @@ class JobSiteManager
 
         return null;
     }
-
-    /**
-     * @param string $strJobSiteKey
-     * @throws \Exception
-     * @return \JobScooper\SitePlugins\IJobSitePlugin
-     */
-    public static function getJobSitePluginByKey($strJobSiteKey)
-    {
-        $site = JobSiteManager::getJobSiteByKey($strJobSiteKey);
-        if(null !== $site) {
-        	return $site->getPlugin();
-        }
-
-        return null;
-    }
-
+    
     /**
      *
      * @return array|mixed

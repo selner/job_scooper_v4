@@ -134,7 +134,9 @@ class StageManager
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $jobsiteKeys = JobSiteManager::getJobSiteKeysIncludedInRun();
         $sitePlugin = null;
-
+		$siteRuns = null;
+		$user = null;
+		
         if (!is_empty_value($jobsiteKeys)) {
             $usersForRun = Settings::getValue('users_for_run');
             if(is_empty_value($usersForRun)) {
@@ -165,18 +167,11 @@ class StageManager
 		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		                    startLogSection("Initializing {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
 		                    try {
-		                        $sitePlugin = JobSiteManager::getJobSitePluginByKey($jobsiteKey);
+		                        $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
 		                        $sitePlugin->setSearches($siteRuns);
 		                    } catch (\Exception $classError) {
-		                        handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = false);
+		                        handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
 		                    } finally {
-								// make sure to clean up the references to each of the UserSiteSearchRun objects
-								// so we dont leave a DB connection open
-		                        foreach(array_keys($siteRuns) as $k) {
-									$siteRuns[$k] = null;
-									unset($siteRuns[$k]);
-		                        }
-		                        $siteRuns = null;
 		                        endLogSection(" {$jobsiteKey} searches initialized.");
 		                    }
 
@@ -196,12 +191,18 @@ class StageManager
 		                        endLogSection("Job downloads have ended for {$jobsiteKey}.");
 		                    }
 			            }
-			            $siteRuns = null;
 		            } catch (PropelException $pex) {
 		                handleException($pex, null, true);
 		            } catch (\Exception $ex) {
 		                handleException($ex, null, false);
 		            } finally {
+	                    $sitePlugin = null;
+						// make sure to clean up the references to each of the UserSiteSearchRun objects
+						// so we dont leave a DB connection open
+                        foreach(array_keys($siteRuns) as $k) {
+							$siteRuns[$k] = null;
+							unset($siteRuns[$k]);
+                        }
 						$user = null;
 						$siteRuns = null;
 		            }
@@ -233,6 +234,7 @@ class StageManager
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         } finally {
+        	$normer = null;
             endLogSection('End of stage 2 (job posting normalization).');
         }
     }
@@ -259,8 +261,9 @@ class StageManager
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         } finally {
+        	$marker = null;
+        	$usersForRun = null;
             endLogSection("End of stage 3 (auto-marking) for user {$userFacts['UserSlug']}.");
-            $usersForRun = null;
         }
     }
 
@@ -286,6 +289,8 @@ class StageManager
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         } finally {
+        	$notifier = null;
+        	$usersForRun = null;
             endLogSection('End of stage 4: user notifications');
         }
     }
@@ -326,6 +331,7 @@ class StageManager
             handleException($ex, null, true);
         } finally {
         	$usersForRun = null;
+        	$notify = null;
             endLogSection('End of do Weekly Recaps command');
         }
     }
@@ -391,5 +397,22 @@ class StageManager
 
             logMessage("JobScooper runtime was " . $runtime->format("%h hours, %i minutes and %s seconds (%h:%i:%s)."));
         }
+    }
+    
+   /**
+     * @param string $siteKey
+     * @throws \Exception
+     * @return \JobScooper\SitePlugins\IJobSitePlugin
+     */
+    private function _getJobSitePluginInstance($siteKey)
+    {
+    	$ret = null;
+        $site = JobSiteManager::getJobSiteByKey($siteKey);
+        if(null !== $site) {
+        	$ret = $site->getPlugin();
+        }
+
+		$site = null;
+        return $ret;
     }
 }

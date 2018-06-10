@@ -58,10 +58,12 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
      */
     public function getSitePlugin()
     {
-        if (null === $this->_plugin) {
-	        $this->_plugin = JobSiteManager::getJobSitePluginByKey($this->getJobSiteKey());
+        $site = JobSiteManager::getJobSiteByKey($this->getJobSiteKey());
+        if(null !== $site) {
+        	$this->_plugin = $site->getPlugin();
         }
-
+		$site = null;
+        
         return $this->_plugin;
     }
 
