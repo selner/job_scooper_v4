@@ -273,8 +273,8 @@ class SeleniumManager extends PropertyObject
             $this->remoteWebDriver = RemoteWebDriver::create(
                 $hubUrl,
                 $desired_capabilities = $capabilities,
-                $connection_timeout_in_ms = 60000,
-                $request_timeout_in_ms = 60000
+                $connection_timeout_in_ms = 10000,
+                $request_timeout_in_ms = 150000
             );
 
 //
