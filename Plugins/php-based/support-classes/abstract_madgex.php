@@ -54,7 +54,7 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
             }
         }
 
-        if (null !== $searchURL) {
+        if (null !== $searchURL && is_empty_value($this->SearchUrlFormat)) {
             $this->SearchUrlFormat = "{$searchURL}?Keywords=***KEYWORDS***&radialtown=***LOCATION:{Place}***+***LOCATION:{Region}***&RadialLocation=50&NearFacetsShown=true&countrycode=***LOCATION:{CountryCode}***&sort=Date&Page=***PAGE_NUMBER***";
         }
         $this->prevURL = $this->JobPostingBaseUrl;
