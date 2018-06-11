@@ -1108,19 +1108,18 @@ JSCODE;
      */
     public function parseOneOrMoreLocations($var)
     {
+    	$current_val = $var['current_value'];
+    	$param = $var['parameter'];
+    	
         $reDelim = "[&,;\|~]|(\s+-+)";
         //		$reDelim = "[[:punct:]]+";
-        if (is_array($var) && count($var) > 1) {
-            $param = $var[1];
-            $var = $var[0];
-        }
         if (!empty($param) && is_array($param)) {
             if (array_key_exists('delimiter', $param)) {
                 $reDelim = $param['delimiter'];
             }
         }
 
-        $splitLocs = preg_split('/{$reDelim}/', $var);
+        $splitLocs = preg_split("/{$reDelim}/", $current_val);
         foreach ($splitLocs as $k => $v) {
             $splitLocs[$k] = trim($v);
         }
