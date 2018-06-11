@@ -1031,10 +1031,13 @@ JSCODE;
         	$match_string = "/{$match_string}/";
         }
 
-        if (false !== preg_match($match_string,$current_value)) {
+        $match = preg_match($match_string, $current_value);
+        if ($match === 1) {
 	        return 0;
 	    }
-		
+		if($match === false) {
+        	throw new Exception("Error matching no results string:  " . preg_last_error());
+		}
         return null;
     }
 
