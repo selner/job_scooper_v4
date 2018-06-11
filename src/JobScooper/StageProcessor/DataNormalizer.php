@@ -91,6 +91,9 @@ class DataNormalizer
             handleException($ex, null, false);
         } finally {
             endLogSection('Finished processing job posting duplicates.');
+			$dupeQuery = null;
+			$included_sites = null;
+			$sinceWhen = null;
         }
     }
 
