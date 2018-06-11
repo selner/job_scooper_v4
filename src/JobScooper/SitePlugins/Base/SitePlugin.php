@@ -1590,109 +1590,126 @@ JSCODE;
      * @return mixed|null
      * @throws \Exception
      */
-    protected function getJsonApiResult($apiUri, $searchDetails, $hostPageUri=null)
+    protected function getJsonApiResult($apiUri, $searchDetails, $hostPageUri=null, $useCurl = false)
     {
-        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && null === $this->selenium) {
-            try {
-                $this->selenium = new SeleniumManager();
+    	if($useCurl == true) {
+		    $this->log("Downloading JSON data from {$apiUri} using curl ...");
+	        try {
+	            $curl = new CurlWrapper();
+	            $response = $curl->cURL($apiUri);
+	            if($response['http_code'] < 300 && array_key_exists('body',$response)) {
+	                $response = $response['body'];
+    	        }
             } catch (Exception $ex) {
                 handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
             }
         }
-
-        try {
-            $driver = $this->getActiveWebdriver();
-            if(null === $hostPageUri) {
-            	$hostPageUri = $searchDetails->getSearchStartUrl();
-            }
-            $this->log("Getting host page for JSON query {$hostPageUri}");
-            $driver->get($hostPageUri);
-            $apiNodeId = 'jobs_api_data';
-
-            $this->log("Downloading JSON data from {$apiUri} using page at {$hostPageUri} ...");
-
-            $jsCode = /** @lang javascript */ <<<JSCODE
-			window.JSCOOP_API_RETURN = null;
-			var callback = arguments[arguments.length-1], // webdriver async script callback
-			
-			nIntervalId; // setInterval id to stop polling
-
-			function checkDone() {
-			  if( window.JSCOOP_API_RETURN ) {
-			    window.clearInterval(nIntervalId); // stop polling
-			    callback(window.JSCOOP_API_RETURN );
-			  }
-			}
-
-
-			function setScriptDataObject(jsonText) {
-				window.JSCOOP_API_RETURN = jsonText;
+    	else
+        {
+    			
+	        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && null === $this->selenium) {
+	            try {
+	                $this->selenium = new SeleniumManager();
+	            } catch (Exception $ex) {
+	                handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+	            }
+	        }
+	
+	        try {
+	            $driver = $this->getActiveWebdriver();
+	            if(null === $hostPageUri) {
+	                $hostPageUri = $searchDetails->getSearchStartUrl();
+	            }
+	            $this->log("Getting host page for JSON query {$hostPageUri}");
+	            $driver->get($hostPageUri);
+	            $apiNodeId = 'jobs_api_data';
+	
+	            $this->log("Downloading JSON data from {$apiUri} using page at {$hostPageUri} ...");
+	
+	            $jsCode = /** @lang javascript */ <<<JSCODE
+				window.JSCOOP_API_RETURN = null;
+				var callback = arguments[arguments.length-1], // webdriver async script callback
 				
-				API_ELEM_ID = 'jobs_api_data';
-
-				var myScriptTag = null;
-				try {
-					myScriptTag = document.getElementById(API_ELEM_ID);
+				nIntervalId; // setInterval id to stop polling
+	
+				function checkDone() {
+				  if( window.JSCOOP_API_RETURN ) {
+				    window.clearInterval(nIntervalId); // stop polling
+				    callback(window.JSCOOP_API_RETURN );
+				  }
+				}
+	
+	
+				function setScriptDataObject(jsonText) {
+					window.JSCOOP_API_RETURN = jsonText;
+					
+					API_ELEM_ID = 'jobs_api_data';
+	
+					var myScriptTag = null;
+					try {
+						myScriptTag = document.getElementById(API_ELEM_ID);
+						myScriptTag.text = jsonText;
+					}
+					catch (err) {
+					}
+	
+					if (!myScriptTag) {
+						myScriptTag = document.createElement('script');
+						var bd = document.getElementsByTagName('body')[0];
+						bd.appendChild(myScriptTag);
+					}
+	
+					myScriptTag.id = API_ELEM_ID;
 					myScriptTag.text = jsonText;
 				}
-				catch (err) {
-				}
-
-				if (!myScriptTag) {
-					myScriptTag = document.createElement('script');
-					var bd = document.getElementsByTagName('body')[0];
-					bd.appendChild(myScriptTag);
-				}
-
-				myScriptTag.id = API_ELEM_ID;
-				myScriptTag.text = jsonText;
-			}
-
-			// The parameters we are gonna pass to the fetch function
-			fetchData = { 
-			    method: 'GET', 
-			    headers: new Headers({'Content-Type' : 'application/json'})
-			};
-			
-			fetch('{$apiUri}', fetchData)
-				.then( 
-					function(resp) {
-						setScriptDataObject(resp.text());  
-					}
-				);
+	
+				// The parameters we are gonna pass to the fetch function
+				fetchData = {
+				    method: 'GET',
+				    headers: new Headers({'Content-Type' : 'application/json'})
+				};
 				
-				
-			nIntervalId = window.setInterval( checkDone, 150 ); // start polling
+				fetch('{$apiUri}', fetchData)
+					.then(
+						function(resp) {
+							setScriptDataObject(resp.text());
+						}
+					);
+					
+					
+				nIntervalId = window.setInterval( checkDone, 150 ); // start polling
 
 JSCODE;
-
-            $this->log("Executing JavaScript: ".PHP_EOL ." {$jsCode}");
-            //			$driver->manage()->timeouts()->setScriptTimeout(30);
-            $driver->executeAsyncScript($jsCode);
-
-            $response = $driver->executeScript('return window.JSCOOP_API_RETURN;');
-            if (is_empty_value($response)) {
-                $simpHtml = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
-                $node = $simpHtml->find("script#{$apiNodeId}");
-                if (!empty($node)) {
-                    $response = $node[0]->text();
-                }
+	
+	            $this->log("Executing JavaScript: ".PHP_EOL ." {$jsCode}");
+	            //			$driver->manage()->timeouts()->setScriptTimeout(30);
+	            $driver->executeAsyncScript($jsCode);
+	
+	            $response = $driver->executeScript('return window.JSCOOP_API_RETURN;');
+	            if (is_empty_value($response)) {
+	                $simpHtml = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
+	                $node = $simpHtml->find("script#{$apiNodeId}");
+	                if (!empty($node)) {
+	                    $response = $node[0]->text();
+	                }
+	            }
+	        } catch (Exception $ex) {
+				$msg = "Failed to download JSON data from API call {$apiUri}.";
+	            if(null !== $response && null !== $response->error) {
+	                $msg = "{$msg} {$response->error}";
+	            }
+	            handleException($ex, "{$msg} Error:  ", true);
             }
-            try {
-                $data= json_decode($response);
-            } catch (\Exception $ex) {
-                $data = $response;
+		}
+
+		try {
+            if(!is_empty_value($response)) {
+            	$data= json_decode($response);
             }
-            return $data;
-        } catch (Exception $ex) {
-			$msg = "Failed to download JSON data from API call {$apiUri}.";
-        	if(null !== $response && null !== $response->error) {
-        		$msg = "{$msg} {$response->error}";
-        	}
-            handleException($ex, "{$msg} Error:  ", true);
+        } catch (\Exception $ex) {
+            $data = $response;
         }
-
-        return null;
+        return $data;
     }
 
     /**
