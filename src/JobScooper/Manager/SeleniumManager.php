@@ -153,7 +153,11 @@ class SeleniumManager extends PropertyObject
         if(null === $driver) {
         	throw new \Exception('Failed to get WebDriver');
         }
-        $driver->wait(30, 2000)->until(
+
+		// wait at most 5 seconds before giving up with a timeout exception
+        $driver->manage()->timeouts()->setScriptTimeout(5);
+
+        $driver->wait(5, 2000)->until(
             function ($driver) use ($code) {
                 return !($driver->executeScript($code));
             }

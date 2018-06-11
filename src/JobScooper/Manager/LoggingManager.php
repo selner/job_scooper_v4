@@ -24,7 +24,8 @@ use JobScooper\Utils\Settings;
 use Monolog\ErrorHandler;
 use Monolog\Formatter\LineFormatter;
 
-use Monolog\Handler\BufferHandler;use Monolog\Handler\RavenHandler;
+use Monolog\Handler\BufferHandler;
+use Monolog\Handler\RavenHandler;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
@@ -157,7 +158,7 @@ class LoggingManager extends \Monolog\Logger
     /**
      * @throws \Exception
      */
-    public function handleException($e)
+    public function handleException($e, $record)
     {
         handleException($e);
         exit(255);
