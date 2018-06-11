@@ -102,7 +102,7 @@ class JobsAutoMarker
         LogMessage('Clearing old auto-marked facts from jobs we are re-marking...');
         try {
             foreach ($results as $jobMatch) {
-                $jobMatch->clear();
+                $jobMatch->clearUserMatchState();
             }
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);

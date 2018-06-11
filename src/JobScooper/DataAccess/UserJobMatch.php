@@ -158,4 +158,20 @@ class UserJobMatch extends BaseUserJobMatch
 
         return parent::setMatchedUserKeywords($v);
     }
+
+    /**
+     *
+     */
+    public function clearUserMatchState()
+    {
+    	$this->clearAllReferences();
+        $this->setIsJobMatch(null);
+        $this->setIsExcluded(null);
+        $this->setOutOfUserArea(null);
+		$this->setMatchedUserKeywords(null);
+		$this->setMatchedNegativeTitleKeywords(null);
+		$this->setMatchedNegativeCompanyKeywords(null);
+        $this->applyDefaultValues();
+        $this->applyDefaultValues();
+    }
 }
