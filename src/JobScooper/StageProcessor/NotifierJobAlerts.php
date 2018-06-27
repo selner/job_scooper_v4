@@ -338,7 +338,7 @@ class NotifierJobAlerts extends JobsMailSender
                 // we will notify the users again in a full report run.  Otherwise they would get annoyingly small
                 // separate reports instead.
                 //
-                if (!isDebug() && !Settings::is_in_setting_value('command_line_args.jobsite', 'all') &&
+                if (!isDebug() && Settings::is_in_setting_value('command_line_args.jobsite', 'all') &&
                     !is_empty_value($allJobMatchIds)) {
                     $now = new \DateTime();
                     $sendToUser->setLastNotifiedAt($now);
