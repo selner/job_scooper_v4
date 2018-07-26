@@ -84,7 +84,7 @@
           "Name": "PostedAt",
           "Selector": "div.posted-by",
           "Attribute": "text",
-          "Pattern": "/.*?Posted\\s+(\\d{1,2}\\s\\w+\\s+\\d{2,4})\\s*.*/",
+          "Pattern": "/.*?(Posted.*?)by\b.*/",
           "Type": "CSS"
         }
       ]
