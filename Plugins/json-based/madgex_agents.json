@@ -33,7 +33,7 @@
                             "Name": "TotalPostCount",
                             "Selector": "h1",
                             "Index": 0,
-                            "Pattern": "/.*?\\s([\\d,]+)\\s*/",
+                            "Pattern": "/.*?([\\d,]+).*/",
                             "Type": "CSS"
                         },
                         {
