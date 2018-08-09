@@ -112,7 +112,7 @@ class DomItemParser
     public function setDomNode($domNodeData)
     {
         if (!(is_a($domNodeData, ExtendedDiDomElement::class) ||
-            is_a($domNodeData, SimpleHtmlHelper::class))) {
+            is_a($domNodeData, SimpleHTMLHelper::class))) {
             try {
                 $content = (string) $domNodeData;
                 $this->_domNodeData = new ExtendedDiDomElement($content);
