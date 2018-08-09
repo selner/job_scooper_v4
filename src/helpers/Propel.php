@@ -192,10 +192,10 @@ function doBatchCallbackForQuery($query, $callback, $backOffsetDelta = 0, $maxRe
     $nResults = 0;
     $queryClass = get_class($query);
 	$totalResults = $query->count($con);
-    $nLastPage = round($totalResults / $maxResultsPerPage, 0, PHP_ROUND_HALF_UP);
+    $nLastPage = round($totalResults / $maxResultsPerPage, 0, PHP_ROUND_HALF_UP) + 1;
 
     for($nCurrentPage = 1; $nCurrentPage <= $nLastPage; $nCurrentPage++) {
-        $offset = $nCurrentPage * $maxResultsPerPage;
+        $offset = ($nCurrentPage - 1) * $maxResultsPerPage;
         //
         /// // go backwards one if we can so we don't miss dupes at the border of page sets
         //
