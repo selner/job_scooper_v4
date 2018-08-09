@@ -16,7 +16,7 @@
  */
 namespace JobScooper\Logging;
 
-use JobScooper\Utils\JobsMailSender;
+use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\Utils\Settings;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Handler\MailHandler;
@@ -34,7 +34,7 @@ class ErrorEmailLogHandler extends MailHandler
     */
     protected function send($content, array $records)
     {
-        $newErrContent = $this->getEmailErrorLogContent() . PHP_EOL . $content;
+        $newErrContent = self::getEmailErrorLogContent() . PHP_EOL . $content;
         Settings::setValue("email_error_log_content", $newErrContent);
 
         $searchParams = $this->_getUserSearchSiteRunContent();
@@ -53,7 +53,7 @@ class ErrorEmailLogHandler extends MailHandler
 
         $htmlBody = call_user_func($renderer, $data);
 
-        $mailer = new JobsMailSender(true);
+        $mailer = new NotifierDevAlerts();
         return $mailer->sendEmail("", $htmlBody, null, $subject, "errors");
     }
 
