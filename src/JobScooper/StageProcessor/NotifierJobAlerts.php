@@ -296,6 +296,10 @@ class NotifierJobAlerts extends JobsMailSender
     {
         $ret = false;
 
+        if(!is_array($matches) || !array_key_exists('all', $matches) ){
+        	LogWarning("No results were found to notify user about.");
+        	return $ret;
+        }
         $allJobMatchIds = array_keys($matches['all']);
 
         //
