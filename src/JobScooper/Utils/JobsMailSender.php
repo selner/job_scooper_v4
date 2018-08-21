@@ -205,7 +205,7 @@ class JobsMailSender
                         'phpmail_settings' => objectToArray($this),
                         'alerts_users' => $alerts_users
                     );
-                    $jsonErrorInfo = encodeJSON($errorInfo);
+                    $jsonErrorInfo = encodeJson($errorInfo);
 
                     //
                     // If sending the email fails, try again but this time with SMTP debug

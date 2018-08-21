@@ -447,7 +447,7 @@ class LoggingManager extends \Monolog\Logger
             $context['exception_message'] = $thrownExc->getMessage();
             $context['exception_file'] = $thrownExc->getFile();
             $context['exception_line'] = $thrownExc->getLine();
-            //		$context['exception_trace'] = join('|', preg_split('/$/', encodeJSON($thrownExc->getTrace())));
+            //		$context['exception_trace'] = join('|', preg_split('/$/', encodeJson($thrownExc->getTrace())));
         }
 
 

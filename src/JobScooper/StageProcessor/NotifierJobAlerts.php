@@ -184,28 +184,30 @@ class NotifierJobAlerts extends JobsMailSender
                 null,
                 $userFacts
             );
+			
+            $matches['all'] = $dbMatches;
+            // dump the full list of matches/excludes to JSON
+            //
+            LogMessage('Exporting ' . countAssociativeArrayValues($dbMatches) . ' UserJobMatch objects to JSON for use in notifications...');
+            $pathJsonMatches = getDefaultJobsOutputFileName('', 'user-job-matches', 'json', '_', 'debug');
+            writeJson($matches, $pathJsonMatches);
 
-            if (empty($dbMatches)) {
-                $matches['all'] = array();
-            } else {
+            $matches['all'] = null;
 
-                // dump the full list of matches/excludes to JSON
-                //
-                LogMessage('Exporting ' . countAssociativeArrayValues($dbMatches) . ' UserJobMatch objects to JSON for use in notifications...');
-                $pathJsonMatches = getDefaultJobsOutputFileName('', 'user-job-matches', 'json', '_', 'debug');
-                writeJSON($matches, $pathJsonMatches);
+            LogMessage('Converting ' . countAssociativeArrayValues($dbMatches) . ' UserJobMatch objects to array data for use in notifications...');
 
-                LogMessage('Converting ' . countAssociativeArrayValues($dbMatches) . ' UserJobMatch objects to array data for use in notifications...');
-
-                foreach ($dbMatches as $userMatchId => $item) {
-                    $matches['all'][$userMatchId] = $dbMatches[$userMatchId]->toFlatArrayForCSV();
-                }
+            foreach ($dbMatches as $userMatchId => $item) {
+                $matches['all'][$userMatchId] = $dbMatches[$userMatchId]->toFlatArrayForCSV();
             }
+
             unset($dbMatches);
 
-            $matches['isUserJobMatchAndNotExcluded'] = array_filter($matches['all'], 'isUserJobMatchAndNotExcluded');
+            $matches['isUserJobMatchAndNotExcluded'] = [];
+            if(\is_array($matches['all'])) {
+	            $matches['isUserJobMatchAndNotExcluded'] = array_filter($matches['all'], 'isUserJobMatchAndNotExcluded');
+            }
 
-            if (countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) == 0) {
+            if (countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) === 0) {
                 $subject = 'No New Job Postings Found for ' . getRunDateRange();
             } else {
                 $subject = countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) . " New {$place} Job Postings: " . getRunDateRange();
@@ -215,7 +217,12 @@ class NotifierJobAlerts extends JobsMailSender
             $this->_sendResultsNotification($matches, $subject, $userFacts, $geoLocationId);
 
             unset($matches);
+            
+            $arrNearbyIds = null;
         }
+
+		$userSearchPairLocs = null;
+		$userFacts = null;
         $user = null;
     }
 

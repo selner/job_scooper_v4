@@ -2180,7 +2180,7 @@ JSCODE;
      */
     public function parseJobsFromLdJson($objSimpHTML)
     {
-        $ret = array();
+        $parsedJobs= [];
 
         if (empty($objSimpHTML) || !method_exists($objSimpHTML, 'find')) {
             return null;
@@ -2192,9 +2192,9 @@ JSCODE;
             foreach ($jsonNodes as $node) {
                 $jsonText = $node->text();
                 try {
-                    $jsonData = decodeJSON($jsonText);
+                    $jsonData = decodeJson($jsonText);
                     if (!empty($jsonData) && is_array($jsonData)) {
-                        if (!array_key_exists('@type', $jsonData) || $jsonData['@type'] != 'JobPosting') {
+                        if (!array_key_exists('@type', $jsonData) || $jsonData['@type'] !== 'JobPosting') {
                             return null;
                         }
 
@@ -2244,13 +2244,13 @@ JSCODE;
                                     break;
                             }
                         }
-                        $ret[$item['JobSitePostId']] = $item;
+                        $parsedJobs[$item['JobSitePostId']] = $item;
                     }
                 } catch (Exception $ex) {
                     $this->log("Error parsing LD+JSON for {$this->JobSiteKey}: " . $ex->getMessage(), \Monolog\Logger::DEBUG);
                 }
             }
         }
-        return $ret;
+        return $parsedJobs;
     }
 }

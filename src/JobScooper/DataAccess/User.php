@@ -270,7 +270,7 @@ class User extends BaseUser
     public function setInputFiles($v)
     {
         if (!empty($v)) {
-            $this->setInputFilesJson(encodeJSON($v));
+            $this->setInputFilesJson(encodeJson($v));
         }
     }
 
@@ -285,7 +285,7 @@ class User extends BaseUser
         $files = null;
         $v = $this->getInputFilesJson();
         if (!empty($v) && is_string($v)) {
-            $files = decodeJSON($v);
+            $files = decodeJson($v);
         }
 
         if (!is_empty_value($type) && !is_empty_value($files)) {

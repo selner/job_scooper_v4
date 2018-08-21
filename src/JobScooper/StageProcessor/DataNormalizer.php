@@ -151,7 +151,7 @@ class DataNormalizer
 	        }
 	
 	        LogMessage("Loading list of duplicate job postings from {$resultsfile}...");
-	        $jobsToMarkDupe = loadJSON($resultsfile);
+	        $jobsToMarkDupe = loadJson($resultsfile);
 	
 	        $cntJobsToMark = countAssociativeArrayValues($jobsToMarkDupe['duplicate_job_postings']);
 	

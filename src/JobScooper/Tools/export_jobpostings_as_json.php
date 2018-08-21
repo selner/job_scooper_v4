@@ -72,7 +72,7 @@ if (!$allJobsPager->isEmpty()) {
             }
             $arrOutputList[$job->getKeySiteAndPostId()] = $arrJob;
         }
-        $pageJsonData = encodeJSON($arrOutputList);
+        $pageJsonData = encodeJson($arrOutputList);
         file_put_contents($outFile, $pageJsonData);
         $nJobsExported += RESULTS_PER_PAGE;
         $allJobsPager->getNextPage();

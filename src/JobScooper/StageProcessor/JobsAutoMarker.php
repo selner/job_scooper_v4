@@ -449,34 +449,44 @@ class JobsAutoMarker
     {
         $jobMatchKeys = array();
         $arrJobItems = array();
+        
         if ($arrJobList) {
             $item = array_shift($arrJobList);
             $jobMatchKeys = array_keys($item->toArray());
             $jobMatchKeys[] = 'Title';
             array_unshift($arrJobList, $item);
         }
-        foreach ($arrJobList as $job) {
-            $arrJobItems[$job->getUserJobMatchId()] = $job->toFlatArrayForCSV($jobMatchKeys);
-        }
+        
+        try {
+	        foreach ($arrJobList as $job) {
+	            $arrJobItems[$job->getUserJobMatchId()] = $job->toFlatArrayForCSV($jobMatchKeys);
+	        }
+	
+	        $searchKeywords = array();
+	        $keywords = $this->_markingUserFacts['SearchKeywords'];
+	        if (is_empty_value($keywords)) {
+	            return null;
+	        }
+	
+	        $neg_kwds = $this->_loadUserNegativeTitleKeywords();
+	
+	        $jsonObj = array(
+	            'user' => $this->_markingUserFacts,
+	            'job_matches' => $arrJobItems,
+	            'search_keywords' => $searchKeywords,
+	            'negative_title_keywords' => $neg_kwds
+	        );
+	
+	        $outfile = generateOutputFileName($basefile, 'json', true, 'debug');
+	        writeJson($jsonObj, $outfile);
 
-        $searchKeywords = array();
-        $keywords = $this->_markingUserFacts['SearchKeywords'];
-        if (is_empty_value($keywords)) {
-            return null;
-        }
-
-        $neg_kwds = $this->_loadUserNegativeTitleKeywords();
-
-        $jsonObj = array(
-            'user' => $this->_markingUserFacts,
-            'job_matches' => $arrJobItems,
-            'search_keywords' => $searchKeywords,
-            'negative_title_keywords' => $neg_kwds
-        );
-
-        $outfile = generateOutputFileName($basefile, 'json', true, 'debug');
-        writeJson($jsonObj, $outfile);
-
+	    } catch (\Exception $ex) {
+	        handleException($ex, null, false);
+	    } finally {
+	        $arrJobItems = null;
+	        $jsonObj = null;
+	    }
+        
         return $outfile;
     }
 
@@ -525,7 +535,7 @@ class JobsAutoMarker
 
         try {
             LogMessage("Loading json file '{$datafile}'...");
-            $data = loadJSON($datafile);
+            $data = loadJson($datafile);
             $retUJMIds = array();
 
             if (empty($data) || !array_key_exists('job_matches', $data)) {

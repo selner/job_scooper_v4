@@ -158,7 +158,7 @@ class SitePluginFactory
 
 
         foreach ($this->_configJsonFiles as $f) {
-            $dataPlugins = loadJSON($f, null, true);
+            $dataPlugins = loadJson($f, null, true);
             if (empty($dataPlugins)) {
                 throw new \Exception('Unable to load JSON plugin data file from ' . $f . ': ' . json_last_error_msg());
             }

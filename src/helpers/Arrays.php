@@ -80,7 +80,7 @@ function countAssociativeArrayValues($arrToCount)
 function getArrayDebugOutput($arr)
 {
     try {
-        $dbg = encodeJSON($arr);
+        $dbg = encodeJson($arr);
     } catch (\Exception $ex) {
         $dbg = var_dump($arr, true);
     }
