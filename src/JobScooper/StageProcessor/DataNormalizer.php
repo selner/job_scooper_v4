@@ -107,6 +107,7 @@ class DataNormalizer
     	if (is_empty_value($queryResults)) {
     		return;
         }
+        $jsonObj = [];
         
         try {
 	        $recentJobPostings = $queryResults->toArray("JobPostingId");
@@ -123,10 +124,8 @@ class DataNormalizer
 	
 	        $cntJobs = countAssociativeArrayValues($postsToExport);
 	
-	        $jsonObj = array(
-	            'job_postings' => $postsToExport,
-	            'count' => count($postsToExport)
-	        );
+	        $jsonObj['job_postings'] = $postsToExport;
+            $jsonObj['count'] = count($postsToExport);
 	
 	        $outfile = generateOutputFileName('dedupe', 'json', true, 'debug');
 	        $resultsfile = generateOutputFileName('deduped_jobs_results', 'json', true, 'debug');
@@ -181,6 +180,7 @@ class DataNormalizer
 	    } catch (\Exception $ex) {
 	        handleException($ex, null, false);
 	    } finally {
+        	$jsonObj = null;
 	        LogMessage('Processed job posting duplicate batch.');
 	    }
     }
