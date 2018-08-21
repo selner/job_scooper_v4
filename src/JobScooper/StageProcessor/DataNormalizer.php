@@ -48,6 +48,7 @@ class DataNormalizer
      */
     public function normalizeJobs($onlyNew=true)
     {
+        $startMem = getPhpMemoryUsage();
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Filter the full jobs list looking for duplicates, etc.
@@ -57,6 +58,10 @@ class DataNormalizer
             $this->_findAndMarkRecentDuplicatePostings();
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);
+        } finally {
+            $endMem = getPhpMemoryUsage();
+	        LogMessage("Memory in use on entry:  {$startMem} vs. exit {$endMem}.");
+
         }
 
     }
@@ -68,6 +73,7 @@ class DataNormalizer
      */
     private function _findAndMarkRecentDuplicatePostings()
     {
+        $startMem = getPhpMemoryUsage();
         startLogSection('Finding new duplicate company / job title pairs in the past 7 days to mark as dupe...');
         try {
             $daysBack = 7;
@@ -94,6 +100,8 @@ class DataNormalizer
 			$dupeQuery = null;
 			$included_sites = null;
 			$sinceWhen = null;
+	        $endMem = getPhpMemoryUsage();
+	        LogMessage("Memory in use on entry:  {$startMem} vs. exit {$endMem}.");
         }
     }
 
@@ -101,8 +109,9 @@ class DataNormalizer
      * @param $queryResults
      * @throws \Exception
      */
-    public static function markDuplicatePostings($queryResults)
+    public static function markDuplicatePostings(&$queryResults)
     {
+        $startMem = getPhpMemoryUsage();
 
     	if (is_empty_value($queryResults)) {
     		return;
@@ -182,6 +191,8 @@ class DataNormalizer
 	    } finally {
         	$jsonObj = null;
 	        LogMessage('Processed job posting duplicate batch.');
+	        $endMem = getPhpMemoryUsage();
+	        LogMessage("Memory in use on entry:  {$startMem} vs. exit {$endMem}.");
 	    }
     }
 

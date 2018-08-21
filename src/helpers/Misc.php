@@ -90,7 +90,7 @@ function isBitFlagSet($flagSettings = null, $flagToCheck= null)
  */
 function getPhpMemoryUsage()
 {
-    $size = memory_get_usage(true);
+    $size = memory_get_usage(false);
 
     $unit = array(' bytes', 'KB', 'MB', 'GB', 'TB', 'PN');
 

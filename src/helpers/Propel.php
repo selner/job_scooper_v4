@@ -184,7 +184,7 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function doBatchCallbackForQuery($query, $callback, $backOffsetDelta = 0, $maxResultsPerPage = MAX_RESULTS_PER_PAGE)
+function doBatchCallbackForQuery(&$query, $callback, $backOffsetDelta = 0, $maxResultsPerPage = MAX_RESULTS_PER_PAGE)
 {
     $resultsPageData = null;
     $con = \Propel\Runtime\Propel::getWriteConnection('default');
@@ -210,8 +210,8 @@ function doBatchCallbackForQuery($query, $callback, $backOffsetDelta = 0, $maxRe
         $nSetResults = $nResults + count($resultsPageData);
         LogMessage("Processing query results #" . (string)($nResults+$backStepOffset) . " - " . (string)($nSetResults+$backStepOffset) . " of {$totalResults} total results via callback {$queryClass}...");
         $nResults = $nResults + $nSetResults + $backStepOffset;
-        call_user_func($callback, $resultsPageData);
-	    $resultsPageData = null;
+        call_user_func_array($callback, array(&$resultsPageData));
+	    unset($resultsPageData);
     }
 
     $con = null;
