@@ -25,15 +25,14 @@
             },
             {
               "Name": "TotalPostCount",
-              "Selector": "h2.page-title",
+              "Selector": "div.mux-search-results",
               "Index": 0,
-              "Pattern": "/(\\d+).*/",
-              "Attribute": "text",
+              "Attribute": "data-results-total",
               "Type": "CSS"
             },
             {
               "Name": "JobPostItem",
-              "Selector": "article.js_result_row",
+              "Selector": "section.card-content",
               "Attribute": "collection",
               "Type": "CSS"
             }
@@ -44,30 +43,36 @@
           "Fields": [
             {
               "Name": "Title",
-              "Selector": "div.jobTitle h2 a span",
+              "Selector": "h2 a",
               "Attribute": "text",
               "Type": "CSS"
             },
             {
               "Name": "Url",
-              "Selector": "div.jobTitle h2 a",
+              "Selector": "h2 a",
               "Attribute": "href",
               "Index": 0,
               "Type": "CSS"
             },
             {
               "Name": "JobSitePostId",
-              "Selector": "div.jobTitle h2 a",
-              "Attribute": "data-m_impr_j_jobid",
-              "AlternateAttributeNotes" : "Could also be data-m_impr_j_postingid attribute",
+              "Selector": "section.card-content",
+              "Attribute": "data-jobid",
               "Index": 0,
               "Type": "CSS"
             },
             {
               "Name": "Company",
-              "Selector": "div.company",
+              "Selector": "div.company a",
               "Index": 0,
               "Attribute": "text",
+              "Type": "CSS"
+            },
+            {
+              "Name": "CompanyUrl",
+              "Selector": "div.company a",
+              "Index": 0,
+              "Attribute": "href",
               "Type": "CSS"
             },
             {
@@ -79,14 +84,14 @@
             },
             {
               "Name": "Location",
-              "Selector": "div.job-specs-location p a",
+              "Selector": "div.location",
               "Index": 0,
               "Attribute": "text",
               "Type": "CSS"
             },
             {
               "Name": "PostedAt",
-              "Selector": "div.job-specs-date p time",
+              "Selector": "time",
               "Index": 0,
               "Attribute": "datetime",
               "Type": "CSS"
@@ -95,8 +100,8 @@
         }
       ],
       "Pagination": {
-        "Type": "NEXT-BUTTON",
-        "Selector": "a.page-link.next",
+        "Type": "LOAD-MORE",
+        "Selector": "a#loadMoreJobs",
         "PageLimit": 25
       }
     },

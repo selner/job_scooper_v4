@@ -1902,6 +1902,7 @@ JSCODE;
                                     //
                                     $this->goToEndOfResultsSetViaLoadMore($nTotalListings);
                                     $totalPagesCount = 1;
+                                    $this->nMaxJobsToReturn = $nTotalListings;
                                     break;
 
                                 case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
