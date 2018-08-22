@@ -117,6 +117,9 @@ class ConfigInitializer
         Settings::setValue('number_days', 1);
 
         $allSettings = Settings::getAllValues();
+        if(array_key_exists('command_line_args', $allSettings)) {
+        	LogMessage('Command line parameters used:  ' . encodeJson($allSettings['command_line_args']));
+        }
         LogDebug('Configuration options set:  ' . encodeJson($allSettings));
 		unset($allSettings);
         endLogSection('Runner configured.');
