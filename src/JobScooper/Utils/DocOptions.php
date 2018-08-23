@@ -36,7 +36,7 @@ Options:
   --version                 Show version.
   --config=<config_file_path>  Full path to the configuration setting file to load.  
   --user=<config_user_key>  Which set of user configuration settings should we run.  
-  --stages=<stage_numbers>  Comma-separated list of stage numbers to run from 1 - 4. [default: 1,2,3]
+  --stages=<stage_numbers>  Comma-separated list of stage numbers to run from 1 - 4. [default: 1,2,3,4]
   --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey. [default: all]
   --debug                   Show debug output
   --ignore_recent           Run a search regardless of whether it was run recently.

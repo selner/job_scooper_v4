@@ -99,7 +99,7 @@ class StageManager
                 }
             } else {
                 /*
-                 * If no stage was specifically requested, we default to running stages 1 - 3
+                 * If no stage was specifically requested, we default to running stages 1 - 4
                  */
                 $this->doStage1();
                 $this->doStage2();
@@ -273,6 +273,7 @@ class StageManager
     public function doStage4()
     {
         $this->_initConfig();
+ 
         try {
             $usersForRun = Settings::getValue('users_for_run');
             if(is_empty_value($usersForRun)) {
