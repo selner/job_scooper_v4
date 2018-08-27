@@ -74,7 +74,7 @@ class PluginDisney extends AbstractTalentBrew
 {
     protected $JobSiteName = 'Disney';
     protected $JobPostingBaseUrl = 'https://jobs.disneycareers.com';
-    protected $additionalBitFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE__ ];
+    protected $additionalBitFlags = [ C__JOB_ITEMCOUNT_NOTAPPLICABLE ];
     protected $JobListingsPerPage = 15;
 
     public function __construct()

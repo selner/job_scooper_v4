@@ -42,7 +42,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $currentJsonSearchDetails = null;
 
     protected $arrBaseListingTagSetupNationalSearch = array(
-        'TotalPostCount' => ['Selector'=> 'span#retCount span'],  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE__
+        'TotalPostCount' => ['Selector'=> 'span#retCount span'],  # BUGBUG:  need this empty array so that the parent class doesn't auto-set to C__JOB_ITEMCOUNT_NOTAPPLICABLE
         'NoPostsFound' => ['Selector'=> 'div#aiSearchResultsSuccess h2', 'Attribute'=> 'text', 'Callback'=> "matchesNoResultsPattern", 'CallbackParameter'=> 'Oops'],
         'JobPostItem' => ['Selector'=> 'div.aiResultsWrapper'],
         'Title' => ['Selector'=> 'div.aiResultTitle h3 a'],
@@ -215,7 +215,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
      * parseTotalResultsCount
      *
      * If the site does not show the total number of results
-     * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
+     * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE
      * in the Constants.php file and just comment out this function.
      *
      * parseTotalResultsCount returns the total number of listings that

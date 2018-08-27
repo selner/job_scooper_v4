@@ -2,7 +2,7 @@
   "JobSiteName": "LucasGroup",
   "SourceURL": "https://www.lucasgroup.com/executive-jobs/job-search/job-search-results",
   "BaseURL": "https://www.lucasgroup.com",
-  "AdditionalFlags" : [ "C__JOB_PAGECOUNT_NOTAPPLICABLE__", "C__JOB_ITEMCOUNT_NOTAPPLICABLE__", "C__JOB_USE_SELENIUM", "C__JOB_USE_SITENAME_AS_COMPANY"],
+  "AdditionalFlags" : [ "C__JOB_PAGECOUNT_NOTAPPLICABLE", "C__JOB_ITEMCOUNT_NOTAPPLICABLE", "C__JOB_USE_SELENIUM", "C__JOB_USE_SITENAME_AS_COMPANY"],
   "Collections": [
     {
       "Name": "PageFields",

@@ -22,7 +22,7 @@ class PluginGroupon extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $JobSiteName = 'Groupon';
     protected $JobPostingBaseUrl = 'https://jobs.groupon.com';
     protected $SearchUrlFormat = "https://jobs.groupon.com/locations/***LOCATION***";
-    protected $additionalBitFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE__, C__JOB_ITEMCOUNT_NOTAPPLICABLE__, C__JOB_LOCATION_REQUIRES_LOWERCASE];
+    protected $additionalBitFlags = [C__JOB_PAGECOUNT_NOTAPPLICABLE, C__JOB_ITEMCOUNT_NOTAPPLICABLE, C__JOB_LOCATION_REQUIRES_LOWERCASE];
     protected $PaginationType = C__PAGINATION_NONE;
     protected $LocationType = 'location-city';
 

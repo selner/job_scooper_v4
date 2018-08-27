@@ -25,7 +25,7 @@ class PluginGoogle extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $JobSiteName = 'Google';
     protected $JobPostingBaseUrl = 'https://careers.google.com/jobs';
     protected $prevURL = 'https://careers.google.com/jobs';
-    protected $additionalBitFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE__];
+    protected $additionalBitFlags = [C__JOB_ITEMCOUNT_NOTAPPLICABLE];
     protected $SearchUrlFormat = "https://careers.google.com/jobs#j=***KEYWORDS***&t=sq&q=j&so=dt_pd&li=20&l=false&jlo=en-US&***LOCATION:&jl={Latitude}%3A{Longitude}%3A{Place}%2C+{CountryCode}%3A%3ALOCALITY&jld=10***";
 
     protected $CountryCodes = ["US", "UK"];

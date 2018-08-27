@@ -96,12 +96,12 @@ abstract class SitePlugin implements IJobSitePlugin
                 $this->selectorMoreListings = DomItemParser::getSelector($this->arrListingTagSetup['LoadMoreControl']);
             }
 
-            if (!array_key_exists('TotalPostCount', $this->arrListingTagSetup) && !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalBitFlags)) {
-                $this->additionalBitFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+            if (!array_key_exists('TotalPostCount', $this->arrListingTagSetup) && !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE, $this->additionalBitFlags)) {
+                $this->additionalBitFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE;
             }
 
-            if (!array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE__, $this->additionalBitFlags)) {
-                $this->additionalBitFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+            if (!array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE, $this->additionalBitFlags)) {
+                $this->additionalBitFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE;
             }
         }
 
@@ -747,7 +747,7 @@ JSCODE;
      * parseTotalResultsCount
      *
      * If the site does not show the total number of results
-     * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
+     * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE
      * in the Constants.php file and just comment out this function.
      *
      * parseTotalResultsCount returns the total number of listings that
@@ -789,10 +789,10 @@ JSCODE;
             }
 
             $retJobCount = $retPageCount * $this->JobListingsPerPage;
-        } elseif ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
+        } elseif ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE)) {
             $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
         } else {
-            throw new \Exception('Error: plugin is missing either C__JOB_ITEMCOUNT_NOTAPPLICABLE__ flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.');
+            throw new \Exception('Error: plugin is missing either C__JOB_ITEMCOUNT_NOTAPPLICABLE flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.');
         }
 
         return $retJobCount;
@@ -1811,7 +1811,7 @@ JSCODE;
 
             $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
             $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__; // placeholder because we don't know how many are on the page
-            if ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) && $this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
+            if ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE) && $this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE)) {
                 switch ($this->PaginationType) {
 
                     case C__PAGINATION_INFSCROLLPAGE_NOCONTROL:
@@ -1835,7 +1835,7 @@ JSCODE;
 
             $this->log('Getting count of ' . $this->JobSiteName . ' jobs for search ' . $searchDetails->getUserSearchSiteRunKey() . ': ' . $searchDetails->getSearchStartUrl());
 
-            if (!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE__)) {
+            if (!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE)) {
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
                 $nTotalListings = (int) str_replace(',', '', $strTotalResults);
                 if ($nTotalListings == 0) {
@@ -2050,15 +2050,15 @@ JSCODE;
                         $err = 'Retrieved 0 of the expected ' . $nTotalListings . ' listings for ' . $this->JobSiteName . ' (search = ' . $searchDetails->getUserSearchSiteRunKey() . ')';
                     } elseif ($nItemCount < $this->JobListingsPerPage && $nPageCount < $totalPagesCount) {
                         $err = 'Retrieved only ' . $nItemCount . ' of the ' . $this->JobListingsPerPage . ' job listings on page ' . $nPageCount . ' for ' . $this->JobSiteName . ' (search = ' . $searchDetails->getUserSearchSiteRunKey() . ')';
-                    } elseif ($nJobsFound < $nTotalListings * (1 - $marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
+                    } elseif ($nJobsFound < $nTotalListings * (1 - $marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE)) {
                         $err = 'Retrieved only ' . $nJobsFound . ' of the ' . $nTotalListings . ' listings that we expected for ' . $this->JobSiteName . ' (search = ' . $searchDetails->getUserSearchSiteRunKey() . ')';
-                    } elseif ($nJobsFound > $nTotalListings * (1 + $marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__)) {
+                    } elseif ($nJobsFound > $nTotalListings * (1 + $marginOfErrorAllowed) && $nPageCount == $totalPagesCount && !$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE)) {
                         $warnMsg = 'Warning:  Downloaded ' . ($nJobsFound - $nTotalListings) . ' jobs more than the ' . $nTotalListings . ' expected for ' . $this->JobSiteName . ' (search = ' . $searchDetails->getUserSearchSiteRunKey() . ')';
                         $this->log($warnMsg, \Monolog\Logger::WARNING);
                     }
 
                     if (null !== $err) {
-                        if ($this->isBitFlagSet(C__JOB_IGNORE_MISMATCHED_JOB_COUNTS) || $this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__) === true) {
+                        if ($this->isBitFlagSet(C__JOB_IGNORE_MISMATCHED_JOB_COUNTS) || $this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE) === true) {
                             $this->log('Warning: ' . $err, \Monolog\Logger::WARNING);
                         } else {
                             $err = 'Error: ' . $err . '  Aborting job site plugin to prevent further errors.';

@@ -33,7 +33,7 @@ class ApiPlugin extends SitePlugin
      */
     public function __construct($strBaseDir = null)
     {
-        $this->additionalBitFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+        $this->additionalBitFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE;
         $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
 
         parent::__construct();

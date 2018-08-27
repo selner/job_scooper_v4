@@ -25,7 +25,7 @@ abstract class AbstractJobviteATS extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     public function __construct()
     {
-        $this->additionalBitFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+        $this->additionalBitFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE;
         $this->additionalBitFlags[] = C__JOB_USE_SITENAME_AS_COMPANY;
         parent::__construct();
     }

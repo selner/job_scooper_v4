@@ -372,7 +372,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
             return $ret;
         }
 
-        if ($this->isBitFlagSet(C__JOB_ITEMCOUNT_STARTSATZERO__) && $nItem > 0) {
+        if ($this->isBitFlagSet(C__JOB_ITEMCOUNT_STARTSATZERO) && $nItem > 0) {
             $nItem = $nItem - 1;
         }
 
