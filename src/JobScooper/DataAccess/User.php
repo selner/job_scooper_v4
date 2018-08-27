@@ -204,7 +204,7 @@ class User extends BaseUser
                     break;
 
                 case 'inputfiles':
-                    $this->_parseConfigUserInputFiles($arr);
+                    $this->_setConfigUserInputFiles($arr);
                     unset($arr['inputfiles']);
                     break;
                     
@@ -227,7 +227,7 @@ class User extends BaseUser
      *
      * @throws \Exception
      */
-    private function _parseConfigUserInputFiles($arrUserFacts)
+    static function parseConfigUserInputFiles($arrUserFacts):array
     {
         //
         // Validate each of the inputfiles that the user passed
@@ -257,9 +257,20 @@ class User extends BaseUser
                 }
                 $verifiedInputFiles[$type][$key] = $tempFileDetails->getPathname();
             }
-
-            $this->setInputFiles($verifiedInputFiles);
+            
         }
+        return $verifiedInputFiles;
+	}
+
+    /**
+     * @param array $arrUserFacts
+     *
+     * @throws \Exception
+     */
+    private function _setConfigUserInputFiles($arrUserFacts)
+    {
+    	$verifiedInputFiles = self::parseConfigUserInputFiles($arrUserFacts);
+        $this->setInputFiles($verifiedInputFiles);
     }
 
     /**

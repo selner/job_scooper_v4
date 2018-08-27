@@ -16,6 +16,7 @@
  */
 namespace JobScooper\Utils;
 
+use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserQuery;
 use JobScooper\DataAccess\GeoLocationManager;
 use JobScooper\DataAccess\JobSiteManager;
@@ -403,6 +404,38 @@ class ConfigInitializer
         Settings::setValue('selenium', $settings);
     }
 
+    private function getConfigUsers()
+    {
+        $config_users = $this->getSetting('users');
+        
+        $user_recs = array();
+        if (is_empty_value($config_users)) {
+            throw new \Exception('No users found in configuration settings.  Aborting.');
+		}
+		
+		// Remap the property names for each user's settings to match the
+		// equivalent column name on the DB User object / array
+		foreach($config_users as $key => $user)
+		{
+	        $userFacts = array_replace_keys($user, [
+			  'email' => 'EmailAddress',
+			  'name' => 'Name',
+			  'slug' => 'UserSlug',
+			  'notification_delay' => 'NotificationFrequency',
+			  'keywords' => 'SearchKeywords',
+			  'search_locations' => 'SearchLocations'
+	            ]);
+		    if(array_key_exists('inputfiles', $userFacts)) {
+	            $inputFiles = User::parseConfigUserInputFiles($userFacts);
+	            $userFacts['InputFilesJson'] = encodeJson($inputFiles);
+	            unset($userFacts['inputfiles']);
+		    }
+	        $config_users[$key] = $userFacts;
+		}
+	    return $config_users;
+    }
+    
+    
     /**
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
@@ -421,7 +454,7 @@ class ConfigInitializer
         $currentUser = null;
         $cmd_line_user_to_run = Settings::getValue('command_line_args.user');
 
-        $config_users = $this->getSetting('users');
+        $config_users = $this->getConfigUsers();
         $user_recs = array();
         if (is_empty_value($config_users)) {
             throw new \Exception('No users found in configuration settings.  Aborting.');
@@ -436,13 +469,30 @@ class ConfigInitializer
         			$config_users = [$cmd_line_user_to_run => $config_users[$cmd_line_user_to_run]];
         		}
         	}
+
+        	// Loop over each of the user's specified in the config file.  If the config properties
+        	// do not match the database, update the database to use the new properties.
+        	// Otherwise, do nothing.   This is a performance optimization to skip DB writes on every
+        	// startup
+        	
             foreach ($config_users as $key_user => $config_user) {
-                $updatedUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($key_user), $config_user, $overwriteFacts = true);
-                if (null === $updatedUser) {
-                    throw new \Exception('Failed to create or update user based on config section users.{$key_user}.');
+                $user_recs[$key_user] = UserQuery::create()
+		            ->filterByUserSlug(cleanupSlugPart($key_user))
+		            ->findOne()
+		            ->toArray();
+                if(null !== $user_recs[$key_user] && \is_array($user_recs[$key_user]))
+                {
+                	$userDiff = array_diff_assoc($config_user, $user_recs[$key_user]);
+                	if(!is_empty_value($userDiff)){
+    	                $updatedUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($key_user), $config_user, $overwriteFacts = true);
+		                if (null === $updatedUser) {
+		                    throw new \Exception('Failed to create or update user based on config section users.{$key_user}.');
+		                }
+		                $user_recs[$key_user] = $updatedUser->toArray();
+		                $updatedUser = null;
+	            	}
                 }
-                $user_recs[$key_user] = $updatedUser->toArray();
-                $updatedUser = null;
+
             }
         }
 
