@@ -53,6 +53,25 @@ function is_empty_value($v)
     }
 }
 
+function parse_query_string($str)
+{
+	$args = [];
+	if(!is_empty_value($str) && is_string($str))
+	{
+		$items  = explode('&', $str);
+		if(!is_empty_value($items) && is_array($items)) {
+			foreach($items as $i) {
+				$idecoded = urldecode($i);
+				$parts = explode('=', $idecoded);
+				if(!is_empty_value($parts) && count($parts) > 1) {
+					$args[$parts[0]] = $parts[1];
+				}
+			}
+		}
+	}
+	
+	return $args;
+}
 /**
  * @param Object $obj
  *

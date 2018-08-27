@@ -17,7 +17,7 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
+use JBZoo\Utils\Url;use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use JobScooper\Utils\SimpleHTMLHelper;
 use Propel\Runtime\Map\TableMap;
@@ -267,7 +267,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
         //	    {
         //		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
         if (null !== $tokenFmtStrings) {
-            foreach ($tokenFmtStrings as $tokFound) {
+            foreach ($tokenFmtStrings as $token => $tokFound) {
                 $replaceVal = '';
                 $replaceStr = $tokFound['source_string'];
                 switch ($tokFound['type']) {
@@ -281,7 +281,26 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                         break;
 
                     case "PAGE_NUMBER":
-                        $replaceVal = $this->getPageURLValue($nPage);
+                    	if($nPage <= 1 && $this->isBitFlagSet(C__JOB_PAGECOUNT_OMIT_ON_FIRST_PAGE))
+                        {
+                        	$queryArgs = null;
+					        $parsedUrl = parse_url($strURL);
+					        if(\is_array($parsedUrl) && array_key_exists('query',$parsedUrl)) {
+						        $queryArgs = parse_query_string($parsedUrl['query']);
+
+						        if(!is_empty_value($queryArgs) && \is_array($queryArgs))
+					            {
+					            	$queryArgs = array_filter($queryArgs, function($v) use ($token) {
+					            		return strpos($v, $token) === false;
+					            	});
+					            }
+					        }
+					        $parsedUrl['query'] = Url::build($queryArgs);
+		                    $strURL = Url::buildAll($parsedUrl);
+                        }
+                        else {
+                        		$replaceVal = $this->getPageURLValue($nPage);
+                        }
                         break;
 
                     case "ITEM_NUMBER":
@@ -356,6 +375,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
             return $ret;
         }
         return ($nPage == null || $nPage == '') ? '' : $nPage;
+    
     }
 
     /**
