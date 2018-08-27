@@ -194,28 +194,6 @@ function getArrayValuesAsString($arrDetails, $strDelimiter = ", ", $strIntro = "
 
 
 /**
- * routine to return -1 if there is no match for strpos
- *
- *
- * @author William Jaspers, IV <wjaspers4@gmail.com>
- * @created 2009-02-27 17:00:00 +6:00:00 GMT
- * @access public
- * @ref http://www.php.net/manual/en/function.preg-match.php#89252
- *
- * @param $haystack
- * @param $needle
- * @return bool|int
- */
-function inStr($haystack, $needle)
-{
-    $pos=strpos($haystack, $needle);
-    if ($pos !== false) {
-        return $pos;
-    } else {
-        return -1;
-    }
-}
-/**
  *
  * in_string_array that takes an array of values to match against a string.
  * note the stupid argument order (to match strpos).  Returns
