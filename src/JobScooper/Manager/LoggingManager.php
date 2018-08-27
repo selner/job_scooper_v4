@@ -21,10 +21,12 @@ use JobScooper\Logging\CSVLogHandler;
 use JobScooper\Logging\ErrorEmailLogHandler;
 use JobScooper\Utils\JobsExceptionHandler;
 use JobScooper\Utils\Settings;
-use Monolog\ErrorHandler;
 use Monolog\Formatter\LineFormatter;
 
 use Monolog\Handler\BufferHandler;
+use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
+use Monolog\Handler\FingersCrossedHandler;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\RavenHandler;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel as LogLevel;
@@ -51,8 +53,6 @@ class LoggingManager extends \Monolog\Logger
     private $_handlersByType = array();
     private $_loggerName = 'default';
     private $_loggers = array();
-    private $_csvHandle = null;
-    private $_emailHandle = null;
     private $_sentryClient = null;
 
     private $_shouldLogContext = false;
@@ -84,7 +84,7 @@ class LoggingManager extends \Monolog\Logger
 
         parent::__construct($name, $handlers = $this->_handlersByType);
 
-        $logOptions = \JobScooper\Utils\Settings::getValue('logging', array());
+        $logOptions = Settings::getValue('logging', array());
         $this->_shouldLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
         if (array_key_exists('log_level', $logOptions) and !empty($logOptions['log_level'])) {
             if (strtoupper($logOptions['log_level']) === 'DEBUG') {
@@ -98,14 +98,15 @@ class LoggingManager extends \Monolog\Logger
 
         $now = new DateTime('NOW');
 
-        $this->_handlersByType['stderr'] = new StreamHandler('php://stderr', Logger::DEBUG);
+        $stderrHandler = new StreamHandler('php://stderr', Logger::DEBUG);
         $fmter = new ColoredLineFormatter(new DefaultScheme());
-        //	    $fmter = $this->_handlersByType['stderr']->getFormatter();
         $fmter->allowInlineLineBreaks(true);
         $fmter->includeStacktraces(true);
         $fmter->ignoreEmptyContextAndExtra(true);
-        $this->_handlersByType['stderr']->setFormatter($fmter);
-        $this->pushHandler($this->_handlersByType['stderr']);
+        $stderrHandler->setFormatter($fmter);
+        $this->addHandler('stderr', $stderrHandler);
+
+
         $this->_addSentryHandler();
 
 
@@ -114,7 +115,7 @@ class LoggingManager extends \Monolog\Logger
         $this->_loggers['database'] = $this->withName('database');
         $this->_loggers['caches'] = $this->withName('caches');
 
-        $this->LogRecord(\Psr\Log\LogLevel::INFO, 'Logging started from STDIN');
+        $this->LogRecord(LogLevel::INFO, 'Logging started from STDIN');
 
 //        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
         $propelContainer = Propel::getServiceContainer();
@@ -156,9 +157,11 @@ class LoggingManager extends \Monolog\Logger
     }
 
     /**
-     * @throws \Exception
-     */
-    public function handleException($e, $record)
+	* @param \Exception $e
+	* @param array $record
+	* @throws \Exception
+	*/
+    public function handleException(\Exception $e, array $record):void
     {
         handleException($e);
         exit(255);
@@ -167,7 +170,7 @@ class LoggingManager extends \Monolog\Logger
     /**
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function updatePropelLogging()
+    public function updatePropelLogging():void
     {
         $logger = $this->getChannelLogger('database');
 
@@ -182,7 +185,7 @@ class LoggingManager extends \Monolog\Logger
     /**
      *
      */
-    private function _addSentryHandler()
+    private function _addSentryHandler():void
     {
         $settings = Settings::getValue('config_file_settings.sentry');
         if (!empty($settings)) {
@@ -197,16 +200,27 @@ class LoggingManager extends \Monolog\Logger
                 $handler = new RavenHandler($this->_sentryClient, Logger::ERROR);
                 $handler->setFormatter(new LineFormatter('%message% %context% %extra%\n'));
 
-                $this->_handlersByType['sentry'] = $handler;
-                $this->pushHandler($handler);
+                $this->addHandler('sentry', $handler);
 
                 $handler = new \Raven_Breadcrumbs_MonologHandler($this->_sentryClient, Logger::ERROR);
-                $this->_handlersByType['sentry_breadcrumbs'] = $handler;
-                $this->pushHandler($handler);
+                $this->addHandler('sentry_breadcrumbs', $handler);
             }
         }
     }
 
+    /**
+     * Pushes a handler on to the stack.
+     *
+     * @param  HandlerInterface $handler
+     * @return $this
+     */
+    private function addHandler(string $logType, HandlerInterface $handler):self
+    {
+        $this->_handlersByType[$logType] = $handler;
+        return $this->pushHandler($handler);
+    }
+
+    /**
     /**
      * @param $logPath
      *
@@ -216,33 +230,61 @@ class LoggingManager extends \Monolog\Logger
     public function addFileHandlers($logPath)
     {
         $logLevel = (isDebug() ? Logger::DEBUG : $this->_defaultLogLevel);
-
+        
+		//
+		// Define the various output log filenames
+		//
+        $now = getNowAsString('-');
         $today = getTodayAsString('-');
-        $mainLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}.log";
-        $this->_handlersByType['logfile'] = new StreamHandler($mainLog, $logLevel, $bubble = true);
-        $fmter = $this->_handlersByType['logfile']->getFormatter();
-        $fmter->allowInlineLineBreaks(true);
-        $fmter->includeStacktraces(true);
-        $fmter->ignoreEmptyContextAndExtra(true);
-        $this->_handlersByType['logfile']->getFormatter($fmter);
-        $this->pushHandler($this->_handlersByType['logfile']);
-        $this->logRecord(\Psr\Log\LogLevel::INFO, "Logging started to logfile at {$mainLog}");
+        $pathLogBase = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}";
+        $mainLog = "{$pathLogBase}.log";
+        $errorLog = "{$pathLogBase}_errors_with_context.log";
+        $csvlog = "{$pathLogBase}_run_errors_{$now}.csv";
 
-        $now = getNowAsString('-');
-        $csvlog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-run_errors.csv";
-        $fpcsv = fopen($csvlog, 'w');
-        $this->_handlersByType['csverrors'] = new CSVLogHandler($fpcsv, $this->_defaultLogLevel, $bubble = true);
-        $this->pushHandler($this->_handlersByType['csverrors']);
-        $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started to CSV file at {$csvlog}");
+		//
+		// Configure and add the main output log handler
+		//
+        $mainHandler = new StreamHandler($mainLog, $logLevel, $bubble = true);
+        $fmter = $mainHandler->getFormatter();
+	        $fmter->allowInlineLineBreaks(true);
+            $fmter->includeStacktraces(true);
+            $fmter->ignoreEmptyContextAndExtra(true);
+		$mainHandler->setFormatter($fmter);
+        $this->addHandler('logfile', $mainHandler);
+        $this->logRecord(LogLevel::INFO, "Logging started to logfile at {$mainLog}");
 
-        $now = getNowAsString('-');
-        $emailLog = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}-email_error_log_errors.csv";
-        $this->_emailHandle = fopen($emailLog, 'w');
-        $this->_handlersByType['email_errors'] = new BufferHandler(
+		//
+		// Configure the error log handler.  Error log includes the log context for the last
+		// few entries before an error as well as the error record itself.
+		//
+        $errLogHandler = new StreamHandler($errorLog, LogLevel::DEBUG, $bubble = true);
+		$errLogHandler->setFormatter($fmter);
+        $fingersHandler = new FingersCrossedHandler(
+		    $errLogHandler,
+		    new ErrorLevelActivationStrategy(Logger::ERROR),
+		    10,
+		    true,
+		    false,
+		    Logger::WARNING
+		);
+        $this->addHandler('errorlog', $fingersHandler);
+        $this->logRecord(LogLevel::INFO, "Error logging to CSV file: {$csvlog}");
+
+		//
+		// Configure the CSV-format error log
+		//
+        $fpcsv = fopen($csvlog, 'wb');
+        $csvErrHandler = new CSVLogHandler($fpcsv, LogLevel::ERROR, $bubble = true);
+        $this->addHandler('csverrors', $csvErrHandler);
+        $this->logRecord(LogLevel::INFO, "Error logging to CSV file: {$csvlog}");
+
+		//
+		// Configure the errors email log handler
+		//
+        $emailHandler = new BufferHandler(
         	    new ErrorEmailLogHandler(Logger::ERROR, true),
-                1000);
-        $this->pushHandler($this->_handlersByType['email_errors']);
-        $this->LogRecord(\Psr\Log\LogLevel::INFO, "Logging started for emailed error log file at {$emailLog}");
+                100);
+        $this->addHandler('email_errors', $emailHandler);
 
         $this->updatePropelLogging();
     }
@@ -253,10 +295,6 @@ class LoggingManager extends \Monolog\Logger
     public function __destruct()
     {
         $this->flushErrorNotifications();
-
-        if (null !== $this->_csvHandle) {
-            fclose($this->_csvHandle);
-        }
     }
 
     /**
