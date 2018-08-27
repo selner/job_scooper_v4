@@ -124,7 +124,7 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
         'Title'                 => array('Selector' => 'h3.lister__header a span', 'Attribute' => 'text', 'Index' =>0),
         'Url'                   => array('Selector' => 'h3.lister__header a', 'Attribute' => 'href', 'Index' =>0),
         'Company'               => array('Selector' => 'ul li.lister__meta-item--recruiter', 'Attribute' => 'text', 'Index' =>0),
-        'PageRange'             => array('Selector' => 'ul li.lister__meta-item--salary', 'Attribute' => 'text', 'Index' =>0),
+        'PayRange'             => array('Selector' => 'ul li.lister__meta-item--salary', 'Attribute' => 'text', 'Index' =>0),
         'Location'              => array('Selector' => 'ul li.lister__meta-item--location', 'Attribute' => 'text', 'Index' =>0),
         'JobSitePostId'         => array('Selector' => 'li', 'Attribute' => 'id', 'Pattern' =>  '/item\-(\d+)/i', 'Index' =>0),
         'PostedAt'              => array('Selector' => 'li.job-actions__action', 'Index' =>0),
