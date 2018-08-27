@@ -690,3 +690,24 @@ function getGlobalSetting($root, $keyPath=null, $default=null)
 {
     //	return array_get_element($keyPath, $GLOBALS[$root]);
 }
+
+
+
+/**
+ * This function replaces the keys of an associate array by those supplied in the keys array
+ *
+ * @param array $target associative array in which the keys are intended to be replaced
+ * @param string[] $keys associate array where search key => replace by key, for replacing respective keys
+ * @return  array with replaced keys
+ */
+function array_replace_keys(array &$target, array $keyMap)
+{
+    foreach ($keyMap as $search => $replace) {
+        if ( isset($target[$search])) {
+            $target[$replace] = $target[$search];
+            unset($target[$search]);
+        }
+    }
+
+    return $target;
+}
