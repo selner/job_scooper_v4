@@ -21,7 +21,7 @@
                         },
                         {
                             "Name": "JobPostItem",
-                            "Selector": "div.twinpeaks",
+                            "Selector": "div.job",
                             "Attribute": "collection",
                             "Type": "CSS"
                         }
