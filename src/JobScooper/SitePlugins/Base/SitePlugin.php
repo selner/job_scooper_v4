@@ -1496,6 +1496,7 @@ JSCODE;
         } catch (Exception $ex) {
             handleException($ex, 'Unable to save job search results to database.', true);
         }
+        
     }
 
     /**
@@ -1508,28 +1509,44 @@ JSCODE;
     {
         $userId = $searchDetails->getUserId();
 
-        $alreadyMatched = UserJobMatchQuery::create()
-            ->filterByUserId($userId)
-            ->filterByJobPostingId($arrJobIds, Criteria::IN)
-            ->find()
-            ->toKeyIndex('JobPostingId');
-
-        $arrTemp = array_combine($arrJobIds, $arrJobIds);
-        if (!is_empty_value($alreadyMatched)) {
-            $arrIdsToAdd = array_diff($arrJobIds, array_keys($alreadyMatched));
-            $arrTemp = array_combine($arrIdsToAdd, $arrIdsToAdd);
+        $alreadyMatched = null;
+        $conWrite = null;
+        $arrUserMatches = null;
+        $bulkUpsert = null;
+        
+        try {
+	        $alreadyMatched = UserJobMatchQuery::create()
+	            ->filterByUserId($userId)
+	            ->filterByJobPostingId($arrJobIds, Criteria::IN)
+	            ->find()
+	            ->toKeyIndex('JobPostingId');
+	
+	        $arrTemp = array_combine($arrJobIds, $arrJobIds);
+	        if (!is_empty_value($alreadyMatched)) {
+	            $arrIdsToAdd = array_diff($arrJobIds, array_keys($alreadyMatched));
+	            $arrTemp = array_combine($arrIdsToAdd, $arrIdsToAdd);
+	        }
+	
+	        if (!is_empty_value($arrTemp)) {
+	            $arrUserMatches = array_map(function ($value) use ($userId) {
+	                return array('JobPostingId' => $value, 'UserId' => $userId);
+	            }, $arrTemp);
+	            $conWrite = Propel::getServiceContainer()->getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+	
+	            $bulkUpsert = new ObjectCollection();
+	            $bulkUpsert->setModel(UserJobMatch::class);
+	            $bulkUpsert->fromArray($arrUserMatches);
+	            $bulkUpsert->save($conWrite);
+	        }
         }
-
-        if (!is_empty_value($arrTemp)) {
-            $arrUserMatches = array_map(function ($value) use ($userId) {
-                return array('JobPostingId' => $value, 'UserId' => $userId);
-            }, $arrTemp);
-            $conWrite = Propel::getServiceContainer()->getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-
-            $bulkUpsert = new ObjectCollection();
-            $bulkUpsert->setModel(UserJobMatch::class);
-            $bulkUpsert->fromArray($arrUserMatches);
-            $bulkUpsert->save($conWrite);
+        catch (Exception $ex) {
+        	handleException($ex);
+        }
+        finally {
+            $alreadyMatched = null;
+		    $conWrite = null;
+		    $arrUserMatches = null;
+		    $bulkUpsert = null;
         }
     }
 

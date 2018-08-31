@@ -26,6 +26,7 @@ use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\DataAccess\GeoLocationManager;
 use JobScooper\Utils\PythonRunner;
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
 
 /**
@@ -84,9 +85,12 @@ class JobsAutoMarker
                 null,
                 $userFacts
             );
+        } catch (PropelException $ex) {
+	        handleException($ex, null, true);
+        } catch (\PDOException $ex) {
+	        handleException($ex, null, true);
         } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
-            throw $ex;
+	        handleException($ex, null, true);
         }
     }
 

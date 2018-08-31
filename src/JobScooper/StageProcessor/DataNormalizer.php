@@ -93,6 +93,8 @@ class DataNormalizer
 
 	    } catch (PropelException $pex) {
 	        handleException($pex, null, true);
+	    } catch (\PDOException $pex) {
+	        handleException($pex, null, true);
         } catch (\Exception $ex) {
             handleException($ex, null, false);
         } finally {
