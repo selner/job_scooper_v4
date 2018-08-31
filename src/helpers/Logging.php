@@ -162,6 +162,11 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
         $toThrow = new Exception($fmtLogMsg);
     }
 
+	if(is_a($ex, PDOException::class))
+	{
+	    $conmgr = Propel\Runtime\Propel::getConnectionManager(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
+	    $conmgr->closeConnections();
+	}
 
     $msg = $fmtLogMsg;
     if (null !== $toThrow && null !== $fmtLogMsg && null !== $ex && strlen($fmtLogMsg) > 0) {
