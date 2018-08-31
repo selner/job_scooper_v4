@@ -283,24 +283,32 @@ function getGeoLocationsNearby(\JobScooper\DataAccess\GeoLocation $sourceGeoLoca
 function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 {
     LogMessage('Marking ' . count($arrUserJobMatchIds) . " user job matches as {$strNewStatus}...");
-    $con = \Propel\Runtime\Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-    $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
-    $statusInt = array_search($strNewStatus, $valueSet);
-    $nChunkCounter = 1;
-
-    foreach (array_chunk($arrUserJobMatchIds, 50) as $chunk) {
-        $nMax = ($nChunkCounter+50);
-        \JobScooper\DataAccess\UserJobMatchQuery::create()
-            ->filterByUserJobMatchId($chunk)
-            ->update(array('UserNotificationState' => $statusInt), $con);
-
-        $nChunkCounter += 50;
-        if ($nChunkCounter % 100 === 0) {
-            $con->commit();
-            // fetch a new connection
-            $con = \Propel\Runtime\Propel::getWriteConnection('default');
-            LogMessage("Marking user job matches {$nChunkCounter} - " . ($nMax >= count($arrUserJobMatchIds) ? count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
-        }
+ 
+    try
+    {
+	    $con = \Propel\Runtime\Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+	    $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
+	    $statusInt = array_search($strNewStatus, $valueSet);
+	    $nChunkCounter = 1;
+	
+	    foreach (array_chunk($arrUserJobMatchIds, 50) as $chunk) {
+	        $nMax = ($nChunkCounter+50);
+	        \JobScooper\DataAccess\UserJobMatchQuery::create()
+	            ->filterByUserJobMatchId($chunk)
+	            ->update(array('UserNotificationState' => $statusInt), $con);
+	
+	        $nChunkCounter += 50;
+	        if ($nChunkCounter % 100 === 0) {
+	            $con->commit();
+	
+	            // fetch a new connection
+	            $con = \Propel\Runtime\Propel::getWriteConnection('default');
+	            LogMessage("Marking user job matches {$nChunkCounter} - " . ($nMax >= count($arrUserJobMatchIds) ? count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
+	        }
+	    }
+    }
+    catch (Exception $ex) {
+		handleException($ex);
     }
 }
 
