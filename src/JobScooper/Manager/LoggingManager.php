@@ -268,7 +268,7 @@ class LoggingManager extends \Monolog\Logger
 		    Logger::WARNING
 		);
         $this->addHandler('errorlog', $fingersHandler);
-        $this->logRecord(LogLevel::INFO, "Error logging to CSV file: {$csvlog}");
+        $this->logRecord(LogLevel::INFO, "Logging errors only to file: {$errorLog}");
 
 		//
 		// Configure the CSV-format error log
