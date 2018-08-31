@@ -884,7 +884,7 @@ JSCODE;
             }
         }
 
-        if (empty($item['Title']) || strcasecmp($item['Title'], 'title') == 0) {
+        if (empty($item['Title']) || 0 == strcasecmp($item['Title'], 'title')) {
             return null;
         }
 

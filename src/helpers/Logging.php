@@ -165,7 +165,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
 
     $msg = $fmtLogMsg;
     if (null !== $toThrow && null !== $fmtLogMsg && null !== $ex && strlen($fmtLogMsg) > 0) {
-        if (stristr($fmtLogMsg, '%s') !== false) {
+        if (false !== stripos($fmtLogMsg, '%s')) {
             $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
             $toThrow = new Exception($msg, null, $ex);
         } else {
