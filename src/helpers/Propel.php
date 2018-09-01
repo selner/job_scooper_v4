@@ -123,48 +123,56 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
  * @param int|null $nNumDaysBack
  * @param array|null $userFacts
  *
- * @return \JobScooper\DataAccess\UserJobMatch[]
+ * @return \JobScooper\DataAccess\UserJobMatchQuery
  *
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $userFacts=null, $countsOnly=false)
+function getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $userFacts=null)
 {
     $results = null;
 
     $query = \JobScooper\DataAccess\UserJobMatchQuery::create();
     $query->joinWithJobPostingFromUJM();
 
-    if ($countsOnly !== true) {
-        $query->limit(2500);
+//        $query->limit(MAX_RESULTS_PER_PAGE);
 
         $query->useJobPostingFromUJMQuery()
             ->orderByKeyCompanyAndTitle()
             ->endUse();
-
-        $keyResults = 'UserJobMatchId';
-    } else {
-        $sitekeyColumnName = $query->getAliasedColName(\JobScooper\DataAccess\Map\JobPostingTableMap::COL_JOBSITE_KEY);
-        $query->clearSelectColumns()
-            ->addAsColumn('TotalNewUserJobMatches', 'COUNT(DISTINCT(UserJobMatch.UserJobMatchId))')
-            ->addAsColumn('TotalNewJobPostings', 'COUNT(DISTINCT(UserJobMatch.JobPostingId))')
-            ->select(array($sitekeyColumnName, 'TotalNewUserJobMatches', 'TotalNewJobPostings'))
-            ->groupBy(array($sitekeyColumnName));
-
-        $keyResults = null;
-    }
-
 
     $query->filterByUserNotificationStatus($userNotificationState);
     $query->filterByUserId($userFacts['UserId']);
     $query->filterByDaysAgo($nNumDaysBack);
     $query->filterByGeoLocationIds($arrGeoLocIds);
 
-    if (null !== $keyResults) {
-        $results = $query->find()->toKeyIndex($keyResults);
-    } else {
-        $results = $query->find()->getData();
-    }
+    return $query;
+}
+
+/**
+ * @param null $userNotificationState
+ * @param array|null $arrGeoLocIds
+ * @param int|null $nNumDaysBack
+ * @param array|null $userFacts
+ *
+ * @return \JobScooper\DataAccess\UserJobMatch[]
+ *
+ * @throws \Exception
+ * @throws \Propel\Runtime\Exception\PropelException
+ */
+function getAllUserNotificationCounts($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $userFacts=null)
+{
+    $results = null;
+
+    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds, $nNumDaysBack, $userFacts);
+
+    $sitekeyColumnName = $query->getAliasedColName(\JobScooper\DataAccess\Map\JobPostingTableMap::COL_JOBSITE_KEY);
+    $query->clearSelectColumns()
+        ->addAsColumn('TotalNewUserJobMatches', 'COUNT(DISTINCT(UserJobMatch.UserJobMatchId))')
+        ->addAsColumn('TotalNewJobPostings', 'COUNT(DISTINCT(UserJobMatch.JobPostingId))')
+        ->select(array($sitekeyColumnName, 'TotalNewUserJobMatches', 'TotalNewJobPostings'))
+        ->groupBy(array($sitekeyColumnName));
+    $results = $query->find()->getData();
 
     if (!empty($results) && !empty($sitekeyColumnName)) {
         $results = array_column($results, null, $sitekeyColumnName);
@@ -175,8 +183,36 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
     return $results;
 }
 
+
+
+
 /**
- * @param $query
+ * @param null $userNotificationState
+ * @param array|null $arrGeoLocIds
+ * @param int|null $nNumDaysBack
+ * @param array|null $userFacts
+ *
+ * @return \JobScooper\DataAccess\UserJobMatch[]
+ *
+ * @throws \Exception
+ * @throws \Propel\Runtime\Exception\PropelException
+ */
+function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $userFacts=null, $countsOnly=false)
+{
+    $results = null;
+
+    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds, $nNumDaysBack, $userFacts);
+
+
+    $results = $query->find()->toKeyIndex('UserJobMatchId');
+
+    $query = null;
+
+    return $results;
+}
+
+/**
+ * @param \Propel\Runtime\ActiveQuery\ModelCriteria $query
  * @param $callback
  * @param $backOffsetDelta
  * @param $maxResultsPerPage
@@ -191,7 +227,10 @@ function doBatchCallbackForQuery(&$query, $callback, $backOffsetDelta = 0, $maxR
     
     $nResults = 0;
     $queryClass = get_class($query);
+    
 	$totalResults = $query->count($con);
+	
+	
     $nLastPage = round($totalResults / $maxResultsPerPage, 0, PHP_ROUND_HALF_UP) + 1;
 
     for($nCurrentPage = 1; $nCurrentPage <= $nLastPage; $nCurrentPage++) {
@@ -206,17 +245,13 @@ function doBatchCallbackForQuery(&$query, $callback, $backOffsetDelta = 0, $maxR
         $query->setOffset($offset + $backStepOffset);
         $query->limit($maxResultsPerPage + abs($backStepOffset));
         $resultsPageData = $query->find();
-
+		
         $nSetResults = $nResults + count($resultsPageData);
         LogMessage("Processing query results #" . (string)($nResults+$backStepOffset) . " - " . (string)($nSetResults+$backStepOffset) . " of {$totalResults} total results via callback {$queryClass}...");
         $nResults = $nResults + $nSetResults + $backStepOffset;
         call_user_func_array($callback, array(&$resultsPageData));
 	    unset($resultsPageData);
     }
-
-    $con = null;
-    $jobsPager = null;
-    $query = null;
  
 }
 //
@@ -233,27 +268,47 @@ function doBatchCallbackForQuery(&$query, $callback, $backOffsetDelta = 0, $maxR
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, $userFacts=null)
+function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, $userFacts=null, $addlCallbackParams=[])
 {
-    $chunkResults = null;
-    $continueLoop = true;
-
     $nResults = 0;
-    while ((null !== $chunkResults && !is_empty_value($chunkResults)) || $continueLoop === true) {
-        $chunkResults = getAllMatchesForUserNotification($userNotificationState, $arrGeoIds, $nNumDaysBack, $userFacts);
-        if (null !== $chunkResults && !is_empty_value($chunkResults)) {
-            $nSetResults = $nResults + count($chunkResults) - 1;
-            LogMessage("Processing user match results #{$nResults} - {$nSetResults} via callback...");
-            $callback($chunkResults);
-            $nResults += ($nResults + count($chunkResults) - 1);
-        } else {
-            $continueLoop = false;
+ 
+    LogMessage('Getting all user job matches results query...');
+
+    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoIds, $nNumDaysBack, $userFacts);
+    $resultsPager = $query->paginate($page=1, $maxPerPage = MAX_RESULTS_PER_PAGE);
+    
+    $totalResults = $resultsPager->getNbResults();
+    if ($totalResults === 0 ) {
+        LogMessage('No user job matches were found to auto-mark.');
+    }
+    else
+    {
+       $moreResults = true;
+        while($moreResults === true && $nResults <= $totalResults)
+        {
+            startLogSection("Processing user matches page {$resultsPager->getPage()} (#{$nResults} - " . ($nResults + $resultsPager->count()) . ") via callback...");
+
+            $pageResults = $resultsPager->getResults();
+            
+            if(!is_empty_value($addlCallbackParams)) {
+	            $callback($pageResults, $addlCallbackParams);
+            }
+            else {
+            	$callback($pageResults);
+            }
+            $nResults += ($nResults + $pageResults->count() - 1);
+
+            if($resultsPager->isLastPage()) {
+                $moreResults = false;
+            }
+            else
+            {
+                $resultsPager->getNextPage();
+            }
+            endLogSection("Callback complete for results page {$resultsPager->getPage()} ");
         }
     }
 
-    if ($nResults === 0) {
-        LogMessage('No user job matches were found to auto-mark.');
-    }
 }
 
 /**

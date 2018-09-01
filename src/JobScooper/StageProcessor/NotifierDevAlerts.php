@@ -47,12 +47,11 @@ class NotifierDevAlerts extends JobsMailSender
     {
         startLogSection("Processing run result summary for devs...");
 
-        $countsByPlugin = getAllMatchesForUserNotification(
+        $countsByPlugin = getAllUserNotificationCounts(
             [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
             null,
             2,
-            null,
-            $countsOnly = true
+            null
         );
 
         $includedSites = JobSiteManager::getJobSiteKeysIncludedInRun();
@@ -66,10 +65,8 @@ class NotifierDevAlerts extends JobsMailSender
             );
 
             if (in_array($k, $countsByPlugin)) {
-                if (in_array($k, $countsByPlugin)) {
                     $arrPluginResults[$k]['TotalNewUserJobMatches'] = $countsByPlugin[$k]['TotalNewUserJobMatches'];
                     $arrPluginResults[$k]['TotalNewJobPostings'] = $countsByPlugin[$k]['TotalNewJobPostings'];
-                }
             }
         }
 
