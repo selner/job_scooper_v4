@@ -230,17 +230,21 @@ function in_string_array($haystack, $needle)
  *
  * @return array
  */
-function flattenWithKeys(array $array, $childPrefix = '.', $root = '', $result = array())
+function flattenWithKeys(array $array, $delimeter = '.', $prefix = '', $result = array())
 {
     //if(!is_array($array)) return $result;
 
     ### print_r(array(__LINE__, 'arr' => $array, 'prefix' => $childPrefix, 'root' => $root, 'result' => $result));
 
     foreach ($array as $k => $v) {
+
         if (is_array($v) || is_object($v)) {
-            $result = flattenWithKeys((array) $v, $childPrefix, $root . $k . $childPrefix, $result);
+            $result = flattenWithKeys((array) $v, $prefix, $prefix . $k . $delimeter, $result);
         } else {
-            $result[ $root . $k ] = $v;
+        	if(is_empty_value($prefix)) {
+        		$delimeter = '';
+        	}
+            $result[  $prefix . $delimeter . $k ] = $v;
         }
     }
     return $result;
