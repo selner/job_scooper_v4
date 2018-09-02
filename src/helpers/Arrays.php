@@ -250,6 +250,48 @@ function flattenWithKeys(array $array, $delimeter = '.', $prefix = '', $result =
     return $result;
 }
 
+
+/**
+ * @param $data
+ * @param string $childPrefix
+ * @param string $root
+ * @param array  $result
+ *
+ * @return array
+ */
+function flattenChildren(&$data, $indexColKey, $delimeter = '.', $prefix = '', $result = array())
+{
+    //if(!is_array($array)) return $result;
+
+    ### print_r(array(__LINE__, 'arr' => $array, 'prefix' => $childPrefix, 'root' => $root, 'result' => $result));
+	$retData = $data;
+	
+	if(is_a($data, \Propel\Runtime\Collection\ObjectCollection::class)) {
+		$retData = $data->toArray($indexColKey);
+	}
+	
+    foreach($retData as $recKey => $recVal)
+    {
+        foreach($recVal as $key => $val)
+        {
+            if(\is_array($val)) {
+                if (\is_array_multidimensional($val))
+                {
+                    $retData[$recKey] = array_merge($retData[$recKey], flattenWithKeys($val, '.'));
+                    unset($retData[$recKey][$key]);
+                }
+                else
+                {
+                    $retData[$recKey][$key] = implode('|', array_values($val));
+                }
+            }
+        }
+    }
+
+    return $retData;
+}
+
+
 /**
  * array_merge_recursive does indeed merge arrays, but it converts values with duplicate
  * keys to arrays rather than overwriting the value in the first array with the duplicate
