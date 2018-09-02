@@ -1566,40 +1566,6 @@ JSCODE;
     }
 
 
-    /**
-     * @param \JobScooper\DataAccess\JobPosting[] $arrJobs
-     *
-     * @return array
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    protected function getJobsDbIds($arrJobs)
-    {
-        $arrIds = array_column($arrJobs, 'JobSitePostId', 'JobSitePostId');
-        $queryData = JobPostingQuery::create()
-            ->select(array('JobPostingId', 'JobSitePostId', 'JobSiteKey', 'KeySiteAndPostId'))
-            ->filterByJobSiteKey($this->JobSiteName)
-            ->filterByJobSitePostId(array_values($arrIds))
-            ->find();
-        $jobResults = $queryData->toArray();
-
-        return $jobResults;
-    }
-
-    /**
-     * @return array
-     */
-    public function getObjectProperties()
-    {
-        return $this->getArray();
-    }
-
-    /**
-     * @return array
-     */
-    public function getArray()
-    {
-        return get_object_vars($this);
-    }
 
     /**
      * @param string $apiUri
