@@ -210,63 +210,53 @@ class NotifierJobAlerts extends JobsMailSender
 	*/
     function sendUserResultsBatch(&$dbMatches, array $addlFacts)
     {
-    				
-        $matches['all'] = $dbMatches->toArray('UserJobMatchId');
-        // dump the full list of matches/excludes to JSON
-        //
-        LogMessage('Exporting ' . $dbMatches->count() . ' UserJobMatch objects to JSON for use in notifications...');
-        $pathJsonMatches = getDefaultJobsOutputFileName('', 'user-job-matches', 'json', '_', 'debug');
-        writeJson($matches['all'], $pathJsonMatches);
-
-        LogMessage('Updating ' . $dbMatches->count() . ' UserJobMatch array items for use in notifications...');
-
-        foreach($matches['all'] as $matchKey => $match)
-        {
-        	foreach($match as $key => $val)
-            {
-            	if(\is_array($val)) {
-            		if (\is_array_multidimensional($val))
-	                {
-	                	$matches['all'][$matchKey] = array_merge($match, flattenWithKeys($val, '.'));
-	                    unset($match[$key]);
-	                }
-	                else
-	                {
-	                    $matches['all'][$matchKey][$key] = implode('|', array_values($val));
-	                }
-                }
-            }
-        }
-
-        $matches['isUserJobMatchAndNotExcluded'] = [];
-        if(\is_array($matches['all'])) {
-            $matches['isUserJobMatchAndNotExcluded'] = array_filter($matches['all'], 'isUserJobMatchAndNotExcluded');
-        }
-
-        if (countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) === 0) {
-            $subject = 'No New Job Postings Found for ' . getRunDateRange();
-        } else {
-        	$place = '';
-        	if(array_key_exists('place', $addlFacts)) {
-        		$place = $addlFacts['place'];
-        	}
-        	
-            $subject = countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) . " New {$place} Job Postings: " . getRunDateRange();
-        }
-
-        $userFacts = [];
-        $geoLocationId = null;
-        if(array_key_exists('userfacts', $addlFacts)) {
-            $userFacts = $addlFacts['userfacts'];
-        }
-
-        if(array_key_exists('geolocationid', $addlFacts)) {
-            $geoLocationId = $addlFacts['geolocationid'];
-        }
-
-        $this->_sendResultsNotification($matches, $subject, $userFacts, $geoLocationId);
-
-        unset($matches);
+    	try
+    	{
+	        $matches['all'] = $dbMatches->toArray('UserJobMatchId');
+	        // dump the full list of matches/excludes to JSON
+	        //
+	        LogMessage('Exporting ' . count($matches['all']) . ' UserJobMatch objects to JSON for use in notifications...');
+	        $pathJsonMatches = getDefaultJobsOutputFileName('', 'user-job-matches', 'json', '_', 'debug');
+	        writeJson($matches['all'], $pathJsonMatches);
+	
+	        LogMessage('Updating ' .  count($matches['all']) . ' UserJobMatch array items for use in notifications...');
+	        
+	        $matches['all'] = flattenChildren($matches['all'], 'UserJobMatchId');
+	
+	        $matches['isUserJobMatchAndNotExcluded'] = [];
+	        if(\is_array($matches['all'])) {
+	            $matches['isUserJobMatchAndNotExcluded'] = array_filter($matches['all'], 'isUserJobMatchAndNotExcluded');
+	        }
+	
+	        if (countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) === 0) {
+	            $subject = 'No New Job Postings Found for ' . getRunDateRange();
+	        } else {
+	            $place = '';
+	            if(array_key_exists('place', $addlFacts)) {
+	                $place = $addlFacts['place'];
+	            }
+	            
+	            $subject = countAssociativeArrayValues($matches['isUserJobMatchAndNotExcluded']) . " New {$place} Job Postings: " . getRunDateRange();
+	        }
+	
+	        $userFacts = [];
+	        $geoLocationId = null;
+	        if(array_key_exists('userfacts', $addlFacts)) {
+	            $userFacts = $addlFacts['userfacts'];
+	        }
+	
+	        if(array_key_exists('geolocationid', $addlFacts)) {
+	            $geoLocationId = $addlFacts['geolocationid'];
+	        }
+	
+	        $this->_sendResultsNotification($matches, $subject, $userFacts, $geoLocationId);
+		}
+		catch (Exception $ex) {
+    		handleException($ex);
+		}
+		finally {
+	        unset($matches);
+		}
 
     }
     /**
@@ -359,7 +349,6 @@ class NotifierJobAlerts extends JobsMailSender
         } finally {
             unset($ss);
             endLogSection('Excel file generated.');
-            unset($matches['all']);
         }
 
         //

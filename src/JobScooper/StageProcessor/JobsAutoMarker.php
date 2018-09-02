@@ -16,8 +16,6 @@
  */
 namespace JobScooper\StageProcessor;
 
-use JobScooper\DataAccess\JobSiteManager;
-use JobScooper\DataAccess\JobPostingQuery;
 use Exception;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
@@ -307,7 +305,7 @@ class JobsAutoMarker
      * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
      * @throws \Exception
      */
-    private function _markJobsList_OutOfArea_Geospatial(&$arrJobsList)
+    private function _markJobsList_OutOfArea_Geospatial(&$collJobsList)
     {
         try {
             startLogSection('Automarker: marking jobs as out of area using geospatial data...');
@@ -341,9 +339,12 @@ class JobsAutoMarker
             }
 			$searchLocations = null;
             
-            $arrJobListFacts = convert_propel_objects_to_arrays($arrJobsList, 'UserJobMatchId');
-            $arrJobListIds = array_keys($arrJobListFacts);
-            $arrJobListFacts = null;
+            if(is_empty_value($collJobsList) || $collJobsList->count() === 0)
+            {
+            	return;
+            }
+            $arrJobsList = $collJobsList->toKeyIndex('UserJobMatchId');
+            $arrJobListIds = array_keys($arrJobsList);
 			
             LogMessage('Marking job postings in the ' . count($arrNearbyGeoLocIds) . ' nearby GeoLocations...');
             $arrInAreaJobs = array_filter($arrJobsList, function (UserJobMatch &$var) use ($arrNearbyGeoLocIds) {
@@ -367,7 +368,7 @@ class JobsAutoMarker
                     ->update(array('OutOfUserArea' => false), $con);
             }
 
-            LogMessage('Marking job postings outside ' . count($arrNearbyGeoLocIds) . ' matching areas ...');
+            LogMessage('Marking job postings outside ' . \count($arrNearbyGeoLocIds) . ' matching areas ...');
             if (!empty($arrJobIdsOutOfArea)) {
                 foreach (array_chunk($arrJobIdsOutOfArea, 50) as $chunk) {
                     $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
@@ -378,9 +379,9 @@ class JobsAutoMarker
                 }
             }
 
-            $nJobsMarkedAutoExcluded = count($arrJobIdsOutOfArea);
-            $nJobsNotMarked = count($arrJobIdsInArea);
-            $nJobsTotal = count($arrJobListIds);
+            $nJobsMarkedAutoExcluded = \count($arrJobIdsOutOfArea);
+            $nJobsNotMarked = \count($arrJobIdsInArea);
+            $nJobsTotal = \count($arrJobListIds);
 
             LogMessage("Jobs excluded as out of area:  marked out of area {$nJobsMarkedAutoExcluded}/{$nJobsTotal}; marked in area = {$nJobsNotMarked}/{$nJobsTotal}");
         } catch (Exception $ex) {
@@ -449,23 +450,11 @@ class JobsAutoMarker
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    private function _exportJobMatchesToJson($basefile='automarker', $arrJobList)
+    private function _exportJobMatchesToJson($basefile, $collJobList)
     {
-        $jobMatchKeys = array();
-        $arrJobItems = array();
-        
-        if ($arrJobList) {
-            $item = array_shift($arrJobList);
-            $jobMatchKeys = array_keys($item->toArray());
-            $jobMatchKeys[] = 'Title';
-            array_unshift($arrJobList, $item);
-        }
-        
-        try {
-	        foreach ($arrJobList as $job) {
-	            $arrJobItems[$job->getUserJobMatchId()] = $job->toFlatArrayForCSV($jobMatchKeys);
-	        }
-	
+		try {
+            $arrJobItems = flattenChildren($collJobList, 'UserJobMatchId');
+
 	        $searchKeywords = array();
 	        $keywords = $this->_markingUserFacts['SearchKeywords'];
 	        if (is_empty_value($keywords)) {
@@ -531,7 +520,7 @@ class JobsAutoMarker
      *
      * @throws \Exception
      */
-    private function _updateUserJobMatchesFromJson($datafile, &$arrJobsList)
+    private function _updateUserJobMatchesFromJson($datafile, &$collJobsList)
     {
         if (!is_file($datafile)) {
             throw new Exception("Unable to locate JSON file {$datafile} to load.");
@@ -553,15 +542,17 @@ class JobsAutoMarker
             // Update any of the passed job records we had in the loaded data set
             //
             if (!empty($arrMatchRecs) && is_array($arrMatchRecs)) {
-                $arrUserJobMatchIds = array_keys($arrMatchRecs);
-
-                if (!empty($arrJobsList)) {
-                    $jobIdsToUpdate = array_intersect($arrUserJobMatchIds, array_keys($arrJobsList));
-                    foreach ($jobIdsToUpdate as $jobid) {
-                        $this->_updateKeywordMatchForSingleJob($arrJobsList[$jobid], $arrMatchRecs[$jobid]);
-                        unset($arrMatchRecs[$jobid]);
-                        $retUJMIds[] = $jobid;
+                if (!is_empty_value($collJobsList))
+                {
+                	$jobsToUpdate = array_intersect_key($collJobsList->toKeyIndex('UserJobMatchId'), $arrMatchRecs);
+                    foreach ($jobsToUpdate as $jobId => $jobRecord) {
+                        $this->_updateKeywordMatchForSingleJob($jobsToUpdate[$jobId], $arrMatchRecs[$jobId]);
+                        $retUJMIds[] = $jobId;
+                        unset($jobRecord);
+                        unset($arrMatchRecs[$jobId]);
                     }
+                    unset($jobsToUpdate);
+
                 }
             }
 
@@ -570,38 +561,42 @@ class JobsAutoMarker
             // file, we need to pull each one from the DB if exists and update
             // or insert if missing
             //
-            if (!empty($arrMatchRecs)) {
-                $con = Propel::getWriteConnection('default');
-
-                $chunks = array_chunk(array_keys($arrMatchRecs), 50);
-                foreach ($chunks as $idchunk) {
-                    $dbRecsById = UserJobMatchQuery::create()
-                        ->filterByUserJobMatchId($idchunk, Criteria::IN)
-                        ->find()
-                        ->toKeyIndex('UserJobMatchId');
-                    foreach ($idchunk as $id) {
-                        if (array_key_exists($id, $dbRecsById)) {
-                            $dbMatch = $dbRecsById[$id];
-                        } else {
-                            $dbMatch = UserJobMatchQuery::create()
-                                ->filterByUserJobMatchId($id)
-                                ->findOneOrCreate();
-                            $dbMatch->setUserJobMatchId($id);
-                        }
-                        $this->_updateKeywordMatchForSingleJob($dbMatch, $arrMatchRecs[$id]);
-                        $dbMatch->save();
-                        $retUJMIds[] = $id;
-                        unset($dbMatch);
-                    }
-
-                    // commit the last 50 to the database and then fetch
-                    // a clean connection so we don't trip up the database with long connection times
-                    $con->commit();
-                    // fetch a new connection
-                    $con = Propel::getWriteConnection('default');
-                }
-            }
-
+            if (!empty($arrMatchRecs))
+            {
+            	$jobsToUpdate = array_diff_key($collJobsList->toKeyIndex('UserJobMatchId'), $arrMatchRecs);
+				if(!is_empty_value($jobsToUpdate))
+				{
+	                $con = Propel::getWriteConnection('default');
+	
+	                $chunks = array_chunk(array_keys($arrMatchRecs), 50);
+	                foreach ($chunks as $idchunk) {
+	                    $dbRecsById = UserJobMatchQuery::create()
+	                        ->filterByUserJobMatchId($idchunk, Criteria::IN)
+	                        ->find()
+	                        ->toKeyIndex('UserJobMatchId');
+	                    foreach ($idchunk as $id) {
+	                        if (array_key_exists($id, $dbRecsById)) {
+	                            $dbMatch = $dbRecsById[$id];
+	                        } else {
+	                            $dbMatch = UserJobMatchQuery::create()
+	                                ->filterByUserJobMatchId($id)
+	                                ->findOneOrCreate();
+	                            $dbMatch->setUserJobMatchId($id);
+	                        }
+	                        $this->_updateKeywordMatchForSingleJob($dbMatch, $arrMatchRecs[$id]);
+	                        $dbMatch->save();
+	                        $retUJMIds[] = $id;
+	                        unset($dbMatch);
+	                    }
+	
+	                    // commit the last 50 to the database and then fetch
+	                    // a clean connection so we don't trip up the database with long connection times
+	                    $con->commit();
+	                    // fetch a new connection
+	                    $con = Propel::getWriteConnection('default');
+	                }
+	            }
+			}
             $totalMarked = count($retUJMIds);
 
             LogMessage("... updated {$totalMarked} user job matches loaded from json file '{$datafile}.");

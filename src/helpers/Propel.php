@@ -278,34 +278,48 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
     $resultsPager = $query->paginate($page=1, $maxPerPage = MAX_RESULTS_PER_PAGE);
     
     $totalResults = $resultsPager->getNbResults();
+    $nTotalPages = intceil($totalResults/MAX_RESULTS_PER_PAGE);
+
     if ($totalResults === 0 ) {
         LogMessage('No user job matches were found to auto-mark.');
     }
     else
     {
-       $moreResults = true;
-        while($moreResults === true && $nResults <= $totalResults)
+        $moreResults = true;
+		$nCurrentPage = 1;
+        
+        while($moreResults === true && $nResults <= $totalResults && $nCurrentPage <= $nTotalPages)
         {
-            startLogSection("Processing user matches page {$resultsPager->getPage()} (#{$nResults} - " . ($nResults + $resultsPager->count()) . ") via callback...");
+        	try {
+	            startLogSection("Processing user matches page {$nCurrentPage} (#{$resultsPager->getFirstIndex()} - {$resultsPager->getLastIndex()} ) via callback...");
+	            
+	            if(!is_empty_value($addlCallbackParams)) {
+		            $callback($resultsPager->getResults(), $addlCallbackParams);
+	            }
+	            else {
+	                $callback($resultsPager->getResults());
+	            }
+	            $nResults += $resultsPager->count();
+	            endLogSection("Callback complete for results page {$nCurrentPage} ");
 
-            $pageResults = $resultsPager->getResults();
-            
-            if(!is_empty_value($addlCallbackParams)) {
-	            $callback($pageResults, $addlCallbackParams);
+	            if(!$resultsPager->haveToPaginate() || $resultsPager->isLastPage()) {
+	                $moreResults = false;
+	            }
+	            else
+	            {
+	                $nCurrentPage = $resultsPager->getNextPage();
+	            	LogMessage("Getting page {$nCurrentPage} of user match results...");
+	                unset($resultsPager);
+				    $resultsPager = $query->paginate($nCurrentPage, $maxPerPage = MAX_RESULTS_PER_PAGE);
+	            }
+        	}
+        	catch (Exception $ex)
+        	{
+        		handleException($ex);
             }
-            else {
-            	$callback($pageResults);
+            finally {
+                unset($resultsPager);
             }
-            $nResults += ($nResults + $pageResults->count() - 1);
-
-            if($resultsPager->isLastPage()) {
-                $moreResults = false;
-            }
-            else
-            {
-                $resultsPager->getNextPage();
-            }
-            endLogSection("Callback complete for results page {$resultsPager->getPage()} ");
         }
     }
 
