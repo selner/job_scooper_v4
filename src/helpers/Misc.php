@@ -41,7 +41,7 @@ function is_empty_value($v)
             return ($v === null || '' === $v);
 
         case 'array':
-            return $v === null || (is_array($v) && (count($v) === 0 || count(array_keys($v)) === 0));
+            return $v === null || (is_array($v) && (count($v) === 0 || \count(array_keys($v)) === 0));
 
         case 'boolean':
             return $v !== null && $v !== false;
@@ -63,7 +63,7 @@ function parse_query_string($str)
 			foreach($items as $i) {
 				$idecoded = urldecode($i);
 				$parts = explode('=', $idecoded);
-				if(!is_empty_value($parts) && count($parts) > 1) {
+				if(!is_empty_value($parts) && \count($parts) > 1) {
 					$args[$parts[0]] = $parts[1];
 				}
 			}
@@ -182,12 +182,12 @@ function combineTextAllChildren($node)
 		return null;
 	}
 	
-    if (is_array($node) && count($node) > 1) {
-        $strError = sprintf("Warning:  " . count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
+    if (is_array($node) && \count($node) > 1) {
+        $strError = sprintf("Warning:  " . \count($node) . " DOM nodes were sent to combineTextAllChildren instead of a single starting node.  Using first node only.");
         LogWarning($strError);
     }
 
-    if (is_array($node) && count($node) >= 1) {
+    if (is_array($node) && \count($node) >= 1) {
         $node = $node[0];
     }
     

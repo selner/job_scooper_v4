@@ -457,7 +457,7 @@ class PluginCareerJet extends \JobScooper\SitePlugins\ApiPlugin
             }
 
             $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails);
-            $nTotalJobs = $nTotalJobs + count($arrPageJobsList);
+            $nTotalJobs = $nTotalJobs + \count($arrPageJobsList);
             $pageNumber++;
             if ($totalPages < $pageNumber) {
                 $noMoreJobs = true;

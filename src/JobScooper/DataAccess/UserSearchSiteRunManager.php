@@ -240,7 +240,7 @@ class UserSearchSiteRunManager {
                 unset($searchRuns[$runKey]);
 			}
 
-            LogMessage('Skipping ' . count(array_keys($skippedSearchRuns)) . ' searches because they have run since ' . $dtSiteWaitPrevRunCutOff->format('Y-m-d H:i') . ': ' . implode(', ', array_keys($skippedSearchRuns)));
+            LogMessage('Skipping ' . \count(array_keys($skippedSearchRuns)) . ' searches because they have run since ' . $dtSiteWaitPrevRunCutOff->format('Y-m-d H:i') . ': ' . implode(', ', array_keys($skippedSearchRuns)));
         }
 
     }

@@ -57,7 +57,7 @@ class ExtendedDiDomElement extends Element
             $parts = explode(";", $style);
             foreach ($parts as $part) {
                 $kvPair = explode(':', $part);
-                if (!empty($kvPair) && count($kvPair) >1) {
+                if (!empty($kvPair) && \count($kvPair) >1) {
                     $key = strtolower($kvPair[0]);
                     $val = strtolower($kvPair[1]);
                     switch ($key) {

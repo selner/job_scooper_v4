@@ -141,7 +141,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
             );
         }
 
-        LogMessage("Loaded " . count($ret) . " jobs from JSON with " . count($jobs));
+        LogMessage("Loaded " . \count($ret) . " jobs from JSON with " . \count($jobs));
         return $ret;
     }
 
@@ -247,7 +247,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
             try {
                 $ret = array();
                 $nOffset = 0;
-                if (!is_empty_value($this->lastResponseData) && !is_empty_value($this->lastResponseData->Jobs) && count($this->lastResponseData->Jobs) > 0) {
+                if (!is_empty_value($this->lastResponseData) && !is_empty_value($this->lastResponseData->Jobs) && \count($this->lastResponseData->Jobs) > 0) {
                     $jobs = $this->lastResponseData->Jobs;
                     unset($this->lastResponseData);
                 } else {
@@ -263,7 +263,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
                     $curPageJobs = $this->_parseJsonJobs($jobs);
                     unset($jobs);
                     $ret = array_merge($ret, $curPageJobs);
-                    $nOffset = $nOffset + count($curPageJobs);
+                    $nOffset = $nOffset + \count($curPageJobs);
                     if ($nOffset < $this->nTotalJobs) {
                         $jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
                         LogMessage("Loading next page of JSON data for {$this->JobSiteKey} from {$this->getActiveWebdriver()->getCurrentURL()}");
@@ -307,7 +307,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
         if (!is_empty_value($baseHTML)) {
             try {
                 $head = $baseHTML->find("head");
-                if (!is_empty_value($head) && count($head) >= 1) {
+                if (!is_empty_value($head) && \count($head) >= 1) {
                     foreach ($head[0]->children() as $child) {
                         if ($child->isCommentNode()) {
                             $template = "unknown";

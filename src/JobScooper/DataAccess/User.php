@@ -396,7 +396,7 @@ class User extends BaseUser
             LogMessage('Could not create user searches for the given user keyword sets and geolocations.  Cannot continue.');
             return ;
         }
-        LogMessage('Updated or created ' . count($userSearchPairs) . " user search pairs for {$slug}.");
+        LogMessage('Updated or created ' . \count($userSearchPairs) . " user search pairs for {$slug}.");
     }
 
     /**
@@ -492,14 +492,14 @@ class User extends BaseUser
         }
 
         $searchPairs = $this->getActiveUserSearchPairs();
-        $nTotalPairs = count($searchPairs);
-        $nKeywords = count($this->getSearchKeywords());
+        $nTotalPairs = \count($searchPairs);
+        $nKeywords = \count($this->getSearchKeywords());
         $nLocations = countAssociativeArrayValues($this->getSearchLocations());
-        $nTotalPossibleSearches = $nKeywords * $nLocations * count($sites);
+        $nTotalPossibleSearches = $nKeywords * $nLocations * \count($sites);
 
         $countryCodes = $this->getCountryCodesForUser();
 
-        LogDebug("Configuring {$nTotalPairs} search pairs X " . count($sites) . " jobsites = up to {$nTotalPossibleSearches} total searches, from {$nKeywords} search keywords and {$nLocations} search locations in " . implode(", ", $countryCodes) .".");
+        LogDebug("Configuring {$nTotalPairs} search pairs X " . \count($sites) . " jobsites = up to {$nTotalPossibleSearches} total searches, from {$nKeywords} search keywords and {$nLocations} search locations in " . implode(", ", $countryCodes) .".");
 
         $ntotalSearchRuns = 0;
 
@@ -520,7 +520,7 @@ class User extends BaseUser
 	                if (!is_empty_value($ccPairOverlaps)) {
 
 						if($site->getResultsFilterType() !== JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
-							!array_key_exists($jobsiteKey, $this->_userSearchSiteRunsByJobSite) || count( $this->_userSearchSiteRunsByJobSite[$jobsiteKey]) < 1) {
+							!array_key_exists($jobsiteKey, $this->_userSearchSiteRunsByJobSite) || \count( $this->_userSearchSiteRunsByJobSite[$jobsiteKey]) < 1) {
 		                    $searchrun = new UserSearchSiteRun();
 		                    $searchrun->setUserSearchPairId($searchPair->getUserSearchPairId());
 		                    $searchrun->setJobSiteKey($site);
@@ -552,7 +552,7 @@ class User extends BaseUser
         	if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$siteKey])) {
 	            UserSearchSiteRunManager::filterRecentlyRunUserSearchRuns($this->_userSearchSiteRunsByJobSite[$siteKey]);
 	            if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$siteKey])) {
-		            $totalRuns += count($this->_userSearchSiteRunsByJobSite[$siteKey]);
+		            $totalRuns += \count($this->_userSearchSiteRunsByJobSite[$siteKey]);
 	            }
             }
 		}

@@ -444,7 +444,7 @@ class LoggingManager extends \Monolog\Logger
 	        $usersearch = null;
 	
 	        $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-	        while ($i < count($dbg) - 1) {
+	        while ($i < \count($dbg) - 1) {
 	            if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
 	                (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array('getDebugContent', 'handleException')))) {
 	                $class = $dbg[$i]['class'] . '->' . $dbg[$i]['function'] .'()';

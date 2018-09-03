@@ -278,10 +278,10 @@ class JobsAutoMarker
                 return false;
             });
 
-            LogMessage('Marking user job matches as out of area for ' . count($arrJobsOutOfArea) . ' matches ...');
+            LogMessage('Marking user job matches as out of area for ' . \count($arrJobsOutOfArea) . ' matches ...');
 
-            $nJobsMarkedAutoExcluded = count($arrJobsOutOfArea);
-            $nJobsNotMarked = count($arrJobsList) - $nJobsMarkedAutoExcluded;
+            $nJobsMarkedAutoExcluded = \count($arrJobsOutOfArea);
+            $nJobsNotMarked = \count($arrJobsList) - $nJobsMarkedAutoExcluded;
 
             foreach ($arrJobsOutOfArea as &$jobOutofArea) {
                 $jobOutofArea->setOutOfUserArea(true);
@@ -346,7 +346,7 @@ class JobsAutoMarker
             $arrJobsList = $collJobsList->toKeyIndex('UserJobMatchId');
             $arrJobListIds = array_keys($arrJobsList);
 			
-            LogMessage('Marking job postings in the ' . count($arrNearbyGeoLocIds) . ' nearby GeoLocations...');
+            LogMessage('Marking job postings in the ' . \count($arrNearbyGeoLocIds) . ' nearby GeoLocations...');
             $arrInAreaJobs = array_filter($arrJobsList, function (UserJobMatch &$var) use ($arrNearbyGeoLocIds) {
                 if (null !== $var->getJobPostingFromUJM()) {
                     $geoId = $var->getJobPostingFromUJM()->getGeoLocationId();
@@ -368,7 +368,7 @@ class JobsAutoMarker
                     ->update(array('OutOfUserArea' => false), $con);
             }
 
-            LogMessage('Marking job postings outside ' . \count($arrNearbyGeoLocIds) . ' matching areas ...');
+            LogMessage('Marking job postings outside ' .  \count($arrNearbyGeoLocIds) . ' matching areas ...');
             if (!empty($arrJobIdsOutOfArea)) {
                 foreach (array_chunk($arrJobIdsOutOfArea, 50) as $chunk) {
                     $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
@@ -379,9 +379,9 @@ class JobsAutoMarker
                 }
             }
 
-            $nJobsMarkedAutoExcluded = \count($arrJobIdsOutOfArea);
-            $nJobsNotMarked = \count($arrJobIdsInArea);
-            $nJobsTotal = \count($arrJobListIds);
+            $nJobsMarkedAutoExcluded =  \count($arrJobIdsOutOfArea);
+            $nJobsNotMarked =  \count($arrJobIdsInArea);
+            $nJobsTotal =  \count($arrJobListIds);
 
             LogMessage("Jobs excluded as out of area:  marked out of area {$nJobsMarkedAutoExcluded}/{$nJobsTotal}; marked in area = {$nJobsNotMarked}/{$nJobsTotal}");
         } catch (Exception $ex) {
@@ -408,12 +408,12 @@ class JobsAutoMarker
             $nJobsMarkedAutoExcluded = 0;
             $nJobsNotMarked = 0;
 
-            if (null === $this->companies_regex_to_filter  || count($arrJobsList) === 0 || count($this->companies_regex_to_filter) === 0) {
+            if (null === $this->companies_regex_to_filter  || \count($arrJobsList) === 0 || \count($this->companies_regex_to_filter) === 0) {
                 return;
             }
 
             LogMessage('Excluding Jobs by Companies Regex Matches');
-            LogMessage('Checking '.count($arrJobsList) .' roles against '. count($this->companies_regex_to_filter) .' excluded companies.');
+            LogMessage('Checking '.count($arrJobsList) .' roles against '. \count($this->companies_regex_to_filter) .' excluded companies.');
 
             foreach ($arrJobsList as &$jobMatch) {
                 $matched_exclusion = false;
@@ -536,7 +536,7 @@ class JobsAutoMarker
             }
 
             $arrMatchRecs = $data['job_matches'];
-            LogMessage("Loaded " . count($arrMatchRecs) . " user job matches from JSON file {$datafile} for updating in the DB...");
+            LogMessage("Loaded " . \count($arrMatchRecs) . " user job matches from JSON file {$datafile} for updating in the DB...");
 
             //
             // Update any of the passed job records we had in the loaded data set
@@ -597,7 +597,7 @@ class JobsAutoMarker
 	                }
 	            }
 			}
-            $totalMarked = count($retUJMIds);
+            $totalMarked =  \count($retUJMIds);
 
             LogMessage("... updated {$totalMarked} user job matches loaded from json file '{$datafile}.");
         } catch (Exception $ex) {
@@ -616,12 +616,12 @@ class JobsAutoMarker
 	        return;
     	}
 
-        startLogSection('Automarker: Starting matching of ' . count($arrJobsList) . ' job role titles against user search keywords ...');
+        startLogSection('Automarker: Starting matching of ' .  \count($arrJobsList) . ' job role titles against user search keywords ...');
 
         try {
             $basefile = 'mark_titlematches';
 
-            LogMessage('Exporting ' . count($arrJobsList) . " user job matches to JSON file '{$basefile}_src.json' for matching...");
+            LogMessage('Exporting ' . \count($arrJobsList) . " user job matches to JSON file '{$basefile}_src.json' for matching...");
             $sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $arrJobsList);
             $resultsfile = generateOutputFileName("{$basefile}_results", 'json', true, 'debug');
 
@@ -668,7 +668,7 @@ class JobsAutoMarker
         $inputfiles = $user->getInputFiles('negative_title_keywords');
         $user = null;
 
-        if (!is_array($inputfiles)) {
+        if (!\is_array($inputfiles)) {
             // No files were found, so bail
             LogDebug('No input files were found with title token strings to exclude.');
 
@@ -709,7 +709,7 @@ class JobsAutoMarker
             preg_match($rx, 'empty');
         } catch (\Exception $ex) {
             LogError($ex->getMessage());
-            if (isDebug() == true) {
+            if (isDebug() === true) {
                 throw $ex;
             }
         }
@@ -727,7 +727,7 @@ class JobsAutoMarker
     {
         if (!is_empty_value($this->companies_regex_to_filter)) {
             // We've already loaded the companies; go ahead and return right away
-            LogDebug('Using previously loaded ' . count($this->companies_regex_to_filter) . ' regexed company strings to exclude.');
+            LogDebug('Using previously loaded ' .  \count($this->companies_regex_to_filter) . ' regexed company strings to exclude.');
             return;
         }
 
@@ -741,7 +741,7 @@ class JobsAutoMarker
         
         $inputfiles = $user->getInputFiles('regex_filter_companies');
 		$user = null;
-        if (is_empty_value($inputfiles) ||  !is_array($inputfiles)) {
+        if (is_empty_value($inputfiles) ||  !\is_array($inputfiles)) {
             return;
         }
 
@@ -753,7 +753,7 @@ class JobsAutoMarker
                 //	        $classCSVFile = new SimpleCSV($fileItem, 'r');
                 //	        $loadedCompaniesRegex= $classCSVFile->readAllRecords(true, array('match_regex'));
                 $regexList = array_merge($regexList, array_column($loadedCompaniesRegex, 'match_regex'));
-                LogDebug(count($loadedCompaniesRegex) . " companies found in the file {$fileItem} that will be automatically filtered from job listings.");
+                LogDebug( \count($loadedCompaniesRegex) . " companies found in the file {$fileItem} that will be automatically filtered from job listings.");
             }
         }
         $regexList = array_unique($regexList);
@@ -762,15 +762,15 @@ class JobsAutoMarker
         // Add each Company we found in the file to our list in this class, setting the key for
         // each record to be equal to the job Company so we can do a fast lookup later
         //
-        if (!empty($regexList) && is_array($regexList)) {
+        if (!empty($regexList) && \is_array($regexList)) {
             foreach ($regexList as $rxItem) {
                 try {
                     $rx = $this->_scrubRegexSearchString($rxItem);
                     $this->companies_regex_to_filter[] = $rx;
                 } catch (\Exception $ex) {
-                    $strError = "Regex test failed on company regex pattern " . $rxItem .".  Skipping.  Error: '".$ex->getMessage();
+                    $strError = "Regex test failed on company regex pattern {$rxItem}.  Skipping.  Error: '{$ex->getMessage()}'";
                     LogError($strError);
-                    if (isDebug() == true) {
+	                    if (isDebug() === true) {
                         throw new \ErrorException($strError);
                     }
                 }
@@ -783,6 +783,6 @@ class JobsAutoMarker
             LogDebug("Could not load regex list for companies to exclude from '" . getArrayValuesAsString($inputfiles) . "'.  Final list will not be filtered.");
         }
 
-        LogMessage('Loaded ' . count($this->companies_regex_to_filter). ' regexes to use for filtering companies from ' . getArrayValuesAsString($inputfiles));
+        LogMessage('Loaded ' . \count($this->companies_regex_to_filter). ' regexes to use for filtering companies from ' . getArrayValuesAsString($inputfiles));
     }
 }

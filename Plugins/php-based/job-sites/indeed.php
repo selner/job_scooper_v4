@@ -59,7 +59,7 @@ class PluginIndeed extends \JobScooper\SitePlugins\AjaxSitePlugin
 //                $ret = noJobStringMatch($text, "No jobs match your search");
 //            } else {
 //                $node2 = $var->find("div.bad_query h2");
-//                if (null !== $node2 && count($node2) > 0) {
+//                if (null !== $node2 && \count($node2) > 0) {
 //                    $text = $node2[0]->text();
 //                    $ret = noJobStringMatch($text, "did not match");
 //                }
@@ -89,7 +89,7 @@ class PluginIndeed extends \JobScooper\SitePlugins\AjaxSitePlugin
             );
         }
 
-        LogMessage("Loaded " . count($ret) . " jobs from JSON with " . count($jobs));
+        LogMessage("Loaded " . \count($ret) . " jobs from JSON with " . \count($jobs));
         return $ret;
     }
 

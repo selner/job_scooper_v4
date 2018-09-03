@@ -162,7 +162,7 @@ abstract class AbstractTaleoATS extends \JobScooper\SitePlugins\AjaxSitePlugin
     public function parseTotalResultsCountFrom1ToTD(SimpleHTMLHelper $objSimpHTML)
     {
         $nodes = $objSimpHTML->find('td[class="nowrapRegular"] b');
-        if ($nodes && count($nodes)>=2) {
+        if ($nodes && \count($nodes)>=2) {
             return $nodes[1]->text();
         }
 
@@ -189,7 +189,7 @@ abstract class AbstractTaleoATS extends \JobScooper\SitePlugins\AjaxSitePlugin
         } else {
             $nodeHelper = new SimpleHTMLHelper($objSimpHTML);
             $node = $nodeHelper->find("div[" . $divTagType . "='" . $divTagValue . "'] table tbody tr");
-            if (!empty($node) && !empty($trIndex) && count($node) > $trIndex + 1) {
+            if (!empty($node) && !empty($trIndex) && \count($node) > $trIndex + 1) {
                 $node = $node[$trIndex];
             } else {
                 return null;
@@ -197,7 +197,7 @@ abstract class AbstractTaleoATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 
             $nodeSecond = new SimpleHTMLHelper($node);
             $nodeThird = $nodeSecond->find("td");
-            if (!empty($nodeThird) && count($nodeThird) >= 1) {
+            if (!empty($nodeThird) && \count($nodeThird) >= 1) {
                 $totalItemsText = $nodeThird[0]->text();
                 $arrItemsFirstSplit = explode("found ", trim($totalItemsText));
                 $strTotalItemsCount = explode(" matching", trim($arrItemsFirstSplit[1]));

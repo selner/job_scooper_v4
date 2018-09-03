@@ -144,7 +144,7 @@ class StageManager
             }
             
             foreach($usersForRun as $userFacts) {
-	            startLogSection(PHP_EOL . "Stage 1:  Downloading jobs for user={$userFacts['UserSlug']} from " . count($jobsiteKeys) . " potential job sites");
+	            startLogSection(PHP_EOL . "Stage 1:  Downloading jobs for user={$userFacts['UserSlug']} from " . \count($jobsiteKeys) . " potential job sites");
 
 		        foreach($jobsiteKeys as $jobsiteKey)
 		        {
@@ -158,7 +158,7 @@ class StageManager
 		                $user = User::getUserObjById($userFacts['UserId']);
 			            $siteRuns = $user->getUserSearchSiteRunsForJobSite($jobsiteKey);
 			            if(!is_empty_value($siteRuns)) {
-		                    $countTotalSiteSearches = count($siteRuns);
+		                    $countTotalSiteSearches = \count($siteRuns);
 		                    $plugin = null;
 		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		                    //

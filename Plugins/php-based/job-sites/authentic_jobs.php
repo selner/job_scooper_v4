@@ -49,7 +49,7 @@ class PluginAuthenticJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
         $objSimplHtml = $this->getSimpleHtmlDomFromSeleniumPage($this->_currentSearchDetails);
 
         $node = $objSimplHtml->find('p.more');
-        if ($node == null || count($node) == 0) {
+        if ($node == null || \count($node) == 0) {
             return false;
         } else {
             if (false !== stripos($node[0]->attr['style'], 'display: none')) {

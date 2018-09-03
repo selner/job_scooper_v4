@@ -246,7 +246,7 @@ function doBatchCallbackForQuery(&$query, $callback, $backOffsetDelta = 0, $maxR
         $query->limit($maxResultsPerPage + abs($backStepOffset));
         $resultsPageData = $query->find();
 		
-        $nSetResults = $nResults + count($resultsPageData);
+        $nSetResults = $nResults + \count($resultsPageData);
         LogMessage("Processing query results #" . (string)($nResults+$backStepOffset) . " - " . (string)($nSetResults+$backStepOffset) . " of {$totalResults} total results via callback {$queryClass}...");
         $nResults = $nResults + $nSetResults + $backStepOffset;
         call_user_func_array($callback, array(&$resultsPageData));

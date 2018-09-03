@@ -102,14 +102,14 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
             $ret = array();
             $nOffset = 0;
             $data = $this->getJsonResultsPage("jobs", "meta->total");
-            if (!empty($data) && !empty($data['jobs']) && count($data['jobs']) > 0) {
+            if (!empty($data) && !empty($data['jobs']) && \count($data['jobs']) > 0) {
                 $jobs = $data['jobs'];
                 ;
                 $nTotal = $data['count'];
                 while (!empty($jobs)) {
                     $curPageJobs = $this->_parseJsonJobs($jobs);
                     $ret = array_merge($ret, $curPageJobs);
-                    $nOffset += count($jobs);
+                    $nOffset += \count($jobs);
                     if ($nOffset < $nTotal) {
                         $retData = $this->getJsonResultsPage($nOffset);
                         $jobs = $retData['jobs'];
@@ -158,7 +158,7 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
 	                    $ret['count'] = $respdata->$countKey;
                     }
                 } elseif (!is_empty_value($ret['jobs'])) {
-                    $ret['count'] = count($ret['jobs']);
+                    $ret['count'] = \count($ret['jobs']);
                 }
             } catch (Exception $ex) {
                 throw new Exception($respdata->error);

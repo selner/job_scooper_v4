@@ -360,7 +360,7 @@ class GeoLocation extends BaseGeoLocation
                 case 'alternate_names':
                     $names = $this->getAlternateNames();
                     $arrVals['alternate_names'] = $geocode['alternate_names'];
-                    if (null === $names || count($names) == 0) {
+                    if (null === $names || \count($names) == 0) {
                         $mergednames = array_merge($arrVals['alternate_names'], $names);
                         $arrVals['alternate_names'] = array_unique($mergednames);
                     }

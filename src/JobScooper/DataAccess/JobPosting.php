@@ -267,7 +267,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         }
 //        $arrMatches = array();
 //        $matched = preg_match('/.*(\w{2})\s*[\-,]\s*.*(\w{2})\s*[\-,]s*([\w]+)/', $v, $arrMatches);
-//        if ($matched !== false && count($arrMatches) == 4) {
+//        if ($matched !== false && \count($arrMatches) == 4) {
 //            $v = $arrMatches[3] . ", " . $arrMatches[2];
 //        }
 
@@ -513,7 +513,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
     public function __construct($arrJobFacts = null)
     {
         parent::__construct();
-        if (!is_empty_value($arrJobFacts) && count($arrJobFacts) > 1) {
+        if (!is_empty_value($arrJobFacts) && \count($arrJobFacts) > 1) {
             foreach (array_keys($arrJobFacts) as $key) {
                 $this->set($key, $arrJobFacts[$key]);
             }

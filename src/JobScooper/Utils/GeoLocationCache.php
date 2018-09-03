@@ -216,7 +216,7 @@ class GeoLocationCache
         $keys = array_iunique($keys);
 
         $strKeys = getArrayDebugOutput($keys);
-        $cntKeys = count($keys);
+        $cntKeys = \count($keys);
         $strTags = getArrayDebugOutput($tags);
 
         if (isDebug()) {
@@ -251,7 +251,7 @@ class GeoLocationCache
             ->find()
             ->getData();
 
-        LogDebug('... ' . count($allLocsWithoutGeoLocs) . ' missing locations found and being added to cache...');
+        LogDebug('... ' . \count($allLocsWithoutGeoLocs) . ' missing locations found and being added to cache...');
 
         foreach ($allLocsWithoutGeoLocs as $name) {
             if (!empty($name)) {

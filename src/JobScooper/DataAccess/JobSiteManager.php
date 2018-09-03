@@ -280,7 +280,7 @@ class JobSiteManager
         }
 
         ksort($allEnabledJobSites);
-        $nEnabledSites = count($allEnabledJobSites);
+        $nEnabledSites = \count($allEnabledJobSites);
         LogMessage("Loaded {$nEnabledSites} enabled jobsite plugins.");
 	    Settings::setValue(self::class . '.enabled_sites', array_keys($allEnabledJobSites));
 

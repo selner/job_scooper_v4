@@ -88,10 +88,10 @@ abstract class SitePlugin implements IJobSitePlugin
         }
 
         if (!is_empty_value($this->arrListingTagSetup) && is_array($this->arrListingTagSetup)) {
-            if (array_key_exists('NextButton', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['NextButton']) && count($this->arrListingTagSetup['NextButton'])) {
+            if (array_key_exists('NextButton', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['NextButton']) && \count($this->arrListingTagSetup['NextButton'])) {
                 $this->selectorMoreListings = DomItemParser::getSelector($this->arrListingTagSetup['NextButton']);
                 $this->PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
-            } elseif (array_key_exists('LoadMoreControl', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['LoadMoreControl']) && count($this->arrListingTagSetup['LoadMoreControl'])) {
+            } elseif (array_key_exists('LoadMoreControl', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['LoadMoreControl']) && \count($this->arrListingTagSetup['LoadMoreControl'])) {
                 $this->PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
                 $this->selectorMoreListings = DomItemParser::getSelector($this->arrListingTagSetup['LoadMoreControl']);
             }
@@ -356,10 +356,10 @@ abstract class SitePlugin implements IJobSitePlugin
 
                     $jobIdsToAddToUser = array_diff($queryAllJobsFromJobSite, $dataExistingUserJobMatchIds);
 
-                    if (null !== $jobIdsToAddToUser && count($jobIdsToAddToUser) > 0) {
-                        LogMessage("Found " . count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs not yet assigned to user {$userFacts['UserSlug']}.");
+                    if (null !== $jobIdsToAddToUser && \count($jobIdsToAddToUser) > 0) {
+                        LogMessage("Found " . \count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs not yet assigned to user {$userFacts['UserSlug']}.");
                         $this->_addJobMatchIdsToUser($jobIdsToAddToUser, $search);
-                        LogMessage("Successfully added " . count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs to user {$userFacts['UserSlug']}.");
+                        LogMessage("Successfully added " . \count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs to user {$userFacts['UserSlug']}.");
                     } else {
                         LogMessage("User {$userFacts['UserSlug']} had no missing previously loaded listings from {$this->JobSiteKey}.");
                     }
@@ -764,7 +764,7 @@ JSCODE;
         }
 
 
-        if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && null !== $this->arrListingTagSetup['NoPostsFound'] && count($this->arrListingTagSetup['NoPostsFound']) > 0) {
+        if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && null !== $this->arrListingTagSetup['NoPostsFound'] && \count($this->arrListingTagSetup['NoPostsFound']) > 0) {
             try {
                 $noResultsVal = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['NoPostsFound'], null, $this);
                 if (null !== $noResultsVal) {
@@ -777,12 +777,12 @@ JSCODE;
         }
 
         $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
-        if (array_key_exists('TotalPostCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalPostCount']) && count($this->arrListingTagSetup['TotalPostCount']) > 0) {
+        if (array_key_exists('TotalPostCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalPostCount']) && \count($this->arrListingTagSetup['TotalPostCount']) > 0) {
             $retJobCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalPostCount'], null, $this);
             if (is_empty_value($retJobCount)) {
                 throw new \Exception('Unable to determine number of listings for the defined tag:  ' . getArrayValuesAsString($this->arrListingTagSetup['TotalPostCount']));
             }
-        } elseif (array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalResultPageCount']) && count($this->arrListingTagSetup['TotalResultPageCount']) > 0) {
+        } elseif (array_key_exists('TotalResultPageCount', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['TotalResultPageCount']) && \count($this->arrListingTagSetup['TotalResultPageCount']) > 0) {
             $retPageCount = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['TotalResultPageCount'], null, $this);
             if (is_empty_value($retPageCount)) {
                 throw new \Exception('Unable to determine number of pages for the defined tag:  ' . getArrayValuesAsString($this->arrListingTagSetup['TotalResultPageCount']));
@@ -839,7 +839,7 @@ JSCODE;
 
         $nodesJobRows = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobPostItem'], null, $this);
 
-        if ($nodesJobRows !== false && null !== $nodesJobRows && is_array($nodesJobRows) && count($nodesJobRows) > 0) {
+        if ($nodesJobRows !== false && null !== $nodesJobRows && is_array($nodesJobRows) && \count($nodesJobRows) > 0) {
             foreach ($nodesJobRows as $node) {
                 $job = $this->parseSingleJob($node);
                 if (!empty($job)) {
@@ -953,7 +953,7 @@ JSCODE;
             return null;
         }
 
-        if (is_array($var[1]) && count($var[1]) >= 2) {
+        if (is_array($var[1]) && \count($var[1]) >= 2) {
             $delim = $var[1][0];
             $index = $var[1][1];
             $parts = preg_split('/{$delim}/', $val, -1, PREG_SPLIT_NO_EMPTY);
@@ -1238,7 +1238,7 @@ JSCODE;
 
             $objSimpleHTML = null;
 
-            if (isDebug() == true) {
+            if (isDebug() === true) {
                 $this->log('URL        = ' . $strURL);
                 $this->log('Referrer   = ' . $referrer);
                 $this->log('Cookies    = ' . $cookies);
@@ -1492,7 +1492,7 @@ JSCODE;
 	        
             $this->arrSearchReturnedJobs[$siteRunKey] = array_merge($this->arrSearchReturnedJobs[$siteRunKey], $arrJobCols);
     
-            $nCountNewJobs = count($arrJobsToAdd);
+            $nCountNewJobs = \count($arrJobsToAdd);
         } catch (Exception $ex) {
             handleException($ex, 'Unable to save job search results to database.', true);
         }
@@ -1895,7 +1895,7 @@ JSCODE;
                                     // until we get to the right number of pages
                                     //
                                     while ($nPageCount <= $totalPagesCount) {
-                                        if (isDebug() == true) {
+                                        if (isDebug() === true) {
                                             $this->log("... getting infinite results page #{$nPageCount} of {$totalPagesCount}");
                                         }
                                         $this->moveDownOnePageInBrowser();
@@ -1972,7 +1972,7 @@ JSCODE;
                             $nCountNewJobsInDb = 0;
                             $cntPageJobsReturned = countAssociativeArrayValues($arrPageJobsList);
                             $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails, $nCountNewJobsInDb);
-                            $nJobsFound = count($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]);
+                            $nJobsFound = \count($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]);
 
                             if ($nItemCount == 1) {
                                 $nItemCount = 0;

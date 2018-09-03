@@ -215,11 +215,11 @@ class NotifierJobAlerts extends JobsMailSender
 	        $matches['all'] = $dbMatches->toArray('UserJobMatchId');
 	        // dump the full list of matches/excludes to JSON
 	        //
-	        LogMessage('Exporting ' . count($matches['all']) . ' UserJobMatch objects to JSON for use in notifications...');
+	        LogMessage('Exporting ' . \count($matches['all']) . ' UserJobMatch objects to JSON for use in notifications...');
 	        $pathJsonMatches = getDefaultJobsOutputFileName('', 'user-job-matches', 'json', '_', 'debug');
 	        writeJson($matches['all'], $pathJsonMatches);
 	
-	        LogMessage('Updating ' .  count($matches['all']) . ' UserJobMatch array items for use in notifications...');
+	        LogMessage('Updating ' .  \count($matches['all']) . ' UserJobMatch array items for use in notifications...');
 	        
 	        $matches['all'] = flattenChildren($matches['all'], 'UserJobMatchId');
 	
@@ -358,7 +358,7 @@ class NotifierJobAlerts extends JobsMailSender
         startLogSection('Generating HTML & text email content for user ');
 
         try {
-            $messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, count($allJobMatchIds), $userFacts, $geoLocationId);
+            $messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, \count($allJobMatchIds), $userFacts, $geoLocationId);
             if (empty($messageHtml)) {
                 throw new Exception("Failed to generate email notification content for email {$resultsTitle} to sent to user {$userFacts['UserSlug']}.");
             }
@@ -424,7 +424,7 @@ class NotifierJobAlerts extends JobsMailSender
 	 */
 	function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 	{
-	    LogMessage('Marking ' . count($arrUserJobMatchIds) . " user job matches as {$strNewStatus}...");
+	    LogMessage('Marking ' . \count($arrUserJobMatchIds) . " user job matches as {$strNewStatus}...");
 	 
 	    try
 	    {
@@ -445,7 +445,7 @@ class NotifierJobAlerts extends JobsMailSender
 		
 		            // fetch a new connection
 		            $con = \Propel\Runtime\Propel::getWriteConnection('default');
-		            LogMessage("Marking user job matches {$nChunkCounter} - " . ($nMax >= count($arrUserJobMatchIds) ? count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
+		            LogMessage("Marking user job matches {$nChunkCounter} - " . ($nMax >= \count($arrUserJobMatchIds) ? \count($arrUserJobMatchIds) - 1 : $nMax) . " as {$strNewStatus}...");
 		        }
 		    }
 	    }

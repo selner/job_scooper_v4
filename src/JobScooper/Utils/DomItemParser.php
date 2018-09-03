@@ -194,7 +194,7 @@ class DomItemParser
     {
         $ret = null;
 
-        if (!is_array($this->_tagParseInfo) || count($this->_tagParseInfo) == 0 ||
+        if (!is_array($this->_tagParseInfo) || \count($this->_tagParseInfo) == 0 ||
             $this->_domNodeData == null) {
             return null;
         }
@@ -333,15 +333,15 @@ class DomItemParser
                 break;
 
             case 'LAST':
-                $ret = count($arr) - 1;
+                $ret = \count($arr) - 1;
                 break;
 
             case $indexValue < 0:
-                $ret = count($arr) - 1 - abs($indexValue);
+                $ret = \count($arr) - 1 - abs($indexValue);
                 break;
 
-            case $indexValue > count($arr):
-                $strError = sprintf('Failed to find index #%d in the %d matching nodes. ', $indexValue, count($arr));
+            case $indexValue > \count($arr):
+                $strError = sprintf('Failed to find index #%d in the %d matching nodes. ', $indexValue, \count($arr));
                 $this->log($strError, LogLevel::WARNING);
                 $ret = null;
                 break;
@@ -390,8 +390,8 @@ class DomItemParser
             // do nothing.  We already have the node set correctly
             } elseif (!empty($nodeMatches) && array_key_exists('Index', $arrTag) && is_array($nodeMatches)) {
                 $index = (int)$arrTag['Index'];
-                if ($index > count($nodeMatches) - 1) {
-                    $this->log("Tag specified index {$index} but only " . count($nodeMatches) . " were matched.  Defaulting to first node.", LogLevel::WARNING);
+                if ($index > \count($nodeMatches) - 1) {
+                    $this->log("Tag specified index {$index} but only " . \count($nodeMatches) . " were matched.  Defaulting to first node.", LogLevel::WARNING);
                     $index = 0;
                 } elseif (empty($index) && $index !== 0) {
                     $this->log("Tag specified index value was invalid {$arrTag['Index']}.  Defaulting to first node.", LogLevel::WARNING);
@@ -400,7 +400,7 @@ class DomItemParser
                 $ret = $this->_getReturnValueByIndex($nodeMatches, $index);
             } elseif (!empty($nodeMatches) && is_array($nodeMatches)) {
                 if (count($nodeMatches) > 1) {
-                    $strError = sprintf('Warning: ' . self::class . ' matched %d nodes to selector \'%s\' but did not specify an index.  Assuming first node.  Tag = %s', count($nodeMatches), $strMatch, getArrayDebugOutput($arrTag));
+                    $strError = sprintf('Warning: ' . self::class . ' matched %d nodes to selector \'%s\' but did not specify an index.  Assuming first node.  Tag = %s', \count($nodeMatches), $strMatch, getArrayDebugOutput($arrTag));
                     $this->log($strError, LogLevel::WARNING);
                 }
                 $ret = $nodeMatches[0];
@@ -414,7 +414,7 @@ class DomItemParser
                     $match = array();
                     $propertyRegEx = str_replace("\\\\", "\\", $propertyRegEx);
                     $retTemp = str_replace('\n', ' ', $ret);
-                    if (preg_match($propertyRegEx, $retTemp, $match) !== false && count($match) >= 1) {
+                    if (preg_match($propertyRegEx, $retTemp, $match) !== false && \count($match) >= 1) {
                         $ret = $match[1];
                     } else {
                         $this->log(sprintf(self::class . ' failed to find match for regex \'%s\' for tag \'%s\' with value \'%s\' as expected.', $propertyRegEx, getArrayDebugOutput($arrTag), $ret), LogLevel::DEBUG);

@@ -112,7 +112,7 @@ class SitePluginFactory
         $arrAddedPlugins = null;
         LogMessage('Initializing all job site plugins...', null, null, null, $channel='plugins');
 
-        LogMessage('Generating classes for ' . count($this->_jsonPluginSetups) . ' JSON-loaded plugins...', null, null, null, $channel='plugins');
+        LogMessage('Generating classes for ' . \count($this->_jsonPluginSetups) . ' JSON-loaded plugins...', null, null, null, $channel='plugins');
         foreach (array('Abstract', 'Plugin') as $type) {
             $plugins = array_filter($this->_jsonPluginSetups, function ($val) use ($type) {
                 $matched = preg_match('/^' . $type . '/', $val['PhpClassName']);
@@ -152,7 +152,7 @@ class SitePluginFactory
     private function _loadJsonPluginConfigFiles_()
     {
         $this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . '*.json');
-        LogMessage('Loading JSON-based, jobsite plugin configurations from ' . count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...", null, null, null, $channel='plugins');
+        LogMessage('Loading JSON-based, jobsite plugin configurations from ' . \count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...", null, null, null, $channel='plugins');
 
         sort($this->_configJsonFiles);
 
@@ -264,7 +264,7 @@ class SitePluginFactory
         }
 
 
-        if (array_key_exists('Collections', $arrConfigData) && null !== $arrConfigData['Collections'] && is_array($arrConfigData['Collections']) && count($arrConfigData['Collections']) > 0 && array_key_exists('Fields', $arrConfigData['Collections'][0])) {
+        if (array_key_exists('Collections', $arrConfigData) && null !== $arrConfigData['Collections'] && is_array($arrConfigData['Collections']) && \count($arrConfigData['Collections']) > 0 && array_key_exists('Fields', $arrConfigData['Collections'][0])) {
             if (!is_array($pluginData[$listingTagBucket])) {
                 $pluginData[$listingTagBucket] = array();
             }

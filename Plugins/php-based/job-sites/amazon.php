@@ -188,12 +188,12 @@ JSCODE;
         try {
             $ret = array();
             $nOffset = 0;
-            if (!empty($this->lastResponseData) && !empty($this->lastResponseData->jobs) && count($this->lastResponseData->jobs) > 0) {
+            if (!empty($this->lastResponseData) && !empty($this->lastResponseData->jobs) && \count($this->lastResponseData->jobs) > 0) {
                 $jobs = $this->lastResponseData->jobs;
                 while (!empty($jobs)) {
                     $curPageJobs = $this->_parseJsonJobs($jobs);
                     $ret = array_merge($ret, $curPageJobs);
-                    $nOffset = $nOffset + count($jobs);
+                    $nOffset = $nOffset + \count($jobs);
                     if ($nOffset < $this->nTotalJobs) {
                         $retData = $this->getJsonResultsPage($nOffset);
                         $jobs = $retData['jobs'];

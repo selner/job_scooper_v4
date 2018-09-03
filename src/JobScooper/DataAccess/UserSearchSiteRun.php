@@ -263,7 +263,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
         $tokenFmtStrings = getUrlTokenList($strURL);
         //	    $count = preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strURL, $tokenlist);
-        //	    if(!empty($tokenlist) && is_array($tokenlist) && count($tokenlist) >= 3)
+        //	    if(!empty($tokenlist) && is_array($tokenlist) && \count($tokenlist) >= 3)
         //	    {
         //		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
         if (null !== $tokenFmtStrings) {

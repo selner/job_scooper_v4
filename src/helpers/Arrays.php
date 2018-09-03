@@ -68,7 +68,7 @@ function countAssociativeArrayValues($arrToCount)
 
 
     $arrValues = array_values($arrToCount);
-    $nValues = count($arrValues);
+    $nValues = \count($arrValues);
     return max($nValues, $count);
 }
 
@@ -499,7 +499,7 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
             $findings[$name] = $pattern;
 
             if ($boolMustMatchAllKeywords == true) {
-                return (count($findings) === count($patterns));
+                return (count($findings) === \count($patterns));
             }
         } else {
             if (PREG_NO_ERROR !== ($code = preg_last_error())) {
@@ -510,7 +510,7 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
             }
         }
     }
-    return !(0 === count($findings));
+    return !(0 === \count($findings));
 }
 
 /**

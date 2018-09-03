@@ -145,7 +145,7 @@ class JobSiteRecord extends BaseJobSiteRecord
     		return false;
         }
 
-        if(is_array($countryCode) && count($countryCode) >= 1) {
+        if(is_array($countryCode) && \count($countryCode) >= 1) {
     		$countryCode = array_pop($countryCode);
         }
         $siteKeysOutOfSearchArea = array();

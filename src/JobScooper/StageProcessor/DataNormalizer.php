@@ -136,7 +136,7 @@ class DataNormalizer
 	        $cntJobs = countAssociativeArrayValues($postsToExport);
 	
 	        $jsonObj['job_postings'] = $postsToExport;
-            $jsonObj['count'] = count($postsToExport);
+            $jsonObj['count'] = \count($postsToExport);
 	
 	        $outfile = generateOutputFileName('dedupe', 'json', true, 'debug');
 	        $resultsfile = generateOutputFileName('deduped_jobs_results', 'json', true, 'debug');
