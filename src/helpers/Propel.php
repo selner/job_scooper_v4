@@ -275,7 +275,7 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
     LogMessage('Getting all user job matches results query...');
 
     $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoIds, $nNumDaysBack, $userFacts);
-    $resultsPager = $query->paginate($page=1, $maxPerPage = MAX_RESULTS_PER_PAGE);
+    $resultsPager = $query->paginate(1, $maxPerPage = MAX_RESULTS_PER_PAGE);
     
     $totalResults = $resultsPager->getNbResults();
     $nTotalPages = intceil($totalResults/MAX_RESULTS_PER_PAGE);
@@ -288,38 +288,39 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
         $moreResults = true;
 		$nCurrentPage = 1;
         
-        while($moreResults === true && $nResults <= $totalResults && $nCurrentPage <= $nTotalPages)
+        try {
+	        while($moreResults === true && $nResults <= $totalResults && $nCurrentPage <= $nTotalPages)
+	        {
+		            startLogSection("Processing user matches page {$nCurrentPage} (#{$resultsPager->getFirstIndex()} - {$resultsPager->getLastIndex()} ) via callback...");
+		            
+		            if(!is_empty_value($addlCallbackParams)) {
+			            $callback($resultsPager->getResults(), $addlCallbackParams);
+		            }
+		            else {
+		                $callback($resultsPager->getResults());
+		            }
+		            $nResults += $resultsPager->count();
+		            endLogSection("Callback complete for results page {$nCurrentPage} ");
+	
+		            if(!$resultsPager->haveToPaginate() || $resultsPager->isLastPage()) {
+		                $moreResults = false;
+		            }
+		            else
+		            {
+		                $nCurrentPage = $resultsPager->getNextPage();
+		                LogMessage("Getting page {$nCurrentPage} of user match results...");
+		                unset($resultsPager);
+					    $resultsPager = $query->paginate($nCurrentPage, $maxPerPage = MAX_RESULTS_PER_PAGE);
+		            }
+	        }
+        
+        }
+        catch (Exception $ex)
         {
-        	try {
-	            startLogSection("Processing user matches page {$nCurrentPage} (#{$resultsPager->getFirstIndex()} - {$resultsPager->getLastIndex()} ) via callback...");
-	            
-	            if(!is_empty_value($addlCallbackParams)) {
-		            $callback($resultsPager->getResults(), $addlCallbackParams);
-	            }
-	            else {
-	                $callback($resultsPager->getResults());
-	            }
-	            $nResults += $resultsPager->count();
-	            endLogSection("Callback complete for results page {$nCurrentPage} ");
-
-	            if(!$resultsPager->haveToPaginate() || $resultsPager->isLastPage()) {
-	                $moreResults = false;
-	            }
-	            else
-	            {
-	                $nCurrentPage = $resultsPager->getNextPage();
-	            	LogMessage("Getting page {$nCurrentPage} of user match results...");
-	                unset($resultsPager);
-				    $resultsPager = $query->paginate($nCurrentPage, $maxPerPage = MAX_RESULTS_PER_PAGE);
-	            }
-        	}
-        	catch (Exception $ex)
-        	{
-        		handleException($ex);
-            }
-            finally {
-                unset($resultsPager);
-            }
+            handleException($ex);
+        }
+        finally {
+            unset($resultsPager);
         }
     }
 
