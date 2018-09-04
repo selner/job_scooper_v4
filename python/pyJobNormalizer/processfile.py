@@ -171,7 +171,7 @@ def tokenizeStrings(listData, field, fieldTokenized = "tokenized", retType="stri
     """
 
     for k in listData.keys():
-        if len(k) == 0:
+        if isinstance(k, basestring) and len(k) == 0:
             print "String value for key was empty.  Skipping..."
             continue
 
