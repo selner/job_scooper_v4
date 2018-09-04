@@ -4,4 +4,4 @@ nltk
 unicodecsv
 docopt
 pandas
-
+pymysql
