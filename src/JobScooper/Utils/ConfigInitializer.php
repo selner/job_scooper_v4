@@ -258,7 +258,7 @@ class ConfigInitializer
         $serviceContainer->checkVersion('2.0.0-dev');
         $serviceContainer->setAdapterClass($connKey, $dbConnSettings['adapter']);
         $manager = new \Propel\Runtime\Connection\ConnectionManagerSingle();
-        $manager->setConfiguration(array(
+        $dbconfig = array(
             'dsn'         => $dbConnSettings['dsn'],
             'user'        => $dbConnSettings['user'],
             'password'    => $dbConnSettings['password'],
@@ -271,7 +271,9 @@ class ConfigInitializer
                     0 => 'src',
                     1 => 'vendor',
                 ),
-        ));
+        );
+        Settings::setValue("db_config", $dbconfig);
+        $manager->setConfiguration($dbconfig);
         $manager->setName($connKey);
         $serviceContainer->setConnectionManager($connKey, $manager);
         $serviceContainer->setDefaultDatasource($connKey);

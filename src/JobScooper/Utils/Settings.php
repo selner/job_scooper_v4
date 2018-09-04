@@ -109,4 +109,30 @@ class Settings extends \Adbar\Dot
 
         return $valuesSet == $checkVal;
     }
+    
+    public static function get_db_dsn() {
+    	$cfg = self::getValue('db_config');
+    	if(is_empty_value($cfg)) {
+    		throw new \Exception('Could not find database configuration to use.');
+    	}
+    	$dsn = "";
+    	foreach($cfg as $k=>$v) {
+    		if(!is_array($v)) {
+    			if(in_array($k, ["classname"])) {
+                    continue;
+    			}
+    			elseif ($k === "dsn") {
+    				$dsn .= "{$v};";
+    			}
+    			else
+                {
+    			    $dsn .= "{$k}={$v};";
+    			}
+    			
+    		}
+    	}
+
+    	return $dsn;
+    	
+    }
 }
