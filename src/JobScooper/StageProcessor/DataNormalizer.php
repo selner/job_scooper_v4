@@ -20,7 +20,7 @@ use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\JobPostingQuery;
 use Exception;
 use JobScooper\Utils\PythonRunner;
-use Propel\Runtime\ActiveQuery\Criteria;
+use JobScooper\Utils\Settings;use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
 
@@ -55,7 +55,7 @@ class DataNormalizer
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         try {
-            $this->_findAndMarkRecentDuplicatePostings();
+            $this->_markDuplicatesViaPython();
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);
         } finally {
@@ -65,8 +65,29 @@ class DataNormalizer
         }
 
     }
+    
+    /**
+     * @throws \Exception
+     */
+    private function _markDuplicatesViaPython()
+	{
+	    try {
+	    	startLogSection('Calling python to dedupe new job postings...');
+			$runFile = 'pyJobNormalizer/mark_duplicates.py';
+			$params = [
+				'-c' => Settings::get_db_dsn()
+			];
+			
+			$results = PythonRunner::execScript($runFile, $params);
+	        LogMessage($results);
+			LogMessage('Python command call finished.');
 
-
+	    } catch (\Exception $ex) {
+	        handleException($ex, null, false);
+	    } finally {
+	    	EndLogSection('Completed new job posting dedupe.');
+	    }
+	}
 	   
     /**
      * @throws \Exception
