@@ -171,7 +171,9 @@ function getAllUserNotificationCounts($userNotificationState, $arrGeoLocIds=null
         ->addAsColumn('TotalNewUserJobMatches', 'COUNT(DISTINCT(UserJobMatch.UserJobMatchId))')
         ->addAsColumn('TotalNewJobPostings', 'COUNT(DISTINCT(UserJobMatch.JobPostingId))')
         ->select(array($sitekeyColumnName, 'TotalNewUserJobMatches', 'TotalNewJobPostings'))
-        ->groupBy(array($sitekeyColumnName));
+        ->groupBy(array($sitekeyColumnName))
+        ->orderBy("UserJobMatch.IsJobMatch", Criteria::DESC);
+    
     $results = $query->find()->getData();
 
     if (!empty($results) && !empty($sitekeyColumnName)) {
