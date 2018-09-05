@@ -170,56 +170,25 @@ class User extends BaseUser
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        if (array_key_exists('email', $arr)) {
-            $this->setEmailAddress($arr['email']);
-            unset($arr['email']);
-        }
-
-        if (array_key_exists('display_name', $arr)) {
-            $this->setName($arr['display_name']);
-            unset($arr['display_name']);
-        }
-
+    	$objKeys = \JobScooper\DataAccess\Map\UserTableMap::getFieldNames();
+    	$keyLookups = array();
+    	foreach($objKeys as $k) {
+    		$keyLookups[strtolower($k)] = $k;
+    		$keyLookups[$k] = $k;
+    	}
+		$keyLookups['email'] = 'EmailAddress';
+    	$keyLookups['display_name'] = 'Name';
+    	$keyLookups['keywords'] = 'SearchKeywords';
+    	$keyLookups['inputfiles'] = 'InputFiles';
+    	$keyLookups['notification_delay'] = 'NotificationFrequency';
+    	
+    	$arrToSet = array();
+    	
         foreach ($arr as $k => $v) {
-            switch (strtolower($k)) {
-                case 'email':
-                    $this->setEmailAddress($arr['email']);
-                    unset($arr['email']);
-                    break;
-
-                case 'display_name':
-                    $this->setName($arr['display_name']);
-                    unset($arr['display_name']);
-                    break;
-
-                case 'search_keywords':
-                case 'keywords':
-                    $this->setSearchKeywords($arr[strtolower($k)]);
-                    unset($arr[strtolower($k)]);
-                    break;
-
-                case 'search_locations':
-                    $this->setSearchLocations($arr['search_locations']);
-                    unset($arr['search_locations']);
-                    break;
-
-                case 'inputfiles':
-                    $this->_setConfigUserInputFiles($arr);
-                    unset($arr['inputfiles']);
-                    break;
-                    
-                case 'notification_delay':
-                    $this->setNotificationFrequency($arr['notification_delay']);
-                    unset($arr['notification_delay']);
-                    break;
-
-                default:
-                    $arr[ucwords($k)] = $v;
-                    unset($arr[$k]);
-            }
+            $arrToSet[$keyLookups[$k]] = $v;
         }
 
-        parent::fromArray($arr, $keyType);
+        parent::fromArray($arrToSet, $keyType);
     }
 
     /**
