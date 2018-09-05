@@ -107,7 +107,6 @@ class JobsMailSender
                 // hardcoded in the case where we were unable to load the email addresses for some reason
                 //
                 $this->phpmailer->addAddress('dev@bryanselner.com', 'JobScooper Deveopers');
-                $this->phpmailer->setFrom('dev@bryanselner.com', 'JobScooper Deveopers');
                 $this->phpmailer->addReplyTo('dev@bryanselner.com', 'JobScooper Deveopers');
             } else {
                 foreach ($alerts_users as $kind => $user) {
@@ -156,6 +155,11 @@ class JobsMailSender
                 }
             }
 
+            if(is_empty_value($this->phpmailer->From))
+            {
+	            $this->phpmailer->setFrom('dev@bryanselner.com', 'JobScooper Deveopers');
+            }
+
             $this->phpmailer->addReplyTo('dev@bryanselner.com', 'JobScooper Deveopers');
             $this->phpmailer->SMTPOptions = array(
                 'ssl' => array(
@@ -172,7 +176,7 @@ class JobsMailSender
             if (!empty($arrAttachFilePaths) && is_array($arrAttachFilePaths)) {
                 foreach ($arrAttachFilePaths as $attachPath) {
                     $fileinfo = new \SplFileInfo($attachPath);
-                    if ($fileinfo->getExtension() != 'XLSX') {
+                    if ($fileinfo->getExtension() !== 'XLSX') {
                         $zip = new \ZipArchive();
                         $zipPath = $fileinfo->getRealPath().'.zip';
                         $zip->open($zipPath, \ZipArchive::CREATE);
