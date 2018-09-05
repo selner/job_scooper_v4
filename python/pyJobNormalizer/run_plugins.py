@@ -17,9 +17,13 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-
+from docopt import docopt
+import os
 import sys
-import uuid
+import subprocess
+import datetime
+import codecs
+
 
 cli_usage = """
 Usage:
@@ -35,16 +39,6 @@ Options:
   --configdir=<string> directory location for user configuration files
   --outdir=<string> directory to use for output
 """
-
-from docopt import docopt
-
-
-import os
-import sys
-import subprocess
-import datetime
-import codecs
-
 
 
 def getPluginFiles():
@@ -112,8 +106,8 @@ def save_run_log(outpath=None, plugin=None, textdata=None, encoding='utf-8'):
     :return: the path of the file
     """
 
-    file = "{}_run.log".format(plugin)
-    outfile = os.path.join(outpath, file)
+    logfile = "{}_run.log".format(plugin)
+    outfile = os.path.join(outpath, logfile)
     try:
         f = codecs.open(outfile, encoding=encoding, mode='w+')
         f.write(textdata)
@@ -127,8 +121,6 @@ if __name__ == '__main__':
     print " ".join(sys.argv)
     arguments = docopt(cli_usage, version='0.1.1rc')
     print ("Run Plugins called with arguments: " + str(arguments))
-    
-    import processfile
 
     userKey = arguments['--user']
 
@@ -160,12 +152,3 @@ if __name__ == '__main__':
             print("Running plugins for config file {}".format(nextcfg))
             for plugin in plugs:
                 runPluginForUser(plugin, nextcfg, outdir, stages)
-
-
-# return (stdout.decode("utf-8"), p.returncode)
-
-    # print root, "consumes",
-    # print sum(getsize(join(root, name)) for name in files),
-    # print "bytes in", len(files), "non-directory files"
-    # if 'CVS' in dirs:
-    #     dirs.remove('CVS')  # don't visit CVS directories
