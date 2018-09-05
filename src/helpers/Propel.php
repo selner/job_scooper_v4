@@ -15,7 +15,7 @@
  * under the License.
  */
 
-define('MAX_RESULTS_PER_PAGE', 2500);
+define('MAX_RESULTS_PER_PAGE', 1500);
 
 /******************************************************************************
  *
