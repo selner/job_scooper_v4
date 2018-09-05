@@ -1,17 +1,37 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: bryan
- * Date: 5/31/18
- * Time: 4:41 PM
+ * Copyright 2014-18 Bryan Selner
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License'); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  */
+
 
 namespace JobScooper\Utils;
 
 
+/**
+ * Class PythonRunner
+ * @package JobScooper\Utils
+ */
 class PythonRunner {
 
 	
+	/**
+	 * @param $python_file
+	 * @param array $script_params
+	 * @return null|string
+	 * @throws \Exception
+	*/
 	static function execScript($python_file, $script_params=array()) {
 		$results = null;
 		
@@ -34,9 +54,10 @@ class PythonRunner {
         } catch (\Exception $ex) {
             throw $ex;
         } finally {
-        	return $results;
+            LogMessage($results);
         }
-        
+
+        return $results;
         
 	}
 }

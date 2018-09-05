@@ -252,9 +252,6 @@ function doExec($cmd)
     $lastResultLine = null;
     $lastOutput = exec($cmd, $cmdArrOutput, $cmdRet);
     $cmdStrOutput = implode(PHP_EOL, $cmdArrOutput);
-    if ($cmdRet !== 0) {
-        throw new Exception("Command '{$cmd}' returned non-zero result code.  Output: {$cmdStrOutput}");
-    }
 
     foreach ($cmdArrOutput as $resultLine) {
         LogMessage($resultLine);
@@ -266,7 +263,10 @@ function doExec($cmd)
     }
 
     LogMessage("Command '{$cmd}' returned code={$cmdRet}; last_line='{$lastOutput}'.");
-
+ 
+    if ($cmdRet !== 0) {
+        throw new Exception("Command '{$cmd}' returned non-zero result code.  Output: {$cmdStrOutput}");
+    }
 
     return $lastOutput;
 }
