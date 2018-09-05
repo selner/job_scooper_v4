@@ -879,16 +879,16 @@ JSCODE;
             }
 
             $newVal = DomItemParser::getTagValue($node, $this->arrListingTagSetup[$itemKey], $item, $this);
-            if (!empty($newVal)) {
+            if (!is_empty_value($newVal)) {
                 $item[$itemKey] = $newVal;
             }
         }
 
-        if (empty($item['Title']) || 0 == strcasecmp($item['Title'], 'title')) {
+        if (is_empty_value($item['Title']) || 0 == strcasecmp($item['Title'], 'title')) {
             return null;
         }
 
-        if (empty($item['JobSiteKey'])) {
+        if (is_empty_value($item['JobSiteKey'])) {
             $item['JobSiteKey'] = $this->JobSiteName;
         }
 
