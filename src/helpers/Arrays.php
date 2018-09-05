@@ -560,8 +560,9 @@ function getEmptyJobListingRecord()
         'Title' => '',
         'Url' => '',
         'Location' => '',
-        'Category' => '',
         'PostedAt' =>'',
+        'Category' => '',
+        'PayRange' =>'',
         'EmploymentType' => '',
     );
 }
