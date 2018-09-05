@@ -295,7 +295,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 					            	});
 					            }
 					        }
-					        $parsedUrl['query'] = Url::build($queryArgs);
+					        $parsedUrl['query'] = urldecode(Url::build($queryArgs));
 		                    $strURL = Url::buildAll($parsedUrl);
                         }
                         else {
