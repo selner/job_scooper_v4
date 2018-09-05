@@ -147,7 +147,7 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
         self.load_from_database()
 
     def load_from_database(self):
-        backwardsdate = datetime.now() - timedelta(days=2)
+        backwardsdate = datetime.now() - timedelta(days=14)
 
         print("Connecting to database...")
 
