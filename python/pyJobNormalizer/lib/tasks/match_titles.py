@@ -105,6 +105,7 @@ class TaskMatchJobsToKeywords:
                 if (JSON_KEY_JOBMATCHES in self.input_data and isinstance(self.input_data[JSON_KEY_JOBMATCHES], dict) and len(
                         self.input_data[JSON_KEY_JOBMATCHES]) > 0):
                     self.jobs = self.input_data[JSON_KEY_JOBMATCHES]
+                    print("Loaded {} jobs for matching.".format(len(self.input_data[JSON_KEY_JOBMATCHES])))
 
                     tokenizer = Tokenizer()
                     self.jobs = tokenizer.tokenizeStrings(self.jobs, u'Title', u'TitleTokens', u'set')
