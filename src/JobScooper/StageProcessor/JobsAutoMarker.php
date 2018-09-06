@@ -450,11 +450,14 @@ class JobsAutoMarker
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    private function _exportJobMatchesToJson($basefile, $collJobList)
+    private function _exportJobMatchesToJson($basefile, &$collJobList)
     {
 		try {
-            $arrJobItems = flattenChildren($collJobList, 'UserJobMatchId');
-
+			$arrJobItems = collectionToArray($collJobList, ['UserJobMatchId', 'JobPostingId', 'Title', 'MatchedUserKeywords', 'MatchedNegativeTitleKeywords'] );
+            $arrJobItems = array_column($arrJobItems, null, 'UserJobMatchId');
+            
+            $jobItems = null;
+            
 	        $searchKeywords = array();
 	        $keywords = $this->_markingUserFacts['SearchKeywords'];
 	        if (is_empty_value($keywords)) {
@@ -478,6 +481,8 @@ class JobsAutoMarker
 	    } finally {
 	        $arrJobItems = null;
 	        $jsonObj = null;
+	        $jobItems = null;
+
 	    }
         
         return $outfile;
@@ -516,7 +521,7 @@ class JobsAutoMarker
      * and updates the database with the values for each record
      *
      * @param String $datafile The input json file to load
-     * @param UserJobMatch[] &$arrJobsList the job list to update from json
+     * @param UserJobMatch[] &$collJobsList the job list to update from json
      *
      * @throws \Exception
      */
@@ -606,23 +611,23 @@ class JobsAutoMarker
     }
 
     /**
-     * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+     * @param \JobScooper\DataAccess\UserJobMatch[] $collJobsList
      * @throws \Exception
      */
-    private function _markJobsList_KeywordMatches_(&$arrJobsList)
+    private function _markJobsList_KeywordMatches_(&$collJobsList)
     {
-    	if(is_empty_value($arrJobsList)) {
+    	if(is_empty_value($collJobsList)) {
 	        LogWarning('Automarker: No jobs found to match against user search keywords.');
 	        return;
     	}
 
-        startLogSection('Automarker: Starting matching of ' .  \count($arrJobsList) . ' job role titles against user search keywords ...');
+        startLogSection('Automarker: Starting matching of ' .  \count($collJobsList) . ' job role titles against user search keywords ...');
 
         try {
             $basefile = 'mark_titlematches';
 
-            LogMessage('Exporting ' . \count($arrJobsList) . " user job matches to JSON file '{$basefile}_src.json' for matching...");
-            $sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $arrJobsList);
+            LogMessage('Exporting ' . \count($collJobsList) . " user job matches to JSON file '{$basefile}_src.json' for matching...");
+            $sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $collJobsList);
             $resultsfile = generateOutputFileName("{$basefile}_results", 'json', true, 'debug');
 
             try {
@@ -637,7 +642,7 @@ class JobsAutoMarker
 				$results = PythonRunner::execScript($runFile, $params);
 				
                 LogMessage('Updating database with new match results...');
-                $this->_updateUserJobMatchesFromJson($resultsfile, $arrJobsList);
+                $this->_updateUserJobMatchesFromJson($resultsfile, $collJobsList);
             } catch (Exception $ex) {
                 throw $ex;
             } finally {
