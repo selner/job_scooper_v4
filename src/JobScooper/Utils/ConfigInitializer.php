@@ -101,6 +101,8 @@ class ConfigInitializer
             $rootOutputDir = parsePathDetailsFromString($outputpath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
             Settings::setValue('output_directories.root', $rootOutputDir->getPathname());
         }
+        
+        $this->parseCommandLineOverrides();
 
         $this->setupPropelForRun();
 
@@ -281,7 +283,7 @@ class ConfigInitializer
     }
 
     /**
-     * @throws \Propel\Runtime\Exception\PropelException
+     * @throws \Exception
      */
     private function setupPropelLogging()
     {
@@ -343,6 +345,29 @@ class ConfigInitializer
         LogMessage('Loading plugin setup information from config file...');
 
         Settings::setValue('plugin_settings', $this->getSetting('plugin_settings'));
+    }
+
+    /**
+     *
+     */
+    private function parseCommandLineOverrides()
+    {
+        LogMessage('Loading any command line overrides from config file...');
+		$overrides = $this->getSetting('command_line_overrides');
+		if(!is_empty_value($overrides)) {
+			foreach($overrides as $k => $v) {
+				if(!is_empty_value($v)) {
+					$cmdKey = 'command_line_args.'.strtolower($k);
+					
+					$orig = Settings::getValue($cmdKey);
+					if(\is_array($orig) && \is_string($v)) {
+						$v = explode(',', $v);
+					}
+			        LogMessage("Overriding command line setting for {$k}={$orig} with config file value '{$v}'");
+			        Settings::setValue($cmdKey, $v );
+				}
+			}
+		}
     }
 
     /**
