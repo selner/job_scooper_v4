@@ -403,13 +403,19 @@ function collectionToArray($coll, $limitToKeys=null)
     }
 
     $ret = array_map(function ($v) use ($limitToKeys) {
-        $arrV = $v->toArray();
+        if(method_exists($v,'toFlatArrayForCsv')) {
+        	$arrV = $v->toFlatArrayForCsv();
+        }
+        else {
+	    	$arrV = $v->toArray();
+        }
+    	
         if (!empty($limitToKeys)) {
             return array_subset($arrV, $limitToKeys);
         }
 
         return $arrV;
-    }, $coll);
+    }, $coll->getArrayCopy());
 
     return $ret;
 }
