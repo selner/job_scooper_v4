@@ -215,10 +215,19 @@ class NotifierJobAlerts extends JobsMailSender
 	        $matches['all'] = $dbMatches->toArray('UserJobMatchId');
 	        // dump the full list of matches/excludes to JSON
 	        //
-	        LogMessage('Exporting ' . \count($matches['all']) . ' UserJobMatch objects to JSON for use in notifications...');
-	        $pathJsonMatches = getDefaultJobsOutputFileName('', 'user-job-matches', 'json', '_', 'debug');
-	        writeJson($matches['all'], $pathJsonMatches);
-	
+			try {
+		        LogMessage('Exporting ' . \count($matches['all']) . ' UserJobMatch objects to JSON for use in notifications...');
+		        $pathJsonMatches = getDefaultJobsOutputFileName('', 'user-job-matches', 'json', '_', 'debug');
+		        $jsonText = $dbMatches->toJSON($usePrefix=true, $includeLazyLoadColumns=true);
+		        file_put_text($jsonText, $pathJsonMatches);
+			}
+			catch (Exception $ex) {
+	            handleException($ex, null, false);
+			}
+			finally {
+		        unset($jsonText);
+			}
+
 	        LogMessage('Updating ' .  \count($matches['all']) . ' UserJobMatch array items for use in notifications...');
 	        
 	        $matches['all'] = flattenChildren($matches['all'], 'UserJobMatchId');

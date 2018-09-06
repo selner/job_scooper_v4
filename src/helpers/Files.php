@@ -63,7 +63,7 @@ function parsePathDetailsFromString($strFilePath, $flags = C__FILEPATH_NO_FLAGS)
         }
 
         if (isBitFlagSet($flags, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED) && !$f->isDir()) {
-            mkdir($f->getPathname(), 0777, true);
+            if (!mkdir($concurrentDirectory = $f->getPathname(), 0777, true) && !is_dir($concurrentDirectory)) { throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory)); }
         }
 
 
@@ -257,19 +257,28 @@ function utf8ize($mixed)
 * @param $filepath
 * @return string
 * @throws \Exception
-*/function writeJson(&$data, $filepath):string
+*/function file_put_text(&$strData, $filepath):string
 {
-    $jsonData = encodeJson($data);
-
     LogMessage("Writing data to json file " . $filepath);
-    if (file_put_contents($filepath, $jsonData, FILE_TEXT) === false) {
+    if (file_put_contents($filepath, $strData, FILE_TEXT) === false) {
         $err = error_get_last();
-        $errMsg = "Error:  Unable to save JSON results to file " . $filepath . " due to error   " . $err;
+        $errMsg = "Error:  Unable to save string data to file {$filepath} due to error:  {$err}";
         LogError($errMsg);
         throw new Exception($errMsg);
     }
 
     return $filepath;
+}
+
+/**
+* @param $data
+* @param $filepath
+* @return string
+* @throws \Exception
+*/function writeJson(&$data, $filepath):string
+{
+    $jsonData = encodeJson($data);
+    return file_put_text($jsonData, $filepath);
 }
 
 /**
