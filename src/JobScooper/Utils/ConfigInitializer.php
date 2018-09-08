@@ -505,12 +505,13 @@ class ConfigInitializer
             foreach ($config_users as $key_user => $config_user) {
                 $user_recs[$key_user] = UserQuery::create()
 		            ->filterByUserSlug(cleanupSlugPart($key_user))
-		            ->findOne()
-		            ->toArray();
-                if(null !== $user_recs[$key_user] && \is_array($user_recs[$key_user]))
+		            ->findOne();
+                if(null !== $user_recs[$key_user])
                 {
+					$user_recs[$key_user] = $user_recs[$key_user]->toArray();
                 	$userDiff = array_diff_assoc($config_user, $user_recs[$key_user]);
                 	if(!is_empty_value($userDiff)){
+	                    LogMessage("Updating user {$key_user} facts in database:  " . getArrayValuesAsString($userDiff));
     	                $updatedUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($key_user), $config_user, $overwriteFacts = true);
 		                if (null === $updatedUser) {
 		                    throw new \Exception('Failed to create or update user based on config section users.{$key_user}.');
@@ -518,6 +519,12 @@ class ConfigInitializer
 		                $user_recs[$key_user] = $updatedUser->toArray();
 		                $updatedUser = null;
 	            	}
+                }
+                else
+                {
+                    LogMessage("Creating new user {$key_user} in database...");
+                    $newUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($key_user), $config_user, $overwriteFacts = true);
+					$user_recs[$key_user] = $newUser->toArray();
                 }
 
             }
