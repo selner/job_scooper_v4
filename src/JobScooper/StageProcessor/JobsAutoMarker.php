@@ -54,7 +54,7 @@ class JobsAutoMarker
      */
     public function __construct()
     {
-        $this->_locmgr = GeoLocationManager::getLocationManager();
+        $this->_locmgr = GeoLocationManager::getInstance();
     }
 
     /**

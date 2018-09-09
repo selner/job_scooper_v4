@@ -304,7 +304,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
                 }
             }
 
-            $locmgr = GeoLocationManager::getLocationManager();
+            $locmgr = GeoLocationManager::getInstance();
 
             if (false === stripos($loc_str, " {$countryCode}")) {
                 $loc_str = "{$loc_str} {$countryCode}";

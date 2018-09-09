@@ -39,6 +39,8 @@
         "ext-json": "^1.5",
         "ext-PDO": "^7.1",
         "ext-zip": "^1.13"
+        "matthiasmullie/scrapbook": "dev-master",
+        "league/flysystem": "^1.1@dev"
     },
     "autoload": {
         "psr-4": {

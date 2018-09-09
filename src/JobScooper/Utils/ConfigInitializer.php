@@ -18,7 +18,6 @@ namespace JobScooper\Utils;
 
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserQuery;
-use JobScooper\DataAccess\GeoLocationManager;
 use JobScooper\DataAccess\JobSiteManager;
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Runtime\Exception\InvalidArgumentException;
@@ -189,25 +188,8 @@ class ConfigInitializer
         //
         new JobSiteManager();
 
-        $this->instantiateLocationManager();
         $this->parseSeleniumParameters();
     }
-
-    /**
-     * @return \JobScooper\DataAccess\GeoLocationManager
-     * @throws \Exception
-     */
-    private function instantiateLocationManager()
-    {
-        $cache = GeoLocationManager::getLocationManager();
-        if (null === $cache) {
-            GeoLocationManager::create();
-            $cache = GeoLocationManager::getLocationManager();
-        }
-
-        return $cache;
-    }
-
 
     /**
      *

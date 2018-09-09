@@ -530,4 +530,45 @@ class GeoLocation extends BaseGeoLocation
 
         return $this->format($locFormatString);
     }
+    /**
+     * @param $strAddress
+     *
+     * @return mixed|null|string|string[]
+     */
+    public static function scrubLocationValue($strAddress)
+    {
+        $lookupAddress = $strAddress;
+
+        // Strip out any zip code (aka a 5 digit set) from the string
+        //
+        // Most of the time when we see a zip, it is placed in one of these three cases:
+        //      Case 1  =  "Seattle WA 98102 (Cap Hill Area)"
+        //      Case 2  =  "Seattle WA 98102"
+        //      Case 3  =  "98102"
+        //
+        $zipSplits = preg_split("/\b\d{5}\b/", $lookupAddress);
+        if (count($zipSplits) === 1 && !empty(trim($zipSplits[0]))) {
+            $lookupAddress = $zipSplits[0];
+        }  // "Dallas Tx 55555" => "Dallas Tx"
+        elseif (count($zipSplits) === 2) {
+            $lookupAddress = str_ireplace(" area", "", $zipSplits[1]) . " " . $zipSplits[0];
+        } elseif (count($zipSplits) > 2) {
+            $lookupAddress = implode(" ", $zipSplits);
+        }
+
+        $lookupAddress = strip_punctuation($lookupAddress);
+
+        //
+        // if name is something like "Greater London" or
+        // "Greater Seattle Area", strip it down to just the
+        // place name
+        //
+        $lookupAddress = preg_replace("/greater\s(\w+\s)area/i", "\\1", $lookupAddress, -1);
+        $lookupAddress = preg_replace("/greater\s(\w+\s)/i", "\\1", $lookupAddress);
+        $lookupAddress = cleanupTextValue($lookupAddress);
+
+        $lookupAddress = preg_replace("/\s{2,}/", " ", $lookupAddress);
+        return $lookupAddress;
+    }
+
 }

@@ -301,11 +301,8 @@ class User extends BaseUser
             return ;
         }
 
-        $locmgr = GeoLocationManager::getLocationManager();
-        if (is_empty_value($locmgr)) {
-            GeoLocationManager::create();
-            $locmgr = GeoLocationManager::getLocationManager();
-        }
+        $locmgr = GeoLocationManager::getInstance();
+
         $searchGeoLocIds = array();
 
         foreach ($searchLocations as $lockey => $searchLoc) {
