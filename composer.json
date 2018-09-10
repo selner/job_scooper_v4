@@ -35,11 +35,11 @@
         "phpFastCache/phpFastCache": "6.1.1",
         "mk-j/php_xlsxwriter": "~0.37",
         "digiaonline/common-sanitization-stages": "~1.1",
-        "hassankhan/config": "dev-master",
+        "hassankhan/config": "~1.1",
         "ext-json": "^1.5",
         "ext-PDO": "^7.1",
-        "ext-zip": "^1.13"
-        "matthiasmullie/scrapbook": "dev-master",
+        "ext-zip": "^1.13",
+        "matthiasmullie/scrapbook": "^1.4.6",
         "league/flysystem": "^1.1@dev"
     },
     "autoload": {
