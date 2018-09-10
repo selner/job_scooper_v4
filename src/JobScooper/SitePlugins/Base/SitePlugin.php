@@ -1146,6 +1146,21 @@ JSCODE;
         $ex = null;
 
         try {
+        	
+        	$searchpair = $searchDetails->getUserSearchPairFromUSSR();
+		    
+        	$loc = $searchpair->getGeoLocationFromUS();
+		    if (!is_empty_value($loc)) {
+		    	$searchBias = [
+	                'loc_lat' => $loc->getLatitude(),
+	                'loc_long' => $loc->getLongitude(),
+		    		'loc_radius' => 10000
+		    	];
+		    	Settings::setValue('active_location_search_bias', $searchBias);
+		    }
+
+        	unset($searchpair);
+        	unset($loc);
 
             // get the url for the first page/items in the results
             if ($this->_checkInvalidURL_($searchDetails, $searchDetails->getSearchStartUrl()) == self::VALUE_NOT_SUPPORTED) {
