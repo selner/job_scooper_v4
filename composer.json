@@ -48,11 +48,5 @@
         "files": [
             "src/helpers/autoload.php"
         ]
-    },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/selner/Config"
-        }
-    ]
+    }
 }
