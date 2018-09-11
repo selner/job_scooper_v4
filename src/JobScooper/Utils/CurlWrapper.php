@@ -239,7 +239,7 @@ class CurlWrapper
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         /* If the document has loaded successfully without any redirection or error */
         if ($httpCode < 200 || $httpCode >= 400) {
-            $strErr = 'CURL received an HTTP error #'. $httpCode;
+            $strErr = "CURL HTTP error #{$httpCode} retrieving {$curl_object['input_url']}";
             $curl_object['http_error_number'] = $httpCode;
             $curl_object['error_number'] = -1;
             curl_close($ch);
