@@ -17,19 +17,43 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\Traits\Singleton;
+use JobScooper\Logging\CSVLogFormatter;
+use JobScooper\Logging\CSVLogHandler;use JobScooper\Traits\Singleton;
 use JobScooper\Utils\CurlWrapper;
 use JobScooper\Utils\Settings;
+use Monolog\Logger;
 
 class LocationCache {
 	use Singleton;
 	private $_cache = null;
+
+	/**
+	 * @return null
+	 */
+	public  function getCache(){
+	    return $this->_cache;
+	}
+	/**
+	 * @param null $cache
+	 */
+	public  function setCache($cache):void {
+	    $this->_cache = $cache;
+	}
+
 	private $_geoapi_srvr = null;
+	private $_loggerName = 'geocode_api_calls';
 	
+	/* @var \Monolog\Logger */
+	private $logger = null;
+	
+    /**
+     * @throws \Exception
+     */
 	protected function init(){
 
+		$this->_initializeLogger();
 		// create Flysystem object
-        $cachedir = getOutputDirectory('cache') . DIRECTORY_SEPARATOR . self::class;
+        $cachedir = getOutputDirectory('reusable_caches') . DIRECTORY_SEPARATOR . 'geocode_api_calls';
 
 		$adapter = new \League\Flysystem\Adapter\Local($cachedir, LOCK_EX);
 		$filesystem = new \League\Flysystem\Filesystem($adapter);
@@ -44,27 +68,110 @@ class LocationCache {
 
 	}
 
+    /**
+     * @throws \Exception
+     */
+    private function _initializeLogger()
+    {
+        $this->loggerName = 'geocode_calls';
+        $logger = new Logger($this->_loggerName);
+        $now = getNowAsString('-');
+        $csvlog = getOutputDirectory('logs') . DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}.csv";
+        $fpcsv = fopen($csvlog, 'w');
+        $csvHandler = new CSVLogHandler($fpcsv, LOG_INFO, $bubble = false, $this->getLogContextKeys());
+        $fmtr = new CSVLogFormatter();
+        $csvHandler->setFormatter($fmtr);
+        $logger->pushHandler($csvHandler);
 
-	public function lookup($str, $args=[]) {
+        $logger->addNotice("Initialized log", array_fill_keys($this->getLogContextKeys(), ""));
 		
-		$scrubbed = GeoLocation::scrubLocationValue($str);
-		$cachehit = $this->_cache->get($scrubbed); // returns 'value'
-		if($cachehit !== false && !is_empty_value($cachehit)) {
-			return $cachehit;
-		}
-		
-		if(!\is_array($args)) {
-			$args = [];
-		}
-		$args['query'] = $scrubbed;
-		
-		$apiresult = $this->_callApi($args);
-		if(!is_empty_value($apiresult)) {
-			$this->_cache->set($scrubbed, $apiresult); // returns 'value'
+        LogMessage("Geocode API logging started to CSV file at {$csvlog}");
 
-		}
+        $this->logger = $logger;
+        
+    }
+
+
+	/**
+	* @param $str
+	* @param array $args
+    *
+    * @return \JobScooper\DataAccess\GeoLocation|null
+	* @throws \Exception
+	*/
+	public function lookup($str, $args=[])
+	{
+		$scrubbed = null;
+		$cacheSlug = null;
+		$cachehit = null;
+		$apiresult = null;
 		
-		return $apiresult;
+		try {
+		
+			$scrubbed = GeoLocation::scrubLocationValue($str);
+			$cacheSlug = cleanupSlugPart($scrubbed);
+			$cachehit = $this->_cache->get($cacheSlug); // returns 'value'
+			if($cachehit !== false && !is_empty_value($cachehit)) {
+				return $cachehit;
+			}
+			
+			if(!\is_array($args)) {
+				$args = [];
+			}
+			$args['query'] = $scrubbed;
+			
+			$apiresult = $this->_callApi($args);
+			if(!is_empty_value($apiresult)) {
+				$this->_cache->set($cacheSlug, $apiresult); // returns 'value'
+			}
+			
+			return $apiresult;
+		}
+		catch (\Exception $ex) {
+			handleException($ex);
+		}
+		finally {
+				$msg = "Unknown geoloc state for {$scrubbed}";
+				$geolocid = null;
+				$geolockey = null;
+				if($cachehit !== false && !is_empty_value($cachehit)) {
+					$msg = "Geolocation cache hit found for {$cacheSlug}";
+					$geolocid = $cachehit->getGeoLocationId();
+					$geolockey = $cachehit->getGeoLocationKey();
+					$hitresult = "CACHE_HIT";
+				}
+				elseif (!is_empty_value($apiresult)) {
+					$msg = "Geolocation api result found for {$scrubbed}";
+					$hitresult = "API_HIT";
+					$geolocid = $cachehit->getGeoLocationId();
+					$geolockey = $cachehit->getGeoLocationKey();
+				}
+				else {
+					$msg = "Failed to find geolocation for {$scrubbed}";
+					$hitresult = "FAILED_LOOKUP";
+				}
+
+				$context = array(
+					'query' => str_replace(',', '\,', $str),
+					'scrubbed' => $scrubbed,
+					'cachekey' => $cacheSlug,
+					'hitresult' => $hitresult,
+					'geolocationid' => $geolocid,
+					'geolocationkey' => $geolockey
+				);
+				$this->logger->info($msg, $context);
+		}
+	}
+	
+	private function getLogContextKeys() {
+				return array(
+					'query',
+					'scrubbed',
+					'cachekey',
+					'hitresult',
+					'geolocationid',
+					'geolocationkey'
+				);
 	}
 	
 	private function _callApi($args) {
@@ -79,7 +186,7 @@ class LocationCache {
             $curl = new CurlWrapper();
 			LogDebug("Calling Geocode API: { $url }");
             $response = $curl->cURL($url);
-            if($response['http_code'] < 300 && array_key_exists('body',$response)) {
+            if($response['http_code'] < 300 && array_key_exists('body', $response)) {
 	            if(!is_empty_value($response['body'])) {
 	                $resdata = decodeJson($response['body']);
 	                $geoloc = new GeoLocation();

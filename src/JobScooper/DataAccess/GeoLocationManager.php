@@ -31,82 +31,31 @@ class GeoLocationManager
 {
 	use Singleton;
 	private $_inst = null;
-	
-    /**
-     * @var int
-     */
-    private $countGeocodeErrors = 0;
-    /**
-     * @var int
-     */
-    private $countGeocodeCalls = 0;
 
     /**
      * @var Geocoder
     */
     private $_geocache = null;
 
-
     /**
-     * @var \Monolog\Logger|null
-     */
-    protected $logger = null;
-    /**
-     * @var null
-     */
-    private $loggerName = null;
-
-
-    /**
-     * @return GeoLocationManager
      * @throws \Exception
      */
-
     public function init() {
     	
-        if(is_empty_value($this->logger)) {
-	        $this->_initializeLogger();
-        }
-
         if(is_empty_value($this->_geocache)) {
 	    	$this->_geocache = LocationCache::getInstance();
-	    }
-	    
-	    if(is_empty_value($this->_geocache)) {
 	    }
 	    
     }
  
     /**
      * @throws \Exception
-     */
-    private function _initializeLogger()
-    {
-        $this->loggerName = 'geocode_calls';
-        $logger = new Logger($this->loggerName);
-        $now = getNowAsString('-');
-        $csvlog = getOutputDirectory('logs') . DIRECTORY_SEPARATOR . "{$this->loggerName}-{$now}-geocode_api_calls.csv";
-        $fpcsv = fopen($csvlog, 'w');
-        $handler = new CSVLogHandler($fpcsv, Logger::INFO);
-        $logger->pushHandler($handler);
-
-        LogMessage("Geocode API logging started to CSV file at {$csvlog}");
-
-        $this->logger = $logger;
-        
-    }
-
-    /**
-     * @throws \Exception
      * @return GeoLocation|null
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function lookupAddress($strAddress): ?GeoLocation
     {
-    	$loccache = LocationCache::getInstance();
-    	
         try {
-	        $geoloc = $loccache->lookup($strAddress);
+	        $geoloc = $this->_geocache->lookup($strAddress);
 	        if(null === $geoloc){
 	            throw new \InvalidArgumentException("Error:  Geocoder returned a null location for {$strAddress}.");
 	        }

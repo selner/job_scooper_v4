@@ -147,6 +147,13 @@ class ConfigInitializer
             $arrOututDirs[$d] = realpath($details->getPathname());
         }
 
+        $globalDirs = ['reusable_caches'];
+        foreach ($globalDirs as $d) {
+            $path = implode(DIRECTORY_SEPARATOR, array($outputDirectory, 'reusable_caches'));
+            $details = parsePathDetailsFromString($path, \C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+            $arrOututDirs[$d] = realpath($details->getPathname());
+        }
+
         Settings::setValue('output_directories', $arrOututDirs);
 
         Settings::setValue('logging', $this->getSetting('logging'));
