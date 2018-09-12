@@ -143,8 +143,8 @@ class LocationCache {
 				elseif (!is_empty_value($apiresult)) {
 					$msg = "Geolocation api result found for {$scrubbed}";
 					$hitresult = "API_HIT";
-					$geolocid = $cachehit->getGeoLocationId();
-					$geolockey = $cachehit->getGeoLocationKey();
+					$geolocid = $apiresult->getGeoLocationId();
+					$geolockey = $apiresult->getGeoLocationKey();
 				}
 				else {
 					$msg = "Failed to find geolocation for {$scrubbed}";
