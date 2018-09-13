@@ -176,9 +176,21 @@ class LocationCache {
 	
 	private function _callApi($args) {
 	        
-            $locbias = Settings::getValue("active_location_search_bias");
-            if(!is_empty_value($locbias) && is_array($locbias)) {
-            	$args = array_merge($args, $locbias);
+            $searchBias = Settings::getValue("active_location_search_bias");
+            if(!is_empty_value($searchBias) && is_array($searchBias)) {
+	            $searchloc = Settings::getValue("active_location_search");
+	            if(!is_empty_value($searchloc) && is_array($searchloc)) {
+			        $searchBias = [
+		                'loc_lat' => $searchloc['latitude'],
+		                'loc_long' => $searchloc['longitude'],
+			            'loc_radius' => 10000
+			        ];
+			        Settings::setValue('active_location_search_bias', $searchBias);
+	
+	            }
+            }
+            if (!is_empty_value($searchBias)) {
+	            $args = array_merge($args, $searchBias);
             }
 			
             $querystring = http_build_query($args);

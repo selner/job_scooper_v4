@@ -1151,12 +1151,7 @@ JSCODE;
 		    
         	$loc = $searchpair->getGeoLocationFromUS();
 		    if (!is_empty_value($loc)) {
-		    	$searchBias = [
-	                'loc_lat' => $loc->getLatitude(),
-	                'loc_long' => $loc->getLongitude(),
-		    		'loc_radius' => 10000
-		    	];
-		    	Settings::setValue('active_location_search_bias', $searchBias);
+		        Settings::setValue('active_search_location', $loc->toArray());
 		    }
 
         	unset($searchpair);
