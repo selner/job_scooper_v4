@@ -176,16 +176,16 @@ class LocationCache {
 	
 	private function _callApi($args) {
 	        
-            $searchBias = Settings::getValue("active_location_search_bias");
-            if(!is_empty_value($searchBias) && is_array($searchBias)) {
-	            $searchloc = Settings::getValue("active_location_search");
+            $searchBias = Settings::getValue("active_search_location_bias");
+            if(is_empty_value($searchBias) || !is_array($searchBias)) {
+	            $searchloc = Settings::getValue("active_search_location");
 	            if(!is_empty_value($searchloc) && is_array($searchloc)) {
 			        $searchBias = [
-		                'loc_lat' => $searchloc['latitude'],
-		                'loc_long' => $searchloc['longitude'],
+		                'loc_lat' => $searchloc['Latitude'],
+		                'loc_long' => $searchloc['Longitude'],
 			            'loc_radius' => 10000
 			        ];
-			        Settings::setValue('active_location_search_bias', $searchBias);
+			        Settings::setValue('active_search_location_bias', $searchBias);
 	
 	            }
             }
