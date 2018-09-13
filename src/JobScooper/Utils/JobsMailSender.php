@@ -102,12 +102,15 @@ class JobsMailSender
             }
 
             $alerts_users = \JobScooper\Utils\Settings::getValue('alerts.' . $emailKind);
+            $fMissingFrom = true;
             if (empty($alerts_users)) {
                 //
                 // hardcoded in the case where we were unable to load the email addresses for some reason
                 //
-                $this->phpmailer->addAddress('dev@bryanselner.com', 'JobScooper Deveopers');
-                $this->phpmailer->addReplyTo('dev@bryanselner.com', 'JobScooper Deveopers');
+                $this->phpmailer->addAddress('dev@bryanselner.com', 'JobScooper Developers');
+                $this->phpmailer->addReplyTo('dev@bryanselner.com', 'JobScooper Developers');
+                $this->phpmailer->setFrom("dev@bryanselner.com", "JobScooper Errors");
+                $fMissingFrom = false;
             } else {
                 foreach ($alerts_users as $kind => $user) {
                     $email = null;
@@ -133,6 +136,7 @@ class JobsMailSender
 
                         case 'from':
                             $this->phpmailer->setFrom($email, $name);
+			                $fMissingFrom = false;
                             break;
 
                         case 'cc':
@@ -155,7 +159,7 @@ class JobsMailSender
                 }
             }
 
-            if(is_empty_value($this->phpmailer->From))
+            if(is_empty_value($this->phpmailer->From) || $fMissingFrom === true)
             {
 	            $this->phpmailer->setFrom('dev@bryanselner.com', 'JobScooper Deveopers');
             }
