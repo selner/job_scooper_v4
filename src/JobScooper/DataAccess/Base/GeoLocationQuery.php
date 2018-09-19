@@ -31,7 +31,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocationQuery orderByCountryCode($order = Criteria::ASC) Order by the countrycode column
  * @method     ChildGeoLocationQuery orderByLatitude($order = Criteria::ASC) Order by the latitude column
  * @method     ChildGeoLocationQuery orderByLongitude($order = Criteria::ASC) Order by the longitude column
- * @method     ChildGeoLocationQuery orderByAlternateNames($order = Criteria::ASC) Order by the alternate_names column
  *
  * @method     ChildGeoLocationQuery groupByGeoLocationId() Group by the geolocation_id column
  * @method     ChildGeoLocationQuery groupByDisplayName() Group by the display_name column
@@ -44,7 +43,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocationQuery groupByCountryCode() Group by the countrycode column
  * @method     ChildGeoLocationQuery groupByLatitude() Group by the latitude column
  * @method     ChildGeoLocationQuery groupByLongitude() Group by the longitude column
- * @method     ChildGeoLocationQuery groupByAlternateNames() Group by the alternate_names column
  *
  * @method     ChildGeoLocationQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildGeoLocationQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -89,8 +87,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocation findOneByCountry(string $country) Return the first ChildGeoLocation filtered by the country column
  * @method     ChildGeoLocation findOneByCountryCode(string $countrycode) Return the first ChildGeoLocation filtered by the countrycode column
  * @method     ChildGeoLocation findOneByLatitude(double $latitude) Return the first ChildGeoLocation filtered by the latitude column
- * @method     ChildGeoLocation findOneByLongitude(double $longitude) Return the first ChildGeoLocation filtered by the longitude column
- * @method     ChildGeoLocation findOneByAlternateNames(array $alternate_names) Return the first ChildGeoLocation filtered by the alternate_names column *
+ * @method     ChildGeoLocation findOneByLongitude(double $longitude) Return the first ChildGeoLocation filtered by the longitude column *
 
  * @method     ChildGeoLocation requirePk($key, ConnectionInterface $con = null) Return the ChildGeoLocation by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOne(ConnectionInterface $con = null) Return the first ChildGeoLocation matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -106,7 +103,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocation requireOneByCountryCode(string $countrycode) Return the first ChildGeoLocation filtered by the countrycode column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOneByLatitude(double $latitude) Return the first ChildGeoLocation filtered by the latitude column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOneByLongitude(double $longitude) Return the first ChildGeoLocation filtered by the longitude column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildGeoLocation requireOneByAlternateNames(array $alternate_names) Return the first ChildGeoLocation filtered by the alternate_names column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildGeoLocation[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildGeoLocation objects based on current ModelCriteria
  * @method     ChildGeoLocation[]|ObjectCollection findByGeoLocationId(int $geolocation_id) Return ChildGeoLocation objects filtered by the geolocation_id column
@@ -120,7 +116,6 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildGeoLocation[]|ObjectCollection findByCountryCode(string $countrycode) Return ChildGeoLocation objects filtered by the countrycode column
  * @method     ChildGeoLocation[]|ObjectCollection findByLatitude(double $latitude) Return ChildGeoLocation objects filtered by the latitude column
  * @method     ChildGeoLocation[]|ObjectCollection findByLongitude(double $longitude) Return ChildGeoLocation objects filtered by the longitude column
- * @method     ChildGeoLocation[]|ObjectCollection findByAlternateNames(array $alternate_names) Return ChildGeoLocation objects filtered by the alternate_names column
  * @method     ChildGeoLocation[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
  */
@@ -219,7 +214,7 @@ abstract class GeoLocationQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT geolocation_id, display_name, geolocation_key, place, county, region, regioncode, country, countrycode, latitude, longitude, alternate_names FROM geolocation WHERE geolocation_id = :p0';
+        $sql = 'SELECT geolocation_id, display_name, geolocation_key, place, county, region, regioncode, country, countrycode, latitude, longitude FROM geolocation WHERE geolocation_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -630,87 +625,6 @@ abstract class GeoLocationQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(GeoLocationTableMap::COL_LONGITUDE, $longitude, $comparison);
-    }
-
-    /**
-     * Filter the query on the alternate_names column
-     *
-     * @param     array $alternateNames The values to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildGeoLocationQuery The current query, for fluid interface
-     */
-    public function filterByAlternateNames($alternateNames = null, $comparison = null)
-    {
-        $key = $this->getAliasedColName(GeoLocationTableMap::COL_ALTERNATE_NAMES);
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            foreach ($alternateNames as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_SOME) {
-            foreach ($alternateNames as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addOr($key, $value, Criteria::LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::LIKE);
-                }
-            }
-
-            return $this;
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            foreach ($alternateNames as $value) {
-                $value = '%| ' . $value . ' |%';
-                if ($this->containsKey($key)) {
-                    $this->addAnd($key, $value, Criteria::NOT_LIKE);
-                } else {
-                    $this->add($key, $value, Criteria::NOT_LIKE);
-                }
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(GeoLocationTableMap::COL_ALTERNATE_NAMES, $alternateNames, $comparison);
-    }
-
-    /**
-     * Filter the query on the alternate_names column
-     * @param     mixed $alternateNames The value to use as filter
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::CONTAINS_ALL
-     *
-     * @return $this|ChildGeoLocationQuery The current query, for fluid interface
-     */
-    public function filterByAlternateName($alternateNames = null, $comparison = null)
-    {
-        if (null === $comparison || $comparison == Criteria::CONTAINS_ALL) {
-            if (is_scalar($alternateNames)) {
-                $alternateNames = '%| ' . $alternateNames . ' |%';
-                $comparison = Criteria::LIKE;
-            }
-        } elseif ($comparison == Criteria::CONTAINS_NONE) {
-            $alternateNames = '%| ' . $alternateNames . ' |%';
-            $comparison = Criteria::NOT_LIKE;
-            $key = $this->getAliasedColName(GeoLocationTableMap::COL_ALTERNATE_NAMES);
-            if ($this->containsKey($key)) {
-                $this->addAnd($key, $alternateNames, $comparison);
-            } else {
-                $this->addAnd($key, $alternateNames, $comparison);
-            }
-            $this->addOr($key, null, Criteria::ISNULL);
-
-            return $this;
-        }
-
-        return $this->addUsingAlias(GeoLocationTableMap::COL_ALTERNATE_NAMES, $alternateNames, $comparison);
     }
 
     /**

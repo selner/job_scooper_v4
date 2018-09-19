@@ -215,42 +215,42 @@ class GeoLocation extends BaseGeoLocation
         }
         parent::setCountryCode($value);
     }
-
-
-    public function updateDisplayName()
+    
+    public function setAutoPopulatedFields()
     {
         $dispVal = '';
+        $keyVal = '';
 
         if (!empty($this->getPlace())) {
             $dispVal = '%L';
+            $keyVal = '%L';
+        }
+        elseif (!empty($this->getCounty())) {
+            $dispVal = '%A2';
+            $keyVal = '%A2';
         }
 
-        if ($this->getCountryCode() == 'US') {
+        if ($this->getCountryCode() === 'US') {
             if (!empty($this->getRegionCode())) {
                 $dispVal .= ' %r %c';
+	            $keyVal = '%c_%r_' . $keyVal;
             } else {
                 $dispVal .= ' %c';
+	            $keyVal = '%c_%R_' . $keyVal;
             }
         } else {
             if (!empty($this->getRegion())) {
                 $dispVal .= ' %R %c';
+	            $keyVal = '%c_%R_' . $keyVal;
             } else {
                 $dispVal .= ' %c';
+	            $keyVal = '%c_' . $keyVal;
             }
         }
 
-        $this->setDisplayName($this->format($dispVal));
-    }
+        $this->setDisplayName(trim($this->format($dispVal)));
 
-    public function setAutoPopulatedFields()
-    {
-        $this->updateDisplayName();
-
-        $this->setGeoLocationKey(strtolower($this->format('%c_%r_%L')));
-
-        if ($this->isNew()) {
-            $this->setAlternateNames($this->getVariants());
-        }
+        $this->setGeoLocationKey(strtolower($this->format($keyVal)));
     }
 
     public function preSave(ConnectionInterface $con = null)
@@ -312,26 +312,6 @@ class GeoLocation extends BaseGeoLocation
         }
     }
 
-    public function addAlternateNames($value)
-    {
-        if (null !== $value && is_array($value)) {
-            $names = $value;
-        } else {
-            $names = preg_split('/\s*\|\s*/', $value, $limit = -1, PREG_SPLIT_NO_EMPTY);
-        }
-        foreach ($names as $name) {
-            $this->addAlternateName($name);
-        }
-    }
-
-    public function setAlternateNames($value)
-    {
-        if (null !== $value && is_array($value)) {
-            $value = array_unique($value);
-        }
-        parent::setAlternateNames($value);
-    }
-
 
     public function fromGeocode($geocode)
     {
@@ -355,15 +335,6 @@ class GeoLocation extends BaseGeoLocation
 
                 case 'city':
                     $arrVals['place'] = $geocode['city'];
-                    break;
-
-                case 'alternate_names':
-                    $names = $this->getAlternateNames();
-                    $arrVals['alternate_names'] = $geocode['alternate_names'];
-                    if (null === $names || \count($names) == 0) {
-                        $mergednames = array_merge($arrVals['alternate_names'], $names);
-                        $arrVals['alternate_names'] = array_unique($mergednames);
-                    }
                     break;
 
                 default:
@@ -421,24 +392,25 @@ class GeoLocation extends BaseGeoLocation
 
     public function getVariants()
     {
-        $altFormats = array(
-            'location-place' => '%L',
-            'location-place-state' => '%L %R',
-            'location-place-state-country' => '%L %R %C',
-            'location-place-state-countrycode' => '%L %R %c',
-            'location-place-statecode' => '%L %r',
-            'location-place-statecode-country' => '%L %r %C',
-            'location-place-statecode-countrycode' => '%L %r %c',
-            'location-place-country' => '%L %C',
-            'location-place-countrycode' => '%L %c',
-        );
-
         $retNames = array();
-
-        foreach (array_keys($altFormats) as $k) {
-            $retNames[$k] = $this->format($altFormats[$k]);
-        }
-
+	
+    	if(!is_empty_value($this->getPlace())) {
+	        $altFormats = array(
+	            'location-place' => '%L',
+	            'location-place-state' => '%L %R',
+	            'location-place-state-country' => '%L %R %C',
+	            'location-place-state-countrycode' => '%L %R %c',
+	            'location-place-statecode' => '%L %r',
+	            'location-place-statecode-country' => '%L %r %C',
+	            'location-place-statecode-countrycode' => '%L %r %c',
+	            'location-place-country' => '%L %C',
+	            'location-place-countrycode' => '%L %c',
+	        );
+	
+	        foreach (array_keys($altFormats) as $k) {
+	            $retNames[$k] = $this->format($altFormats[$k]);
+	        }
+    	}
         return $retNames;
     }
 
@@ -528,7 +500,7 @@ class GeoLocation extends BaseGeoLocation
                 break;
         }
 
-        return $this->format($locFormatString);
+        return trim($this->format($locFormatString));
     }
     /**
      * @param $strAddress

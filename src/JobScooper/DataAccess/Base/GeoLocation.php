@@ -145,20 +145,6 @@ abstract class GeoLocation implements ActiveRecordInterface
     protected $longitude;
 
     /**
-     * The value for the alternate_names field.
-     *
-     * @var        array
-     */
-    protected $alternate_names;
-
-    /**
-     * The unserialized $alternate_names value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
-     * @var object
-     */
-    protected $alternate_names_unserialized;
-
-    /**
      * @var        ObjectCollection|ChildJobPosting[] Collection to store aggregation of ChildJobPosting objects.
      */
     protected $collJobPostings;
@@ -526,35 +512,6 @@ abstract class GeoLocation implements ActiveRecordInterface
     }
 
     /**
-     * Get the [alternate_names] column value.
-     *
-     * @return array
-     */
-    public function getAlternateNames()
-    {
-        if (null === $this->alternate_names_unserialized) {
-            $this->alternate_names_unserialized = array();
-        }
-        if (!$this->alternate_names_unserialized && null !== $this->alternate_names) {
-            $alternate_names_unserialized = substr($this->alternate_names, 2, -2);
-            $this->alternate_names_unserialized = '' !== $alternate_names_unserialized ? explode(' | ', $alternate_names_unserialized) : array();
-        }
-
-        return $this->alternate_names_unserialized;
-    }
-
-    /**
-     * Test the presence of a value in the [alternate_names] array column value.
-     * @param      mixed $value
-     *
-     * @return boolean
-     */
-    public function hasAlternateName($value)
-    {
-        return in_array($value, $this->getAlternateNames());
-    } // hasAlternateName()
-
-    /**
      * Set the value of [geolocation_id] column.
      *
      * @param int $v new value
@@ -775,57 +732,6 @@ abstract class GeoLocation implements ActiveRecordInterface
     } // setLongitude()
 
     /**
-     * Set the value of [alternate_names] column.
-     *
-     * @param array $v new value
-     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
-     */
-    public function setAlternateNames($v)
-    {
-        if ($this->alternate_names_unserialized !== $v) {
-            $this->alternate_names_unserialized = $v;
-            $this->alternate_names = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[GeoLocationTableMap::COL_ALTERNATE_NAMES] = true;
-        }
-
-        return $this;
-    } // setAlternateNames()
-
-    /**
-     * Adds a value to the [alternate_names] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
-     */
-    public function addAlternateName($value)
-    {
-        $currentArray = $this->getAlternateNames();
-        $currentArray []= $value;
-        $this->setAlternateNames($currentArray);
-
-        return $this;
-    } // addAlternateName()
-
-    /**
-     * Removes a value from the [alternate_names] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
-     */
-    public function removeAlternateName($value)
-    {
-        $targetArray = array();
-        foreach ($this->getAlternateNames() as $element) {
-            if ($element != $value) {
-                $targetArray []= $element;
-            }
-        }
-        $this->setAlternateNames($targetArray);
-
-        return $this;
-    } // removeAlternateName()
-
-    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -893,10 +799,6 @@ abstract class GeoLocation implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 10 + $startcol : GeoLocationTableMap::translateFieldName('Longitude', TableMap::TYPE_PHPNAME, $indexType)];
             $this->longitude = (null !== $col) ? (double) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 11 + $startcol : GeoLocationTableMap::translateFieldName('AlternateNames', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->alternate_names = $col;
-            $this->alternate_names_unserialized = null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -905,7 +807,7 @@ abstract class GeoLocation implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 12; // 12 = GeoLocationTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 11; // 11 = GeoLocationTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\GeoLocation'), 0, $e);
@@ -1175,9 +1077,6 @@ abstract class GeoLocation implements ActiveRecordInterface
         if ($this->isColumnModified(GeoLocationTableMap::COL_LONGITUDE)) {
             $modifiedColumns[':p' . $index++]  = 'longitude';
         }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_ALTERNATE_NAMES)) {
-            $modifiedColumns[':p' . $index++]  = 'alternate_names';
-        }
 
         $sql = sprintf(
             'INSERT INTO geolocation (%s) VALUES (%s)',
@@ -1221,9 +1120,6 @@ abstract class GeoLocation implements ActiveRecordInterface
                         break;
                     case 'longitude':
                         $stmt->bindValue($identifier, $this->longitude, PDO::PARAM_STR);
-                        break;
-                    case 'alternate_names':
-                        $stmt->bindValue($identifier, $this->alternate_names, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1322,9 +1218,6 @@ abstract class GeoLocation implements ActiveRecordInterface
             case 10:
                 return $this->getLongitude();
                 break;
-            case 11:
-                return $this->getAlternateNames();
-                break;
             default:
                 return null;
                 break;
@@ -1366,7 +1259,6 @@ abstract class GeoLocation implements ActiveRecordInterface
             $keys[8] => $this->getCountryCode(),
             $keys[9] => $this->getLatitude(),
             $keys[10] => $this->getLongitude(),
-            $keys[11] => $this->getAlternateNames(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1471,13 +1363,6 @@ abstract class GeoLocation implements ActiveRecordInterface
             case 10:
                 $this->setLongitude($value);
                 break;
-            case 11:
-                if (!is_array($value)) {
-                    $v = trim(substr($value, 2, -2));
-                    $value = $v ? explode(' | ', $v) : array();
-                }
-                $this->setAlternateNames($value);
-                break;
         } // switch()
 
         return $this;
@@ -1536,9 +1421,6 @@ abstract class GeoLocation implements ActiveRecordInterface
         }
         if (array_key_exists($keys[10], $arr)) {
             $this->setLongitude($arr[$keys[10]]);
-        }
-        if (array_key_exists($keys[11], $arr)) {
-            $this->setAlternateNames($arr[$keys[11]]);
         }
     }
 
@@ -1613,9 +1495,6 @@ abstract class GeoLocation implements ActiveRecordInterface
         }
         if ($this->isColumnModified(GeoLocationTableMap::COL_LONGITUDE)) {
             $criteria->add(GeoLocationTableMap::COL_LONGITUDE, $this->longitude);
-        }
-        if ($this->isColumnModified(GeoLocationTableMap::COL_ALTERNATE_NAMES)) {
-            $criteria->add(GeoLocationTableMap::COL_ALTERNATE_NAMES, $this->alternate_names);
         }
 
         return $criteria;
@@ -1713,7 +1592,6 @@ abstract class GeoLocation implements ActiveRecordInterface
         $copyObj->setCountryCode($this->getCountryCode());
         $copyObj->setLatitude($this->getLatitude());
         $copyObj->setLongitude($this->getLongitude());
-        $copyObj->setAlternateNames($this->getAlternateNames());
 
         if ($deepCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -2326,8 +2204,6 @@ abstract class GeoLocation implements ActiveRecordInterface
         $this->countrycode = null;
         $this->latitude = null;
         $this->longitude = null;
-        $this->alternate_names = null;
-        $this->alternate_names_unserialized = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();

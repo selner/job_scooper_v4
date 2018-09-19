@@ -59,7 +59,7 @@ class GeoLocationTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 12;
+    const NUM_COLUMNS = 11;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class GeoLocationTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 12;
+    const NUM_HYDRATE_COLUMNS = 11;
 
     /**
      * the column name for the geolocation_id field
@@ -127,11 +127,6 @@ class GeoLocationTableMap extends TableMap
     const COL_LONGITUDE = 'geolocation.longitude';
 
     /**
-     * the column name for the alternate_names field
-     */
-    const COL_ALTERNATE_NAMES = 'geolocation.alternate_names';
-
-    /**
      * The default string format for model objects of the related table
      */
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -160,11 +155,11 @@ class GeoLocationTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('GeoLocationId', 'DisplayName', 'GeoLocationKey', 'Place', 'County', 'Region', 'RegionCode', 'Country', 'CountryCode', 'Latitude', 'Longitude', 'AlternateNames', ),
-        self::TYPE_CAMELNAME     => array('geoLocationId', 'displayName', 'geoLocationKey', 'place', 'county', 'region', 'regionCode', 'country', 'countryCode', 'latitude', 'longitude', 'alternateNames', ),
-        self::TYPE_COLNAME       => array(GeoLocationTableMap::COL_GEOLOCATION_ID, GeoLocationTableMap::COL_DISPLAY_NAME, GeoLocationTableMap::COL_GEOLOCATION_KEY, GeoLocationTableMap::COL_PLACE, GeoLocationTableMap::COL_COUNTY, GeoLocationTableMap::COL_REGION, GeoLocationTableMap::COL_REGIONCODE, GeoLocationTableMap::COL_COUNTRY, GeoLocationTableMap::COL_COUNTRYCODE, GeoLocationTableMap::COL_LATITUDE, GeoLocationTableMap::COL_LONGITUDE, GeoLocationTableMap::COL_ALTERNATE_NAMES, ),
-        self::TYPE_FIELDNAME     => array('geolocation_id', 'display_name', 'geolocation_key', 'place', 'county', 'region', 'regioncode', 'country', 'countrycode', 'latitude', 'longitude', 'alternate_names', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
+        self::TYPE_PHPNAME       => array('GeoLocationId', 'DisplayName', 'GeoLocationKey', 'Place', 'County', 'Region', 'RegionCode', 'Country', 'CountryCode', 'Latitude', 'Longitude', ),
+        self::TYPE_CAMELNAME     => array('geoLocationId', 'displayName', 'geoLocationKey', 'place', 'county', 'region', 'regionCode', 'country', 'countryCode', 'latitude', 'longitude', ),
+        self::TYPE_COLNAME       => array(GeoLocationTableMap::COL_GEOLOCATION_ID, GeoLocationTableMap::COL_DISPLAY_NAME, GeoLocationTableMap::COL_GEOLOCATION_KEY, GeoLocationTableMap::COL_PLACE, GeoLocationTableMap::COL_COUNTY, GeoLocationTableMap::COL_REGION, GeoLocationTableMap::COL_REGIONCODE, GeoLocationTableMap::COL_COUNTRY, GeoLocationTableMap::COL_COUNTRYCODE, GeoLocationTableMap::COL_LATITUDE, GeoLocationTableMap::COL_LONGITUDE, ),
+        self::TYPE_FIELDNAME     => array('geolocation_id', 'display_name', 'geolocation_key', 'place', 'county', 'region', 'regioncode', 'country', 'countrycode', 'latitude', 'longitude', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, )
     );
 
     /**
@@ -174,11 +169,11 @@ class GeoLocationTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('GeoLocationId' => 0, 'DisplayName' => 1, 'GeoLocationKey' => 2, 'Place' => 3, 'County' => 4, 'Region' => 5, 'RegionCode' => 6, 'Country' => 7, 'CountryCode' => 8, 'Latitude' => 9, 'Longitude' => 10, 'AlternateNames' => 11, ),
-        self::TYPE_CAMELNAME     => array('geoLocationId' => 0, 'displayName' => 1, 'geoLocationKey' => 2, 'place' => 3, 'county' => 4, 'region' => 5, 'regionCode' => 6, 'country' => 7, 'countryCode' => 8, 'latitude' => 9, 'longitude' => 10, 'alternateNames' => 11, ),
-        self::TYPE_COLNAME       => array(GeoLocationTableMap::COL_GEOLOCATION_ID => 0, GeoLocationTableMap::COL_DISPLAY_NAME => 1, GeoLocationTableMap::COL_GEOLOCATION_KEY => 2, GeoLocationTableMap::COL_PLACE => 3, GeoLocationTableMap::COL_COUNTY => 4, GeoLocationTableMap::COL_REGION => 5, GeoLocationTableMap::COL_REGIONCODE => 6, GeoLocationTableMap::COL_COUNTRY => 7, GeoLocationTableMap::COL_COUNTRYCODE => 8, GeoLocationTableMap::COL_LATITUDE => 9, GeoLocationTableMap::COL_LONGITUDE => 10, GeoLocationTableMap::COL_ALTERNATE_NAMES => 11, ),
-        self::TYPE_FIELDNAME     => array('geolocation_id' => 0, 'display_name' => 1, 'geolocation_key' => 2, 'place' => 3, 'county' => 4, 'region' => 5, 'regioncode' => 6, 'country' => 7, 'countrycode' => 8, 'latitude' => 9, 'longitude' => 10, 'alternate_names' => 11, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
+        self::TYPE_PHPNAME       => array('GeoLocationId' => 0, 'DisplayName' => 1, 'GeoLocationKey' => 2, 'Place' => 3, 'County' => 4, 'Region' => 5, 'RegionCode' => 6, 'Country' => 7, 'CountryCode' => 8, 'Latitude' => 9, 'Longitude' => 10, ),
+        self::TYPE_CAMELNAME     => array('geoLocationId' => 0, 'displayName' => 1, 'geoLocationKey' => 2, 'place' => 3, 'county' => 4, 'region' => 5, 'regionCode' => 6, 'country' => 7, 'countryCode' => 8, 'latitude' => 9, 'longitude' => 10, ),
+        self::TYPE_COLNAME       => array(GeoLocationTableMap::COL_GEOLOCATION_ID => 0, GeoLocationTableMap::COL_DISPLAY_NAME => 1, GeoLocationTableMap::COL_GEOLOCATION_KEY => 2, GeoLocationTableMap::COL_PLACE => 3, GeoLocationTableMap::COL_COUNTY => 4, GeoLocationTableMap::COL_REGION => 5, GeoLocationTableMap::COL_REGIONCODE => 6, GeoLocationTableMap::COL_COUNTRY => 7, GeoLocationTableMap::COL_COUNTRYCODE => 8, GeoLocationTableMap::COL_LATITUDE => 9, GeoLocationTableMap::COL_LONGITUDE => 10, ),
+        self::TYPE_FIELDNAME     => array('geolocation_id' => 0, 'display_name' => 1, 'geolocation_key' => 2, 'place' => 3, 'county' => 4, 'region' => 5, 'regioncode' => 6, 'country' => 7, 'countrycode' => 8, 'latitude' => 9, 'longitude' => 10, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, )
     );
 
     /**
@@ -210,7 +205,6 @@ class GeoLocationTableMap extends TableMap
         $this->addColumn('countrycode', 'CountryCode', 'VARCHAR', false, 5, null);
         $this->addColumn('latitude', 'Latitude', 'FLOAT', false, null, null);
         $this->addColumn('longitude', 'Longitude', 'FLOAT', false, null, null);
-        $this->addColumn('alternate_names', 'AlternateNames', 'ARRAY', false, null, null);
     } // initialize()
 
     /**
@@ -399,7 +393,6 @@ class GeoLocationTableMap extends TableMap
             $criteria->addSelectColumn(GeoLocationTableMap::COL_COUNTRYCODE);
             $criteria->addSelectColumn(GeoLocationTableMap::COL_LATITUDE);
             $criteria->addSelectColumn(GeoLocationTableMap::COL_LONGITUDE);
-            $criteria->addSelectColumn(GeoLocationTableMap::COL_ALTERNATE_NAMES);
         } else {
             $criteria->addSelectColumn($alias . '.geolocation_id');
             $criteria->addSelectColumn($alias . '.display_name');
@@ -412,7 +405,6 @@ class GeoLocationTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.countrycode');
             $criteria->addSelectColumn($alias . '.latitude');
             $criteria->addSelectColumn($alias . '.longitude');
-            $criteria->addSelectColumn($alias . '.alternate_names');
         }
     }
 
