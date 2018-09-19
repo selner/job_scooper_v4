@@ -304,12 +304,12 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
                 }
             }
 
-            $locmgr = GeoLocationManager::getInstance();
+            $locmgr = LocationCache::getInstance();
 
             if (false === stripos($loc_str, " {$countryCode}")) {
                 $loc_str = "{$loc_str} {$countryCode}";
             }
-            $location = $locmgr->lookupAddress($loc_str);
+            $location = $locmgr->lookup($loc_str);
             if (!is_empty_value($location)) {
                 $this->setGeoLocationFromJP($location);
                 $this->_setDenormalizedLocationDisplayValue_();

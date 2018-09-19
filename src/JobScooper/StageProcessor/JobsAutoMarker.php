@@ -17,11 +17,11 @@
 namespace JobScooper\StageProcessor;
 
 use Exception;
+use JobScooper\DataAccess\LocationCache;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery;
-use JobScooper\DataAccess\GeoLocationManager;
 use JobScooper\Utils\PythonRunner;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\PropelException;
@@ -35,7 +35,7 @@ class JobsAutoMarker
 {
 
     /**
-     * @var GeoLocationManager
+     * @var LocationCache
      */
     protected $_locmgr = null;
     protected $title_negative_keyword_tokens = null;
@@ -54,7 +54,7 @@ class JobsAutoMarker
      */
     public function __construct()
     {
-        $this->_locmgr = GeoLocationManager::getInstance();
+        $this->_locmgr = LocationCache::getInstance();
     }
 
     /**

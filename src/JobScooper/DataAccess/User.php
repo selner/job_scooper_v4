@@ -301,12 +301,12 @@ class User extends BaseUser
             return ;
         }
 
-        $locmgr = GeoLocationManager::getInstance();
+        $locmgr = LocationCache::getInstance();
 
         $searchGeoLocIds = array();
 
         foreach ($searchLocations as $lockey => $searchLoc) {
-            $location = $locmgr->lookupAddress($searchLoc);
+            $location = $locmgr->lookup($searchLoc);
             if ($location !== null && !is_empty_value($location)) {
                 LogMessage("Updating/adding user search keyword/location pairings for location {$location->getDisplayName()} and user {$slug}'s keywords");
                 $locId = $location->getGeoLocationId();
