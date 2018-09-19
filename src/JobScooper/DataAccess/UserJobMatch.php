@@ -42,18 +42,19 @@ class UserJobMatch extends BaseUserJobMatch
      */
     public function updateUserMatchStatus()
     {
-        if (count($this->getMatchedUserKeywords()) > 0) {
+        $this->setIsExcluded(false);
+
+        if (\count($this->getMatchedUserKeywords()) > 0) {
             $this->setIsJobMatch(true);
         } else {
             $this->setIsJobMatch(false);
         }
 
-        $this->setIsExcluded(false);
-        if (count($this->getMatchedNegativeTitleKeywords()) > 0) {
+        if (\count($this->getMatchedNegativeTitleKeywords()) > 0) {
             $this->setIsExcluded(true);
         }
 
-        if (count($this->getMatchedNegativeCompanyKeywords()) > 0) {
+        if (\count($this->getMatchedNegativeCompanyKeywords()) > 0) {
             $this->setIsExcluded(true);
         }
 
@@ -62,7 +63,7 @@ class UserJobMatch extends BaseUserJobMatch
         }
 
         $jp = $this->getJobPostingFromUJM();
-        if (null !== $jp && !empty($jp->getDuplicatesJobPostingId())) {
+        if (null !== $jp && !is_empty_value($jp->getDuplicatesJobPostingId())) {
             $this->setIsExcluded(true);
         }
     }

@@ -514,6 +514,7 @@ class JobsAutoMarker
         }
         
         $job->fromArray($arrJobMatchFacts);
+        $job->save();
     }
 
     /**
