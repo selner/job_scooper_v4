@@ -103,16 +103,16 @@ class LocationCache {
 	{
 		$scrubbed = null;
 		$cacheSlug = null;
-		$cachehit = null;
-		$apiresult = null;
+		$result = null;
 		
 		try {
-		
+			$hittype = 'FAILED_LOOKUP';
 			$scrubbed = GeoLocation::scrubLocationValue($str);
 			$cacheSlug = cleanupSlugPart($scrubbed);
-			$cachehit = $this->_cache->get($cacheSlug); // returns 'value'
-			if($cachehit !== false && !is_empty_value($cachehit)) {
-				return $cachehit;
+			$result = $this->_cache->get($cacheSlug); // returns 'value'
+			if($result !== false && !is_empty_value($result)) {
+				$hittype = 'CACHE_HIT';
+				return $result;
 			}
 			
 			if(!\is_array($args)) {
@@ -120,49 +120,44 @@ class LocationCache {
 			}
 			$args['query'] = $scrubbed;
 			
-			$apiresult = $this->_callApi($args);
-			if(!is_empty_value($apiresult)) {
-				$this->_cache->set($cacheSlug, $apiresult); // returns 'value'
+			$result = $this->_callApi($args);
+			if(!is_empty_value($result)) {
+				$this->_cache->set($cacheSlug, $result); // returns 'value'
+				$hittype = 'API_HIT';
 			}
 			
-			return $apiresult;
+			return $result;
 		}
 		catch (\Exception $ex) {
 			handleException($ex);
 		}
 		finally {
 				$msg = "Unknown geoloc state for {$scrubbed}";
-				$geolocid = null;
-				$geolockey = null;
-				if($cachehit !== false && !is_empty_value($cachehit)) {
-					$msg = "Geolocation cache hit found for {$cacheSlug}";
-					$geolocid = $cachehit->getGeoLocationId();
-					$geolockey = $cachehit->getGeoLocationKey();
-					$hitresult = "CACHE_HIT";
-				}
-				elseif (!is_empty_value($apiresult)) {
-					$msg = "Geolocation api result found for {$scrubbed}";
-					$hitresult = "API_HIT";
-					$geolocid = $apiresult->getGeoLocationId();
-					$geolockey = $apiresult->getGeoLocationKey();
-				}
-				else {
-					$msg = "Failed to find geolocation for {$scrubbed}";
-					$hitresult = "FAILED_LOOKUP";
-				}
-
 				$context = array(
 					'query' => str_replace(',', '\,', $str),
 					'scrubbed' => $scrubbed,
 					'cachekey' => $cacheSlug,
-					'hitresult' => $hitresult,
-					'geolocationid' => $geolocid,
-					'geolocationkey' => $geolockey
+					'hit_type' => $hittype,
+					'geolocationid' => null,
+					'geolocationkey' => null
 				);
-				$this->logger->info($msg, $context);
+				if($result !== false && !is_empty_value($result))
+				{
+					$msg = "Geolocation cache hit found for {$cacheSlug}";
+					$context['geolocationid'] = $result->getGeoLocationId();
+					$context['geolocationkey'] = $result->getGeoLocationKey();
+					$this->logger->info($msg, $context);
+				}
+				else {
+					$msg = "Failed to find geolocation for {$scrubbed}";
+					$this->logger->error($msg, $context);
+			}
 		}
 	}
 	
+	/**
+      * @return array
+	*/
 	private function getLogContextKeys() {
 				return array(
 					'query',
@@ -174,6 +169,12 @@ class LocationCache {
 				);
 	}
 	
+	/**
+	  * @param $args
+	  *
+	  * @return \JobScooper\DataAccess\GeoLocation|null
+	  * @throws \ErrorException
+	*/
 	private function _callApi($args) {
 	        
             $searchBias = Settings::getValue("active_search_location_bias");
