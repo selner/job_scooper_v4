@@ -26,6 +26,8 @@ use Monolog\Logger;
 class LocationCache {
 	use Singleton;
 	private $_cache = null;
+	private $_nFailures = 0;
+    private $_googleApiKey = null;
 
 	/**
 	 * @return null
@@ -65,6 +67,10 @@ class LocationCache {
 		$buffcache = new \MatthiasMullie\Scrapbook\Buffered\BufferedStore($cache);
 		$this->_cache = new \MatthiasMullie\Scrapbook\Psr16\SimpleCache($buffcache);
 
+        $this->_googleApiKey = \JobScooper\Utils\Settings::getValue('google_maps_api_key');
+        if (is_empty_value($this->_googleApiKey) || !is_string($this->_googleApiKey)) {
+            throw new \Exception('No Google Geocode API key found in configuration.  Instructions for getting an API key are at https://developers.google.com/maps/documentation/geocoding/get-api-key.');
+        }
 
 	}
 
@@ -104,14 +110,31 @@ class LocationCache {
 		$scrubbed = null;
 		$cacheSlug = null;
 		$result = null;
-		
+		$context = [];
+
 		try {
-			$hittype = 'FAILED_LOOKUP';
+			if($this->_nFailures >= 5) {
+				LogWarning('Location lookup halted due to too many errors.');
+				return null;
+			}
+	
 			$scrubbed = GeoLocation::scrubLocationValue($str);
+			if(is_empty_value($scrubbed)) {
+				return null;
+			}
+
 			$cacheSlug = cleanupSlugPart($scrubbed);
+			$context = array(
+				'query' => str_replace(',', '\,', $str),
+				'scrubbed' => $scrubbed,
+				'cachekey' => $cacheSlug,
+				'hit_type' => 'FAILED',
+				'geolocationid' => null,
+				'geolocationkey' => null
+			);
 			$result = $this->_cache->get($cacheSlug); // returns 'value'
 			if($result !== false && !is_empty_value($result)) {
-				$hittype = 'CACHE_HIT';
+				$context['hit_type'] = 'CACHE_HIT';
 				return $result;
 			}
 			
@@ -123,24 +146,17 @@ class LocationCache {
 			$result = $this->_callApi($args);
 			if(!is_empty_value($result)) {
 				$this->_cache->set($cacheSlug, $result); // returns 'value'
-				$hittype = 'API_HIT';
+				$context['hit_type'] = 'API_HIT';
 			}
 			
 			return $result;
 		}
 		catch (\Exception $ex) {
+			$this->_nFailures .= 0;
 			handleException($ex);
 		}
 		finally {
 				$msg = "Unknown geoloc state for {$scrubbed}";
-				$context = array(
-					'query' => str_replace(',', '\,', $str),
-					'scrubbed' => $scrubbed,
-					'cachekey' => $cacheSlug,
-					'hit_type' => $hittype,
-					'geolocationid' => null,
-					'geolocationkey' => null
-				);
 				if($result !== false && !is_empty_value($result))
 				{
 					$msg = "Geolocation cache hit found for {$cacheSlug}";
@@ -163,7 +179,7 @@ class LocationCache {
 					'query',
 					'scrubbed',
 					'cachekey',
-					'hitresult',
+					'hittype',
 					'geolocationid',
 					'geolocationkey'
 				);
@@ -173,13 +189,16 @@ class LocationCache {
 	  * @param $args
 	  *
 	  * @return \JobScooper\DataAccess\GeoLocation|null
-	  * @throws \ErrorException
+	  * @throws \HttpRequestException
 	*/
 	private function _callApi($args) {
-	        
-            $searchBias = Settings::getValue("active_search_location_bias");
+	    $url = 'UNKNOWN';
+		$response = [ 'API' => $url, 'http_code' => 'UNKNOWN'];
+		
+		try {
+            $searchBias = Settings::getValue('active_search_location_bias');
             if(is_empty_value($searchBias) || !is_array($searchBias)) {
-	            $searchloc = Settings::getValue("active_search_location");
+	            $searchloc = Settings::getValue('active_search_location');
 	            if(!is_empty_value($searchloc) && is_array($searchloc)) {
 			        $searchBias = [
 		                'loc_lat' => $searchloc['Latitude'],
@@ -193,13 +212,15 @@ class LocationCache {
             if (!is_empty_value($searchBias)) {
 	            $args = array_merge($args, $searchBias);
             }
-			
+
+            if(!is_empty_value($this->_googleApiKey)) {
+                $args['apikey'] = $this->_googleApiKey;
+            }
             $querystring = http_build_query($args);
 			$url = \JBZoo\Utils\Url::buildAll($this->_geoapi_srvr, array('path' => '/places/lookup', 'query' => $querystring));
             $curl = new CurlWrapper();
-			LogDebug("Calling Geocode API: { $url }");
             $response = $curl->cURL($url);
-            if($response['http_code'] < 300 && array_key_exists('body', $response)) {
+            if(array_key_exists('body', $response) && $response['http_code'] < 300) {
 	            if(!is_empty_value($response['body'])) {
 	                $resdata = decodeJson($response['body']);
 	                $geoloc = new GeoLocation();
@@ -219,10 +240,22 @@ class LocationCache {
 		            	unset($curl);
 		                return $geoloc;
 		            }
+	            } else {
+					throw new \HttpRequestException("GeocodeAPI returned an empty body in the response: [HTTP code {$response['http_code']}}");
 	            }
-	            
+
             }
-	
-            return null;
+            else
+            {
+				throw new \HttpRequestException("GeocodeAPI failed to return a valid response: [HTTP code {$response['http_code']} / {$response['body']}");
+            }
+		}
+		catch (\Exception $ex) {
+			$this->logger->error("GeocodeAPI returned an error: {$ex->getMessage()}.");
+			handleException($ex);
+		}
+		finally {
+			LogDebug('Geocode API called',  $extras= [ 'API' => $url, 'http_code' => $response['http_code']]);
+		}
 	}
 }
