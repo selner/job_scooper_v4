@@ -152,7 +152,7 @@ class LocationCache {
 			return $result;
 		}
 		catch (\Exception $ex) {
-			$this->_nFailures .= 0;
+			$this->_nFailures += 1;
 			handleException($ex);
 		}
 		finally {
