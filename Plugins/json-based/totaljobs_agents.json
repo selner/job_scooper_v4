@@ -50,7 +50,7 @@
                         },
                         {
                             "Name": "Location",
-                            "Selector": "li.location",
+                            "Selector": "li.location span",
                             "Attribute": "text",
                             "Index": 0,
                             "Type": "CSS"
