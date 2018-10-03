@@ -18,25 +18,30 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\Logging\CSVLogFormatter;
-use JobScooper\Logging\CSVLogHandler;use JobScooper\Traits\Singleton;
+use JobScooper\Logging\CSVLogHandler;
+use JobScooper\Traits\Singleton;
 use JobScooper\Utils\CurlWrapper;
 use JobScooper\Utils\Settings;
 use Monolog\Logger;
+use \MatthiasMullie\Scrapbook\Psr16\SimpleCache;
 
 class LocationCache {
 	use Singleton;
-	private $_cache = null;
+    /**
+     * @var SimpleCache|null
+     */
+    private $_cache = null;
 	private $_nFailures = 0;
     private $_googleApiKey = null;
 
 	/**
-	 * @return null
+	 * @return SimpleCache|null
 	 */
-	public  function getCache(){
+	public function getCache(){
 	    return $this->_cache;
 	}
 	/**
-	 * @param null $cache
+	 * @param SimpleCache $cache
 	 */
 	public  function setCache($cache):void {
 	    $this->_cache = $cache;
@@ -65,9 +70,9 @@ class LocationCache {
 	    $this->_geoapi_srvr = Settings::getValue('geocodeapi_server');
 		
 		$buffcache = new \MatthiasMullie\Scrapbook\Buffered\BufferedStore($cache);
-		$this->_cache = new \MatthiasMullie\Scrapbook\Psr16\SimpleCache($buffcache);
+		$this->_cache = new SimpleCache($buffcache);
 
-        $this->_googleApiKey = \JobScooper\Utils\Settings::getValue('google_maps_api_key');
+        $this->_googleApiKey = Settings::getValue('google_maps_api_key');
         if (is_empty_value($this->_googleApiKey) || !is_string($this->_googleApiKey)) {
             throw new \Exception('No Google Geocode API key found in configuration.  Instructions for getting an API key are at https://developers.google.com/maps/documentation/geocoding/get-api-key.');
         }
@@ -79,8 +84,7 @@ class LocationCache {
      */
     private function _initializeLogger()
     {
-        $this->loggerName = 'geocode_calls';
-        $logger = new Logger($this->_loggerName);
+        $logger = new Logger('geocode_api_cache');
         $now = getNowAsString('-');
         $csvlog = getOutputDirectory('logs') . DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}.csv";
         $fpcsv = fopen($csvlog, 'w');
@@ -132,12 +136,17 @@ class LocationCache {
 				'geolocationid' => null,
 				'geolocationkey' => null
 			);
-			$result = $this->_cache->get($cacheSlug); // returns 'value'
-			if($result !== false && !is_empty_value($result)) {
-				$context['hit_type'] = 'CACHE_HIT';
-				return $result;
-			}
-			
+			try {
+                $result = $this->_cache->get($cacheSlug); // returns 'value'
+                if($result !== false && !is_empty_value($result)) {
+                    $context['hit_type'] = 'CACHE_HIT';
+                    return $result;
+                }
+            }
+            catch (\Psr\SimpleCache\InvalidArgumentException $ex) {
+                handleException($ex, null, false, $context);
+            }
+
 			if(!\is_array($args)) {
 				$args = [];
 			}
@@ -145,8 +154,14 @@ class LocationCache {
 			
 			$result = $this->_callApi($args);
 			if(!is_empty_value($result)) {
-				$this->_cache->set($cacheSlug, $result); // returns 'value'
-				$context['hit_type'] = 'API_HIT';
+                try {
+    				$this->_cache->set($cacheSlug, $result); // returns 'value'
+                }
+                catch (\Psr\SimpleCache\InvalidArgumentException $ex) {
+                    handleException($ex, null, true, $context);
+                }
+
+                $context['hit_type'] = 'API_HIT';
 			}
 			
 			return $result;
@@ -156,18 +171,18 @@ class LocationCache {
 			handleException($ex);
 		}
 		finally {
-				$msg = "Unknown geoloc state for {$scrubbed}";
-				if($result !== false && !is_empty_value($result))
-				{
-					$msg = "Geolocation cache hit found for {$cacheSlug}";
-					$context['geolocationid'] = $result->getGeoLocationId();
-					$context['geolocationkey'] = $result->getGeoLocationKey();
-					$this->logger->info($msg, $context);
-				}
-				else {
-					$msg = "Failed to find geolocation for {$scrubbed}";
-					$this->logger->error($msg, $context);
-			}
+            $msg = "Unknown geoloc state for {$scrubbed}";
+            if($result !== false && !is_empty_value($result))
+            {
+                $msg = "Geolocation cache hit found for {$cacheSlug}";
+                $context['geolocationid'] = $result->getGeoLocationId();
+                $context['geolocationkey'] = $result->getGeoLocationKey();
+                $this->logger->info($msg, $context);
+            }
+            else {
+                $msg = "Failed to find geolocation for {$scrubbed}";
+                $this->logger->error($msg, $context);
+            }
 		}
 	}
 	
@@ -189,7 +204,8 @@ class LocationCache {
 	  * @param $args
 	  *
 	  * @return \JobScooper\DataAccess\GeoLocation|null
-	  * @throws \HttpRequestException
+     * @throws \HttpRequestException
+     * @throws \Exception
 	*/
 	private function _callApi($args) {
 	    $url = 'UNKNOWN';
