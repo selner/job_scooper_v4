@@ -369,11 +369,6 @@ class ConfigInitializer
 
         $gsoset = $this->getSetting('global_search_options');
         if (!is_empty_value($gsoset)) {
-            // This must happen first so that the search locations can be geocoded
-            if (array_key_exists('google_maps_api_key', $gsoset)) {
-                Settings::setValue('google_maps_api_key', $gsoset['google_maps_api_key']);
-            }
-
             foreach ($gsoset as $gsoKey => $gso) {
                 if (!empty($gso)) {
                     switch (strtoupper($gsoKey)) {

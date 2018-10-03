@@ -32,7 +32,6 @@ class LocationCache {
      */
     private $_cache = null;
 	private $_nFailures = 0;
-    private $_googleApiKey = null;
 
 	/**
 	 * @return SimpleCache|null
@@ -71,11 +70,6 @@ class LocationCache {
 		
 		$buffcache = new \MatthiasMullie\Scrapbook\Buffered\BufferedStore($cache);
 		$this->_cache = new SimpleCache($buffcache);
-
-        $this->_googleApiKey = Settings::getValue('google_maps_api_key');
-        if (is_empty_value($this->_googleApiKey) || !is_string($this->_googleApiKey)) {
-            throw new \Exception('No Google Geocode API key found in configuration.  Instructions for getting an API key are at https://developers.google.com/maps/documentation/geocoding/get-api-key.');
-        }
 
 	}
 
@@ -229,9 +223,6 @@ class LocationCache {
 	            $args = array_merge($args, $searchBias);
             }
 
-            if(!is_empty_value($this->_googleApiKey)) {
-                $args['apikey'] = $this->_googleApiKey;
-            }
             $querystring = http_build_query($args);
 			$url = \JBZoo\Utils\Url::buildAll($this->_geoapi_srvr, array('path' => '/places/lookup', 'query' => $querystring));
             $curl = new CurlWrapper();
