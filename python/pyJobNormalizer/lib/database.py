@@ -21,6 +21,7 @@ import pymysql
 
 from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
+import sys
 
 class OrderedDictCursor(DictCursorMixin, Cursor):
     dict_type = OrderedDict
@@ -93,12 +94,12 @@ class DatabaseMixin:
             self.connection.commit()
             self.close_connection()
 
-    def run_command(self, querysql, close_connection=True):
+    def run_command(self, querysql, values=None, close_connection=True):
         try:
             # print("Running command: {}".format(querysql))
 
             with self.connection.cursor() as cursor:
-                cursor.execute(querysql)
+                return cursor.execute(querysql, values)
 
         except Exception, ex:
             print ex
@@ -106,6 +107,56 @@ class DatabaseMixin:
 
         finally:
             self.connection.commit()
+
             if close_connection:
                 self.close_connection()
+
+    def get_table_columns(self, tablename):
+        # print("Running command: {}".format(querysql))
+        column_data = self.fetch_all_from_query("SHOW columns from %s" % tablename)
+
+        return set(col['Field'] for col in column_data)
+
+    def add_row(self, tablename, primary_key_column, rowdict, tablecolumns=None):
+        # XXX tablename not sanitized
+        # XXX test for allowed keys is case-sensitive
+
+        try:
+            if not tablecolumns:
+                allowed_keys = self.get_table_columns(tablename)
+            else:
+                allowed_keys = tablecolumns
+
+            matched_keys = allowed_keys.intersection(rowdict)
+
+            if len(rowdict) > len(matched_keys):
+                unknown_keys = set(rowdict) - allowed_keys
+                print >> sys.stderr, "skipping keys:", ", ".join(unknown_keys)
+
+            columns = ", ".join(matched_keys)
+            values_template = ", ".join(["%s"] * len(matched_keys))
+
+            sql = "insert into %s (%s) values (%s)" % (
+                tablename, columns, values_template)
+            values = tuple(rowdict[key] for key in matched_keys)
+            with self.connection.cursor() as cursor:
+                cursor.execute(sql, values)
+                inserted_id = cursor.lastrowid
+                if inserted_id:
+                    result = self.fetch_all_from_query("SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id))
+                    if result and len(result) > 0:
+                        return result[0]
+                    else:
+                        return result
+                else:
+                    return None
+
+        except Exception, ex:
+            print ex
+            raise ex
+
+        finally:
+            self.connection.commit()
+            self.close_connection()
+
 
