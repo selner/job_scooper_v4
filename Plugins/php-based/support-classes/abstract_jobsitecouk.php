@@ -35,7 +35,7 @@ abstract class AbstractJobSiteCoUk extends \JobScooper\SitePlugins\AjaxSitePlugi
      * @return mixed
      * @throws \Exception
      */
-    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         if (empty($this->arrListingTagSetup)) {
             throw new \BadMethodCallException(sprintf('Not implemented method  %s called on class %s', __METHOD__, __CLASS__));

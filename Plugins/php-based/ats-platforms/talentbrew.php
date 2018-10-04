@@ -45,12 +45,12 @@ class PluginBoeing extends AbstractTalentBrew
      * This does the heavy lifting of parsing each job record from the
      * page's HTML it was passed.
      *
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
 		$ret = parent::parseJobsListForPage($objSimpHTML);
 	

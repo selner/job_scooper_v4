@@ -28,12 +28,12 @@ class PluginGroupon extends \JobScooper\SitePlugins\AjaxSitePlugin
 
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null|void
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
 

@@ -19,12 +19,12 @@ class AbstractFacebook extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = parent::parseJobsListForPage($objSimpHTML);
 

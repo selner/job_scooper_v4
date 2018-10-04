@@ -225,7 +225,7 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
      * @return string|null
      * @throws \Exception
      */
-    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         if (!is_empty_value($this->nTotalJobs)) {
             return $this->nTotalJobs;
@@ -236,12 +236,12 @@ abstract class AbstractAdicio extends \JobScooper\SitePlugins\AjaxSitePlugin
 
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         if (!is_empty_value($this->lastResponseData) || !is_empty_value($this->currentJsonSearchDetails)) {
             try {

@@ -15,12 +15,10 @@
  * under the License.
  */
 
-namespace JobScooper\Utils;
+namespace JobScooper\Utils\SimpleHtml;
 
 use DiDom\Query;
 use \Exception;
-use JobScooper\Utils\ExtendedDiDomElement;
-use JobScooper\Utils\SimpleHTMLHelper;
 use Psr\Log\LogLevel;
 
 /**
@@ -35,7 +33,7 @@ class DomItemParser
     private $_callbackObject = null;
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper|ExtendedDiDomElement $nodeData
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper|ExtendedDiDomElement $nodeData
      * @param array $tagInfo
      * @param array|null $itemData
      *
@@ -50,7 +48,7 @@ class DomItemParser
 
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper|ExtendedDiDomElement $nodeData
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper|ExtendedDiDomElement $nodeData
      * @param array $tagInfo
      * @param array|null $itemData
      *

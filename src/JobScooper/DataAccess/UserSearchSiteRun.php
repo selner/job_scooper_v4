@@ -19,7 +19,7 @@ namespace JobScooper\DataAccess;
 
 use JBZoo\Utils\Url;use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
-use JobScooper\Utils\SimpleHTMLHelper;
+use JobScooper\Utils\SimpleHtml\SimpleHTMLHelper;
 use Propel\Runtime\Map\TableMap;
 use JobScooper\SitePlugins\Base\SitePlugin;
 
@@ -85,7 +85,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
     /**
      * @param                                         $err
-     * @param \JobScooper\Utils\SimpleHTMLHelper|null $objPageHtml
+     * @param SimpleHTMLHelper|null $objPageHtml
      *
      * @throws \Propel\Runtime\Exception\PropelException
      */

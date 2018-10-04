@@ -78,7 +78,7 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
     }
 
 
-    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         try {
             $retData = $this->getJsonResultsPage('jobs', "meta->total");
@@ -91,12 +91,12 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
     }
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         try {
             $ret = array();

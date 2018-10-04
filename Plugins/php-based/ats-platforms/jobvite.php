@@ -55,12 +55,12 @@ abstract class AbstractJobviteATS extends \JobScooper\SitePlugins\AjaxSitePlugin
     private $_currentSearchDetails = null;
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return \JobScooper\DataAccess\JobPosting[]|null
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $frame = $objSimpHTML->find("*[name='jobvite_careersite_iframe']");
         if (!empty($frame) && array_key_exists('attr', $frame[0])) {

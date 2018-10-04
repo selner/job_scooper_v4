@@ -19,9 +19,8 @@ namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
 use JobScooper\Utils\Settings;
-use JobScooper\Utils\SimpleHTMLHelper;
+use JobScooper\Utils\SimpleHtml\SimpleHTMLHelper;
 use Propel\Runtime\ActiveQuery\Criteria;
-use Propel\Runtime\ActiveQuery\ModelCriteria;
 
 
 class UserSearchSiteRunManager {
@@ -125,7 +124,7 @@ class UserSearchSiteRunManager {
     /**
 	* @param $searchRunFacts
 	* @param $err
-	* @param \JobScooper\Utils\SimpleHTMLHelper|null $objPageHtml
+	* @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper|null $objPageHtml
 	*
 	* @throws \Propel\Runtime\Exception\PropelException
 	*/

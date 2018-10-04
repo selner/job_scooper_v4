@@ -19,9 +19,7 @@ namespace JobScooper\StageProcessor;
 
 use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
-use JobScooper\Logging\ErrorEmailLogHandler;
 use JobScooper\Utils\JobsMailSender;
-use JobScooper\Utils\SimpleHTMLHelper;
 use Propel\Runtime\ActiveQuery\Criteria;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 

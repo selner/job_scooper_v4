@@ -16,7 +16,7 @@
  * under the License.
  */
 
-use \JobScooper\Utils\SimpleHTMLHelper;
+use \JobScooper\Utils\SimpleHtml;
 
 /**
  * Class AbstractTaleoATS
@@ -74,7 +74,7 @@ abstract class AbstractTaleoATS extends \JobScooper\SitePlugins\AjaxSitePlugin
      * @throws \Exception
      * @return array|null|string
      */
-    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseTotalResultsCount(SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         if ($this->use1ToTDForCount) {
             return $this->parseTotalResultsCountFrom1ToTD($objSimpHTML);
@@ -111,12 +111,12 @@ abstract class AbstractTaleoATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
 
@@ -171,7 +171,7 @@ abstract class AbstractTaleoATS extends \JobScooper\SitePlugins\AjaxSitePlugin
 
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      * @param                                    $divTagType
      * @param                                    $divTagValue
      * @param                                    $trIndex

@@ -18,7 +18,14 @@
 namespace JobScooper\SitePlugins\Base;
 
 require_once(__ROOT__ . '/src/helpers/Constants.php');
-
+use Exception;
+use JobScooper\Utils\CurlWrapper;
+use JobScooper\Utils\Settings;
+use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Collection\ObjectCollection;
+use Propel\Runtime\Propel;
+use Psr\Log\LogLevel;
+use JobScooper\DataAccess\UserJobMatch;
 use JobScooper\DataAccess\UserSearchSiteRunManager;
 use function JobScooper\DataAccess\getCountryCodeRemapping;
 use JobScooper\DataAccess\UserSearchSiteRun;
@@ -26,27 +33,17 @@ use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\SitePlugins\IJobSitePlugin;
 use JobScooper\DataAccess\GeoLocation;
 use JobScooper\DataAccess\JobPostingQuery;
-use JobScooper\DataAccess\Map\JobPostingTableMap;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\Manager\SeleniumManager;
 use JobScooper\SitePlugins\SitePluginFactory;
-use JobScooper\Utils\DomItemParser;
-use JobScooper\Utils\ExtendedDiDomElement;
+use JobScooper\Utils\SimpleHtml\DomItemParser;
+use JobScooper\Utils\SimpleHtml\SimpleHTMLHelper;
+use JobScooper\Utils\SimpleHtml\ExtendedDiDomElement;
 
 const BASE_URL_TAG_LOCATION = '***LOCATION***';
 const BASE_URL_TAG_KEYWORDS = '***KEYWORDS***';
-use Exception;
-use JobScooper\Utils\CurlWrapper;
-use JobScooper\Utils\Settings;
-use JobScooper\Utils\SimpleHTMLHelper;
-use Propel\Runtime\ActiveQuery\Criteria;
-use Propel\Runtime\Collection\ObjectCollection;
-use Propel\Runtime\Propel;
-use Psr\Log\LogLevel;
-use JobScooper\DataAccess\JobPosting;
-use JobScooper\DataAccess\UserJobMatch;
 
 /**
  * Class SitePlugin
@@ -814,7 +811,7 @@ JSCODE;
      * This does the heavy lifting of parsing each job record from the
      * page's HTML it was passed.
      *
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null
      * @throws \Exception
@@ -859,7 +856,7 @@ JSCODE;
     }
 
     /**
-     * @param \JobScooper\Utils\ExtendedDiDomElement $node
+     * @param \JobScooper\Utils\SimpleHtml\ExtendedDiDomElement $node
      *
      * @return array|null
      * @throws \Exception
@@ -1236,7 +1233,7 @@ JSCODE;
      * @param null   $referrer
      * @param null   $cookies
      *
-     * @return \JobScooper\Utils\SimpleHTMLHelper|null
+     * @return \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper|null
      * @throws \Exception
      */
     public function getSimpleObjFromPathOrURL(UserSearchSiteRun $searchDetails, $filePath = '', $strURL = '', $optTimeout = null, $referrer = null, $cookies = null)

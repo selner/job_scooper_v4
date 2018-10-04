@@ -52,7 +52,7 @@ class PluginExpedia extends \JobScooper\SitePlugins\AjaxSitePlugin
     }
 
 
-    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $resultsSection= $objSimpHTML->find("span[class='GF34SVYCIUH'] span");
         $totalItemsText = $resultsSection[0]->text();
@@ -63,12 +63,12 @@ class PluginExpedia extends \JobScooper\SitePlugins\AjaxSitePlugin
     }
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null|void
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $ret = null;
 

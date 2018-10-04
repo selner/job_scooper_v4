@@ -35,12 +35,12 @@ abstract class AbstractResumatorFall2017 extends \JobScooper\SitePlugins\Base\Si
     }
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return \JobScooper\DataAccess\JobPosting[]|null
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $retItems = parent::parseJobsListForPage($objSimpHTML);
 

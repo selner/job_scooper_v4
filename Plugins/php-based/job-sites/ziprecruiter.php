@@ -50,7 +50,7 @@ class PluginZipRecruiter extends \JobScooper\SitePlugins\AjaxSitePlugin
      * @return null|string
      * @throws \Exception
      */
-    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         sleep($this->additionalLoadDelaySeconds + 1);
 

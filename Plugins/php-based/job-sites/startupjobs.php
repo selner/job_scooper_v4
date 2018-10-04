@@ -43,12 +43,12 @@ class PluginStartupJobs extends \JobScooper\SitePlugins\AjaxSitePlugin
     }
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return int|null|string
      * @throws \Exception
      */
-    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseTotalResultsCount(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $nTotalResults = C__TOTAL_ITEMS_UNKNOWN__;
 

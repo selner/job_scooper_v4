@@ -17,7 +17,7 @@
 
 namespace JobScooper\SitePlugins;
 
-use JobScooper\Utils\SimpleHTMLHelper;
+use JobScooper\Utils\SimpleHtml\SimpleHTMLHelper;
 
 class AjaxMicrodataOnlyPlugin extends AjaxSitePlugin
 {
@@ -34,7 +34,7 @@ class AjaxMicrodataOnlyPlugin extends AjaxSitePlugin
      * This does the heavy lifting of parsing each job record from the
      * page's HTML it was passed.
      *
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null
      * @throws \Exception

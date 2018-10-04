@@ -24,15 +24,15 @@ abstract class AbstractWordPress extends \JobScooper\SitePlugins\AjaxSitePlugin
     protected $PaginationType = C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
 
     /**
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null
      * @throws \Exception
      */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHTMLHelper $objSimpHTML)
+    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $this->arrListingTagSetup['JobListingsPerPage'] =  array('Selector' => 'div.job_listings', 'Attribute' => 'data-per_page');
-        $count = \JobScooper\Utils\DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobListingsPerPage'], null, $this);
+        $count = \JobScooper\Utils\SimpleHtml\DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['JobListingsPerPage'], null, $this);
         if (!empty($count)) {
             $this->JobListingsPerPage = (int) $count;
         }

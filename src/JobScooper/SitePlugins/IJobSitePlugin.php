@@ -18,7 +18,7 @@
 namespace JobScooper\SitePlugins;
 
 // Declare the interface 'iJobSitePlugin'
-use JobScooper\Utils\SimpleHTMLHelper;
+use JobScooper\Utils\SimpleHtml\SimpleHTMLHelper;
 
 interface IJobSitePlugin
 {
@@ -32,7 +32,7 @@ interface IJobSitePlugin
      * parseTotalResultsCount returns the total number of listings that
      * the search returned by parsing the value from the returned HTML
      * *
-     * @param $objSimpHTML
+     * @param SimpleHTMLHelper $objSimpHTML
      * @return string|null
      */
     public function parseTotalResultsCount(SimpleHTMLHelper $objSimpHTML);
@@ -44,7 +44,7 @@ interface IJobSitePlugin
      * This does the heavy lifting of parsing each job record from the
      * page's HTML it was passed.
      * *
-     * @param \JobScooper\Utils\SimpleHTMLHelper $objSimpHTML
+     * @param SimpleHTMLHelper $objSimpHTML
      *
      * @return array|null|void
      * @throws \Exception
