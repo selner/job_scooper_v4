@@ -166,39 +166,41 @@ function getStateByCode($code)
     return $STATES_BY_CODE[$code];
 }
 
-/**
-* @param $code
-* @param bool $reverseMap
- *
- * @return mixed|null
-*/function getCountryCodeRemapping($code, $reverseMap=false)
-{
-	if (is_empty_value($code)) {
-		return null;
-	}
-
-    $COUNTRY_CODE_REMAPPINGS = array(
-        'GB' => 'UK'
-    );
-
-	$remapList = $COUNTRY_CODE_REMAPPINGS;
-    if($reverseMap === true) {
-    	$remapList = array_flip($COUNTRY_CODE_REMAPPINGS);
-    }
-
-    if (!array_key_exists($code, $remapList)) {
-        return null;
-    }
-
-    return $remapList[$code];
-}
-
 class GeoLocation extends BaseGeoLocation
 {
+
+    /**
+     * @param $code
+     * @param bool $reverseMap
+     *
+     * @return mixed|null
+     */
+    public static function getCountryCodeRemapping($code, $reverseMap=false)
+    {
+        if (is_empty_value($code)) {
+            return null;
+        }
+
+        $COUNTRY_CODE_REMAPPINGS = array(
+            'GB' => 'UK'
+        );
+
+        $remapList = $COUNTRY_CODE_REMAPPINGS;
+        if($reverseMap === true) {
+            $remapList = array_flip($COUNTRY_CODE_REMAPPINGS);
+        }
+
+        if (!array_key_exists($code, $remapList)) {
+            return null;
+        }
+
+        return $remapList[$code];
+    }
+
     public function getCountryCode()
     {
         $ret = parent::getCountryCode();
-        $remap = getCountryCodeRemapping($ret, false);
+        $remap = self::getCountryCodeRemapping($ret, false);
         if (!is_empty_value($remap)) {
             return $remap;
         }
@@ -208,7 +210,7 @@ class GeoLocation extends BaseGeoLocation
     public function setCountryCode($value)
     {
         if (!is_empty_value($value)) {
-            $remap=getCountryCodeRemapping(strtoupper($value), true);
+            $remap=self::getCountryCodeRemapping(strtoupper($value), true);
             if (!is_empty_value($remap)) {
                 parent::setCountryCode($remap);
             }

@@ -27,7 +27,6 @@ use Propel\Runtime\Propel;
 use Psr\Log\LogLevel;
 use JobScooper\DataAccess\UserJobMatch;
 use JobScooper\DataAccess\UserSearchSiteRunManager;
-use function JobScooper\DataAccess\getCountryCodeRemapping;
 use JobScooper\DataAccess\UserSearchSiteRun;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\SitePlugins\IJobSitePlugin;
@@ -464,7 +463,7 @@ abstract class SitePlugin implements IJobSitePlugin
 
         if (null !== $this->CountryCodes) {
             foreach ($this->CountryCodes as $k => $code) {
-                $remap = getCountryCodeRemapping($code);
+                $remap = GeoLocation::getCountryCodeRemapping($code);
                 if (!is_empty_value($remap)) {
                     $this->CountryCodes[$k] = $remap;
                 } else {
