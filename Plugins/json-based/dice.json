@@ -95,15 +95,6 @@
                 "US"
             ],
             "PluginExtendsClassName": "AbstractDice"
-        },
-        {
-            "JobSiteName": "DiceUK",
-            "BaseURL": "http://www.dice.com/",
-            "SourceURL": "https://uk.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION:{Place},{Region}***&sort=date&limit=100&radius=20&postedDate=3&limit=100&radius=20&postedDate=3",
-            "CountryCodes": [
-                "UK"
-            ],
-            "PluginExtendsClassName": "AbstractDice"
         }
     ]
 }
