@@ -199,9 +199,11 @@ class StageManager
 	                    $sitePlugin = null;
 						// make sure to clean up the references to each of the UserSiteSearchRun objects
 						// so we dont leave a DB connection open
-                        foreach(array_keys($siteRuns) as $k) {
-							$siteRuns[$k] = null;
-							unset($siteRuns[$k]);
+                        if(!is_empty_value($siteRuns)) {
+                            foreach(array_keys($siteRuns) as $k) {
+                                $siteRuns[$k] = null;
+                                unset($siteRuns[$k]);
+                            }
                         }
 						$user = null;
 						$siteRuns = null;
