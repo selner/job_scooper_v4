@@ -52,6 +52,7 @@ class DataNormalizer
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         try {
             $this->_markDuplicatesViaPython();
+            $this->_findLocationsViaPython();
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);
         } finally {
@@ -61,29 +62,53 @@ class DataNormalizer
         }
 
     }
-    
+
     /**
      * @throws \Exception
      */
     private function _markDuplicatesViaPython()
-	{
-	    try {
-	    	startLogSection('Calling python to dedupe new job postings...');
-			$runFile = 'pyJobNormalizer/mark_duplicates.py';
-			$params = [
-				'-c' => Settings::get_db_dsn()
-			];
-			
-			$results = PythonRunner::execScript($runFile, $params);
-	        LogMessage($results);
-			LogMessage('Python command call finished.');
+    {
+        try {
+            startLogSection('Calling python to dedupe new job postings...');
+            $runFile = 'pyJobNormalizer/mark_duplicates.py';
+            $params = [
+                '-c' => Settings::get_db_dsn()
+            ];
 
-	    } catch (\Exception $ex) {
-	        handleException($ex, null, false);
-	    } finally {
-	    	EndLogSection('Completed new job posting dedupe.');
-	    }
-	}
+            $results = PythonRunner::execScript($runFile, $params);
+            LogMessage($results);
+            LogMessage('Python command call finished.');
+
+        } catch (\Exception $ex) {
+            handleException($ex, null, false);
+        } finally {
+            EndLogSection('Completed new job posting dedupe.');
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function _findLocationsViaPython()
+    {
+        try {
+            startLogSection('Calling python to find & map missing locations...');
+            $runFile = 'pyJobNormalizer/set_geolocations.py';
+            $params = [
+                '-c' => Settings::get_db_dsn(),
+                '--server' => Settings::getValue('geocodeapi_server'),
+            ];
+
+            $results = PythonRunner::execScript($runFile, $params);
+            LogMessage($results);
+            LogMessage('Python command call finished.');
+
+        } catch (\Exception $ex) {
+            handleException($ex, null, false);
+        } finally {
+            EndLogSection('Completed finding and matching missing locations.');
+        }
+    }
 
 }
 
