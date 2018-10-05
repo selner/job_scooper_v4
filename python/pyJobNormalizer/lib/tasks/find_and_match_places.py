@@ -124,7 +124,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         return rows_updated
 
     def _update_missing_db_known_locs(self, locs):
-        print(u"Updating '{}' known locations who are missing geolocation details in the database...".format(len(locs)))
+        print(u"Updating {} known locations who are missing geolocation details in the database...".format(len(locs)))
         total_updated = 0
 
         try:
@@ -177,7 +177,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             r = None
 
     def _lookup_unknown_locations(self, locs, geocode_server):
-        print(u"Finding places for '{}' unknown locations ...".format(
+        print(u"Finding places for {} unknown locations ...".format(
             len(locs)))
         total_loc_found = 0
         total_loc_notfound = 0
@@ -192,7 +192,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 payload = {'query': unicode(loc)}
                 # headers = {'content-type': 'application/json'}
                 headers = {}
-                print(u"Looking up place location '{}".format(unicode(loc)))
+                print(u"Looking up place for location '{}".format(unicode(loc)))
                 kwargs = {
                     'url': u"{}/places/lookup".format(geocode_server),
                     'params':  payload,
@@ -228,16 +228,16 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                         rows_updated = self._update_mappings_for_loc(loc, locfacts)
                         total_jp_updated += rows_updated
                     else:
-                        print(u"TODO TODO TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
+                        print(u"... TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
                         total_loc_notfound += 1
                     # if not found place:
                     #   add to failed lookups dataset
                 else:
-                    print(u"TODO TODO TODO -- store failed lookups like '{}' to skip future failures".format(loc))
+                    print(u"... TODO -- store failed lookups like '{}' to skip future failures".format(loc))
                     total_loc_notfound += 1
 
         except Exception as e:
-            print(u"Exception occurred:{}".format(e))
+            print(u"Exception occurred: {}".format(e))
             raise e
 
         finally:
