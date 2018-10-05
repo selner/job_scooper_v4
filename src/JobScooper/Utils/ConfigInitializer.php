@@ -435,7 +435,7 @@ class ConfigInitializer
 			  'notification_delay' => 'NotificationFrequency',
 			  'keywords' => 'SearchKeywords',
 			  'search_locations' => 'SearchLocations'
-	            ]);
+            ]);
 		    if(array_key_exists('inputfiles', $userFacts)) {
 	            $inputFiles = User::parseConfigUserInputFiles($userFacts);
 	            $userFacts['InputFilesJson'] = encodeJson($inputFiles);
@@ -493,7 +493,7 @@ class ConfigInitializer
                 if(null !== $user_recs[$key_user])
                 {
 					$user_recs[$key_user] = $user_recs[$key_user]->toArray();
-                	$userDiff = array_diff_assoc($config_user, $user_recs[$key_user]);
+                	$userDiff = array_diff_assoc_recursive($config_user, $user_recs[$key_user]);
                 	if(!is_empty_value($userDiff)){
 	                    LogMessage("Updating user {$key_user} facts in database:  " . getArrayValuesAsString($userDiff));
     	                $updatedUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($key_user), $config_user, $overwriteFacts = true);
