@@ -483,19 +483,6 @@ class JobsAutoMarker
     }
 
     /**
-     * @param UserJobMatch $job
-     * @param $arrMatchData
-     * @throws PropelException
-     */
-    private function _updateKeywordMatchForSingleJob(UserJobMatch $job, $arrMatchData)
-    {
-        $job->setGoodJobTitleKeywordMatches($arrMatchData['GoodJobTitleKeywordMatches']);
-        $job->setBadJobTitleKeywordMatches($arrMatchData['BadJobTitleKeywordMatches']);
-
-        $job->save();
-    }
-
-    /**
      * Reads JSON encoded file with an array of UserJobMatch/JobPosting combo records named "jobs"
      * and updates the database with the values for each record
      *
@@ -570,7 +557,9 @@ class JobsAutoMarker
 	                                ->findOneOrCreate();
 	                            $dbMatch->setUserJobMatchId($id);
 	                        }
-	                        $this->_updateKeywordMatchForSingleJob($dbMatch, $arrMatchRecs[$id]);
+                            $dbMatch->setGoodJobTitleKeywordMatches($arrMatchRecs[$id]['GoodJobTitleKeywordMatches']);
+                            $dbMatch->setBadJobTitleKeywordMatches($arrMatchRecs[$id]['BadJobTitleKeywordMatches']);
+
 	                        $dbMatch->save();
 	                        $retUJMIds[] = $id;
 	                        unset($dbMatch);
@@ -581,9 +570,13 @@ class JobsAutoMarker
 	                    $con->commit();
 	                    // fetch a new connection
 	                    $con = Propel::getWriteConnection('default');
-	                }
+
+                        unset($dbRecsById);
+                    }
 	            }
 			}
+            unset($jobsToUpdate);
+            unset($arrMatchRecs);
             $totalMarked =  \count($retUJMIds);
 
             LogMessage("... updated {$totalMarked} user job matches loaded from json file '{$datafile}.");
