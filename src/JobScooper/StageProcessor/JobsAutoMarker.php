@@ -101,16 +101,6 @@ class JobsAutoMarker
     {
         $errs = array();
 
-        LogMessage('Clearing old auto-marked facts from jobs we are re-marking...');
-        try {
-            foreach ($results as $jobMatch) {
-                $jobMatch->clearUserMatchState();
-            }
-        } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
-            $errs[] = $ex;
-        }
-
         try {
             $this->_markJobsList_SetOutOfArea_($results);
         } catch (Exception $ex) {

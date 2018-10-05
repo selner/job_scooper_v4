@@ -36,52 +36,79 @@ class UserJobMatch extends BaseUserJobMatch
 {
     private $delim = ' | ';
 
+
+    /**
+     * @param mixed $value
+     * @return BaseUserJobMatch|UserJobMatch
+     */
+    public function addMatchedNegativeCompanyKeyword($value)
+    {
+        $this->setIsExcluded(true);
+        return parent::addMatchedNegativeCompanyKeyword($value);
+    }
+
+    /**
+     * @param mixed $value
+     * @return BaseUserJobMatch|UserJobMatch
+     */
+    public function addMatchedNegativeTitleKeyword($value)
+    {
+        $this->setIsExcluded(true);
+        return parent::addMatchedNegativeTitleKeyword($value);
+    }
+
+    /**
+     * @param mixed $value
+     * @return BaseUserJobMatch|UserJobMatch
+     */
+    public function addMatchedUserKeyword($value)
+    {
+        $this->isJobMatch(true);
+        return parent::addMatchedUserKeyword($value);
+    }
+
+    /**
+     * @param bool|int|string $v
+     * @return BaseUserJobMatch|UserJobMatch
+     */
+    public function setOutOfUserArea($v)
+    {
+        if(filter_var($v, FILTER_VALIDATE_BOOLEAN) === true) {
+            $this->setIsExcluded(true);
+        }
+        return parent::setOutOfUserArea($v);
+    }
+    
     /**
      *
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function updateUserMatchStatus()
+    public function recalcUserMatchStatus()
     {
+        $this->setIsJobMatch(false);
         $this->setIsExcluded(false);
 
-        if (\count($this->getMatchedUserKeywords()) > 0) {
+        if (!is_empty_value($this->getMatchedUserKeywords())) {
             $this->setIsJobMatch(true);
-        } else {
-            $this->setIsJobMatch(false);
         }
 
-        if (\count($this->getMatchedNegativeTitleKeywords()) > 0) {
+        if (!is_empty_value($this->getMatchedNegativeTitleKeywords())) {
             $this->setIsExcluded(true);
         }
 
-        if (\count($this->getMatchedNegativeCompanyKeywords()) > 0) {
+        if (!is_empty_value($this->getMatchedNegativeCompanyKeywords()) > 0) {
             $this->setIsExcluded(true);
         }
 
-        if ($this->isOutOfUserArea() === true) {
+        if(filter_var($this->isOutOfUserArea(), FILTER_VALIDATE_BOOLEAN) === true) {
             $this->setIsExcluded(true);
         }
 
         $jp = $this->getJobPostingFromUJM();
-        if (null !== $jp && !is_empty_value($jp->getDuplicatesJobPostingId())) {
+        if (null !== $jp && !is_empty_value($jp->getDuplicatesJobPostingId()) &&
+            filter_var($jp->getDuplicatesJobPostingId(), FILTER_VALIDATE_BOOLEAN) === true) {
             $this->setIsExcluded(true);
         }
-    }
-
-    /**
-     * Code to be run before persisting the object
-     * @param  ConnectionInterface $con
-     * @return boolean
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    public function preSave(ConnectionInterface $con = null)
-    {
-        $this->updateUserMatchStatus();
-
-        if (is_callable('parent::preSave')) {
-            return parent::preSave($con);
-        }
-        return true;
     }
 
     /**
@@ -109,7 +136,7 @@ class UserJobMatch extends BaseUserJobMatch
 
         $arrItem = array_merge_recursive_distinct($arrJobPost, $arrUserJobMatch);
 
-        if (!empty($limitToKeys) && is_array($limitToKeys)) {
+        if (!is_empty_value($limitToKeys) && is_array($limitToKeys)) {
             return array_subset_keys($arrItem, $limitToKeys);
         }
 
@@ -117,62 +144,101 @@ class UserJobMatch extends BaseUserJobMatch
     }
 
     /**
+     * @param mixed $value
+     * @return BaseUserJobMatch|UserJobMatch
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function removeMatchedNegativeTitleKeyword($value)
+    {
+        $ret = parent::removeMatchedNegativeTitleKeyword($value);
+        $this->recalcUserMatchStatus();
+        return $ret;
+    }
+
+    /**
+     * @param mixed $value
+     * @return BaseUserJobMatch|UserJobMatch
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function removeMatchedUserKeyword($value)
+    {
+        $ret = parent::removeMatchedUserKeyword($value);
+        $this->recalcUserMatchStatus();
+        return $ret;
+    }
+
+    /**
+     * @param mixed $value
+     * @return BaseUserJobMatch|UserJobMatch
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function removeMatchedNegativeCompanyKeyword($value)
+    {
+        $ret = parent::removeMatchedNegativeCompanyKeyword($value);
+        $this->recalcUserMatchStatus();
+        return $ret;
+    }
+
+    /**
      * @param array $v
-     *
-     * @return $this|\JobScooper\DataAccess\UserJobMatch
+     * @return BaseUserJobMatch|UserJobMatch|mixed
      */
     public function setMatchedNegativeTitleKeywords($v)
     {
-        if (!empty($v) && is_array($v)) {
-            foreach ($v as &$item) {
-                if (is_array($item)) {
-                    $item = implode(" ", $item);
-                }
-            }
-        } elseif (is_string($v)) {
-            $v = array($v);
-        } elseif (empty($v)) {
-            $v = array();
-        }
-
-        return parent::setMatchedNegativeTitleKeywords($v);
+        return $this->setArray($v, "MatchedNegativeTitleKeywords");
     }
 
     /**
      * @param array $v
-     *
-     * @return $this|\JobScooper\DataAccess\UserJobMatch
+     * @return BaseUserJobMatch|UserJobMatch|mixed
+     */
+    public function setMatchedNegativeCompanyKeywords($v)
+    {
+        return $this->setArray($v, "MatchedNegativeCompanyKeywords");
+    }
+
+
+    /**
+     * @param array $v
+     * @return BaseUserJobMatch|UserJobMatch|mixed
      */
     public function setMatchedUserKeywords($v)
     {
-        if (!empty($v) && is_array($v)) {
+        return $this->setArray($v, "MatchedUserKeywords");
+    }
+
+    /**
+     * @param $v
+     * @param $fact
+     * @return $this|mixed
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function setArray($v, $fact)
+    {
+        $factSet = "get{$fact}";
+        $orig = call_user_func(array($this, $factSet));
+
+        if($orig ===$v)
+            return $this;
+
+        if (!is_empty_value($v) && is_array($v)) {
             foreach ($v as &$item) {
                 if (is_array($item)) {
                     $item = implode(" ", $item);
                 }
             }
-        } elseif (is_string($v)) {
+            $this->setIsJobMatch(true);
+        } elseif (is_string($v) && !is_empty_value($v)) {
+            $this->setIsJobMatch(true);
             $v = array($v);
-        } elseif (empty($v)) {
+        } elseif (is_empty_value($v)) {
             $v = array();
+            $this->recalcUserMatchStatus();
         }
 
-        return parent::setMatchedUserKeywords($v);
+        $factSet = "parent::set{$fact}";
+        return call_user_func(array($this, $factSet), $v);
+
     }
 
-    /**
-     *
-     */
-    public function clearUserMatchState()
-    {
-    	$this->clearAllReferences();
-        $this->setIsJobMatch(null);
-        $this->setIsExcluded(null);
-        $this->setOutOfUserArea(null);
-		$this->setMatchedUserKeywords(null);
-		$this->setMatchedNegativeTitleKeywords(null);
-		$this->setMatchedNegativeCompanyKeywords(null);
-        $this->applyDefaultValues();
-        $this->applyDefaultValues();
-    }
 }
