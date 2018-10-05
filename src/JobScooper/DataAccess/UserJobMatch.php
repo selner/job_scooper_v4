@@ -78,19 +78,35 @@ class UserJobMatch extends BaseUserJobMatch
         }
         return parent::setOutOfUserArea($v);
     }
-    
+
+    public function autoUpdateIsJobMatch() {
+        $usrKwdMatches = $this->getMatchedUserKeywords();
+
+        if (is_empty_value($usrKwdMatches)) {
+            $this->setIsJobMatch(false);
+        } elseif(is_array($usrKwdMatches) &&  strlen(trim(join("", $usrKwdMatches))) > 0) {
+            $this->setIsJobMatch(true);
+        }
+        else {
+            $this->setIsJobMatch(false);
+        }
+    }
+
+    public function preSave(ConnectionInterface $con = null)
+    {
+        $this->autoUpdateIsJobMatch();
+        return parent::preSave($con);
+    }
+
     /**
      *
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function recalcUserMatchStatus()
     {
-        $this->setIsJobMatch(false);
         $this->setIsExcluded(false);
 
-        if (!is_empty_value($this->getMatchedUserKeywords())) {
-            $this->setIsJobMatch(true);
-        }
+        $this->autoUpdateIsJobMatch();
 
         if (!is_empty_value($this->getMatchedNegativeTitleKeywords())) {
             $this->setIsExcluded(true);
@@ -227,9 +243,7 @@ class UserJobMatch extends BaseUserJobMatch
                     $item = implode(" ", $item);
                 }
             }
-            $this->setIsJobMatch(true);
         } elseif (is_string($v) && !is_empty_value($v)) {
-            $this->setIsJobMatch(true);
             $v = array($v);
         } elseif (is_empty_value($v)) {
             $v = array();
