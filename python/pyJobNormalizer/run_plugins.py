@@ -76,8 +76,8 @@ def runPluginForUser(plug, configini, outpath, stages):
         # RUNCMD = " ".join(RUNARGS)
 
         # cmd = RUNCMD.format(plug, configini, outpath)
-        print("\trunning {} plugin".format(plugin))
-        print ("\tcalling: php {}".format(" ".join(RUNARGS)))
+        print(u"\trunning {} plugin".format(plugin))
+        print (u"\tcalling: php {}".format(" ".join(RUNARGS)))
 
         # file = "{}_runlog_{}.log".format(plug, datetime.datetime.now().strftime("%m-%d-%Y") + "_")
         # outfile = os.path.join(outpath, f)
@@ -99,14 +99,14 @@ def runPluginForUser(plug, configini, outpath, stages):
         # print('Return code:', p.returncode)
 
 
-def save_run_log(outpath=None, plugin=None, textdata=None, encoding='utf-8'):
+def save_run_log(outpath=None, name=None, textdata=None, encoding='utf-8'):
     """
         Writes a file to disk with the text passed.  If filepath is not specified, the filename will
         be <testname>_results.txt.
     :return: the path of the file
     """
 
-    logfile = "{}_run.log".format(plugin)
+    logfile = u"{}_run.log".format(name)
     outfile = os.path.join(outpath, logfile)
     try:
         f = codecs.open(outfile, encoding=encoding, mode='w+')
@@ -117,10 +117,11 @@ def save_run_log(outpath=None, plugin=None, textdata=None, encoding='utf-8'):
 
     return outfile
 
+
 if __name__ == '__main__':
     print " ".join(sys.argv)
     arguments = docopt(cli_usage, version='0.1.1rc')
-    print ("Run Plugins called with arguments: " + str(arguments))
+    print (u"Run Plugins called with arguments: " + str(arguments))
 
     userKey = arguments['--user']
 
@@ -143,12 +144,12 @@ if __name__ == '__main__':
         os.makedirs(outdir)
     
     plugs = getPluginFiles()
-    print ("Found {} plugins to run.".format(len(plugs)))
-    print ("Parameters:  inidir={}; outdir={}; userKey={}, stages={}".format(inidir, outdir, userKey, stages))
+    print (u"Found {} plugins to run.".format(len(plugs)))
+    print (u"Parameters:  inidir={}; outdir={}; userKey={}, stages={}".format(inidir, outdir, userKey, stages))
     for fname in os.listdir(inidir):
         f = os.path.join(inidir, fname)
         if os.path.isfile(f) and f.endswith(".ini") and (userKey is None or userKey in f):
             nextcfg = f
-            print("Running plugins for config file {}".format(nextcfg))
+            print(u"Running plugins for config file {}".format(nextcfg))
             for plugin in plugs:
                 runPluginForUser(plugin, nextcfg, outdir, stages)

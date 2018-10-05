@@ -139,17 +139,17 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
 
         self.init_connection(**kwargs)
 
-        print("Processing job postings for duplicates from database {}".format(self.dbparams))
+        print(u"Processing job postings for duplicates from database {}".format(self.dbparams))
 
-        print("Loading job list to match...")
+        print(u"Loading job list to match...")
         self.load_from_database()
 
     def load_from_database(self):
         backwardsdate = datetime.now() - timedelta(days=14)
 
-        print("Connecting to database...")
+        print(u"Connecting to database...")
 
-        querysql = """
+        querysql = u"""
             SELECT 
                 jobposting_id as `JobPostingId`, 
                 key_company_and_title as `KeyCompanyTitle`, 
@@ -171,7 +171,7 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
         self.prepare_data(jobsdata)
 
     def update_database(self):
-        print("Updating {} duplicate job posts in the database...".format(
+        print(u"Updating {} duplicate job posts in the database...".format(
             len(self.output_data["duplicate_job_postings"])))
         nskipped = 0
         nupdated = 0
@@ -184,7 +184,7 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
                 # marked as duplicates
                 #
                 if not rec['WasDuplicate']:
-                    updateStatement = """
+                    updateStatement = u"""
                         UPDATE jobposting 
                         SET duplicates_posting_id={} 
                         WHERE jobposting_id={}""".format(rec['isDuplicateOf'], rec['JobPostingId'])
@@ -195,12 +195,12 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
                     nskipped += 1
 
         except Exception as e:
-            print("Exception occurred:{}".format(e))
+            print(u"Exception occurred:{}".format(e))
             raise e
 
         finally:
             self.close_connection()
-            print("Updated {} new duplicates in the database.  Skipped {} previously marked as duplicate.".format(nupdated, nskipped))
+            print(u"Updated {} new duplicates in the database.  Skipped {} previously marked as duplicate.".format(nupdated, nskipped))
 
 
 class DedupeJobPostingFile(BaseTaskDedupeJobPostings):
@@ -210,22 +210,22 @@ class DedupeJobPostingFile(BaseTaskDedupeJobPostings):
         if 'inputfile' in kwargs:
             self.inputfile = kwargs['inputfile']
         else:
-            raise Exception("No input file specified for processing.")
+            raise Exception(u"No input file specified for processing.")
 
-        print("Processing job postings for duplicates from input file {}".format(self.inputfile))
+        print(u"Processing job postings for duplicates from input file {}".format(self.inputfile))
 
-        print("Loading job list to match...")
+        print(u"Loading job list to match...")
         self.load_jobpostings()
 
     def load_jobpostings(self):
 
         jobsdata = {}
         if str(self.inputfile).endswith(".csv"):
-            print("Loading jobs from CSV file {}".format(self.inputfile))
+            print(u"Loading jobs from CSV file {}".format(self.inputfile))
             jobsdata = load_ucsv(self.inputfile, fieldnames=None, delimiter=",", quotechar="\"",
                                                              keyfield=DATA_KEY_JOBPOSTINGS_KEYFIELD)
         elif str(self.inputfile).endswith(".json"):
-            print("Loading jobs from JSON file {}".format(self.inputfile))
+            print(u"Loading jobs from JSON file {}".format(self.inputfile))
             inputdata = load_json(self.inputfile)
             if inputdata:
                 if isinstance(inputdata, dict):
@@ -233,10 +233,10 @@ class DedupeJobPostingFile(BaseTaskDedupeJobPostings):
                             inputdata[DATA_KEY_JOBPOSTINGS]) > 0):
                         jobsdata = inputdata[DATA_KEY_JOBPOSTINGS]
         else:
-            raise Exception("Unknown input data file format: {}".format(self.inputfile))
+            raise Exception(u"Unknown input data file format: {}".format(self.inputfile))
 
         inputdata = None
-        print("Loaded {} total jobs to deduplicate.".format(len(jobsdata)))
+        print(u"Loaded {} total jobs to deduplicate.".format(len(jobsdata)))
 
         self.prepare_data(jobsdata)
         jobsdata = None

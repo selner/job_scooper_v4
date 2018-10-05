@@ -100,7 +100,7 @@ def loadcsv(csvfileName, rowkeyname = None):
 
     """
 
-    print "Loading " + csvfileName
+    print(u"Loading {}...".format(csvfileName))
     csv_fp = open(csvfileName, "rbU")
     dictRecords = {}
     fields = {}
@@ -119,7 +119,7 @@ def loadcsv(csvfileName, rowkeyname = None):
         print err
         pass
 
-    print "Loaded " + str(len(dictRecords)) + " rows from " + csvfileName
+    print(u"Loaded {} rows from {}.".format(len(dictRecords), csvfileName))
 
     return { 'fieldnames' : fields, 'dict' : dictRecords }
 
@@ -135,7 +135,8 @@ def writedicttocsv(csvfileName, data, keys=None):
     Returns:
 
     """
-    print "Writing " + str(len(data)) + " rows to file " + csvfileName +"..."
+    print(u"Writing {} rows to file {}...".format(len(data), csvfileName))
+
     if keys is None:
         item = data.itervalues().next()
         keys = item.keys()

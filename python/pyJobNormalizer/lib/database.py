@@ -65,7 +65,7 @@ class DatabaseMixin:
     def connection(self):
         if not self._connection:
             if not self.dbparams:
-                raise Exception("Connection must be initialized before it can be accessed.")
+                raise Exception(u"Connection must be initialized before it can be accessed.")
 
             self._connection = pymysql.connect(**self.dbparams)
 
@@ -80,7 +80,7 @@ class DatabaseMixin:
         result = {}
 
         try:
-            print("Querying database: {}".format(querysql))
+            print(u"Querying database: {}".format(querysql))
 
             with self.connection.cursor() as cursor:
                 cursor.execute(querysql)
@@ -113,7 +113,7 @@ class DatabaseMixin:
 
     def get_table_columns(self, tablename):
         # print("Running command: {}".format(querysql))
-        column_data = self.fetch_all_from_query("SHOW columns from %s" % tablename)
+        column_data = self.fetch_all_from_query(u"SHOW columns from %s" % tablename)
 
         return set(col['Field'] for col in column_data)
 
@@ -136,14 +136,14 @@ class DatabaseMixin:
             columns = ", ".join(matched_keys)
             values_template = ", ".join(["%s"] * len(matched_keys))
 
-            sql = "insert into %s (%s) values (%s)" % (
+            sql = u"insert into %s (%s) values (%s)" % (
                 tablename, columns, values_template)
             values = tuple(rowdict[key] for key in matched_keys)
             with self.connection.cursor() as cursor:
                 cursor.execute(sql, values)
                 inserted_id = cursor.lastrowid
                 if inserted_id:
-                    result = self.fetch_all_from_query("SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id))
+                    result = self.fetch_all_from_query(u"SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id))
                     if result and len(result) > 0:
                         return result[0]
                     else:

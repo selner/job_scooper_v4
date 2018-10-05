@@ -56,4 +56,4 @@ if __name__ == '__main__':
         matcher.dedupe_jobs()
         matcher.update_database()
     else:
-        print("Unable to deduplicate job postings.  Missing script arguments.")
+        print(u"Unable to deduplicate job postings.  Missing script arguments.")

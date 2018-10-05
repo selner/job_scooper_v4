@@ -62,28 +62,28 @@ class TaskMatchJobsToKeywords:
         if 'inputfile' in kwargs:
             self.inputfile = kwargs['inputfile']
         else:
-            raise Exception("No input file specified for processing.")
+            raise Exception(u"No input file specified for processing.")
 
         if 'outputfile' in kwargs:
             self.outputfile = kwargs['outputfile']
 
-        print("Loading job list to match...")
+        print(u"Loading job list to match...")
         self.load_jobs()
 
         self.mark_title_matches()
 
     def mark_title_matches(self):
 
-        print("Loading user keywords for matching...")
+        print(u"Loading user keywords for matching...")
         self.load_keywords()
 
-        print("Matching job list titles vs. user search keywords ...")
+        print(u"Matching job list titles vs. user search keywords ...")
         self.mark_positive_matches()
 
-        print("Matching job list titles vs. user negative keyword matches...")
+        print(u"Matching job list titles vs. user negative keyword matches...")
         self.mark_negative_matches()
 
-        print("Matching completed.")
+        print(u"Matching completed.")
 
     def get_output_data(self):
         return {
@@ -93,7 +93,7 @@ class TaskMatchJobsToKeywords:
         }
 
     def exportResultsData(self):
-        print("Exporting final match results to {}".format(self.outputfile))
+        print(u"Exporting final match results to {}".format(self.outputfile))
         write_json(self.outputfile, self.get_output_data())
 
         return self.outputfile
@@ -165,16 +165,16 @@ class TaskMatchJobsToKeywords:
             else:
                 self.jobs[jobid][keyResult] = None
                 nnotmatched += 1
-        print("{} match results:  {}/{} matched, {}/{} not matched".format(keySource, nmatched, len(self.jobs), nnotmatched, len(self.jobs)))
+        print(u"{} match results:  {}/{} matched, {}/{} not matched".format(keySource, nmatched, len(self.jobs), nnotmatched, len(self.jobs)))
 
 
     def mark_positive_matches(self):
-        print( "Marking jobs that match {} positive title keywords...".format(len(self.keywords)))
+        print(u"Marking jobs that match {} positive title keywords...".format(len(self.keywords)))
 
         self.set_keyword_matches(self.keywords, "TitleTokens", "MatchedUserKeywords")
 
     def mark_negative_matches(self):
-        print( "Marking jobs that match {} negative title keywords...".format(len(self.negative_keywords)))
+        print(u"Marking jobs that match {} negative title keywords...".format(len(self.negative_keywords)))
         self.set_keyword_matches(self.negative_keywords, "TitleTokens", "MatchedNegativeTitleKeywords")
 
     def load_keywords(self):
@@ -204,7 +204,7 @@ class TaskMatchJobsToKeywords:
             outData = self.tokenizer.tokenizeStrings(self.negative_keywords, 'keyword', 'tokens')
             self.negative_keywords = outData
 
-        print("Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords), len(self.negative_keywords)))
+        print(u"Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords), len(self.negative_keywords)))
 
 
 # class TaskMatchJobTitlesFromDB(TaskMatchJobsToKeywords, DatabaseMixin)

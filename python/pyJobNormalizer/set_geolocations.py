@@ -42,4 +42,4 @@ if __name__ == '__main__':
         matcher = FindPlacesFromDBLocationsTask()
         matcher.update_all_locations(**args)
     else:
-        print("Unable to update locations for job postings.  Missing script arguments.")
+        print(u"Unable to update locations for job postings.  Missing script arguments.")
