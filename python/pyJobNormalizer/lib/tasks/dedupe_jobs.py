@@ -34,7 +34,6 @@ JSON_DEDUPE_FIELDS = ["JobPostingId", "Title", "Company", "JobSite", "GeoLocatio
 
 
 class BaseTaskDedupeJobPostings:
-
     connecturi = None
     keywords = {}
     negative_keywords = {}
@@ -55,32 +54,32 @@ class BaseTaskDedupeJobPostings:
         self.outputfile = outputfile
 
     def dedupe_jobs(self):
-        dfJobs = pandas.DataFrame.from_records(self.jobs.values(), index="JobPostingId")
-        dfJobs["JobPostingId"] = dfJobs.index
-        dfJobs.sort_values('JobPostingId', ascending=True)
+        dfjobs = pandas.DataFrame.from_records(self.jobs.values(), index="JobPostingId")
+        dfjobs["JobPostingId"] = dfjobs.index
+        dfjobs.sort_values('JobPostingId', ascending=True)
 
         print("Marking jobs as duplicate...")
-        dfJobs["is_duplicate"] = dfJobs.duplicated({"Company", "TitleTokensString", "GeoLocationId"}, keep="first")
-        dfJobs["is_duplicate_stringver"] = dfJobs.duplicated("CompanyTitleGeoLocation", keep="first")
-        dictOrigPosts = dfJobs[(dfJobs["is_duplicate"] == False)].to_dict(orient="index")
-        dictDupePosts = dfJobs[(dfJobs["is_duplicate"] == True)].to_dict(orient="index")
-        dictOrigByCompTitle = {v["CompanyTitleGeoLocation"]: v["JobPostingId"] for (n, v) in dictOrigPosts.items() if
+        dfjobs["is_duplicate"] = dfjobs.duplicated({"Company", "TitleTokensString", "GeoLocationId"}, keep="first")
+        dfjobs["is_duplicate_stringver"] = dfjobs.duplicated("CompanyTitleGeoLocation", keep="first")
+        dict_orig_posts = dfjobs[(dfjobs["is_duplicate"] == False)].to_dict(orient="index")
+        dict_dupe_posts = dfjobs[(dfjobs["is_duplicate"] == True)].to_dict(orient="index")
+        dict_orig_by_comptitle = {v["CompanyTitleGeoLocation"]: v["JobPostingId"] for (n, v) in dict_orig_posts.items() if
                                "CompanyTitleGeoLocation" in v.keys()}
 
         print("Preparing duplicate job post results for export...")
-        retDupesByJobId = {}
-        for jobid in dictDupePosts:
-            item = dictDupePosts[jobid]
-            strCompTitle = item["CompanyTitleGeoLocation"]
-            retDupesByJobId[jobid] = {
+        ret_dupes_by_jobid = {}
+        for jobid in dict_dupe_posts:
+            item = dict_dupe_posts[jobid]
+            str_comptitle = item["CompanyTitleGeoLocation"]
+            ret_dupes_by_jobid[jobid] = {
                 "JobPostingId": jobid,
-                "CompanyTitleGeoLocation": strCompTitle,
-                "isDuplicateOf": dictOrigByCompTitle[strCompTitle],
+                "CompanyTitleGeoLocation": str_comptitle,
+                "isDuplicateOf": dict_orig_by_comptitle[str_comptitle],
                 "WasDuplicate": item["WasDuplicate"]
             }
 
-        print("{} / {} job postings have been marked as duplicate".format(len(retDupesByJobId), len(self.jobs)))
-        self.output_data = {"duplicate_job_postings": retDupesByJobId}
+        print("{} / {} job postings have been marked as duplicate".format(len(ret_dupes_by_jobid), len(self.jobs)))
+        self.output_data = {"duplicate_job_postings": ret_dupes_by_jobid}
 
     def export_results(self):
         print("Exporting final match results to {}".format(self.outputfile))
@@ -93,7 +92,7 @@ class BaseTaskDedupeJobPostings:
         print("Tokenizing {} job titles....".format(len(jobsdata)))
         try:
             tokenizer = Tokenizer()
-            jobsdata = tokenizer.tokenizeStrings(jobsdata, u'Title', u'TitleTokens', u'set')
+            jobsdata = tokenizer.tokenize_strings(jobsdata, u'Title', u'TitleTokens', u'set')
         except Exception, ex:
             print("Error tokenizing strings:  {}".format(ex))
             raise ex
@@ -125,7 +124,8 @@ class BaseTaskDedupeJobPostings:
                     loc = subitem["LocationDisplayValue"]
                 else:
                     loc = "NOLOCATION"
-                subitem["CompanyTitleGeoLocation"] = u"{}_{}_{}".format(subitem["TitleTokensString"], subitem["CompanyCleaned"], loc)
+                subitem["CompanyTitleGeoLocation"] = u"{}_{}_{}".format(subitem["TitleTokensString"],
+                                                                        subitem["CompanyCleaned"], loc)
                 self.jobs[rowkey] = subitem
         jobsdata = None
 
@@ -184,12 +184,12 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
                 # marked as duplicates
                 #
                 if not rec['WasDuplicate']:
-                    updateStatement = u"""
+                    statement = u"""
                         UPDATE jobposting 
                         SET duplicates_posting_id={} 
                         WHERE jobposting_id={}""".format(rec['isDuplicateOf'], rec['JobPostingId'])
 
-                    self.run_command(updateStatement, close_connection=False)
+                    self.run_command(statement, close_connection=False)
                     nupdated += 1
                 else:
                     nskipped += 1
@@ -200,7 +200,8 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
 
         finally:
             self.close_connection()
-            print(u"Updated {} new duplicates in the database.  Skipped {} previously marked as duplicate.".format(nupdated, nskipped))
+            print(u"Updated {} new duplicates in the database.  Skipped {} previously marked as duplicate.".format(
+                nupdated, nskipped))
 
 
 class DedupeJobPostingFile(BaseTaskDedupeJobPostings):
@@ -223,7 +224,7 @@ class DedupeJobPostingFile(BaseTaskDedupeJobPostings):
         if str(self.inputfile).endswith(".csv"):
             print(u"Loading jobs from CSV file {}".format(self.inputfile))
             jobsdata = load_ucsv(self.inputfile, fieldnames=None, delimiter=",", quotechar="\"",
-                                                             keyfield=DATA_KEY_JOBPOSTINGS_KEYFIELD)
+                                 keyfield=DATA_KEY_JOBPOSTINGS_KEYFIELD)
         elif str(self.inputfile).endswith(".json"):
             print(u"Loading jobs from JSON file {}".format(self.inputfile))
             inputdata = load_json(self.inputfile)
@@ -240,4 +241,3 @@ class DedupeJobPostingFile(BaseTaskDedupeJobPostings):
 
         self.prepare_data(jobsdata)
         jobsdata = None
-

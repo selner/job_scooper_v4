@@ -38,4 +38,4 @@ if __name__ == '__main__':
     arguments = docopt(cli_usage, version='0.1.1rc')
 
     matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""), outputfile=arguments["--output"].replace("'", ""))
-    matcher.exportResultsData()
+    matcher.export_results()

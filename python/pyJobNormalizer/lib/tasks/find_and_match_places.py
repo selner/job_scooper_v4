@@ -21,7 +21,6 @@ from ..database import DatabaseMixin
 from urllib import urlencode
 import requests
 
-
 MAX_RETRIES = 3
 PLACE_DETAIL_GEOCODE_MAPPING = {
     "formatted_address": "display_name",
@@ -98,17 +97,19 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             """
 
         result = self.fetch_all_from_query(querysql)
-        locs_needing_setting = set([l["Location"] for l in result if l["Location"] and l["Location"] in self._location_mapping.keys()])
+        locs_needing_setting = set(
+            [l["Location"] for l in result if l["Location"] and l["Location"] in self._location_mapping.keys()])
 
         if len(locs_needing_setting) > 0:
             self._update_missing_db_known_locs(locs_needing_setting)
 
-        locs_needing_lookup = set([l["Location"] for l in result if l["Location"] and l["Location"] not in self._location_mapping.keys()])
+        locs_needing_lookup = set(
+            [l["Location"] for l in result if l["Location"] and l["Location"] not in self._location_mapping.keys()])
         if len(locs_needing_lookup) > 0:
             self._lookup_unknown_locations(locs_needing_lookup, geocode_server)
 
     def _update_mappings_for_loc(self, loc, locfacts):
-        updateStatement = u"""
+        statement = u"""
             UPDATE jobposting
             SET 
                 geolocation_id={},
@@ -118,9 +119,9 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 geolocation_id IS NULL
             """.format(locfacts['GeoLocationId'], locfacts['DisplayName'], loc)
 
-        rows_updated = self.run_command(updateStatement, close_connection=False)
+        rows_updated = self.run_command(statement, close_connection=False)
         print(u"Updated {} rows missing information for '{} ({})'".format(rows_updated, loc,
-                                                                         unicode(locfacts)))
+                                                                          unicode(locfacts)))
         return rows_updated
 
     def _update_missing_db_known_locs(self, locs):
@@ -143,7 +144,6 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 u"Updated {} job postings in the database that were missing location details for {} known locations.".format(
                     total_updated, len(locs)))
 
-
     def call_geocode_api(self, **kwargs):
         results = None
         r = None
@@ -161,7 +161,8 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         except requests.exceptions.Timeout, t:
             if retries < MAX_RETRIES:
-                print(u"Warning:  API request '{}' timed out on retry #.   Retrying {} more times...".format(r.url, MAX_RETRIES - retries))
+                print(u"Warning:  API request '{}' timed out on retry #.   Retrying {} more times...".format(r.url,
+                                                                                                             MAX_RETRIES - retries))
                 retries += 1
                 kwargs['retry_count'] = retries
                 self.call_geocode_api(**kwargs)
@@ -195,7 +196,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 print(u"Looking up place for location '{}".format(unicode(loc)))
                 kwargs = {
                     'url': u"{}/places/lookup".format(geocode_server),
-                    'params':  payload,
+                    'params': payload,
                     'headers': headers,
                     'timeout': 30
                 }
@@ -204,13 +205,13 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 place_details = self.call_geocode_api(**kwargs)
                 print(u"... place returned from API: {}".format(unicode(place_details)))
 
-                if place_details and len(place_details) > 0:   # if found place:
+                if place_details and len(place_details) > 0:  # if found place:
 
                     #   insert GeoLocation into DB
-                    geolocfacts = { PLACE_DETAIL_GEOCODE_MAPPING[pkey]: unicode(place_details[pkey]) for pkey in
+                    geolocfacts = {PLACE_DETAIL_GEOCODE_MAPPING[pkey]: unicode(place_details[pkey]) for pkey in
                                    place_details.keys() if pkey in PLACE_DETAIL_GEOCODE_MAPPING.keys() and
                                    place_details[pkey] is not None
-                                  }
+                                   }
                     if geolocfacts and len(geolocfacts) > 0:
                         print(u"... inserting new geolocation = {}".format(unicode(geolocfacts)))
 
@@ -243,6 +244,6 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         finally:
             self.close_connection()
             print(
-               u"Found places for {} / {} locations; could not find {} / {} locations.  Updated {} job postings based "
-               u"on new locations found.".format(
+                u"Found places for {} / {} locations; could not find {} / {} locations.  Updated {} job postings based "
+                u"on new locations found.".format(
                     total_loc_found, len(locs), total_loc_notfound, len(locs), total_jp_updated))

@@ -24,7 +24,6 @@ import subprocess
 import datetime
 import codecs
 
-
 cli_usage = """
 Usage:
   run_plugins.py --configdir <string> [--outdir <string> --user <string> --stages <string>]
@@ -41,7 +40,7 @@ Options:
 """
 
 
-def getPluginFiles():
+def get_plugin_files():
     """
 
     Returns:
@@ -52,51 +51,53 @@ def getPluginFiles():
     for root, dirs, files in os.walk(plugindir):
         for d in dirs:
             dirpath = os.path.join(root, d)
-            for f in files:
-                fname = os.path.basename(f)
-                basef = fname.split(".")[0]
+            for fitem in files:
+                itemname = os.path.basename(fitem)
+                basef = itemname.split(".")[0]
 
-                filepath = os.path.join(root, d, f)
+                filepath = os.path.join(root, d, fitem)
                 plugins[basef] = filepath
     return plugins
 
-def runPluginForUser(plug, configini, outpath, stages):
-        """
 
-        Args:
-            plug:
-            configini:
-            outpath:
-            stages:
-        """
-        RUNARGS = ["php", "/opt/jobs_scooper/runJobs.php", "-days 3", "--use_config_ini " + configini, "-o " + outpath, "-" + plugin]
-        if stages:
-            RUNARGS.append("--stages {}".format(stages))
+def run_plugin_for_user(plug, configini, outpath, run_stages):
+    """
 
-        # RUNCMD = " ".join(RUNARGS)
+    Args:
+        plug:
+        configini:
+        outpath:
+        run_stages:
+    """
+    run_args = ["php", "/opt/jobs_scooper/runJobs.php", "-days 3", "--use_config_ini " + configini, "-o " + outpath,
+               "-" + plugin]
+    if run_stages:
+        run_args.append("--stages {}".format(run_stages))
 
-        # cmd = RUNCMD.format(plug, configini, outpath)
-        print(u"\trunning {} plugin".format(plugin))
-        print (u"\tcalling: php {}".format(" ".join(RUNARGS)))
+    # RUNCMD = " ".join(run_args)
 
-        # file = "{}_runlog_{}.log".format(plug, datetime.datetime.now().strftime("%m-%d-%Y") + "_")
-        # outfile = os.path.join(outpath, f)
-        try:
-            # f = codecs.open(outfile, encoding='utf-8', mode='w')
-            p = subprocess.Popen(args=RUNARGS,  stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT,
-                                 stdin=subprocess.PIPE)
+    # cmd = RUNCMD.format(plug, configini, outpath)
+    print(u"\trunning {} plugin".format(plugin))
+    print (u"\tcalling: php {}".format(" ".join(run_args)))
 
-            resp = p.communicate()[0]
-            # dresp = resp.split("\n")
-            # print ("Last logged lines: " + "\n".join(dresp[0:5]))
-            save_run_log(outpath, plugin, resp)
-            # f.close()
-        except:
-            pass
+    # file = "{}_runlog_{}.log".format(plug, datetime.datetime.now().strftime("%m-%d-%Y") + "_")
+    # outfile = os.path.join(outpath, f)
+    try:
+        # f = codecs.open(outfile, encoding='utf-8', mode='w')
+        p = subprocess.Popen(args=run_args, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
+                             stdin=subprocess.PIPE)
 
-        # print('Response: ', pp.pprint(dresp))
-        # print('Return code:', p.returncode)
+        resp = p.communicate()[0]
+        # dresp = resp.split("\n")
+        # print ("Last logged lines: " + "\n".join(dresp[0:5]))
+        save_run_log(outpath, plugin, resp)
+        # f.close()
+    except:
+        pass
+
+    # print('Response: ', pp.pprint(dresp))
+    # print('Return code:', p.returncode)
 
 
 def save_run_log(outpath=None, name=None, textdata=None, encoding='utf-8'):
@@ -109,9 +110,9 @@ def save_run_log(outpath=None, name=None, textdata=None, encoding='utf-8'):
     logfile = u"{}_run.log".format(name)
     outfile = os.path.join(outpath, logfile)
     try:
-        f = codecs.open(outfile, encoding=encoding, mode='w+')
-        f.write(textdata)
-        f.close()
+        fout = codecs.open(outfile, encoding=encoding, mode='w+')
+        fout.write(textdata)
+        fout.close()
     except:
         pass
 
@@ -142,8 +143,8 @@ if __name__ == '__main__':
     outdir = os.path.join(outdir, "plugin_run_logs", datetime.datetime.now().strftime("%m-%d-%Y"))
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
-    
-    plugs = getPluginFiles()
+
+    plugs = get_plugin_files()
     print (u"Found {} plugins to run.".format(len(plugs)))
     print (u"Parameters:  inidir={}; outdir={}; userKey={}, stages={}".format(inidir, outdir, userKey, stages))
     for fname in os.listdir(inidir):
@@ -152,4 +153,4 @@ if __name__ == '__main__':
             nextcfg = f
             print(u"Running plugins for config file {}".format(nextcfg))
             for plugin in plugs:
-                runPluginForUser(plugin, nextcfg, outdir, stages)
+                run_plugin_for_user(plugin, nextcfg, outdir, stages)

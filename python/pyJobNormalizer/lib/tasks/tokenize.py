@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 
-from ..helpers import loadcsv, writedicttocsv
+from lib.helpers import loadcsv
 import nltk
 import codecs
 import string
@@ -26,65 +26,64 @@ from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 import os
 
-
 states = {
-        'AK': 'Alaska',
-        'AL': 'Alabama',
-        'AR': 'Arkansas',
-        'AS': 'American Samoa',
-        'AZ': 'Arizona',
-        'CA': 'California',
-        'CO': 'Colorado',
-        'CT': 'Connecticut',
-        'DC': 'District of Columbia',
-        'DE': 'Delaware',
-        'FL': 'Florida',
-        'GA': 'Georgia',
-        'GU': 'Guam',
-        'HI': 'Hawaii',
-        'IA': 'Iowa',
-        'ID': 'Idaho',
-        'IL': 'Illinois',
-        'IN': 'Indiana',
-        'KS': 'Kansas',
-        'KY': 'Kentucky',
-        'LA': 'Louisiana',
-        'MA': 'Massachusetts',
-        'MD': 'Maryland',
-        'ME': 'Maine',
-        'MI': 'Michigan',
-        'MN': 'Minnesota',
-        'MO': 'Missouri',
-        'MP': 'Northern Mariana Islands',
-        'MS': 'Mississippi',
-        'MT': 'Montana',
-        'NA': 'National',
-        'NC': 'North Carolina',
-        'ND': 'North Dakota',
-        'NE': 'Nebraska',
-        'NH': 'New Hampshire',
-        'NJ': 'New Jersey',
-        'NM': 'New Mexico',
-        'NV': 'Nevada',
-        'NY': 'New York',
-        'OH': 'Ohio',
-        'OK': 'Oklahoma',
-        'OR': 'Oregon',
-        'PA': 'Pennsylvania',
-        'PR': 'Puerto Rico',
-        'RI': 'Rhode Island',
-        'SC': 'South Carolina',
-        'SD': 'South Dakota',
-        'TN': 'Tennessee',
-        'TX': 'Texas',
-        'UT': 'Utah',
-        'VA': 'Virginia',
-        'VI': 'Virgin Islands',
-        'VT': 'Vermont',
-        'WA': 'Washington',
-        'WI': 'Wisconsin',
-        'WV': 'West Virginia',
-        'WY': 'Wyoming'
+    'AK': 'Alaska',
+    'AL': 'Alabama',
+    'AR': 'Arkansas',
+    'AS': 'American Samoa',
+    'AZ': 'Arizona',
+    'CA': 'California',
+    'CO': 'Colorado',
+    'CT': 'Connecticut',
+    'DC': 'District of Columbia',
+    'DE': 'Delaware',
+    'FL': 'Florida',
+    'GA': 'Georgia',
+    'GU': 'Guam',
+    'HI': 'Hawaii',
+    'IA': 'Iowa',
+    'ID': 'Idaho',
+    'IL': 'Illinois',
+    'IN': 'Indiana',
+    'KS': 'Kansas',
+    'KY': 'Kentucky',
+    'LA': 'Louisiana',
+    'MA': 'Massachusetts',
+    'MD': 'Maryland',
+    'ME': 'Maine',
+    'MI': 'Michigan',
+    'MN': 'Minnesota',
+    'MO': 'Missouri',
+    'MP': 'Northern Mariana Islands',
+    'MS': 'Mississippi',
+    'MT': 'Montana',
+    'NA': 'National',
+    'NC': 'North Carolina',
+    'ND': 'North Dakota',
+    'NE': 'Nebraska',
+    'NH': 'New Hampshire',
+    'NJ': 'New Jersey',
+    'NM': 'New Mexico',
+    'NV': 'Nevada',
+    'NY': 'New York',
+    'OH': 'Ohio',
+    'OK': 'Oklahoma',
+    'OR': 'Oregon',
+    'PA': 'Pennsylvania',
+    'PR': 'Puerto Rico',
+    'RI': 'Rhode Island',
+    'SC': 'South Carolina',
+    'SD': 'South Dakota',
+    'TN': 'Tennessee',
+    'TX': 'Texas',
+    'UT': 'Utah',
+    'VA': 'Virginia',
+    'VI': 'Virgin Islands',
+    'VT': 'Vermont',
+    'WA': 'Washington',
+    'WI': 'Wisconsin',
+    'WV': 'West Virginia',
+    'WY': 'Wyoming'
 }
 
 
@@ -101,11 +100,11 @@ class Tokenizer:
         self.snowstemmer = SnowballStemmer("english")
         self.stopwrds = stopwords.words('english')
 
-    def tokenizeStrings(self, listData, field, field_tokenized="tokenized", ret_type="string"):
+    def tokenize_strings(self, list_data, field, field_tokenized="tokenized", ret_type="string"):
         """
 
         Args:
-            listData:
+            list_data:
             field:
             field_tokenized:
             ret_type:
@@ -114,26 +113,26 @@ class Tokenizer:
 
         """
 
-        for k in listData.keys():
+        for k in list_data.keys():
             if isinstance(k, basestring) and len(k) == 0:
                 print "String value for key was empty.  Skipping..."
                 continue
 
-            tokens = self.getScrubbedStringTokens(listData[k][field])
+            tokens = self.get_scrubbed_string_tokens(list_data[k][field])
             sorted(tokens)
 
             if ret_type == "list":
-                listData[k][field_tokenized] = tokens
+                list_data[k][field_tokenized] = tokens
 
             elif ret_type == "set":
-                listData[k][field_tokenized] = set(tokens)
+                list_data[k][field_tokenized] = set(tokens)
             else:
                 # if ret_type == "string" or ret_type is None:
-                listData[k][field_tokenized] = "|{}|".format("|".join(tokens))
+                list_data[k][field_tokenized] = "|{}|".format("|".join(tokens))
 
-        return listData
+        return list_data
 
-    def removeStopWords(self, listwords):
+    def remove_stop_words(self, listwords):
         """
 
         Args:
@@ -145,7 +144,7 @@ class Tokenizer:
         retwords = [i for i in listwords if i not in self.stopwrds]
         return retwords
 
-    def getStemmedWords(self, listwords):
+    def get_stemmed_words(self, listwords):
         """
 
         Args:
@@ -157,7 +156,6 @@ class Tokenizer:
         retwords = [self.snowstemmer.stem(i) for i in listwords]
         return retwords
 
-
     @property
     def expandedwords(self):
         if not self._expandwords:
@@ -168,34 +166,34 @@ class Tokenizer:
 
         return self._expandwords
 
-    def getExpandedWords(self, strWords):
+    def get_expanded_words(self, str_words):
         """
 
         Args:
-            strWords:
+            str_words:
 
         Returns:
 
         """
 
-        if not isinstance(strWords, basestring):
-            strWords = str(strWords)
-        assert (len(strWords) > 0)
-        s = ''.join(ch for ch in strWords if ch not in self.exclude)
+        if not isinstance(str_words, basestring):
+            str_words = str(str_words)
+        assert (len(str_words) > 0)
+        s = ''.join(ch for ch in str_words if ch not in self.exclude)
 
-        retWords = []
+        ret_words = []
         words = nltk.word_tokenize(s)
         for i in words:
             loweri = i.strip().lower()
             if loweri in self.expandedwords:
-                retWords.append(self.expandedwords[loweri]['expansion'])
+                ret_words.append(self.expandedwords[loweri]['expansion'])
             else:
-                retWords.append(loweri)
+                ret_words.append(loweri)
 
-        retWords = nltk.word_tokenize(" ".join(retWords))
-        return retWords
+        ret_words = nltk.word_tokenize(" ".join(ret_words))
+        return ret_words
 
-    def getScrubbedStringTokens(self, inputstring):
+    def get_scrubbed_string_tokens(self, inputstring):
         """
 
         Args:
@@ -206,42 +204,9 @@ class Tokenizer:
         """
         if not inputstring:
             return ""
-        str_noabbrev = self.getExpandedWords(inputstring)
-        nostop_tokens = self.removeStopWords(str_noabbrev)
-        stemmed_tokens = self.getStemmedWords(nostop_tokens)
+        str_noabbrev = self.get_expanded_words(inputstring)
+        nostop_tokens = self.remove_stop_words(str_noabbrev)
+        stemmed_tokens = self.get_stemmed_words(nostop_tokens)
 
         return stemmed_tokens
 
-    def tokenizeFile(self, inputfile, outputfile, datakey=None, indexKey=None):
-        """
-
-        Args:
-            inputfile:
-            outputfile:
-            datakey:
-            indexKey:
-
-        Returns:
-
-        """
-        if indexKey is None:
-            indexKey = 0
-        if datakey is None:
-            datakey = 0
-
-        data = loadcsv(inputfile, indexKey)
-        fields = data['fieldnames']
-        dictData = data['dict']
-        dictStrings = {}
-        # if (isinstance(dictData, dict) and len(dictData) > 0):
-        #     for k, v in dictData.items():
-        #         dictStrings[k] = v[datakey]
-        # print k, v, "\n"
-        # print v[datakey], "\n", "\n"
-        #    listStrings = [k, v[datakey] for k, v in dictData.items()]
-        tokenkey = str(datakey) + "tokenized"
-        outData = self.tokenizeStrings(dictData, datakey, tokenkey)
-        fields.append(tokenkey)
-        writedicttocsv(outputfile, outData, fields)
-
-        return outData

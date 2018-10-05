@@ -62,7 +62,8 @@ def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield
         fp.seek(0)
         fieldnames = header_line.split(dialect.delimiter)
 
-    csv_reader = unicodecsv.DictReader(fp, dialect=dialect, delimiter=delimiter, quotechar=quotechar, fieldnames=fieldnames)
+    csv_reader = unicodecsv.DictReader(fp, dialect=dialect, delimiter=delimiter, quotechar=quotechar,
+                                       fieldnames=fieldnames)
 
     if fieldnames is None:
         fieldnames = []
@@ -88,21 +89,20 @@ def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield
     return ret
 
 
-
-def loadcsv(csvfileName, rowkeyname = None):
+def loadcsv(csvfilename, rowkeyname=None):
     """
 
     Args:
-        csvfileName:
+        csvfilename:
         rowkeyname:
 
     Returns:
 
     """
 
-    print(u"Loading {}...".format(csvfileName))
-    csv_fp = open(csvfileName, "rbU")
-    dictRecords = {}
+    print(u"Loading {}...".format(csvfilename))
+    csv_fp = open(csvfilename, "rbU")
+    dict_records = {}
     fields = {}
 
     csv_reader = None
@@ -114,34 +114,34 @@ def loadcsv(csvfileName, rowkeyname = None):
                 if rowkeyname is None:
                     rowkeyname = fields[0]
 
-                dictRecords[row[rowkeyname]] = row
+                dict_records[row[rowkeyname]] = row
     except Exception as err:
         print err
         pass
 
-    print(u"Loaded {} rows from {}.".format(len(dictRecords), csvfileName))
+    print(u"Loaded {} rows from {}.".format(len(dict_records), csvfilename))
 
-    return { 'fieldnames' : fields, 'dict' : dictRecords }
+    return {'fieldnames': fields, 'dict': dict_records}
 
 
-def writedicttocsv(csvfileName, data, keys=None):
+def writedicttocsv(csvfilename, data, keys=None):
     """
 
     Args:
-        csvfileName:
+        csvfilename:
         data:
         keys:
 
     Returns:
 
     """
-    print(u"Writing {} rows to file {}...".format(len(data), csvfileName))
+    print(u"Writing {} rows to file {}...".format(len(data), csvfilename))
 
     if keys is None:
         item = data.itervalues().next()
         keys = item.keys()
 
-    csvfile = open(csvfileName, "wb")
+    csvfile = open(csvfilename, "wb")
     csv_writer = unicodecsv.DictWriter(csvfile, fieldnames=keys, dialect=unicodecsv.excel)
     csv_writer.writeheader()
     for row in data:
@@ -154,7 +154,7 @@ def writedicttocsv(csvfileName, data, keys=None):
             pass
 
     csvfile.close()
-    return csvfileName
+    return csvfilename
 
 
 def combine_dicts(a, b):

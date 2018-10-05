@@ -23,9 +23,9 @@ from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
 import sys
 
+
 class OrderedDictCursor(DictCursorMixin, Cursor):
     dict_type = OrderedDict
-
 
 
 class DatabaseMixin:
@@ -143,7 +143,8 @@ class DatabaseMixin:
                 cursor.execute(sql, values)
                 inserted_id = cursor.lastrowid
                 if inserted_id:
-                    result = self.fetch_all_from_query(u"SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id))
+                    result = self.fetch_all_from_query(
+                        u"SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id))
                     if result and len(result) > 0:
                         return result[0]
                     else:
@@ -158,5 +159,3 @@ class DatabaseMixin:
         finally:
             self.connection.commit()
             self.close_connection()
-
-

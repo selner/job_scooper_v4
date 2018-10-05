@@ -33,10 +33,9 @@ Options:
   -s <server>, --server <server>    hostname for geocode api server [default: http://0.0.0.0:5000]
 """
 
-
 if __name__ == '__main__':
     arguments = docopt(cli_usage, version='0.1.1rc')
-    args = { k.replace("--", ""):arguments[k] for k in arguments.keys()}
+    args = {k.replace("--", ""): arguments[k] for k in arguments.keys()}
 
     if "connecturi" in args and args["connecturi"] and "server" in args and args["server"]:
         matcher = FindPlacesFromDBLocationsTask()

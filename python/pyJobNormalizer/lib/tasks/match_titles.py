@@ -21,12 +21,12 @@ from ..helpers import load_json, write_json
 
 from tokenize import Tokenizer
 # from pyJobNormalizer.lib.database import DatabaseMixin
-from datetime import datetime, timedelta
 
 JSON_KEY_JOBMATCHES = u'job_matches'
 JSON_KEY_POS_KEYWORDS = u'SearchKeywords'
 JSON_KEY_NEG_KEYWORDS = u'negative_title_keywords'
 JSON_KEY_USER = u'user'
+
 
 class TaskMatchJobsToKeywords:
     inputfile = None
@@ -92,7 +92,7 @@ class TaskMatchJobsToKeywords:
             JSON_KEY_NEG_KEYWORDS: self.negative_keywords
         }
 
-    def exportResultsData(self):
+    def export_results(self):
         print(u"Exporting final match results to {}".format(self.outputfile))
         write_json(self.outputfile, self.get_output_data())
 
@@ -102,15 +102,17 @@ class TaskMatchJobsToKeywords:
 
         if self.input_data:
             if isinstance(self.input_data, dict):
-                if (JSON_KEY_JOBMATCHES in self.input_data and isinstance(self.input_data[JSON_KEY_JOBMATCHES], dict) and len(
+                if (JSON_KEY_JOBMATCHES in self.input_data and isinstance(self.input_data[JSON_KEY_JOBMATCHES],
+                                                                          dict) and len(
                         self.input_data[JSON_KEY_JOBMATCHES]) > 0):
                     self.jobs = self.input_data[JSON_KEY_JOBMATCHES]
                     print("Loaded {} jobs for matching.".format(len(self.input_data[JSON_KEY_JOBMATCHES])))
 
                     tokenizer = Tokenizer()
-                    self.jobs = tokenizer.tokenizeStrings(self.jobs, u'Title', u'TitleTokens', u'set')
+                    self.jobs = tokenizer.tokenize_strings(self.jobs, u'Title', u'TitleTokens', u'set')
 
-    def get_unique_keywd_set(self, keywords):
+    @staticmethod
+    def get_unique_keywd_set(keywords):
 
         all_keyword_sets = [x['tokens'].replace("||", "|")[1:-1].split("|") for x in keywords.values()]
 
@@ -126,9 +128,9 @@ class TaskMatchJobsToKeywords:
         #
         all_multi_tok_sets = {"|".join(s): list(set(s)) for s in all_keyword_sets if len(s) > 1}
 
-        return { u'single_tokens' : uniq_single_toks, u'multi_tokens' : all_multi_tok_sets }
+        return {u'single_tokens': uniq_single_toks, u'multi_tokens': all_multi_tok_sets}
 
-    def set_keyword_matches(self, data, keySource, keyResult):
+    def set_keyword_matches(self, data, key_source, key_result):
         nmatched = 0
         nnotmatched = 0
 
@@ -144,7 +146,7 @@ class TaskMatchJobsToKeywords:
             # them by single/multi because we can do the single check in one call
             # but have to iterate for the
             #
-            matched_singles = self.jobs[jobid][keySource].intersection(kwds_to_match['single_tokens'])
+            matched_singles = self.jobs[jobid][key_source].intersection(kwds_to_match['single_tokens'])
             if matched_singles:
                 matched_toks.extend(matched_singles)
             # first, do a quick shortcut check to see if we matched even one of the tokens
@@ -152,7 +154,7 @@ class TaskMatchJobsToKeywords:
             # we then have to find any set where all the tokens were found in the token list
             # we are matching against
             #
-            matched_any_multis = self.jobs[jobid][keySource].intersection(all_possible_multi_toks)
+            matched_any_multis = self.jobs[jobid][key_source].intersection(all_possible_multi_toks)
             if matched_any_multis:
                 for m in kwds_to_match['multi_tokens'].keys():
                     multitokset = kwds_to_match['multi_tokens'][m]
@@ -160,13 +162,13 @@ class TaskMatchJobsToKeywords:
                         matched_toks.append("|".join(multitokset))
 
             if matched_toks:
-                self.jobs[jobid][keyResult] = matched_toks
+                self.jobs[jobid][key_result] = matched_toks
                 nmatched += 1
             else:
-                self.jobs[jobid][keyResult] = None
+                self.jobs[jobid][key_result] = None
                 nnotmatched += 1
-        print(u"{} match results:  {}/{} matched, {}/{} not matched".format(keySource, nmatched, len(self.jobs), nnotmatched, len(self.jobs)))
-
+        print(u"{} match results:  {}/{} matched, {}/{} not matched".format(key_source, nmatched, len(self.jobs),
+                                                                            nnotmatched, len(self.jobs)))
 
     def mark_positive_matches(self):
         print(u"Marking jobs that match {} positive title keywords...".format(len(self.keywords)))
@@ -178,6 +180,7 @@ class TaskMatchJobsToKeywords:
         self.set_keyword_matches(self.negative_keywords, "TitleTokens", "BadJobTitleKeywordMatches")
 
     def load_keywords(self):
+        outdata = None
 
         if JSON_KEY_USER in self.input_data and 'UserId' in self.input_data[JSON_KEY_USER]:
             self.user_id = self.input_data[JSON_KEY_USER]['UserId']
@@ -190,9 +193,9 @@ class TaskMatchJobsToKeywords:
                         'keyword': keyword,
                         'tokens': None
                     }
-                outData = self.tokenizer.tokenizeStrings(self.keywords, 'keyword', 'tokens')
+                    outdata = self.tokenizer.tokenize_strings(self.keywords, 'keyword', 'tokens')
 
-                self.keywords = outData
+                self.keywords = outdata
 
         if JSON_KEY_NEG_KEYWORDS in self.input_data:
             for kwdkey in self.input_data[JSON_KEY_NEG_KEYWORDS]:
@@ -201,11 +204,11 @@ class TaskMatchJobsToKeywords:
                     'keyword': kwdkey,
                     'tokens': None
                 }
-            outData = self.tokenizer.tokenizeStrings(self.negative_keywords, 'keyword', 'tokens')
-            self.negative_keywords = outData
+            data = self.tokenizer.tokenize_strings(self.negative_keywords, 'keyword', 'tokens')
+            self.negative_keywords = data
 
-        print(u"Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords), len(self.negative_keywords)))
-
+        print(u"Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords),
+                                                                                           len(self.negative_keywords)))
 
 # class TaskMatchJobTitlesFromDB(TaskMatchJobsToKeywords, DatabaseMixin)
 #
