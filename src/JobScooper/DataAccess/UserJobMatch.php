@@ -34,50 +34,6 @@ use Propel\Runtime\Map\TableMap;
  */
 class UserJobMatch extends BaseUserJobMatch
 {
-    private $delim = ' | ';
-
-
-    /**
-     * @param mixed $value
-     * @return BaseUserJobMatch|UserJobMatch
-     */
-    public function addMatchedNegativeCompanyKeyword($value)
-    {
-        $this->setIsExcluded(true);
-        return parent::addMatchedNegativeCompanyKeyword($value);
-    }
-
-    /**
-     * @param mixed $value
-     * @return BaseUserJobMatch|UserJobMatch
-     */
-    public function addMatchedNegativeTitleKeyword($value)
-    {
-        $this->setIsExcluded(true);
-        return parent::addMatchedNegativeTitleKeyword($value);
-    }
-
-    /**
-     * @param mixed $value
-     * @return BaseUserJobMatch|UserJobMatch
-     */
-    public function addMatchedUserKeyword($value)
-    {
-        $this->isJobMatch(true);
-        return parent::addMatchedUserKeyword($value);
-    }
-
-    /**
-     * @param bool|int|string $v
-     * @return BaseUserJobMatch|UserJobMatch
-     */
-    public function setOutOfUserArea($v)
-    {
-        if(filter_var($v, FILTER_VALIDATE_BOOLEAN) === true) {
-            $this->setIsExcluded(true);
-        }
-        return parent::setOutOfUserArea($v);
-    }
 
     public function autoUpdateIsJobMatch() {
         $usrKwdMatches = $this->getMatchedUserKeywords();
@@ -92,9 +48,14 @@ class UserJobMatch extends BaseUserJobMatch
         }
     }
 
+    /**
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
     public function preSave(ConnectionInterface $con = null)
     {
         $this->autoUpdateIsJobMatch();
+        $this->autoUpdateIsExcluded();
         return parent::preSave($con);
     }
 
@@ -102,29 +63,29 @@ class UserJobMatch extends BaseUserJobMatch
      *
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function recalcUserMatchStatus()
+    public function autoUpdateIsExcluded()
     {
         $this->setIsExcluded(false);
 
-        $this->autoUpdateIsJobMatch();
-
-        if (!is_empty_value($this->getMatchedNegativeTitleKeywords())) {
-            $this->setIsExcluded(true);
-        }
-
-        if (!is_empty_value($this->getMatchedNegativeCompanyKeywords()) > 0) {
-            $this->setIsExcluded(true);
-        }
-
-        if(filter_var($this->isOutOfUserArea(), FILTER_VALIDATE_BOOLEAN) === true) {
+        if($this->getOutOfUserArea() === true) {
             $this->setIsExcluded(true);
         }
 
         $jp = $this->getJobPostingFromUJM();
-        if (null !== $jp && !is_empty_value($jp->getDuplicatesJobPostingId()) &&
-            filter_var($jp->getDuplicatesJobPostingId(), FILTER_VALIDATE_BOOLEAN) === true) {
+        if (null !== $jp && !is_empty_value($jp->getDuplicatesJobPostingId())) {
             $this->setIsExcluded(true);
         }
+
+        $kwds = $this->getMatchedNegativeTitleKeywords();
+        if(!is_empty_value($kwds)) {
+            $this->setIsExcluded(true);
+        }
+
+        $kwds = $this->getMatchedNegativeCompanyKeywords();
+        if(!is_empty_value($kwds)) {
+            $this->setIsExcluded(true);
+        }
+
     }
 
     /**
@@ -158,101 +119,4 @@ class UserJobMatch extends BaseUserJobMatch
 
         return $arrItem;
     }
-
-    /**
-     * @param mixed $value
-     * @return BaseUserJobMatch|UserJobMatch
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    public function removeMatchedNegativeTitleKeyword($value)
-    {
-        $ret = parent::removeMatchedNegativeTitleKeyword($value);
-        $this->recalcUserMatchStatus();
-        return $ret;
-    }
-
-    /**
-     * @param mixed $value
-     * @return BaseUserJobMatch|UserJobMatch
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    public function removeMatchedUserKeyword($value)
-    {
-        $ret = parent::removeMatchedUserKeyword($value);
-        $this->recalcUserMatchStatus();
-        return $ret;
-    }
-
-    /**
-     * @param mixed $value
-     * @return BaseUserJobMatch|UserJobMatch
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    public function removeMatchedNegativeCompanyKeyword($value)
-    {
-        $ret = parent::removeMatchedNegativeCompanyKeyword($value);
-        $this->recalcUserMatchStatus();
-        return $ret;
-    }
-
-    /**
-     * @param array $v
-     * @return BaseUserJobMatch|UserJobMatch|mixed
-     */
-    public function setMatchedNegativeTitleKeywords($v)
-    {
-        return $this->setArray($v, "MatchedNegativeTitleKeywords");
-    }
-
-    /**
-     * @param array $v
-     * @return BaseUserJobMatch|UserJobMatch|mixed
-     */
-    public function setMatchedNegativeCompanyKeywords($v)
-    {
-        return $this->setArray($v, "MatchedNegativeCompanyKeywords");
-    }
-
-
-    /**
-     * @param array $v
-     * @return BaseUserJobMatch|UserJobMatch|mixed
-     */
-    public function setMatchedUserKeywords($v)
-    {
-        return $this->setArray($v, "MatchedUserKeywords");
-    }
-
-    /**
-     * @param $v
-     * @param $fact
-     * @return $this|mixed
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    public function setArray($v, $fact)
-    {
-        $factSet = "get{$fact}";
-        $orig = call_user_func(array($this, $factSet));
-
-        if($orig ===$v)
-            return $this;
-
-        if (!is_empty_value($v) && is_array($v)) {
-            foreach ($v as &$item) {
-                if (is_array($item)) {
-                    $item = implode(" ", $item);
-                }
-            }
-        } elseif (is_string($v) && !is_empty_value($v)) {
-            $v = array($v);
-        } elseif (is_empty_value($v)) {
-            $v = array();
-            $this->recalcUserMatchStatus();
-        }
-
-        $factSet = "parent::set{$fact}";
-        return call_user_func(array($this, $factSet), $v);
-
-    }
-
 }

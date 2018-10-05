@@ -493,6 +493,9 @@ class JobsAutoMarker
                 }
             }
         }
+        if(!is_array($arrJobMatchFacts['MatchedUserKeywords'])) {
+            $arrJobMatchFacts['MatchedUserKeywords'] = array();
+        }
 
         if (!is_empty_value($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
             if (is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
@@ -502,7 +505,10 @@ class JobsAutoMarker
                 }
             }
         }
-        
+        if(!is_array($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
+            $arrJobMatchFacts['MatchedNegativeTitleKeywords'] = array();
+        }
+
         $job->fromArray($arrJobMatchFacts);
         $job->save();
     }
