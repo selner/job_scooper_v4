@@ -17,6 +17,7 @@
 namespace JobScooper\StageProcessor;
 
 use Exception;
+use const JobScooper\DataAccess\LIST_SEPARATOR_TOKEN;
 use JobScooper\DataAccess\LocationCache;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
@@ -406,27 +407,30 @@ class JobsAutoMarker
             LogMessage('Checking '.count($arrJobsList) .' roles against '. \count($this->companies_regex_to_filter) .' excluded companies.');
 
             foreach ($arrJobsList as &$jobMatch) {
-                $matched_exclusion = false;
+                $matched_companies = array();
+
                 foreach ($this->companies_regex_to_filter as $rxInput) {
                     if (preg_match($rxInput, strScrub($jobMatch->getJobPostingFromUJM()->getCompany(), DEFAULT_SCRUB))) {
-                        $jobMatch->setMatchedNegativeCompanyKeywords(array($rxInput));
-                        $jobMatch->save();
-                        unset($jobMatch);
-                        $nJobsMarkedAutoExcluded++;
-                        $matched_exclusion = true;
-                        break;
+                        $matched_companies[] = $rxInput;
                     }
                 }
-				unset($jobMatch);
 
-                if ($matched_exclusion !== true) {
+                if(!is_empty_value($matched_companies) && count($matched_companies) > 0) {
+                    $matches = join(LIST_SEPARATOR_TOKEN, $matched_companies);
+
+                    $jobMatch->setBadCompanyNameKeywordMatches($matches);
+                    $jobMatch->save();
+                    $nJobsMarkedAutoExcluded++;
+                }
+                else {
                     ++$nJobsNotMarked;
                 }
+                unset($jobMatch);
             }
 
-            LogMessage('Jobs marked with excluded companies: '.$nJobsMarkedAutoExcluded . '/' . countAssociativeArrayValues($arrJobsList) .' marked as excluded; not marked '. $nJobsNotMarked . '/' . countAssociativeArrayValues($arrJobsList));
+            LogMessage('Jobs marked with unwanted company name matches: '.$nJobsMarkedAutoExcluded . '/' . countAssociativeArrayValues($arrJobsList) .' marked as excluded; not marked '. $nJobsNotMarked . '/' . countAssociativeArrayValues($arrJobsList));
         } catch (Exception $ex) {
-            handleException($ex, 'Error in SetAutoExcludedCompaniesFromRegex: %s', true);
+            handleException($ex, 'Error in _markJobsList_SetAutoExcludedCompaniesFromRegex_: %s', true);
         } finally {
             endLogSection('Company exclusion by name finished.');
         }
@@ -443,7 +447,7 @@ class JobsAutoMarker
     private function _exportJobMatchesToJson($basefile, &$collJobList)
     {
 		try {
-			$arrJobItems = collectionToArray($collJobList, ['UserJobMatchId', 'JobPostingId', 'Title', 'MatchedUserKeywords', 'MatchedNegativeTitleKeywords'] );
+			$arrJobItems = collectionToArray($collJobList, ['UserJobMatchId', 'JobPostingId', 'Title', 'GoodJobTitleKeywordMatches', 'BadJobTitleKeywordMatches'] );
             $arrJobItems = array_column($arrJobItems, null, 'UserJobMatchId');
             
             $jobItems = null;
@@ -478,38 +482,16 @@ class JobsAutoMarker
         return $outfile;
     }
 
+    /**
+     * @param UserJobMatch $job
+     * @param $arrMatchData
+     * @throws PropelException
+     */
     private function _updateKeywordMatchForSingleJob(UserJobMatch $job, $arrMatchData)
     {
-        $arrJobMatchFacts = array_subset_keys($arrMatchData, array(
-            'UserJobMatchId',
-            'MatchedNegativeTitleKeywords',
-            'MatchedUserKeywords'
-        ));
-        if (!is_empty_value($arrJobMatchFacts['MatchedUserKeywords'])) {
-            if (is_string($arrJobMatchFacts['MatchedUserKeywords'])) {
-                $split = preg_split("/\|/", $arrJobMatchFacts['MatchedUserKeywords'], -1, PREG_SPLIT_NO_EMPTY);
-                if (!is_empty_value($split)) {
-                    $arrJobMatchFacts['MatchedUserKeywords'] = $split;
-                }
-            }
-        }
-        if(!is_array($arrJobMatchFacts['MatchedUserKeywords'])) {
-            $arrJobMatchFacts['MatchedUserKeywords'] = array();
-        }
+        $job->setGoodJobTitleKeywordMatches($arrMatchData['GoodJobTitleKeywordMatches']);
+        $job->setBadJobTitleKeywordMatches($arrMatchData['BadJobTitleKeywordMatches']);
 
-        if (!is_empty_value($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
-            if (is_string($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
-                $split = preg_split("/\|/", $arrJobMatchFacts['MatchedNegativeTitleKeywords'], -1, PREG_SPLIT_NO_EMPTY);
-                if (!is_empty_value($split)) {
-                    $arrJobMatchFacts['MatchedNegativeTitleKeywords'] = $split;
-                }
-            }
-        }
-        if(!is_array($arrJobMatchFacts['MatchedNegativeTitleKeywords'])) {
-            $arrJobMatchFacts['MatchedNegativeTitleKeywords'] = array();
-        }
-
-        $job->fromArray($arrJobMatchFacts);
         $job->save();
     }
 
@@ -548,7 +530,10 @@ class JobsAutoMarker
                 {
                 	$jobsToUpdate = array_intersect_key($collJobsList->toKeyIndex('UserJobMatchId'), $arrMatchRecs);
                     foreach ($jobsToUpdate as $jobId => $jobRecord) {
-                        $this->_updateKeywordMatchForSingleJob($jobsToUpdate[$jobId], $arrMatchRecs[$jobId]);
+                        $jobRecord->setGoodJobTitleKeywordMatches($arrMatchRecs[$jobId]['GoodJobTitleKeywordMatches']);
+                        $jobRecord->setBadJobTitleKeywordMatches($arrMatchRecs[$jobId]['BadJobTitleKeywordMatches']);
+
+                        $jobRecord->save();
                         $retUJMIds[] = $jobId;
                         unset($jobRecord);
                         unset($arrMatchRecs[$jobId]);

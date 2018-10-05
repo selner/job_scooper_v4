@@ -32,15 +32,72 @@ use Propel\Runtime\Map\TableMap;
  * long as it does not already exist in the output directory.
  *
  */
+
+const LIST_SEPARATOR_TOKEN = '_||_';
+
 class UserJobMatch extends BaseUserJobMatch
 {
+    private function _cleanupKeywordListValue($v) {
+        if (is_array($v)) {
+            $v = join(LIST_SEPARATOR_TOKEN, $v);
+        }
+
+        $v = cleanupTextValue($v);
+
+        return $v;
+    }
+
+    private function _convertKeywordListToArray($v) {
+        if (is_string($v) && !is_empty_value($v)) {
+            $v = explode(LIST_SEPARATOR_TOKEN, $v);
+        }
+
+        return $v;
+    }
+
+    public function getGoodJobTitleKeywordMatches()
+    {
+        $v = parent::getGoodJobTitleKeywordMatches();
+        return $this->_convertKeywordListToArray($v);
+    }
+
+
+    public function setGoodJobTitleKeywordMatches($v)
+    {
+        $v = $this->_cleanupKeywordListValue($v);
+
+        return parent::setGoodJobTitleKeywordMatches($v);
+    }
+
+    public function getBadJobTitleKeywordMatches()
+    {
+        $v = parent::getBadJobTitleKeywordMatches();
+        return $this->_convertKeywordListToArray($v);
+    }
+
+    public function setBadJobTitleKeywordMatches($v)
+    {
+        $v = $this->_cleanupKeywordListValue($v);
+
+        return parent::setBadJobTitleKeywordMatches($v);
+    }
+
+    public function getBadCompanyNameKeywordMatches()
+    {
+        $v = parent::getBadCompanyNameKeywordMatches();
+        return $this->_convertKeywordListToArray($v);
+    }
+
+    public function setBadCompanyNameKeywordMatches($v)
+    {
+        $v = $this->_cleanupKeywordListValue($v);
+
+        return parent::setBadCompanyNameKeywordMatches($v);
+    }
 
     public function autoUpdateIsJobMatch() {
-        $usrKwdMatches = $this->getMatchedUserKeywords();
 
-        if (is_empty_value($usrKwdMatches)) {
-            $this->setIsJobMatch(false);
-        } elseif(is_array($usrKwdMatches) &&  strlen(trim(join("", $usrKwdMatches))) > 0) {
+        if(!is_empty_value($this->getGoodJobTitleKeywordMatches())) {
             $this->setIsJobMatch(true);
         }
         else {
@@ -71,21 +128,18 @@ class UserJobMatch extends BaseUserJobMatch
             $this->setIsExcluded(true);
         }
 
+        if(!is_empty_value($bad_comp_matches = $this->getBadCompanyNameKeywordMatches())) {
+            $this->setIsExcluded(true);
+        }
+
+        if(!is_empty_value($bad_title_matches = $this->getBadJobTitleKeywordMatches())) {
+            $this->setIsExcluded(true);
+        }
+
         $jp = $this->getJobPostingFromUJM();
         if (null !== $jp && !is_empty_value($jp->getDuplicatesJobPostingId())) {
             $this->setIsExcluded(true);
         }
-
-        $kwds = $this->getMatchedNegativeTitleKeywords();
-        if(!is_empty_value($kwds)) {
-            $this->setIsExcluded(true);
-        }
-
-        $kwds = $this->getMatchedNegativeCompanyKeywords();
-        if(!is_empty_value($kwds)) {
-            $this->setIsExcluded(true);
-        }
-
     }
 
     /**

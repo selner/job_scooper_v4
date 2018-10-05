@@ -171,11 +171,11 @@ class TaskMatchJobsToKeywords:
     def mark_positive_matches(self):
         print(u"Marking jobs that match {} positive title keywords...".format(len(self.keywords)))
 
-        self.set_keyword_matches(self.keywords, "TitleTokens", "MatchedUserKeywords")
+        self.set_keyword_matches(self.keywords, "TitleTokens", "GoodJobTitleKeywordMatches")
 
     def mark_negative_matches(self):
         print(u"Marking jobs that match {} negative title keywords...".format(len(self.negative_keywords)))
-        self.set_keyword_matches(self.negative_keywords, "TitleTokens", "MatchedNegativeTitleKeywords")
+        self.set_keyword_matches(self.negative_keywords, "TitleTokens", "BadJobTitleKeywordMatches")
 
     def load_keywords(self):
 

@@ -388,17 +388,18 @@
 
         <!-- ~~~~~~~~~  OTHER COLUMNS  ~~~~~~~~~~~~~~~~  -->
 
-        <column name="is_job_match" phpName="IsJobMatch" type="boolean"/>
 
-        <column name="is_excluded" phpName="IsExcluded" type="boolean"/>
+        <column name="is_job_match" phpName="IsJobMatch" type="boolean" default="false"/>
 
-        <column name="out_of_user_area" phpName="OutOfUserArea" type="boolean"/>
+        <column name="good_job_title_keyword_matches" phpName="GoodJobTitleKeywordMatches" type="varchar" size="100"/>
 
-        <column name="matched_user_keywords" phpName="MatchedUserKeywords" type="array"/>
+        <column name="is_excluded" phpName="IsExcluded" type="boolean" default="false"/>
 
-        <column name="matched_negative_title_keywords" phpName="MatchedNegativeTitleKeywords" type="array"/>
+        <column name="out_of_user_area" phpName="OutOfUserArea" type="boolean" default="false"/>
 
-        <column name="matched_negative_company_keywords" phpName="MatchedNegativeCompanyKeywords" type="array"/>
+        <column name="bad_job_title_keyword_matches" phpName="BadJobTitleKeywordMatches" type="varchar" size="100"/>
+
+        <column name="bad_company_name_keyword_matches" phpName="BadCompanyNameKeywordMatches" type="varchar" size="100"/>
 
         <column name="user_notification_state" phpName="UserNotificationState" type="enum"
                 valueSet="not-yet-marked,marked-ready-to-send,sent" defaultValue="not-yet-marked"/>

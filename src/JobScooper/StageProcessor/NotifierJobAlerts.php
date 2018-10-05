@@ -57,9 +57,9 @@ class NotifierJobAlerts extends JobsMailSender
         'IsExcluded',
         'OutOfUserArea',
         'DuplicatesJobPostingId',
-        'MatchedUserKeywords',
-        'MatchedNegativeTitleKeywords',
-        'MatchedNegativeCompanyKeywords',
+        'GoodJobTitleKeywordMatches',
+        'BadJobTitleKeywordMatches',
+        'BadCompanyNameKeywordMatches',
         'Url'
     );
 
@@ -93,9 +93,9 @@ class NotifierJobAlerts extends JobsMailSender
 	        'IsExcluded' =>['type' => 'string', 'col_width' => 5, 'style' => NotifierJobAlerts::HEADER_STYLE ],
 	        'OutOfUserArea' =>['type' => 'string', 'col_width' => 5, 'style' => NotifierJobAlerts::HEADER_STYLE ],
 	        'DuplicatesJobPostingId' =>['type' => 'string', 'col_width' => 7, 'style' => NotifierJobAlerts::HEADER_STYLE ],
-	        'MatchedUserKeywords' =>['type' => 'string', 'col_width' => 20, 'style' => NotifierJobAlerts::HEADER_STYLE ],
-	        'MatchedNegativeTitleKeywords' =>['type' => 'string', 'col_width' => 20, 'style' => NotifierJobAlerts::HEADER_STYLE ],
-	        'MatchedNegativeCompanyKeywords' =>['type' => 'string', 'col_width' => 15, 'style' => NotifierJobAlerts::HEADER_STYLE ],
+	        'GoodJobTitleKeywordMatches' =>['type' => 'string', 'col_width' => 20, 'style' => NotifierJobAlerts::HEADER_STYLE ],
+	        'BadJobTitleKeywordMatches' =>['type' => 'string', 'col_width' => 20, 'style' => NotifierJobAlerts::HEADER_STYLE ],
+	        'BadCompanyNameKeywordMatches' =>['type' => 'string', 'col_width' => 15, 'style' => NotifierJobAlerts::HEADER_STYLE ],
 	        'Url' =>['type' => 'string', 'col_width' => 100, 'style' => NotifierJobAlerts::HEADER_STYLE ]
             ]
 		]

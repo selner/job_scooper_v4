@@ -90,13 +90,22 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * The value for the is_job_match field.
      *
+     * Note: this column has a database default value of: false
      * @var        boolean
      */
     protected $is_job_match;
 
     /**
+     * The value for the good_job_title_keyword_matches field.
+     *
+     * @var        string
+     */
+    protected $good_job_title_keyword_matches;
+
+    /**
      * The value for the is_excluded field.
      *
+     * Note: this column has a database default value of: false
      * @var        boolean
      */
     protected $is_excluded;
@@ -104,51 +113,24 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * The value for the out_of_user_area field.
      *
+     * Note: this column has a database default value of: false
      * @var        boolean
      */
     protected $out_of_user_area;
 
     /**
-     * The value for the matched_user_keywords field.
+     * The value for the bad_job_title_keyword_matches field.
      *
-     * @var        array
+     * @var        string
      */
-    protected $matched_user_keywords;
+    protected $bad_job_title_keyword_matches;
 
     /**
-     * The unserialized $matched_user_keywords value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
-     * @var object
-     */
-    protected $matched_user_keywords_unserialized;
-
-    /**
-     * The value for the matched_negative_title_keywords field.
+     * The value for the bad_company_name_keyword_matches field.
      *
-     * @var        array
+     * @var        string
      */
-    protected $matched_negative_title_keywords;
-
-    /**
-     * The unserialized $matched_negative_title_keywords value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
-     * @var object
-     */
-    protected $matched_negative_title_keywords_unserialized;
-
-    /**
-     * The value for the matched_negative_company_keywords field.
-     *
-     * @var        array
-     */
-    protected $matched_negative_company_keywords;
-
-    /**
-     * The unserialized $matched_negative_company_keywords value - i.e. the persisted object.
-     * This is necessary to avoid repeated calls to unserialize() at runtime.
-     * @var object
-     */
-    protected $matched_negative_company_keywords_unserialized;
+    protected $bad_company_name_keyword_matches;
 
     /**
      * The value for the user_notification_state field.
@@ -198,6 +180,9 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function applyDefaultValues()
     {
+        $this->is_job_match = false;
+        $this->is_excluded = false;
+        $this->out_of_user_area = false;
         $this->user_notification_state = 0;
     }
 
@@ -479,6 +464,16 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
+     * Get the [good_job_title_keyword_matches] column value.
+     *
+     * @return string
+     */
+    public function getGoodJobTitleKeywordMatches()
+    {
+        return $this->good_job_title_keyword_matches;
+    }
+
+    /**
      * Get the [is_excluded] column value.
      *
      * @return boolean
@@ -519,91 +514,24 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
-     * Get the [matched_user_keywords] column value.
+     * Get the [bad_job_title_keyword_matches] column value.
      *
-     * @return array
+     * @return string
      */
-    public function getMatchedUserKeywords()
+    public function getBadJobTitleKeywordMatches()
     {
-        if (null === $this->matched_user_keywords_unserialized) {
-            $this->matched_user_keywords_unserialized = array();
-        }
-        if (!$this->matched_user_keywords_unserialized && null !== $this->matched_user_keywords) {
-            $matched_user_keywords_unserialized = substr($this->matched_user_keywords, 2, -2);
-            $this->matched_user_keywords_unserialized = '' !== $matched_user_keywords_unserialized ? explode(' | ', $matched_user_keywords_unserialized) : array();
-        }
-
-        return $this->matched_user_keywords_unserialized;
+        return $this->bad_job_title_keyword_matches;
     }
 
     /**
-     * Test the presence of a value in the [matched_user_keywords] array column value.
-     * @param      mixed $value
+     * Get the [bad_company_name_keyword_matches] column value.
      *
-     * @return boolean
+     * @return string
      */
-    public function hasMatchedUserKeyword($value)
+    public function getBadCompanyNameKeywordMatches()
     {
-        return in_array($value, $this->getMatchedUserKeywords());
-    } // hasMatchedUserKeyword()
-
-    /**
-     * Get the [matched_negative_title_keywords] column value.
-     *
-     * @return array
-     */
-    public function getMatchedNegativeTitleKeywords()
-    {
-        if (null === $this->matched_negative_title_keywords_unserialized) {
-            $this->matched_negative_title_keywords_unserialized = array();
-        }
-        if (!$this->matched_negative_title_keywords_unserialized && null !== $this->matched_negative_title_keywords) {
-            $matched_negative_title_keywords_unserialized = substr($this->matched_negative_title_keywords, 2, -2);
-            $this->matched_negative_title_keywords_unserialized = '' !== $matched_negative_title_keywords_unserialized ? explode(' | ', $matched_negative_title_keywords_unserialized) : array();
-        }
-
-        return $this->matched_negative_title_keywords_unserialized;
+        return $this->bad_company_name_keyword_matches;
     }
-
-    /**
-     * Test the presence of a value in the [matched_negative_title_keywords] array column value.
-     * @param      mixed $value
-     *
-     * @return boolean
-     */
-    public function hasMatchedNegativeTitleKeyword($value)
-    {
-        return in_array($value, $this->getMatchedNegativeTitleKeywords());
-    } // hasMatchedNegativeTitleKeyword()
-
-    /**
-     * Get the [matched_negative_company_keywords] column value.
-     *
-     * @return array
-     */
-    public function getMatchedNegativeCompanyKeywords()
-    {
-        if (null === $this->matched_negative_company_keywords_unserialized) {
-            $this->matched_negative_company_keywords_unserialized = array();
-        }
-        if (!$this->matched_negative_company_keywords_unserialized && null !== $this->matched_negative_company_keywords) {
-            $matched_negative_company_keywords_unserialized = substr($this->matched_negative_company_keywords, 2, -2);
-            $this->matched_negative_company_keywords_unserialized = '' !== $matched_negative_company_keywords_unserialized ? explode(' | ', $matched_negative_company_keywords_unserialized) : array();
-        }
-
-        return $this->matched_negative_company_keywords_unserialized;
-    }
-
-    /**
-     * Test the presence of a value in the [matched_negative_company_keywords] array column value.
-     * @param      mixed $value
-     *
-     * @return boolean
-     */
-    public function hasMatchedNegativeCompanyKeyword($value)
-    {
-        return in_array($value, $this->getMatchedNegativeCompanyKeywords());
-    } // hasMatchedNegativeCompanyKeyword()
 
     /**
      * Get the [user_notification_state] column value.
@@ -761,6 +689,26 @@ abstract class UserJobMatch implements ActiveRecordInterface
     } // setIsJobMatch()
 
     /**
+     * Set the value of [good_job_title_keyword_matches] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
+     */
+    public function setGoodJobTitleKeywordMatches($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->good_job_title_keyword_matches !== $v) {
+            $this->good_job_title_keyword_matches = $v;
+            $this->modifiedColumns[UserJobMatchTableMap::COL_GOOD_JOB_TITLE_KEYWORD_MATCHES] = true;
+        }
+
+        return $this;
+    } // setGoodJobTitleKeywordMatches()
+
+    /**
      * Sets the value of the [is_excluded] column.
      * Non-boolean arguments are converted using the following rules:
      *   * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
@@ -817,157 +765,44 @@ abstract class UserJobMatch implements ActiveRecordInterface
     } // setOutOfUserArea()
 
     /**
-     * Set the value of [matched_user_keywords] column.
+     * Set the value of [bad_job_title_keyword_matches] column.
      *
-     * @param array $v new value
+     * @param string $v new value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
-    public function setMatchedUserKeywords($v)
+    public function setBadJobTitleKeywordMatches($v)
     {
-        if ($this->matched_user_keywords_unserialized !== $v) {
-            $this->matched_user_keywords_unserialized = $v;
-            $this->matched_user_keywords = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS] = true;
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->bad_job_title_keyword_matches !== $v) {
+            $this->bad_job_title_keyword_matches = $v;
+            $this->modifiedColumns[UserJobMatchTableMap::COL_BAD_JOB_TITLE_KEYWORD_MATCHES] = true;
         }
 
         return $this;
-    } // setMatchedUserKeywords()
+    } // setBadJobTitleKeywordMatches()
 
     /**
-     * Adds a value to the [matched_user_keywords] array column value.
-     * @param  mixed $value
+     * Set the value of [bad_company_name_keyword_matches] column.
      *
+     * @param string $v new value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
-    public function addMatchedUserKeyword($value)
+    public function setBadCompanyNameKeywordMatches($v)
     {
-        $currentArray = $this->getMatchedUserKeywords();
-        $currentArray []= $value;
-        $this->setMatchedUserKeywords($currentArray);
-
-        return $this;
-    } // addMatchedUserKeyword()
-
-    /**
-     * Removes a value from the [matched_user_keywords] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
-     */
-    public function removeMatchedUserKeyword($value)
-    {
-        $targetArray = array();
-        foreach ($this->getMatchedUserKeywords() as $element) {
-            if ($element != $value) {
-                $targetArray []= $element;
-            }
+        if ($v !== null) {
+            $v = (string) $v;
         }
-        $this->setMatchedUserKeywords($targetArray);
 
-        return $this;
-    } // removeMatchedUserKeyword()
-
-    /**
-     * Set the value of [matched_negative_title_keywords] column.
-     *
-     * @param array $v new value
-     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
-     */
-    public function setMatchedNegativeTitleKeywords($v)
-    {
-        if ($this->matched_negative_title_keywords_unserialized !== $v) {
-            $this->matched_negative_title_keywords_unserialized = $v;
-            $this->matched_negative_title_keywords = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS] = true;
+        if ($this->bad_company_name_keyword_matches !== $v) {
+            $this->bad_company_name_keyword_matches = $v;
+            $this->modifiedColumns[UserJobMatchTableMap::COL_BAD_COMPANY_NAME_KEYWORD_MATCHES] = true;
         }
 
         return $this;
-    } // setMatchedNegativeTitleKeywords()
-
-    /**
-     * Adds a value to the [matched_negative_title_keywords] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
-     */
-    public function addMatchedNegativeTitleKeyword($value)
-    {
-        $currentArray = $this->getMatchedNegativeTitleKeywords();
-        $currentArray []= $value;
-        $this->setMatchedNegativeTitleKeywords($currentArray);
-
-        return $this;
-    } // addMatchedNegativeTitleKeyword()
-
-    /**
-     * Removes a value from the [matched_negative_title_keywords] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
-     */
-    public function removeMatchedNegativeTitleKeyword($value)
-    {
-        $targetArray = array();
-        foreach ($this->getMatchedNegativeTitleKeywords() as $element) {
-            if ($element != $value) {
-                $targetArray []= $element;
-            }
-        }
-        $this->setMatchedNegativeTitleKeywords($targetArray);
-
-        return $this;
-    } // removeMatchedNegativeTitleKeyword()
-
-    /**
-     * Set the value of [matched_negative_company_keywords] column.
-     *
-     * @param array $v new value
-     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
-     */
-    public function setMatchedNegativeCompanyKeywords($v)
-    {
-        if ($this->matched_negative_company_keywords_unserialized !== $v) {
-            $this->matched_negative_company_keywords_unserialized = $v;
-            $this->matched_negative_company_keywords = '| ' . implode(' | ', $v) . ' |';
-            $this->modifiedColumns[UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS] = true;
-        }
-
-        return $this;
-    } // setMatchedNegativeCompanyKeywords()
-
-    /**
-     * Adds a value to the [matched_negative_company_keywords] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
-     */
-    public function addMatchedNegativeCompanyKeyword($value)
-    {
-        $currentArray = $this->getMatchedNegativeCompanyKeywords();
-        $currentArray []= $value;
-        $this->setMatchedNegativeCompanyKeywords($currentArray);
-
-        return $this;
-    } // addMatchedNegativeCompanyKeyword()
-
-    /**
-     * Removes a value from the [matched_negative_company_keywords] array column value.
-     * @param  mixed $value
-     *
-     * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
-     */
-    public function removeMatchedNegativeCompanyKeyword($value)
-    {
-        $targetArray = array();
-        foreach ($this->getMatchedNegativeCompanyKeywords() as $element) {
-            if ($element != $value) {
-                $targetArray []= $element;
-            }
-        }
-        $this->setMatchedNegativeCompanyKeywords($targetArray);
-
-        return $this;
-    } // removeMatchedNegativeCompanyKeyword()
+    } // setBadCompanyNameKeywordMatches()
 
     /**
      * Set the value of [user_notification_state] column.
@@ -1044,6 +879,18 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues()
     {
+            if ($this->is_job_match !== false) {
+                return false;
+            }
+
+            if ($this->is_excluded !== false) {
+                return false;
+            }
+
+            if ($this->out_of_user_area !== false) {
+                return false;
+            }
+
             if ($this->user_notification_state !== 0) {
                 return false;
             }
@@ -1086,23 +933,20 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : UserJobMatchTableMap::translateFieldName('IsJobMatch', TableMap::TYPE_PHPNAME, $indexType)];
             $this->is_job_match = (null !== $col) ? (boolean) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserJobMatchTableMap::translateFieldName('IsExcluded', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : UserJobMatchTableMap::translateFieldName('GoodJobTitleKeywordMatches', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->good_job_title_keyword_matches = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserJobMatchTableMap::translateFieldName('IsExcluded', TableMap::TYPE_PHPNAME, $indexType)];
             $this->is_excluded = (null !== $col) ? (boolean) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : UserJobMatchTableMap::translateFieldName('OutOfUserArea', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserJobMatchTableMap::translateFieldName('OutOfUserArea', TableMap::TYPE_PHPNAME, $indexType)];
             $this->out_of_user_area = (null !== $col) ? (boolean) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : UserJobMatchTableMap::translateFieldName('MatchedUserKeywords', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->matched_user_keywords = $col;
-            $this->matched_user_keywords_unserialized = null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserJobMatchTableMap::translateFieldName('BadJobTitleKeywordMatches', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->bad_job_title_keyword_matches = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : UserJobMatchTableMap::translateFieldName('MatchedNegativeTitleKeywords', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->matched_negative_title_keywords = $col;
-            $this->matched_negative_title_keywords_unserialized = null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserJobMatchTableMap::translateFieldName('MatchedNegativeCompanyKeywords', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->matched_negative_company_keywords = $col;
-            $this->matched_negative_company_keywords_unserialized = null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : UserJobMatchTableMap::translateFieldName('BadCompanyNameKeywordMatches', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->bad_company_name_keyword_matches = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : UserJobMatchTableMap::translateFieldName('UserNotificationState', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_notification_state = (null !== $col) ? (int) $col : null;
@@ -1375,20 +1219,20 @@ abstract class UserJobMatch implements ActiveRecordInterface
         if ($this->isColumnModified(UserJobMatchTableMap::COL_IS_JOB_MATCH)) {
             $modifiedColumns[':p' . $index++]  = 'is_job_match';
         }
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_GOOD_JOB_TITLE_KEYWORD_MATCHES)) {
+            $modifiedColumns[':p' . $index++]  = 'good_job_title_keyword_matches';
+        }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_IS_EXCLUDED)) {
             $modifiedColumns[':p' . $index++]  = 'is_excluded';
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_OUT_OF_USER_AREA)) {
             $modifiedColumns[':p' . $index++]  = 'out_of_user_area';
         }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS)) {
-            $modifiedColumns[':p' . $index++]  = 'matched_user_keywords';
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_BAD_JOB_TITLE_KEYWORD_MATCHES)) {
+            $modifiedColumns[':p' . $index++]  = 'bad_job_title_keyword_matches';
         }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS)) {
-            $modifiedColumns[':p' . $index++]  = 'matched_negative_title_keywords';
-        }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS)) {
-            $modifiedColumns[':p' . $index++]  = 'matched_negative_company_keywords';
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_BAD_COMPANY_NAME_KEYWORD_MATCHES)) {
+            $modifiedColumns[':p' . $index++]  = 'bad_company_name_keyword_matches';
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE)) {
             $modifiedColumns[':p' . $index++]  = 'user_notification_state';
@@ -1422,20 +1266,20 @@ abstract class UserJobMatch implements ActiveRecordInterface
                     case 'is_job_match':
                         $stmt->bindValue($identifier, (int) $this->is_job_match, PDO::PARAM_INT);
                         break;
+                    case 'good_job_title_keyword_matches':
+                        $stmt->bindValue($identifier, $this->good_job_title_keyword_matches, PDO::PARAM_STR);
+                        break;
                     case 'is_excluded':
                         $stmt->bindValue($identifier, (int) $this->is_excluded, PDO::PARAM_INT);
                         break;
                     case 'out_of_user_area':
                         $stmt->bindValue($identifier, (int) $this->out_of_user_area, PDO::PARAM_INT);
                         break;
-                    case 'matched_user_keywords':
-                        $stmt->bindValue($identifier, $this->matched_user_keywords, PDO::PARAM_STR);
+                    case 'bad_job_title_keyword_matches':
+                        $stmt->bindValue($identifier, $this->bad_job_title_keyword_matches, PDO::PARAM_STR);
                         break;
-                    case 'matched_negative_title_keywords':
-                        $stmt->bindValue($identifier, $this->matched_negative_title_keywords, PDO::PARAM_STR);
-                        break;
-                    case 'matched_negative_company_keywords':
-                        $stmt->bindValue($identifier, $this->matched_negative_company_keywords, PDO::PARAM_STR);
+                    case 'bad_company_name_keyword_matches':
+                        $stmt->bindValue($identifier, $this->bad_company_name_keyword_matches, PDO::PARAM_STR);
                         break;
                     case 'user_notification_state':
                         $stmt->bindValue($identifier, $this->user_notification_state, PDO::PARAM_INT);
@@ -1521,19 +1365,19 @@ abstract class UserJobMatch implements ActiveRecordInterface
                 return $this->getIsJobMatch();
                 break;
             case 4:
-                return $this->getIsExcluded();
+                return $this->getGoodJobTitleKeywordMatches();
                 break;
             case 5:
-                return $this->getOutOfUserArea();
+                return $this->getIsExcluded();
                 break;
             case 6:
-                return $this->getMatchedUserKeywords();
+                return $this->getOutOfUserArea();
                 break;
             case 7:
-                return $this->getMatchedNegativeTitleKeywords();
+                return $this->getBadJobTitleKeywordMatches();
                 break;
             case 8:
-                return $this->getMatchedNegativeCompanyKeywords();
+                return $this->getBadCompanyNameKeywordMatches();
                 break;
             case 9:
                 return $this->getUserNotificationState();
@@ -1578,11 +1422,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $keys[1] => $this->getUserId(),
             $keys[2] => $this->getJobPostingId(),
             $keys[3] => $this->getIsJobMatch(),
-            $keys[4] => $this->getIsExcluded(),
-            $keys[5] => $this->getOutOfUserArea(),
-            $keys[6] => $this->getMatchedUserKeywords(),
-            $keys[7] => $this->getMatchedNegativeTitleKeywords(),
-            $keys[8] => $this->getMatchedNegativeCompanyKeywords(),
+            $keys[4] => $this->getGoodJobTitleKeywordMatches(),
+            $keys[5] => $this->getIsExcluded(),
+            $keys[6] => $this->getOutOfUserArea(),
+            $keys[7] => $this->getBadJobTitleKeywordMatches(),
+            $keys[8] => $this->getBadCompanyNameKeywordMatches(),
             $keys[9] => $this->getUserNotificationState(),
             $keys[10] => $this->getUpdatedAt(),
             $keys[11] => $this->getFirstMatchedAt(),
@@ -1678,31 +1522,19 @@ abstract class UserJobMatch implements ActiveRecordInterface
                 $this->setIsJobMatch($value);
                 break;
             case 4:
-                $this->setIsExcluded($value);
+                $this->setGoodJobTitleKeywordMatches($value);
                 break;
             case 5:
-                $this->setOutOfUserArea($value);
+                $this->setIsExcluded($value);
                 break;
             case 6:
-                if (!is_array($value)) {
-                    $v = trim(substr($value, 2, -2));
-                    $value = $v ? explode(' | ', $v) : array();
-                }
-                $this->setMatchedUserKeywords($value);
+                $this->setOutOfUserArea($value);
                 break;
             case 7:
-                if (!is_array($value)) {
-                    $v = trim(substr($value, 2, -2));
-                    $value = $v ? explode(' | ', $v) : array();
-                }
-                $this->setMatchedNegativeTitleKeywords($value);
+                $this->setBadJobTitleKeywordMatches($value);
                 break;
             case 8:
-                if (!is_array($value)) {
-                    $v = trim(substr($value, 2, -2));
-                    $value = $v ? explode(' | ', $v) : array();
-                }
-                $this->setMatchedNegativeCompanyKeywords($value);
+                $this->setBadCompanyNameKeywordMatches($value);
                 break;
             case 9:
                 $valueSet = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
@@ -1756,19 +1588,19 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $this->setIsJobMatch($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
-            $this->setIsExcluded($arr[$keys[4]]);
+            $this->setGoodJobTitleKeywordMatches($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setOutOfUserArea($arr[$keys[5]]);
+            $this->setIsExcluded($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setMatchedUserKeywords($arr[$keys[6]]);
+            $this->setOutOfUserArea($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setMatchedNegativeTitleKeywords($arr[$keys[7]]);
+            $this->setBadJobTitleKeywordMatches($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
-            $this->setMatchedNegativeCompanyKeywords($arr[$keys[8]]);
+            $this->setBadCompanyNameKeywordMatches($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
             $this->setUserNotificationState($arr[$keys[9]]);
@@ -1832,20 +1664,20 @@ abstract class UserJobMatch implements ActiveRecordInterface
         if ($this->isColumnModified(UserJobMatchTableMap::COL_IS_JOB_MATCH)) {
             $criteria->add(UserJobMatchTableMap::COL_IS_JOB_MATCH, $this->is_job_match);
         }
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_GOOD_JOB_TITLE_KEYWORD_MATCHES)) {
+            $criteria->add(UserJobMatchTableMap::COL_GOOD_JOB_TITLE_KEYWORD_MATCHES, $this->good_job_title_keyword_matches);
+        }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_IS_EXCLUDED)) {
             $criteria->add(UserJobMatchTableMap::COL_IS_EXCLUDED, $this->is_excluded);
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_OUT_OF_USER_AREA)) {
             $criteria->add(UserJobMatchTableMap::COL_OUT_OF_USER_AREA, $this->out_of_user_area);
         }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS)) {
-            $criteria->add(UserJobMatchTableMap::COL_MATCHED_USER_KEYWORDS, $this->matched_user_keywords);
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_BAD_JOB_TITLE_KEYWORD_MATCHES)) {
+            $criteria->add(UserJobMatchTableMap::COL_BAD_JOB_TITLE_KEYWORD_MATCHES, $this->bad_job_title_keyword_matches);
         }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS)) {
-            $criteria->add(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_TITLE_KEYWORDS, $this->matched_negative_title_keywords);
-        }
-        if ($this->isColumnModified(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS)) {
-            $criteria->add(UserJobMatchTableMap::COL_MATCHED_NEGATIVE_COMPANY_KEYWORDS, $this->matched_negative_company_keywords);
+        if ($this->isColumnModified(UserJobMatchTableMap::COL_BAD_COMPANY_NAME_KEYWORD_MATCHES)) {
+            $criteria->add(UserJobMatchTableMap::COL_BAD_COMPANY_NAME_KEYWORD_MATCHES, $this->bad_company_name_keyword_matches);
         }
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE)) {
             $criteria->add(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE, $this->user_notification_state);
@@ -1967,11 +1799,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $copyObj->setUserId($this->getUserId());
         $copyObj->setJobPostingId($this->getJobPostingId());
         $copyObj->setIsJobMatch($this->getIsJobMatch());
+        $copyObj->setGoodJobTitleKeywordMatches($this->getGoodJobTitleKeywordMatches());
         $copyObj->setIsExcluded($this->getIsExcluded());
         $copyObj->setOutOfUserArea($this->getOutOfUserArea());
-        $copyObj->setMatchedUserKeywords($this->getMatchedUserKeywords());
-        $copyObj->setMatchedNegativeTitleKeywords($this->getMatchedNegativeTitleKeywords());
-        $copyObj->setMatchedNegativeCompanyKeywords($this->getMatchedNegativeCompanyKeywords());
+        $copyObj->setBadJobTitleKeywordMatches($this->getBadJobTitleKeywordMatches());
+        $copyObj->setBadCompanyNameKeywordMatches($this->getBadCompanyNameKeywordMatches());
         $copyObj->setUserNotificationState($this->getUserNotificationState());
         $copyObj->setUpdatedAt($this->getUpdatedAt());
         $copyObj->setFirstMatchedAt($this->getFirstMatchedAt());
@@ -2122,14 +1954,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $this->user_id = null;
         $this->jobposting_id = null;
         $this->is_job_match = null;
+        $this->good_job_title_keyword_matches = null;
         $this->is_excluded = null;
         $this->out_of_user_area = null;
-        $this->matched_user_keywords = null;
-        $this->matched_user_keywords_unserialized = null;
-        $this->matched_negative_title_keywords = null;
-        $this->matched_negative_title_keywords_unserialized = null;
-        $this->matched_negative_company_keywords = null;
-        $this->matched_negative_company_keywords_unserialized = null;
+        $this->bad_job_title_keyword_matches = null;
+        $this->bad_company_name_keyword_matches = null;
         $this->user_notification_state = null;
         $this->last_updated_at = null;
         $this->first_matched_at = null;
