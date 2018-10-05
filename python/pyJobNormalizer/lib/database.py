@@ -94,9 +94,16 @@ class DatabaseMixin:
             self.connection.commit()
             self.close_connection()
 
+    def fetch_one_from_query(self, querysql):
+        result = self.fetch_all_from_query(querysql)
+        if len(result) > 0 and isinstance(result, list):
+            return result[0]
+
+        return result
+
     def run_command(self, querysql, values=None, close_connection=True):
         try:
-            # print("Running command: {}".format(querysql))
+            print("Running command: {}".format(querysql))
 
             with self.connection.cursor() as cursor:
                 return cursor.execute(querysql, values)
