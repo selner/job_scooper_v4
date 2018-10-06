@@ -159,22 +159,6 @@ RUN python -v
 #tar --strip-components=1 -xvzf docker-17.03.1-ce.tgz -C /usr/local/bin
 #
 
-#######################################################
-##
-## Download & build the math extensions for SQLite
-## that we need for geospatial queries
-##
-#######################################################
-##
-### Uncomment these lines if you are using SQLite
-##
-# RUN mkdir /opt/sqlite
-# RUN mkdir /opt/sqlite/extensions
-# RUN echo "Downloading and compiling SQLite3 math extensions..."
-# RUN wget https://www.sqlite.org/contrib/download/extension-functions.c?get=25 -O /opt/sqlite/extensions/extension-functions.c
-# RUN gcc -fPIC -lm -shared /opt/sqlite/extensions/extension-functions.c -o /opt/sqlite/extensions/libsqlitefunctions.so
-# ADD ./Config/etc/30-pdo_sqlite_ext.ini /etc/php5/cli/conf.d/30-pdo_sqlite_ext.ini
-
 RUN ls -al /usr/bin
 RUN docker-php-ext-enable zip
 RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/docker-php-memory.ini
