@@ -24,7 +24,9 @@ use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatch;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\Utils\PythonRunner;
+use JobScooper\Utils\Settings;
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Collection\ArrayCollection;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
 
@@ -72,7 +74,14 @@ class JobsAutoMarker
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         LogMessage(PHP_EOL . '**************  Updating job match list for known filters ***************' . PHP_EOL);
-        
+
+        try {
+            $this->_markJobsList_OutOfArea_($results);
+        } catch (Exception $ex) {
+            LogError($ex->getMessage(), null, $ex);
+            $errs[] = $ex;
+        }
+
         try {
 
             // Get all the postings that are in the table but not marked as ready-to-send
@@ -101,13 +110,6 @@ class JobsAutoMarker
     public function _markJobsListSubset_($results)
     {
         $errs = array();
-
-        try {
-            $this->_markJobsList_SetOutOfArea_($results);
-        } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
-            $errs[] = $ex;
-        }
 
         try {
             $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($results);
@@ -174,213 +176,43 @@ class JobsAutoMarker
     }
 
 
-
     /**
-     * @return bool
-     */
-    private function _isGeoSpatialWorking()
-    {
-        $sqlType = \Propel\Runtime\Propel::getServiceContainer()->getAdapterClass();
-        switch ($sqlType) {
-            case 'mysql':
-                return true;
-                break;
-
-            default:
-            return false;
-                break;
-
-            case 'sqlite':
-                try {
-                    $ret = loadSqlite3MathExtensions();
-                    if ($ret) {
-                        LogMessage('Successfully loaded the necessary math functions for SQLite to do geospatial filtering.');
-                    }
-                    return $ret;
-                } catch (\Exception $ex) {
-                    LogWarning('Failed to load the necessary math functions for SQLite to do geospatial filtering.  Falling back to county-level instead.');
-                }
-                break;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
+     * @param \Propel\Runtime\Collection\ObjectCollection $collJobsList
      * @throws \Exception
      */
-    private function _markJobsList_SetOutOfArea_(&$arrJobsList)
+    private function _markJobsList_OutOfArea_(&$collJobsList)
     {
-        if (count($arrJobsList) == 0) {
+        if(is_empty_value($collJobsList)) {
+            LogWarning('Automarker: No jobs found to check for in/out of user search area');
             return;
         }
 
-        LogMessage('Marking Out of Area Jobs');
+        $firstJob = $collJobsList->getFirst();
+        $userId = $firstJob->getUserId();
+        $user = User::getUserObjById($userId);
 
-        if ($this->_isGeoSpatialWorking()) {
-            $this->_markJobsList_OutOfArea_Geospatial($arrJobsList);
-        } else {
-            $this->_markJobsList_OutOfArea_CountyFiltered($arrJobsList);
-        }
-    }
+        startLogSection('Automarker: beginning ' .  \count($collJobsList) . ' job tagging as in or out of user\'s search areas...');
 
-    /**
-     * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
-     * @throws \Exception
-     */
-    private function _markJobsList_OutOfArea_CountyFiltered(&$arrJobsList)
-    {
         try {
-            startLogSection('Automarker: marking jobs as out of area using counties...');
-
-            $userObj = User::getUserObjById($this->_markingUserFacts['UserId']);
-            $searchLocations = $userObj->getSearchGeoLocations();
+            startLogSection('Calling python to do heavy lifting of out of area tagging in the database...');
 
 
-            $arrIncludeCounties = array();
+            $runFile = 'pyJobNormalizer/set_out_of_area.py';
+            $params = [
+                '-c' => Settings::get_db_dsn(),
+                '--user' => $user->getUserSlug()
+            ];
 
-            /* Find all locations that are within 50 miles of any of our search locations */
+            $results = PythonRunner::execScript($runFile, $params);
 
-            LogMessage('Auto-marking postings not in same counties as the search locations...');
-            foreach ($searchLocations as $searchloc) {
-                if (null !== $searchloc) {
-                    $arrIncludeCounties[] = $searchloc->getCounty() . '~' .$searchloc->getRegion();
-                }
-            }
-
-            LogMessage('Finding job postings not in the following counties & states: ' . getArrayValuesAsString($arrIncludeCounties) . ' ...');
-            $arrJobsOutOfArea = array_filter($arrJobsList, function (UserJobMatch $v) use ($arrIncludeCounties) {
-                $posting = $v->getJobPostingFromUJM();
-                $locId = $posting->getGeoLocationId();
-                if (null === $locId) {
-                    return false;
-                }  // if we don't have a location, assume nearby
-
-                $location = $posting->getGeoLocationFromJP();
-                $county = $location->getCounty();
-                $state = $location->getRegion();
-                if (null !== $county && null !== $state) {
-                    $match = $county . '~' . $state;
-                    if (!in_array($match, $arrIncludeCounties)) {
-                        return true;
-                    }
-                }
-                return false;
-            });
-
-            LogMessage('Marking user job matches as out of area for ' . \count($arrJobsOutOfArea) . ' matches ...');
-
-            $nJobsMarkedAutoExcluded = \count($arrJobsOutOfArea);
-            $nJobsNotMarked = \count($arrJobsList) - $nJobsMarkedAutoExcluded;
-
-            foreach ($arrJobsOutOfArea as &$jobOutofArea) {
-                $jobOutofArea->setOutOfUserArea(true);
-                $jobOutofArea->save();
-                unset($jobOutofArea);
-           }
-
-
-            LogMessage('Jobs excluded as out of area: marked '. $nJobsMarkedAutoExcluded . '/' . countAssociativeArrayValues($arrJobsList) .';  not marked ' . $nJobsNotMarked . ' / ' . countAssociativeArrayValues($arrJobsList));
         } catch (Exception $ex) {
-            handleException($ex, 'Error in _markJobsList_OutOfArea_CountyFiltered: %s', true);
+            handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
         } finally {
-            endLogSection('Out of area job marking by county finished.');
-            $user = null;
-            $arrJobsOutOfArea = null;
-            $searchLocations = null;
+            endLogSection('Out of area processing finished.');
         }
     }
 
-    /**
-     * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
-     * @throws \Exception
-     */
-    private function _markJobsList_OutOfArea_Geospatial(&$collJobsList)
-    {
-        try {
-            startLogSection('Automarker: marking jobs as out of area using geospatial data...');
-            if(is_empty_value($this->_markingUserFacts['UserId'])) {
-            	throw new \InvalidArgumentException('Unable to automark jobs:  UserId not found.');
-            }
-            $user = User::getUserObjById($this->_markingUserFacts['UserId']);
-            if(null === $user) {
-            	throw new \InvalidArgumentException("Unable to mark jobs:  user ID {$this->_markingUserFacts['UserId']} not found.");
-            }
-            
-            
-            $arrNearbyGeoLocIds = array();
 
-            $searchLocations = $user->getSearchGeoLocations();
-            $user = null;
-            if(is_empty_value($searchLocations)) {
-            	LogWarning("No search locations were found for user ID {$this->_markingUserFacts['UserId']}.");
-            	return;
-            }
-            
-
-            /* Find all locations that are within 50 miles of any of our search locations */
-
-            LogMessage('Getting locationIDs within 50 miles of search locations...');
-            foreach ($searchLocations as $searchloc) {
-                if (null !== $searchloc) {
-                    $arrNearbyGeoLocIds = array_merge(array_values($arrNearbyGeoLocIds), array_values(getGeoLocationsNearby($searchloc)));
-                }
-				$searchloc = null;
-            }
-			$searchLocations = null;
-            
-            if(is_empty_value($collJobsList) || $collJobsList->count() === 0)
-            {
-            	return;
-            }
-            $arrJobsList = $collJobsList->toKeyIndex('UserJobMatchId');
-            $arrJobListIds = array_keys($arrJobsList);
-			
-            LogMessage('Marking job postings in the ' . \count($arrNearbyGeoLocIds) . ' nearby GeoLocations...');
-            $arrInAreaJobs = array_filter($arrJobsList, function (UserJobMatch &$var) use ($arrNearbyGeoLocIds) {
-                if (null !== $var->getJobPostingFromUJM()) {
-                    $geoId = $var->getJobPostingFromUJM()->getGeoLocationId();
-                    if (!is_empty_value($geoId) && !is_empty_value(array_intersect($arrNearbyGeoLocIds, array($geoId)))) {
-                        return true;
-                    }
-                }
-                return false;
-            });
-
-            $arrJobIdsInArea = array_keys($arrInAreaJobs);
-            $arrInAreaJobs = null;
-            $arrJobIdsOutOfArea = array_diff($arrJobListIds, $arrJobIdsInArea);
-
-            foreach (array_chunk($arrJobIdsInArea, 50) as $chunk) {
-                $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-                UserJobMatchQuery::create()
-                    ->filterByUserJobMatchId($chunk)
-                    ->update(array('OutOfUserArea' => false), $con);
-            }
-
-            LogMessage('Marking job postings outside ' .  \count($arrNearbyGeoLocIds) . ' matching areas ...');
-            if (!empty($arrJobIdsOutOfArea)) {
-                foreach (array_chunk($arrJobIdsOutOfArea, 50) as $chunk) {
-                    $con = Propel::getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-                    $query = UserJobMatchQuery::create()
-                        ->filterByUserJobMatchId($chunk)
-                        ->update(array('OutOfUserArea' => true), $con);
-                    unset($query);
-                }
-            }
-
-            $nJobsMarkedAutoExcluded =  \count($arrJobIdsOutOfArea);
-            $nJobsNotMarked =  \count($arrJobIdsInArea);
-            $nJobsTotal =  \count($arrJobListIds);
-
-            LogMessage("Jobs excluded as out of area:  marked out of area {$nJobsMarkedAutoExcluded}/{$nJobsTotal}; marked in area = {$nJobsNotMarked}/{$nJobsTotal}");
-        } catch (Exception $ex) {
-            handleException($ex, 'Error in _markJobsList_OutOfArea_Geospatial: %s', true);
-        } finally {
-            endLogSection('Out of area job marking geospatially finished.');
-        }
-    }
 
     /**
      * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
@@ -591,10 +423,10 @@ class JobsAutoMarker
      */
     private function _markJobsList_KeywordMatches_(&$collJobsList)
     {
-    	if(is_empty_value($collJobsList)) {
-	        LogWarning('Automarker: No jobs found to match against user search keywords.');
-	        return;
-    	}
+        if(is_empty_value($collJobsList)) {
+            LogWarning('Automarker: No jobs found to match against user search keywords.');
+            return;
+        }
 
         startLogSection('Automarker: Starting matching of ' .  \count($collJobsList) . ' job role titles against user search keywords ...');
 
@@ -608,14 +440,14 @@ class JobsAutoMarker
             try {
                 startLogSection('Calling python to do work of job title matching.');
 
-				$runFile = 'pyJobNormalizer/matchTitlesToKeywords.py';
-				$params = [
-					'-i' => $sourcefile,
-					'-o' => $resultsfile
-				];
-				
-				$results = PythonRunner::execScript($runFile, $params);
-				
+                $runFile = 'pyJobNormalizer/matchTitlesToKeywords.py';
+                $params = [
+                    '-i' => $sourcefile,
+                    '-o' => $resultsfile
+                ];
+
+                $results = PythonRunner::execScript($runFile, $params);
+
                 LogMessage('Updating database with new match results...');
                 $this->_updateUserJobMatchesFromJson($resultsfile, $collJobsList);
             } catch (Exception $ex) {
