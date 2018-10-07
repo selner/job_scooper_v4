@@ -2100,7 +2100,7 @@ JSCODE;
                                         // otherwise we're out of results so end the loop here.
                                         //
                                         try {
-                                            $this->takeNextPageAction($searchDetails->getItemURLValue($nItemCount), $searchDetails->getPageURLValue($nPageCount));
+                                            $this->takeNextPageAction();
                                             sleep($this->additionalLoadDelaySeconds + 2);
                                         } catch (Exception $ex) {
                                             handleException($ex, ('Failed to take nextPageAction on page ' . $nPageCount . '.  Error:  %s'), true, $extraData=$searchDetails->toLoggedContext());
