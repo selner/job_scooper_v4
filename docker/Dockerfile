@@ -198,8 +198,8 @@ RUN composer install --no-interaction -vv
 ### Install python dependencies
 ###
 ########################################################
-ADD python/pyJobNormalizer/requirements.txt /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
-RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/requirements.txt
+ADD python/pyJobNormalizer/job_normalizer/requirements.txt /opt/jobs_scooper/python/pyJobNormalizer/job_normalizer/requirements.txt
+RUN pip install --no-cache-dir -v -r /opt/jobs_scooper/python/pyJobNormalizer/job_normalizer/requirements.txt
 
 
 ########################################################
