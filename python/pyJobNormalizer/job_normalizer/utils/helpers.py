@@ -24,6 +24,10 @@ import unicodecsv
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
+        """
+        Args:
+            obj:
+        """
         if isinstance(obj, set):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
@@ -33,6 +37,10 @@ xstr = lambda s: str(s) or ""
 
 
 def load_json(filepath):
+    """
+    Args:
+        filepath:
+    """
     f = codecs.open(filepath, 'rb', encoding='utf-8')
     result = json.load(f)
     f.close()
@@ -40,6 +48,11 @@ def load_json(filepath):
 
 
 def write_json(filepath, data):
+    """
+    Args:
+        filepath:
+        data:
+    """
     outf = codecs.open(filepath, 'w', encoding='utf-8')
 
     json.dump(data, outf, indent=4, encoding='utf-8', cls=SetEncoder)
@@ -47,6 +60,14 @@ def write_json(filepath, data):
 
 
 def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield=None):
+    """
+    Args:
+        filepath:
+        fieldnames:
+        delimiter:
+        quotechar:
+        keyfield:
+    """
     ret = {}
 
     fp = codecs.open(filepath, mode='r')
@@ -91,13 +112,9 @@ def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield
 
 def loadcsv(csvfilename, rowkeyname=None):
     """
-
     Args:
         csvfilename:
         rowkeyname:
-
-    Returns:
-
     """
 
     print(u"Loading {}...".format(csvfilename))
@@ -126,14 +143,10 @@ def loadcsv(csvfilename, rowkeyname=None):
 
 def writedicttocsv(csvfilename, data, keys=None):
     """
-
     Args:
         csvfilename:
         data:
         keys:
-
-    Returns:
-
     """
     print(u"Writing {} rows to file {}...".format(len(data), csvfilename))
 
@@ -159,13 +172,9 @@ def writedicttocsv(csvfilename, data, keys=None):
 
 def combine_dicts(a, b):
     """
-
     Args:
         a:
         b:
-
-    Returns:
-
     """
     z = a.copy()
     for k in a.keys():

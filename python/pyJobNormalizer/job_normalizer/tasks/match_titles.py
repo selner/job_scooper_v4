@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from ..helpers import load_json, write_json
+from job_normalizer.utils.helpers import load_json, write_json
 
 from tokenize import Tokenizer
 # from pyJobNormalizer.lib.database import DatabaseMixin
@@ -44,6 +44,10 @@ class TaskMatchJobsToKeywords:
 
     @outputfile.setter
     def outputfile(self, filepath):
+        """
+        Args:
+            filepath:
+        """
         self.outputfile = filepath
 
     @property
@@ -59,6 +63,10 @@ class TaskMatchJobsToKeywords:
         return self._tokenizer
 
     def __init__(self, **kwargs):
+        """
+        Args:
+            **kwargs:
+        """
         if 'inputfile' in kwargs:
             self.inputfile = kwargs['inputfile']
         else:
@@ -114,6 +122,10 @@ class TaskMatchJobsToKeywords:
     @staticmethod
     def get_unique_keywd_set(keywords):
 
+        """
+        Args:
+            keywords:
+        """
         all_keyword_sets = [x['tokens'].replace("||", "|")[1:-1].split("|") for x in keywords.values()]
 
         #
@@ -131,6 +143,12 @@ class TaskMatchJobsToKeywords:
         return {u'single_tokens': uniq_single_toks, u'multi_tokens': all_multi_tok_sets}
 
     def set_keyword_matches(self, data, key_source, key_result):
+        """
+        Args:
+            data:
+            key_source:
+            key_result:
+        """
         nmatched = 0
         nnotmatched = 0
 

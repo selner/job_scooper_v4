@@ -41,11 +41,6 @@ Options:
 
 
 def get_plugin_files():
-    """
-
-    Returns:
-
-    """
     plugins = {}
     plugindir = os.path.realpath("../../plugins")
     for root, dirs, files in os.walk(plugindir):
@@ -62,7 +57,6 @@ def get_plugin_files():
 
 def run_plugin_for_user(plug, configini, outpath, run_stages):
     """
-
     Args:
         plug:
         configini:
@@ -102,9 +96,17 @@ def run_plugin_for_user(plug, configini, outpath, run_stages):
 
 def save_run_log(outpath=None, name=None, textdata=None, encoding='utf-8'):
     """
-        Writes a file to disk with the text passed.  If filepath is not specified, the filename will
-        be <testname>_results.txt.
-    :return: the path of the file
+        Writes a file to disk with the text passed. If filepath is not
+        specified, the filename will be <testname>_results.txt.
+
+    Args:
+        outpath:
+        name:
+        textdata:
+        encoding:
+
+    Returns:
+        the path of the file
     """
 
     logfile = u"{}_run.log".format(name)

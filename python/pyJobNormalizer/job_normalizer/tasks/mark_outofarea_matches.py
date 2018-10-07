@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from ..database import DatabaseMixin
+from job_normalizer.utils.database import DatabaseMixin
 from .find_nearby_locations import TaskFindNearbyGeolocationsFromDb
 
 class TaskMarkOutOfAreaMatches(DatabaseMixin):
@@ -28,6 +28,10 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
     _config = None
 
     def __init__(self, **kwargs):
+        """
+        Args:
+            **kwargs:
+        """
         self.init_connection(**kwargs)
         if 'geolocation_id' in kwargs:
             self._geolocation_id = kwargs['geolocation_id']
@@ -37,6 +41,10 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         self._config = kwargs
 
     def get_user_search_geolocation_ids(self, userkey):
+        """
+        Args:
+            userkey:
+        """
         result = self.fetch_all_from_query(u"""
         SELECT 
             geolocation_id

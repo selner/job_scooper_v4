@@ -8,3 +8,4 @@ pymysql
 
 cleanco
 requests
+nltk

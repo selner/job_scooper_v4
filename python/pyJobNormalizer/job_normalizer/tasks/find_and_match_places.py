@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from ..database import DatabaseMixin
+from job_normalizer.utils.database import DatabaseMixin
 from urllib import urlencode
 import requests
 
@@ -44,6 +44,10 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
     def update_all_locations(self, **kwargs):
 
+        """
+        Args:
+            **kwargs:
+        """
         self.init_connection(**kwargs)
 
         self._geoloc_columns = self.get_table_columns("geolocation")
@@ -81,6 +85,10 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
     def update_job_posting_locations(self, geocode_server):
 
+        """
+        Args:
+            geocode_server:
+        """
         print(u"Getting locations needing lookup/update...")
 
         querysql = u"""
@@ -109,6 +117,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             self._lookup_unknown_locations(locs_needing_lookup, geocode_server)
 
     def _update_mappings_for_loc(self, loc, locfacts):
+        """
+        Args:
+            loc:
+            locfacts:
+        """
         statement = u"""
             UPDATE jobposting
             SET 
@@ -125,6 +138,10 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         return rows_updated
 
     def _update_missing_db_known_locs(self, locs):
+        """
+        Args:
+            locs:
+        """
         print(u"Updating {} known locations who are missing geolocation details in the database...".format(len(locs)))
         total_updated = 0
 
@@ -145,6 +162,10 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                     total_updated, len(locs)))
 
     def call_geocode_api(self, **kwargs):
+        """
+        Args:
+            **kwargs:
+        """
         results = None
         r = None
         retries = 0
@@ -178,6 +199,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             r = None
 
     def _lookup_unknown_locations(self, locs, geocode_server):
+        """
+        Args:
+            locs:
+            geocode_server:
+        """
         print(u"Finding places for {} unknown locations ...".format(
             len(locs)))
         total_loc_found = 0

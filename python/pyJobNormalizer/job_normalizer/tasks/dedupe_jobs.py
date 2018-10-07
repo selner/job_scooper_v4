@@ -19,9 +19,9 @@
 ###########################################################################
 import pandas
 from datetime import *
-from ..helpers import write_json, load_ucsv, load_json
+from job_normalizer.utils.helpers import write_json, load_ucsv, load_json
 from tokenize import Tokenizer
-from ..database import DatabaseMixin
+from job_normalizer.utils.database import DatabaseMixin
 from collections import OrderedDict
 from cleanco import cleanco
 
@@ -48,9 +48,17 @@ class BaseTaskDedupeJobPostings:
 
     @outputfile.setter
     def outputfile(self, filepath):
+        """
+        Args:
+            filepath:
+        """
         self.outputfile = filepath
 
     def __init__(self, outputfile=None):
+        """
+        Args:
+            outputfile:
+        """
         self.outputfile = outputfile
 
     def dedupe_jobs(self):
@@ -89,6 +97,10 @@ class BaseTaskDedupeJobPostings:
         return self.outputfile
 
     def prepare_data(self, jobsdata):
+        """
+        Args:
+            jobsdata:
+        """
         print("Tokenizing {} job titles....".format(len(jobsdata)))
         try:
             tokenizer = Tokenizer()
@@ -137,6 +149,10 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
 
     def load_data(self, **kwargs):
 
+        """
+        Args:
+            **kwargs:
+        """
         self.init_connection(**kwargs)
 
         print(u"Processing job postings for duplicates from database {}".format(self.dbparams))
@@ -208,6 +224,10 @@ class DedupeJobPostingFile(BaseTaskDedupeJobPostings):
     inputfile = None
 
     def load_data(self, **kwargs):
+        """
+        Args:
+            **kwargs:
+        """
         if 'inputfile' in kwargs:
             self.inputfile = kwargs['inputfile']
         else:

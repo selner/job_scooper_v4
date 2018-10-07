@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 
-from lib.helpers import loadcsv
+from job_normalizer.utils.helpers import loadcsv
 import nltk
 import codecs
 import string
@@ -102,15 +102,11 @@ class Tokenizer:
 
     def tokenize_strings(self, list_data, field, field_tokenized="tokenized", ret_type="string"):
         """
-
         Args:
             list_data:
             field:
             field_tokenized:
             ret_type:
-
-        Returns:
-
         """
 
         for k in list_data.keys():
@@ -134,24 +130,16 @@ class Tokenizer:
 
     def remove_stop_words(self, listwords):
         """
-
         Args:
             listwords:
-
-        Returns:
-
         """
         retwords = [i for i in listwords if i not in self.stopwrds]
         return retwords
 
     def get_stemmed_words(self, listwords):
         """
-
         Args:
             listwords:
-
-        Returns:
-
         """
         retwords = [self.snowstemmer.stem(i) for i in listwords]
         return retwords
@@ -168,12 +156,8 @@ class Tokenizer:
 
     def get_expanded_words(self, str_words):
         """
-
         Args:
             str_words:
-
-        Returns:
-
         """
 
         if not isinstance(str_words, basestring):
@@ -195,12 +179,8 @@ class Tokenizer:
 
     def get_scrubbed_string_tokens(self, inputstring):
         """
-
         Args:
             inputstring:
-
-        Returns:
-
         """
         if not inputstring:
             return ""

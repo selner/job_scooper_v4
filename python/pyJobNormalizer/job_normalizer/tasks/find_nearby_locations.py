@@ -17,20 +17,33 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from ..database import DatabaseMixin
+from job_normalizer.utils.database import DatabaseMixin
 
 
 class TaskFindNearbyGeolocationsFromDb(DatabaseMixin):
     dbparams = {}
 
     def __init__(self, **kwargs):
+        """
+        Args:
+            **kwargs:
+        """
         self.init_connection(**kwargs)
 
     def get_geolocation(self, geolocation_id):
+        """
+        Args:
+            geolocation_id:
+        """
         return self.fetch_one_from_query("SELECT * FROM geolocation WHERE geolocation_id = {}".format(geolocation_id))
 
     def find_nearby_locations(self, geolocation, radius):
 
+        """
+        Args:
+            geolocation:
+            radius:
+        """
         query = self.get_nearby_locations_query(geolocation, radius)
         result = self.fetch_all_from_query(query)
 
@@ -40,6 +53,12 @@ class TaskFindNearbyGeolocationsFromDb(DatabaseMixin):
 
 
     def get_nearby_locations_query(self, geolocation, radius, columns=None):
+        """
+        Args:
+            geolocation:
+            radius:
+            columns:
+        """
         print(u"Connecting to database...")
 
         if not columns:

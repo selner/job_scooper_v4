@@ -34,6 +34,10 @@ class DatabaseMixin:
 
     def init_connection(self, **kwargs):
 
+        """
+        Args:
+            **kwargs:
+        """
         from urlparse import urlparse
 
         if 'connecturi' in kwargs:
@@ -77,6 +81,10 @@ class DatabaseMixin:
         self._connection = None
 
     def fetch_all_from_query(self, querysql):
+        """
+        Args:
+            querysql:
+        """
         result = {}
 
         try:
@@ -95,6 +103,10 @@ class DatabaseMixin:
             self.close_connection()
 
     def fetch_one_from_query(self, querysql):
+        """
+        Args:
+            querysql:
+        """
         result = self.fetch_all_from_query(querysql)
         if len(result) > 0 and isinstance(result, list):
             return result[0]
@@ -102,6 +114,12 @@ class DatabaseMixin:
         return result
 
     def run_command(self, querysql, values=None, close_connection=True):
+        """
+        Args:
+            querysql:
+            values:
+            close_connection:
+        """
         try:
             print("Running command: {}".format(querysql))
 
@@ -120,6 +138,10 @@ class DatabaseMixin:
 
     def get_table_columns(self, tablename):
         # print("Running command: {}".format(querysql))
+        """
+        Args:
+            tablename:
+        """
         column_data = self.fetch_all_from_query(u"SHOW columns from %s" % tablename)
 
         return set(col['Field'] for col in column_data)
@@ -128,6 +150,13 @@ class DatabaseMixin:
         # XXX tablename not sanitized
         # XXX test for allowed keys is case-sensitive
 
+        """
+        Args:
+            tablename:
+            primary_key_column:
+            rowdict:
+            tablecolumns:
+        """
         try:
             if not tablecolumns:
                 allowed_keys = self.get_table_columns(tablename)

@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from lib.tasks.find_and_match_places import FindPlacesFromDBLocationsTask
+from tasks.find_and_match_places import FindPlacesFromDBLocationsTask
 from docopt import docopt
 
 cli_usage = """
