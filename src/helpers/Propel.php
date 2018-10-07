@@ -145,6 +145,7 @@ function getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocId
     $query->filterByUserId($userFacts['UserId']);
     $query->filterByDaysAgo($nNumDaysBack);
     $query->filterByGeoLocationIds($arrGeoLocIds);
+    $query->orderByIsJobMatch(Criteria::DESC);
 
     return $query;
 }
