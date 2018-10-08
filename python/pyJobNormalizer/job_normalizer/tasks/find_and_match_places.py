@@ -130,7 +130,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             WHERE 
                 location='{}' AND 
                 geolocation_id IS NULL
-            """.format(locfacts['GeoLocationId'], locfacts['DisplayName'], loc)
+            """.format(locfacts['GeoLocationId'], self.connection.escape_string(locfacts['DisplayName']), self.connection.escape_string(loc))
 
         rows_updated = self.run_command(statement, close_connection=False)
         print(u"Updated {} rows missing information for '{} ({})'".format(rows_updated, loc,
