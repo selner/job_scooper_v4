@@ -76,7 +76,7 @@ class JobsAutoMarker
         LogMessage(PHP_EOL . '**************  Updating job match list for known filters ***************' . PHP_EOL);
 
         try {
-            $this->_markJobsList_OutOfArea_($results);
+            $this->_markJobsList_OutOfArea_($userFacts);
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);
             $errs[] = $ex;
@@ -180,18 +180,10 @@ class JobsAutoMarker
      * @param \Propel\Runtime\Collection\ObjectCollection $collJobsList
      * @throws \Exception
      */
-    private function _markJobsList_OutOfArea_(&$collJobsList)
+    private function _markJobsList_OutOfArea_($userFacts)
     {
-        if(is_empty_value($collJobsList)) {
-            LogWarning('Automarker: No jobs found to check for in/out of user search area');
-            return;
-        }
 
-        $firstJob = $collJobsList->getFirst();
-        $userId = $firstJob->getUserId();
-        $user = User::getUserObjById($userId);
-
-        startLogSection('Automarker: beginning ' .  \count($collJobsList) . ' job tagging as in or out of user\'s search areas...');
+        startLogSection("Automarker: beginning job tagging as in or out of {$userFacts['UserSlug']}'s search areas...");
 
         try {
             startLogSection('Calling python to do heavy lifting of out of area tagging in the database...');
@@ -200,7 +192,7 @@ class JobsAutoMarker
             $runFile = 'pyJobNormalizer/set_out_of_area.py';
             $params = [
                 '-c' => Settings::get_db_dsn(),
-                '--user' => $user->getUserSlug()
+                '--user' => $userFacts['UserSlug']
             ];
 
             $results = PythonRunner::execScript($runFile, $params);
