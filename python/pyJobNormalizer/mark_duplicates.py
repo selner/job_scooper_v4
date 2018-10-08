@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from tasks.dedupe_jobs import DedupeJobPostingFromDB, DedupeJobPostingFile
+from task_dedupe_jobs import DedupeJobPostingFromDB, DedupeJobPostingFile
 from docopt import docopt
 
 cli_usage = """

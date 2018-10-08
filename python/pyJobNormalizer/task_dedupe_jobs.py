@@ -19,9 +19,9 @@
 ###########################################################################
 import pandas
 from datetime import *
-from job_normalizer.utils.helpers import write_json, load_ucsv, load_json
-from tokenize import Tokenizer
-from job_normalizer.utils.database import DatabaseMixin
+from helpers import write_json, load_ucsv, load_json
+from task_tokenize import Tokenizer
+from database import DatabaseMixin
 from collections import OrderedDict
 from cleanco import cleanco
 

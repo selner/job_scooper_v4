@@ -18,22 +18,24 @@
 #  under the License.
 ###########################################################################
 from docopt import docopt
-from tasks.match_titles import TaskMatchJobsToKeywords
+from task_match_titles import TaskMatchJobsToKeywords
+
 
 cli_usage = """
 Usage:
-  match_db_jobtitles.py -c <dbstring>
-  match_db_jobtitles.py --version
+  match_titles_to_keywords.py -i <file> -o <file>
+  match_titles_to_keywords.py --version
 
 Options:
   -h --help  show this help message and exit
   --version  show version and exit
   -v --verbose  print status messages
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
+  -o <file>, --output <file> output file with job match results 
+  -i <file>, --input <file> input JSON data file with jobs and keywords
 """
 
 if __name__ == '__main__':
     arguments = docopt(cli_usage, version='0.1.1rc')
 
-    matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""),
-                                      outputfile=arguments["--output"].replace("'", ""))
+    matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""), outputfile=arguments["--output"].replace("'", ""))
+    matcher.export_results()

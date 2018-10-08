@@ -17,28 +17,28 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from tasks.mark_outofarea_matches import TaskMarkOutOfAreaMatches
+from task_find_and_match_places import FindPlacesFromDBLocationsTask
 from docopt import docopt
 
 cli_usage = """
 Usage:
-  set_out_of_area.py -c <dbstring> -u user
-  set_out_of_area.py --version
+  set_geolocations.py -c <dbstring> -s <server>
+  set_geolocations.py --version
   
 Options:
   -h --help     show this help message and exit
   --version     show version and exit
   -v --verbose      print status messages
   -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-  -u <userkey>, --user <userkey>    slug key for user to update matches on
+  -s <server>, --server <server>    hostname for geocode api server [default: http://0.0.0.0:5000]
 """
 
 if __name__ == '__main__':
     arguments = docopt(cli_usage, version='0.1.1rc')
     args = {k.replace("--", ""): arguments[k] for k in arguments.keys()}
 
-    if "connecturi" in args and args["connecturi"] and "user" in args and args["user"]:
-        matcher = TaskMarkOutOfAreaMatches(**args)
-        matcher.mark_out_area()
+    if "connecturi" in args and args["connecturi"] and "server" in args and args["server"]:
+        matcher = FindPlacesFromDBLocationsTask()
+        matcher.update_all_locations(**args)
     else:
-        print(u"Unable to mark job matches as out of area.  Missing script arguments.")
+        print(u"Unable to update locations for job postings.  Missing script arguments.")

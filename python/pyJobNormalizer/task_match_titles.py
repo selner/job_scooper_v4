@@ -17,10 +17,9 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from job_normalizer.utils.helpers import load_json, write_json
+from helpers import load_json, write_json
 
-from tokenize import Tokenizer
-# from pyJobNormalizer.lib.database import DatabaseMixin
+from task_tokenize import Tokenizer
 
 JSON_KEY_JOBMATCHES = u'job_matches'
 JSON_KEY_POS_KEYWORDS = u'SearchKeywords'

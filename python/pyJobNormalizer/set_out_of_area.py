@@ -17,25 +17,28 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
+from task_mark_outofarea_matches import TaskMarkOutOfAreaMatches
 from docopt import docopt
-from tasks.match_titles import TaskMatchJobsToKeywords
-
 
 cli_usage = """
 Usage:
-  matchTitlesToKeywords.py -i <file> -o <file>
-  matchTitlesToKeywords.py --version
-
+  set_out_of_area.py -c <dbstring> -u user
+  set_out_of_area.py --version
+  
 Options:
-  -h --help  show this help message and exit
-  --version  show version and exit
-  -v --verbose  print status messages
-  -o <file>, --output <file> output file with job match results 
-  -i <file>, --input <file> input JSON data file with jobs and keywords
+  -h --help     show this help message and exit
+  --version     show version and exit
+  -v --verbose      print status messages
+  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
+  -u <userkey>, --user <userkey>    slug key for user to update matches on
 """
 
 if __name__ == '__main__':
     arguments = docopt(cli_usage, version='0.1.1rc')
+    args = {k.replace("--", ""): arguments[k] for k in arguments.keys()}
 
-    matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""), outputfile=arguments["--output"].replace("'", ""))
-    matcher.export_results()
+    if "connecturi" in args and args["connecturi"] and "user" in args and args["user"]:
+        matcher = TaskMarkOutOfAreaMatches(**args)
+        matcher.mark_out_area()
+    else:
+        print(u"Unable to mark job matches as out of area.  Missing script arguments.")

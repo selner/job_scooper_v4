@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 
-from job_normalizer.utils.helpers import loadcsv
+from helpers import loadcsv
 import nltk
 import codecs
 import string
@@ -147,7 +147,7 @@ class Tokenizer:
     @property
     def expandedwords(self):
         if not self._expandwords:
-            filepath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # /a/b/c/d/e
+            filepath = os.path.dirname(os.path.abspath(__file__))  # /a/b/c/d/e
 
             abbrevfile = os.path.join(filepath, "static", "job-title-abbreviations.csv")
             self._expandwords = loadcsv(abbrevfile, "abbreviation")['dict']
