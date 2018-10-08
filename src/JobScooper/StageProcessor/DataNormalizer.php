@@ -70,7 +70,7 @@ class DataNormalizer
     {
         try {
             startLogSection('Calling python to dedupe new job postings...');
-            $runFile = 'pyJobNormalizer/mark_duplicates.py';
+            $runFile = 'pyJobNormalizer/job_normalizer/mark_duplicates.py';
             $params = [
                 '-c' => Settings::get_db_dsn()
             ];
@@ -93,7 +93,7 @@ class DataNormalizer
     {
         try {
             startLogSection('Calling python to find & map missing locations...');
-            $runFile = 'pyJobNormalizer/set_geolocations.py';
+            $runFile = 'pyJobNormalizer/job_normalizer/set_geolocations.py';
             $params = [
                 '-c' => Settings::get_db_dsn(),
                 '--server' => Settings::getValue('geocodeapi_server'),

@@ -189,7 +189,7 @@ class JobsAutoMarker
             startLogSection('Calling python to do heavy lifting of out of area tagging in the database...');
 
 
-            $runFile = 'pyJobNormalizer/set_out_of_area.py';
+            $runFile = 'pyJobNormalizer/job_normalizer/set_out_of_area.py';
             $params = [
                 '-c' => Settings::get_db_dsn(),
                 '--user' => $userFacts['UserSlug']
@@ -432,7 +432,7 @@ class JobsAutoMarker
             try {
                 startLogSection('Calling python to do work of job title matching.');
 
-                $runFile = 'pyJobNormalizer/matchTitlesToKeywords.py';
+                $runFile = 'pyJobNormalizer/job_normalizer/matchTitlesToKeywords.py';
                 $params = [
                     '-i' => $sourcefile,
                     '-o' => $resultsfile
