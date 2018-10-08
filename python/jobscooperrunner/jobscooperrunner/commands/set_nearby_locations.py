@@ -17,25 +17,11 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from docopt import docopt
-from tasks.match_titles import TaskMatchJobsToKeywords
-
-
-cli_usage = """
-Usage:
-  matchTitlesToKeywords.py -i <file> -o <file>
-  matchTitlesToKeywords.py --version
-
-Options:
-  -h --help  show this help message and exit
-  --version  show version and exit
-  -v --verbose  print status messages
-  -o <file>, --output <file> output file with job match results 
-  -i <file>, --input <file> input JSON data file with jobs and keywords
-"""
+from jobscooperrunner.tasks.findnearbylocations import TaskFindNearbyGeolocationsFromDb
 
 if __name__ == '__main__':
-    arguments = docopt(cli_usage, version='0.1.1rc')
-
-    matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""), outputfile=arguments["--output"].replace("'", ""))
-    matcher.export_results()
+    findnearby = TaskFindNearbyGeolocationsFromDb(
+        connecturi='mysql:host=mysql.jobscooper.local;dbname=js4-dev3;port=3307;charset=utf8mb4;user=jobscooper;password=orange11;')
+    geoloc = findnearby.get_geolocation(377)
+    nearby = findnearby.find_nearby_locations(geoloc, 20)
+    print nearby

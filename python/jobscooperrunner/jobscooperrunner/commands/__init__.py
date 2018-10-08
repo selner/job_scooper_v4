@@ -17,23 +17,11 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from docopt import docopt
-from tasks.match_titles import TaskMatchJobsToKeywords
+__name__ = "commands"
 
-cli_usage = """
-Usage:
-  match_db_jobtitles.py -c <dbstring>
-  match_db_jobtitles.py --version
-
-Options:
-  -h --help  show this help message and exit
-  --version  show version and exit
-  -v --verbose  print status messages
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-"""
-
-if __name__ == '__main__':
-    arguments = docopt(cli_usage, version='0.1.1rc')
-
-    matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""),
-                                      outputfile=arguments["--output"].replace("'", ""))
+__all__ = ['cmd_markdupes', 'cmd_markoutofarea', 'cmd_matchtitles', 'cmd_updatelocations', 'set_nearby_locations']
+# Don't modify the line above, or this line!
+import automodinit
+automodinit.automodinit(__name__, __file__, globals())
+del automodinit
+# Anything else you want can go after here, it won't get modified.

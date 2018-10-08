@@ -18,6 +18,29 @@
 #  under the License.
 ###########################################################################
 
-__all__ = ['dedupe_jobs', 'match_titles', 'tokenize', 'find_nearby_locations', 'find_and_match_places',
-           'mark_outofarea_matches']
-__name__ = "tasks"
+__name__ = "jobscooperrunner"
+__package__ = "jobscooperrunner"
+__all__ = ['cli', 'commands', 'tasks', 'utils']
+
+import os
+import pkgutil
+import sys
+
+def load_all_modules_from_dir(dirname):
+    for importer, package_name, _ in pkgutil.iter_modules([dirname]):
+        full_package_name = '%s.%s' % (dirname, package_name)
+
+        print("Loading module {}".format(full_package_name))
+        if full_package_name not in sys.modules:
+            module = importer.find_module(package_name
+                        ).load_module(package_name)
+
+
+for mod in __all__:
+    if os.path.isdir(mod):
+        load_all_modules_from_dir(mod)
+
+print("\n")
+print("\n")
+
+

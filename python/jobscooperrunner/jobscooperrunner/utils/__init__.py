@@ -18,6 +18,18 @@
 #  under the License.
 ###########################################################################
 
-__all__ = ["database", "helpers"]
-__name__ = "utils"
-
+import os
+mods = []
+for filename in os.listdir(os.path.dirname(__file__)):
+    if filename.endswith('.py') and \
+            filename.startswith('cmd_'):
+        mods.append(filename[4:-3])
+mods.sort()
+for m in mods:
+    modname = m
+    try:
+        modname = m
+        mod = __import__(m,
+                     None, None, ['cli'])
+    except ImportError, imperr:
+        print("Failed to import module {}:  {}".format(modname, unicode(imperr)))

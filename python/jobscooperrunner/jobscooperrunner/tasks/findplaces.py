@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from job_normalizer.utils.database import DatabaseMixin
+from jobscooperrunner.utils.database import DatabaseMixin
 from urllib import urlencode
 import requests
 

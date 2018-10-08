@@ -17,8 +17,8 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from job_normalizer.utils.database import DatabaseMixin
-from .find_nearby_locations import TaskFindNearbyGeolocationsFromDb
+from jobscooperrunner.utils.database import DatabaseMixin
+from jobscooperrunner.tasks.findnearbylocations import TaskFindNearbyGeolocationsFromDb
 
 class TaskMarkOutOfAreaMatches(DatabaseMixin):
     dbparams = {}

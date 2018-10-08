@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 
-from job_normalizer.utils.helpers import loadcsv
+from jobscooperrunner.utils.helpers import loadcsv
 import nltk
 import codecs
 import string

@@ -17,10 +17,11 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from job_normalizer.utils.helpers import load_json, write_json
+from jobscooperrunner.utils.helpers import SetEncoder
+import json
 
-from tokenize import Tokenizer
-# from pyJobNormalizer.lib.database import DatabaseMixin
+from jobscooperrunner.tasks.tokenize import Tokenizer
+# from jobscooperrunner.lib.database import DatabaseMixin
 
 JSON_KEY_JOBMATCHES = u'job_matches'
 JSON_KEY_POS_KEYWORDS = u'SearchKeywords'
@@ -37,23 +38,14 @@ class TaskMatchJobsToKeywords:
     df_job_tokens = None
     _tokenizer = None
     _input_data = None
-
-    @property
-    def outputfile(self):
-        return self.outputfile
-
-    @outputfile.setter
-    def outputfile(self, filepath):
-        """
-        Args:
-            filepath:
-        """
-        self.outputfile = filepath
+    _input = None
+    _output = None
 
     @property
     def input_data(self):
         if not self._input_data:
-            self._input_data = load_json(self.inputfile)
+            import json
+            self._input_data = json.load(self._input)
         return self._input_data
 
     @property
@@ -67,13 +59,13 @@ class TaskMatchJobsToKeywords:
         Args:
             **kwargs:
         """
-        if 'inputfile' in kwargs:
-            self.inputfile = kwargs['inputfile']
+        if 'input' in kwargs:
+            self._input = kwargs['input']
         else:
             raise Exception(u"No input file specified for processing.")
 
-        if 'outputfile' in kwargs:
-            self.outputfile = kwargs['outputfile']
+        if 'output' in kwargs:
+            self._output = kwargs['output']
 
         print(u"Loading job list to match...")
         self.load_jobs()
@@ -101,10 +93,8 @@ class TaskMatchJobsToKeywords:
         }
 
     def export_results(self):
-        print(u"Exporting final match results to {}".format(self.outputfile))
-        write_json(self.outputfile, self.get_output_data())
-
-        return self.outputfile
+        print(u"Exporting final match results...")
+        json.dump(self.get_output_data(), self._output, indent=4, encoding='utf-8', cls=SetEncoder)
 
     def load_jobs(self):
 

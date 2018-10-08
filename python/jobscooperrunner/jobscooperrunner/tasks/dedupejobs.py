@@ -17,13 +17,13 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-import pandas
-from datetime import *
-from job_normalizer.utils.helpers import write_json, load_ucsv, load_json
-from tokenize import Tokenizer
-from job_normalizer.utils.database import DatabaseMixin
 from collections import OrderedDict
 from cleanco import cleanco
+import pandas
+from datetime import *
+from jobscooperrunner.utils.helpers import write_json, load_ucsv, load_json
+from jobscooperrunner.tasks.tokenize import Tokenizer
+from jobscooperrunner.utils.database import DatabaseMixin
 
 DATA_KEY_JOBPOSTINGS = u'job_postings'
 DATA_KEY_JOBPOSTINGS_KEYFIELD = u'JobPostingId'
