@@ -17,10 +17,32 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-
-import os
-import sys
 import click
+import os
+import pkgutil
+import sys
+from importlib import import_module
+from __init__ import py, __package__
+
+
+def load_all_modules_from_dir(dirname):
+    for importer, package_name, _ in pkgutil.iter_modules([dirname]):
+        full_package_name = '%s.%s.%s' % (__package__, dirname, package_name)
+
+        print("Loading module {}".format(full_package_name))
+        if full_package_name not in sys.modules:
+            module = importer.find_module(__package__ + "." + full_package_name)
+            module.load_module(full_package_name)
+            # import_module(name=full_package_name, package=__package__)
+
+
+for mod in py():
+    if os.path.isdir(mod):
+        load_all_modules_from_dir(mod)
+
+print("\n")
+print("\n")
+
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix='JOBSCOOPER')
 

@@ -70,19 +70,18 @@ class DataNormalizer
     {
         try {
             startLogSection('Calling python to dedupe new job postings...');
-            $runFile = 'pyJobNormalizer/mark_duplicates.py';
             $params = [
-                '-c' => Settings::get_db_dsn()
+                '--connecturi' => Settings::get_db_dsn(),
             ];
 
-            $results = PythonRunner::execScript($runFile, $params);
+            $results = PythonRunner::execCommand('markdupes', $params);
             LogMessage($results);
             LogMessage('Python command call finished.');
 
         } catch (\Exception $ex) {
             handleException($ex, null, false);
         } finally {
-            EndLogSection('Completed new job posting dedupe.');
+            EndLogSection('Completed new job posting deduplication.');
         }
     }
 
@@ -93,15 +92,13 @@ class DataNormalizer
     {
         try {
             startLogSection('Calling python to find & map missing locations...');
-            $runFile = 'pyJobNormalizer/set_geolocations.py';
-            $params = [
-                '-c' => Settings::get_db_dsn(),
+             $params = [
+                '--connecturi' => Settings::get_db_dsn(),
                 '--server' => Settings::getValue('geocodeapi_server'),
             ];
 
-            $results = PythonRunner::execScript($runFile, $params);
+            $results = PythonRunner::execCommand('updatelocations', $params);
             LogMessage($results);
-            LogMessage('Python command call finished.');
 
         } catch (\Exception $ex) {
             handleException($ex, null, false);

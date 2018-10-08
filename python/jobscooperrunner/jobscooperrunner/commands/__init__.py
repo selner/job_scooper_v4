@@ -19,9 +19,26 @@
 ###########################################################################
 __name__ = "commands"
 
-__all__ = ['cmd_markdupes', 'cmd_markoutofarea', 'cmd_matchtitles', 'cmd_updatelocations', 'set_nearby_locations']
-# Don't modify the line above, or this line!
-import automodinit
-automodinit.automodinit(__name__, __file__, globals())
-del automodinit
+# __all__ = ['cmd_markdupes', 'cmd_markoutofarea', 'cmd_matchtitles', 'cmd_updatelocations', 'set_nearby_locations']
+# # Don't modify the line above, or this line!
+# import automodinit
+# automodinit.automodinit(__name__, __file__, globals())
+# del automodinit
 # Anything else you want can go after here, it won't get modified.
+import os
+from importlib import import_module
+mods = []
+parentdir = os.path.join(os.path.dirname(__file__))
+for filename in os.listdir(os.path.dirname(__file__)):
+    if filename.endswith('.py') and filename.startswith('cmd_'):
+        mods.append(filename[:-3])
+mods.sort()
+for m in mods:
+    modname = m
+    try:
+        modname = __name__+ "." + m
+        from jobscooperrunner import __package__
+
+        mod = import_module(name=modname, package=__package__)
+    except ImportError, imperr:
+        print("Failed to import module {}:  {}".format(modname, unicode(imperr)))

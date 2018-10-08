@@ -9,8 +9,6 @@ vendor/*
 *.diff
 /scripts/personal/*
 
-
-python/pyJobNormalizer/venv
 *.NOTREADY
 .env
 

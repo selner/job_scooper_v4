@@ -188,14 +188,13 @@ class JobsAutoMarker
         try {
             startLogSection('Calling python to do heavy lifting of out of area tagging in the database...');
 
-
-            $runFile = 'pyJobNormalizer/set_out_of_area.py';
             $params = [
-                '-c' => Settings::get_db_dsn(),
+                '--connecturi' => Settings::get_db_dsn(),
                 '--user' => $userFacts['UserSlug']
             ];
 
-            $results = PythonRunner::execScript($runFile, $params);
+            $results = PythonRunner::execCommand('markoutofarea', $params);
+            LogMessage($results);
 
         } catch (Exception $ex) {
             handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
@@ -431,14 +430,13 @@ class JobsAutoMarker
 
             try {
                 startLogSection('Calling python to do work of job title matching.');
-
-                $runFile = 'pyJobNormalizer/matchTitlesToKeywords.py';
                 $params = [
                     '-i' => $sourcefile,
                     '-o' => $resultsfile
                 ];
 
-                $results = PythonRunner::execScript($runFile, $params);
+                $results = PythonRunner::execCommand('matchtitles', $params);
+                LogMessage($results);
 
                 LogMessage('Updating database with new match results...');
                 $this->_updateUserJobMatchesFromJson($resultsfile, $collJobsList);

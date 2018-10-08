@@ -25,7 +25,46 @@ namespace JobScooper\Utils;
  */
 class PythonRunner {
 
-	
+    /**
+     * @param string $command
+     * @param array $command_params
+     * @return null|string
+     * @throws \Exception
+     */
+    static function execCommand($command, $command_params=array()) {
+        $results = null;
+
+        try {
+            $PYTHONPATH = realpath(__ROOT__ . "/python/jobscooperrunner/jobscooperrunner/cli.py");
+            $cmdLine = " {$command} ";
+            foreach($command_params as $key => $value) {
+                $cmdLine .= " {$key} " . escapeshellarg($value);
+            }
+
+            $pythonCmd = $PYTHONPATH . $cmdLine;
+            $pythonExec = 'python ';
+            $workingDir = dirname($PYTHONPATH);
+            $pythonExec = "cd '{$workingDir}'; python ";
+
+
+            $venvDir = __ROOT__ . '/python/.venv/bin';
+            if(is_dir($venvDir)) {
+                $pythonExec = "source {$venvDir}/activate; {$pythonExec} ";
+            }
+
+            LogMessage(PHP_EOL . "    ~~~~~~ Running command: {$pythonExec} {$pythonCmd}  ~~~~~~~" . PHP_EOL);
+            $results  = doExec("{$pythonExec} {$pythonCmd}");
+        } catch (\Exception $ex) {
+            throw $ex;
+        } finally {
+            LogMessage($results);
+        }
+
+        return $results;
+
+    }
+
+
 	/**
 	 * @param $python_file
 	 * @param array $script_params

@@ -17,19 +17,22 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-
+__name__ = "utils"
 import os
+from importlib import import_module
+
 mods = []
+parentdir = os.path.join(os.path.dirname(__file__))
 for filename in os.listdir(os.path.dirname(__file__)):
-    if filename.endswith('.py') and \
-            filename.startswith('cmd_'):
-        mods.append(filename[4:-3])
+    if filename.endswith('.py'):
+        mods.append(filename[:-3])
 mods.sort()
 for m in mods:
     modname = m
     try:
-        modname = m
-        mod = __import__(m,
-                     None, None, ['cli'])
+        modname = __name__ + "." + m
+        from jobscooperrunner import __package__
+
+        mod = import_module(name=modname, package=__package__)
     except ImportError, imperr:
         print("Failed to import module {}:  {}".format(modname, unicode(imperr)))
