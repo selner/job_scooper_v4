@@ -174,7 +174,7 @@ class DatabaseMixin:
 
             sql = u"insert into %s (%s) values (%s)" % (
                 tablename, columns, values_template)
-            values = tuple(rowdict[key] for key in matched_keys)
+            values = tuple(self.connection.escape_string(rowdict[key]) for key in matched_keys)
             with self.connection.cursor() as cursor:
                 cursor.execute(sql, values)
                 inserted_id = cursor.lastrowid
