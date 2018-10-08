@@ -40,7 +40,7 @@ abstract class BaseForceComClass extends \JobScooper\SitePlugins\AjaxSitePlugin
      * @param null $nItem
      * @param null $nPage
      */
-    public function takeNextPageAction($nItem=null, $nPage=null)
+    public function takeNextPageAction()
     {
         $nextPageJS = "function contains(selector, text) {
                 var elements = document.querySelectorAll(selector);

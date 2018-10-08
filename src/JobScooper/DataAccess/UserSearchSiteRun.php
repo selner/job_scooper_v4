@@ -262,10 +262,25 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
         $strURL = $this->getSearchUrlFormat();
 
         $tokenFmtStrings = getUrlTokenList($strURL);
-        //	    $count = preg_match_all("/\*{3}(\w+):?(.*?)\*{3}/", $strURL, $tokenlist);
-        //	    if(!empty($tokenlist) && is_array($tokenlist) && \count($tokenlist) >= 3)
-        //	    {
-        //		    $tokenFmtStrings = array_combine($tokenlist[1], $tokenlist[2]);
+
+        $searchpair = $this->getUserSearchPairFromUSSR();
+        $loc = $searchpair->getGeoLocationFromUS();
+        $locFacts = array();
+        if(!is_empty_value($loc)) {
+            $locFacts = $loc->toArray();
+        }
+
+        if($this->isBitFlagSet(C__JOB_ITEMCOUNT_STARTSATZERO) && $nItem >= 1) {
+            $nItem = $nItem - 1;
+        }
+
+        $values = array(
+            'page_index'  => $nPage,
+            'item_index'  => $nItem,
+#            'keywords'  => $nItem,
+            'location' => $locFacts
+        );
+
         if (null !== $tokenFmtStrings) {
             foreach ($tokenFmtStrings as $token => $tokFound) {
                 $replaceVal = '';
@@ -281,30 +296,27 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                         break;
 
                     case "PAGE_NUMBER":
-                    	if($nPage <= 1 && $this->isBitFlagSet(C__JOB_PAGECOUNT_OMIT_ON_FIRST_PAGE))
-                        {
-                        	$queryArgs = null;
-					        $parsedUrl = parse_url($strURL);
-					        if(\is_array($parsedUrl) && array_key_exists('query',$parsedUrl)) {
-						        $queryArgs = parse_query_string($parsedUrl['query']);
-
-						        if(!is_empty_value($queryArgs) && \is_array($queryArgs))
-					            {
-					            	$queryArgs = array_filter($queryArgs, function($v) use ($token) {
-					            		return strpos($v, $token) === false;
-					            	});
-					            }
-					        }
-					        $parsedUrl['query'] = urldecode(Url::build($queryArgs));
-		                    $strURL = Url::buildAll($parsedUrl);
+                        $ret = $this->_callPluginMethodIfExists("getPageURLValue", $nPage);
+                        if ($ret !== false) {
+                            $replaceVal = $ret;
+                        }
+                        else if($nPage === 1 && $this->isBitFlagSet(C__JOB_PAGECOUNT_OMIT_ON_FIRST_PAGE)) {
+                            $replaceVal = '';
                         }
                         else {
-                        		$replaceVal = $this->getPageURLValue($nPage);
+                            $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], $values);
                         }
+
                         break;
 
                     case "ITEM_NUMBER":
-                        $replaceVal = $this->getItemURLValue($nItem);
+                        $ret = $this->_callPluginMethodIfExists("getItemURLValue", $nPage);
+                        if ($ret !== false) {
+                            $replaceVal = $ret;
+                        }
+                        else {
+                            $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], $values);
+                        }
                         break;
                 }
 
@@ -362,42 +374,31 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
     }
 
     /**
-     * @param $nPage
+     * @param string $param_fmt
+     * @param array() $values
      *
      * @throws \Exception
      *
      * @return string
      */
-    public function getPageURLValue($nPage)
+    public function getQueryParameterValue($param_fmt, array $values)
     {
-        $ret = $this->_callPluginMethodIfExists("getPageURLValue", array($nPage));
-        if ($ret !== false) {
-            return $ret;
-        }
-        return ($nPage == null || $nPage == '') ? '' : $nPage;
-    
-    }
+        if(is_empty_value($param_fmt) || is_empty_value($values))
+            return '';
 
-    /**
-     * @param $nItem
-     *
-     * @throws \Exception
-     *
-     * @return int
-     */
-    public function getItemURLValue($nItem)
-    {
-        $ret = $this->_callPluginMethodIfExists("getItemURLValue", array($nItem));
+        $ret = $this->_callPluginMethodIfExists('getQueryParameterValue', array($param_fmt, $values));
         if ($ret !== false) {
             return $ret;
         }
 
-        if ($this->isBitFlagSet(C__JOB_ITEMCOUNT_STARTSATZERO) && $nItem > 0) {
-            $nItem = $nItem - 1;
-        }
+        $param = replaceTokensInString($param_fmt, $values);
 
-        return ($nItem == null || $nItem == '') ? 0 : $nItem;
+        if(is_empty_value($param))
+            return '';
+
+        return $param;
     }
+
 
 
     /**
