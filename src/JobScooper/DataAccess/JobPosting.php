@@ -190,9 +190,9 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
      *
      * @return bool|null|string|string[]
      */
-    private function _cleanupTextValue($v, $maxLength=255)
+    private function _cleanupTextValue($v, $maxLength=255, $prefix=null, $postfix=null)
     {
-        $ret = cleanupTextValue($v);
+        $ret = cleanupTextValue($v, $prefix, $postfix);
         if (!empty($ret) && is_string($ret)) {
             $ret = substr($ret, 0, min($maxLength-1, strlen($ret)));
         }
@@ -240,7 +240,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         $this->setGeoLocationFromJP(null);
         $this->setGeoLocationId(null);
 
-        $v = $this->_cleanupTextValue($v);
+        $v = $this->_cleanupTextValue($v, 255, "(", ")");
 
         //
         // Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
