@@ -82,7 +82,6 @@ class UserJobMatchQuery extends BaseUserJobMatchQuery
                 ->addCond('locIdsCond1', $locIdColumnName, $arrGeoLocIds, Criteria::IN)
                 ->addCond('locIdsCond2', $locIdColumnName, null, Criteria::ISNULL)
                 ->combine(array('locIdsCond1', 'locIdsCond2'), Criteria::LOGICAL_OR)
-                ->orderByKeyCompanyAndTitle()
                 ->endUse();
         }
     }

@@ -123,12 +123,12 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
  * @param int|null $nNumDaysBack
  * @param array|null $userFacts
  *
+ * @param array $orderByCols
  * @return \JobScooper\DataAccess\UserJobMatchQuery
  *
- * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $userFacts=null)
+function getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $userFacts=null, $orderByCols=[])
 {
     $results = null;
 
@@ -137,15 +137,30 @@ function getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocId
 
 //        $query->limit(MAX_RESULTS_PER_PAGE);
 
-        $query->useJobPostingFromUJMQuery()
-            ->orderByKeyCompanyAndTitle()
-            ->endUse();
 
     $query->filterByUserNotificationStatus($userNotificationState);
     $query->filterByUserId($userFacts['UserId']);
     $query->filterByDaysAgo($nNumDaysBack);
     $query->filterByGeoLocationIds($arrGeoLocIds);
-    $query->orderByIsJobMatch(Criteria::DESC);
+
+    if(is_empty_value($orderByCols)) {
+        $query->useJobPostingFromUJMQuery()
+            ->orderByKeyCompanyAndTitle()
+            ->endUse();
+    }
+    else {
+        foreach($orderByCols as $col) {
+            $colparams = explode(" ", $col);
+            if(count($colparams) > 1 && strtolower($colparams[1]) === "desc") {
+                $query->addDescendingOrderByColumn($colparams[0]);
+            }
+            else {
+                $query->addAscendingOrderByColumn($colparams[0]);
+            }
+        }
+    }
+
+
 
     return $query;
 }
@@ -204,7 +219,13 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
 {
     $results = null;
 
-    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds, $nNumDaysBack, $userFacts);
+    $query = getAllUserNotificationMatchesQuery(
+        $userNotificationState,
+        $arrGeoLocIds,
+        $nNumDaysBack,
+        $userFacts,
+        $orderByCols = [ 'is_job_match DESC', 'jobposting.key_company_and_title ASC']
+    );
 
 
     $results = $query->find()->toKeyIndex('UserJobMatchId');
@@ -228,13 +249,13 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, $userFacts=null, $addlCallbackParams=[])
+function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, $userFacts=null, $addlCallbackParams=[], $orderByCols=[])
 {
     $nResults = 0;
  
     LogMessage('Getting all user job matches results query...');
 
-    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoIds, $nNumDaysBack, $userFacts);
+    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoIds, $nNumDaysBack, $userFacts, $orderByCols);
     $resultsPager = $query->paginate(1, $maxPerPage = MAX_RESULTS_PER_PAGE);
     
     $totalResults = $resultsPager->getNbResults();

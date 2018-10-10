@@ -191,7 +191,8 @@ class NotifierJobAlerts extends JobsMailSender
                 $arrNearbyIds,
                 null,
                 $userFacts,
-                $addlData
+                $addlData,
+                [ 'is_job_match DESC', 'jobposting.key_company_and_title ASC']
 	        );
             
             $arrNearbyIds = null;
