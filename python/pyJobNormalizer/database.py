@@ -23,12 +23,14 @@ from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
 import sys
 
+ARRAY_JOIN_TOKEN = u"_||_"
 
 class OrderedDictCursor(DictCursorMixin, Cursor):
     dict_type = OrderedDict
 
 
 class DatabaseMixin:
+    _debug = False
     dbparams = {}
     _connection = None
 
@@ -65,15 +67,34 @@ class DatabaseMixin:
         if 'port' in self.dbparams:
             self.dbparams['port'] = int(self.dbparams.pop('port'))
 
+        if 'debug' in self.dbparams:
+            self._debug = self.dbparams['debug']
+
     @property
     def connection(self):
         if not self._connection:
             if not self.dbparams:
                 raise Exception(u"Connection must be initialized before it can be accessed.")
 
+            if 'charset' not in self.dbparams:
+                self.dbparams['charset'] = 'utf8'
+            if 'use_unicode' not in self.dbparams:
+                self.dbparams['use_unicode'] = True
+
             self._connection = pymysql.connect(**self.dbparams)
 
         return self._connection
+
+    def new_cursor(self, curtype=OrderedDictCursor):
+        cursor = self.connection.cursor(curtype)
+
+        # Enforce UTF-8 for the connection.
+        cursor.execute('SET NAMES utf8mb4')
+        cursor.execute("SET CHARACTER SET utf8mb4")
+        cursor.execute("SET character_set_connection=utf8mb4")
+
+        return cursor
+
 
     def close_connection(self):
         if self._connection and self._connection.open:
@@ -90,7 +111,7 @@ class DatabaseMixin:
         try:
             print(u"Querying database: {}".format(querysql))
 
-            with self.connection.cursor() as cursor:
+            with self.new_cursor() as cursor:
                 cursor.execute(querysql)
                 result = cursor.fetchall()
             return result
@@ -101,6 +122,54 @@ class DatabaseMixin:
         finally:
             self.connection.commit()
             self.close_connection()
+
+    def fetch_many_with_callback(self, querysql, callback, batch_size=1000, return_results=False):
+
+        if not callable(callback):
+            raise Exception("Specified callback {} is not callable.".format(str(callback)))
+
+        results = []
+
+        try:
+            print(u"Querying database: {}".format(querysql))
+
+            with self.new_cursor() as cursor:
+                total_rows = cursor.execute(querysql)
+
+                total_num_batches, remainder = divmod(total_rows, batch_size)
+                if remainder > 0:
+                    total_num_batches += 1
+                batch_counter = 0
+
+                print(u"... matched {} DB records".format(total_rows))
+
+                while batch_counter < total_num_batches:
+                    curidx = batch_counter * batch_size
+                    print(u"... processing records {} - {} through callback {}".format(curidx, curidx+batch_size, str(callback)))
+
+                    rows = cursor.fetchmany(batch_size)
+                    if not rows or len(rows) == 0:
+                        break
+                    if return_results == True:
+                        results.extend(callback(rows))
+                    else:
+                        callback(rows)
+                    batch_counter += 1
+
+            self.connection.commit()
+
+            if return_results:
+                return results
+            else:
+                return total_rows
+
+        except Exception, ex:
+            print ex
+            raise ex
+
+        finally:
+            if self.connection.is_connected():
+                self.connection.close()
 
     def fetch_one_from_query(self, querysql):
         """
@@ -113,6 +182,22 @@ class DatabaseMixin:
 
         return result
 
+    def update_many(self, querysql, records):
+
+        try:
+            print(u"...updating {} database rows".format(len(records)))
+
+            with self.new_cursor() as cursor:
+                return cursor.executemany(querysql, records)
+
+        except Exception, ex:
+            print ex
+            raise ex
+
+        finally:
+            self.connection.commit()
+            self.close_connection()
+
     def run_command(self, querysql, values=None, close_connection=True):
         """
         Args:
@@ -121,9 +206,9 @@ class DatabaseMixin:
             close_connection:
         """
         try:
-            print("Running command: {}".format(querysql))
+            print(u"Running command: {}".format(querysql))
 
-            with self.connection.cursor() as cursor:
+            with self.new_cursor() as cursor:
                 return cursor.execute(querysql, values)
 
         except Exception, ex:
@@ -175,7 +260,7 @@ class DatabaseMixin:
             sql = u"insert into %s (%s) values (%s)" % (
                 tablename, columns, values_template)
             values = tuple(self.connection.escape_string(rowdict[key]) for key in matched_keys)
-            with self.connection.cursor() as cursor:
+            with self.new_cursor() as cursor:
                 cursor.execute(sql, values)
                 inserted_id = cursor.lastrowid
                 if inserted_id:
@@ -195,3 +280,14 @@ class DatabaseMixin:
         finally:
             self.connection.commit()
             self.close_connection()
+
+    @staticmethod
+    def convert_array_to_column_value(arr):
+        if arr and len(arr) > 0:
+            return ARRAY_JOIN_TOKEN.join(arr)
+
+    @staticmethod
+    def convert_column_value_to_array(str):
+        if str and len(str) > 0:
+            return unicode(str).split(ARRAY_JOIN_TOKEN)
+
