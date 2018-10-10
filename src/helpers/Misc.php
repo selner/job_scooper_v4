@@ -263,10 +263,10 @@ function doExec($cmd)
         $lastOutput = $lastResultLine;
     }
 
-    LogMessage(u"Command '{$cmd}' returned code={$cmdRet}; last_line='{$lastOutput}'.");
+    LogMessage("Command '{$cmd}' returned code={$cmdRet}; last_line=" . cleanupTextValue($cmdStrOutput));
  
     if ($cmdRet !== 0) {
-        throw new Exception(u"Command '{$cmd}' returned non-zero result code.  Output: {$cmdStrOutput}");
+        throw new Exception("Command '{$cmd}' returned non-zero result code.  Output: " . cleanupTextValue($cmdStrOutput));
     }
 
     return $lastOutput;
