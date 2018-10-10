@@ -37,6 +37,7 @@ function is_empty_value($v)
             return $v === null;
 
         case 'string':
+        case 'unicode':
             $v = trim($v);
             return ($v === null || '' === $v);
 
@@ -262,10 +263,10 @@ function doExec($cmd)
         $lastOutput = $lastResultLine;
     }
 
-    LogMessage("Command '{$cmd}' returned code={$cmdRet}; last_line='{$lastOutput}'.");
+    LogMessage(u"Command '{$cmd}' returned code={$cmdRet}; last_line='{$lastOutput}'.");
  
     if ($cmdRet !== 0) {
-        throw new Exception("Command '{$cmd}' returned non-zero result code.  Output: {$cmdStrOutput}");
+        throw new Exception(u"Command '{$cmd}' returned non-zero result code.  Output: {$cmdStrOutput}");
     }
 
     return $lastOutput;
