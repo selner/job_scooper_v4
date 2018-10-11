@@ -192,6 +192,20 @@ abstract class JobPosting implements ActiveRecordInterface
     protected $duplicates_posting_id;
 
     /**
+     * The value for the title_tokens field.
+     *
+     * @var        string
+     */
+    protected $title_tokens;
+
+    /**
+     * The value for the job_reference_key field.
+     *
+     * @var        string
+     */
+    protected $job_reference_key;
+
+    /**
      * The value for the key_company_and_title field.
      *
      * @var        string
@@ -687,6 +701,26 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
+     * Get the [title_tokens] column value.
+     *
+     * @return string
+     */
+    public function getTitleTokens()
+    {
+        return $this->title_tokens;
+    }
+
+    /**
+     * Get the [job_reference_key] column value.
+     *
+     * @return string
+     */
+    public function getJobReferenceKey()
+    {
+        return $this->job_reference_key;
+    }
+
+    /**
      * Get the [key_company_and_title] column value.
      *
      * @return string
@@ -1049,6 +1083,46 @@ abstract class JobPosting implements ActiveRecordInterface
     } // setDuplicatesJobPostingId()
 
     /**
+     * Set the value of [title_tokens] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
+     */
+    public function setTitleTokens($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->title_tokens !== $v) {
+            $this->title_tokens = $v;
+            $this->modifiedColumns[JobPostingTableMap::COL_TITLE_TOKENS] = true;
+        }
+
+        return $this;
+    } // setTitleTokens()
+
+    /**
+     * Set the value of [job_reference_key] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
+     */
+    public function setJobReferenceKey($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->job_reference_key !== $v) {
+            $this->job_reference_key = $v;
+            $this->modifiedColumns[JobPostingTableMap::COL_JOB_REFERENCE_KEY] = true;
+        }
+
+        return $this;
+    } // setJobReferenceKey()
+
+    /**
      * Set the value of [key_company_and_title] column.
      *
      * @param string $v new value
@@ -1164,7 +1238,13 @@ abstract class JobPosting implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 16 + $startcol : JobPostingTableMap::translateFieldName('DuplicatesJobPostingId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->duplicates_posting_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 17 + $startcol : JobPostingTableMap::translateFieldName('KeyCompanyAndTitle', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 17 + $startcol : JobPostingTableMap::translateFieldName('TitleTokens', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->title_tokens = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 18 + $startcol : JobPostingTableMap::translateFieldName('JobReferenceKey', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->job_reference_key = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 19 + $startcol : JobPostingTableMap::translateFieldName('KeyCompanyAndTitle', TableMap::TYPE_PHPNAME, $indexType)];
             $this->key_company_and_title = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
@@ -1174,7 +1254,7 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 18; // 18 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 20; // 20 = JobPostingTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\JobScooper\\DataAccess\\JobPosting'), 0, $e);
@@ -1543,6 +1623,12 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_DUPLICATES_POSTING_ID)) {
             $modifiedColumns[':p' . $index++]  = 'duplicates_posting_id';
         }
+        if ($this->isColumnModified(JobPostingTableMap::COL_TITLE_TOKENS)) {
+            $modifiedColumns[':p' . $index++]  = 'title_tokens';
+        }
+        if ($this->isColumnModified(JobPostingTableMap::COL_JOB_REFERENCE_KEY)) {
+            $modifiedColumns[':p' . $index++]  = 'job_reference_key';
+        }
         if ($this->isColumnModified(JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE)) {
             $modifiedColumns[':p' . $index++]  = 'key_company_and_title';
         }
@@ -1607,6 +1693,12 @@ abstract class JobPosting implements ActiveRecordInterface
                         break;
                     case 'duplicates_posting_id':
                         $stmt->bindValue($identifier, $this->duplicates_posting_id, PDO::PARAM_INT);
+                        break;
+                    case 'title_tokens':
+                        $stmt->bindValue($identifier, $this->title_tokens, PDO::PARAM_STR);
+                        break;
+                    case 'job_reference_key':
+                        $stmt->bindValue($identifier, $this->job_reference_key, PDO::PARAM_STR);
                         break;
                     case 'key_company_and_title':
                         $stmt->bindValue($identifier, $this->key_company_and_title, PDO::PARAM_STR);
@@ -1727,6 +1819,12 @@ abstract class JobPosting implements ActiveRecordInterface
                 return $this->getDuplicatesJobPostingId();
                 break;
             case 17:
+                return $this->getTitleTokens();
+                break;
+            case 18:
+                return $this->getJobReferenceKey();
+                break;
+            case 19:
                 return $this->getKeyCompanyAndTitle();
                 break;
             default:
@@ -1776,7 +1874,9 @@ abstract class JobPosting implements ActiveRecordInterface
             $keys[14] => $this->getLocationDisplayValue(),
             $keys[15] => $this->getGeoLocationId(),
             $keys[16] => $this->getDuplicatesJobPostingId(),
-            $keys[17] => $this->getKeyCompanyAndTitle(),
+            $keys[17] => $this->getTitleTokens(),
+            $keys[18] => $this->getJobReferenceKey(),
+            $keys[19] => $this->getKeyCompanyAndTitle(),
         );
         if ($result[$keys[11]] instanceof \DateTimeInterface) {
             $result[$keys[11]] = $result[$keys[11]]->format('c');
@@ -1957,6 +2057,12 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->setDuplicatesJobPostingId($value);
                 break;
             case 17:
+                $this->setTitleTokens($value);
+                break;
+            case 18:
+                $this->setJobReferenceKey($value);
+                break;
+            case 19:
                 $this->setKeyCompanyAndTitle($value);
                 break;
         } // switch()
@@ -2037,7 +2143,13 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setDuplicatesJobPostingId($arr[$keys[16]]);
         }
         if (array_key_exists($keys[17], $arr)) {
-            $this->setKeyCompanyAndTitle($arr[$keys[17]]);
+            $this->setTitleTokens($arr[$keys[17]]);
+        }
+        if (array_key_exists($keys[18], $arr)) {
+            $this->setJobReferenceKey($arr[$keys[18]]);
+        }
+        if (array_key_exists($keys[19], $arr)) {
+            $this->setKeyCompanyAndTitle($arr[$keys[19]]);
         }
     }
 
@@ -2130,6 +2242,12 @@ abstract class JobPosting implements ActiveRecordInterface
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_DUPLICATES_POSTING_ID)) {
             $criteria->add(JobPostingTableMap::COL_DUPLICATES_POSTING_ID, $this->duplicates_posting_id);
+        }
+        if ($this->isColumnModified(JobPostingTableMap::COL_TITLE_TOKENS)) {
+            $criteria->add(JobPostingTableMap::COL_TITLE_TOKENS, $this->title_tokens);
+        }
+        if ($this->isColumnModified(JobPostingTableMap::COL_JOB_REFERENCE_KEY)) {
+            $criteria->add(JobPostingTableMap::COL_JOB_REFERENCE_KEY, $this->job_reference_key);
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE)) {
             $criteria->add(JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE, $this->key_company_and_title);
@@ -2236,6 +2354,8 @@ abstract class JobPosting implements ActiveRecordInterface
         $copyObj->setLocationDisplayValue($this->getLocationDisplayValue());
         $copyObj->setGeoLocationId($this->getGeoLocationId());
         $copyObj->setDuplicatesJobPostingId($this->getDuplicatesJobPostingId());
+        $copyObj->setTitleTokens($this->getTitleTokens());
+        $copyObj->setJobReferenceKey($this->getJobReferenceKey());
         $copyObj->setKeyCompanyAndTitle($this->getKeyCompanyAndTitle());
 
         if ($deepCopy) {
@@ -3263,6 +3383,8 @@ abstract class JobPosting implements ActiveRecordInterface
         $this->location_display_value = null;
         $this->geolocation_id = null;
         $this->duplicates_posting_id = null;
+        $this->title_tokens = null;
+        $this->job_reference_key = null;
         $this->key_company_and_title = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();

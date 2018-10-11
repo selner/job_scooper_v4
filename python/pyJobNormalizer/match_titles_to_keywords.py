@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from docopt import docopt
+from helpers import docopt_ext
 from task_match_titles import TaskMatchJobsToKeywords
 
 
@@ -35,7 +35,25 @@ Options:
 """
 
 if __name__ == '__main__':
-    arguments = docopt(cli_usage, version='0.1.1rc')
+    arguments = docopt_ext(cli_usage, version='0.1.1rc')
 
-    matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""), outputfile=arguments["--output"].replace("'", ""))
-    matcher.export_results()
+
+
+if __name__ == '__main__':
+    arguments = docopt_ext(cli_usage, version='0.1.1rc')
+
+    # if not arguments["--input"] or not arguments["--output"]:
+    #     print("Unable to deduplicate job postings.  Missing script arguments.")
+    # else:
+    #     matcher = TaskDedupeJobPostings(arguments["--input"].replace("'", ""), arguments["--output"].replace("'", ""))
+
+    if "input" in arguments and arguments["input"] and "output" in arguments and arguments["output"]:
+        matcher = TaskMatchJobsToKeywords(inputfile=arguments["input"].replace("'", ""),
+                                          outputfile=arguments["output"].replace("'", ""))
+        matcher.export_results()
+
+    elif "--connecturi" in arguments and arguments["--connecturi"]:
+        matcher = TaskMatchJobsToKeywords(connecturi=arguments['--connecturi'])
+        matcher.export_results()
+    else:
+        print(u"Unable to deduplicate job postings.  Missing script arguments.")

@@ -20,6 +20,24 @@
 import codecs
 import json
 import unicodecsv
+import docopt
+docopt_func = getattr(docopt, 'docopt')
+
+def docopt_ext(doc, argv=None, help=True, version=None, options_first=False):
+
+    vals = docopt_func(doc, argv, help, version, options_first)
+    if vals and len(vals) > 0:
+        retvals = {}
+        for k in vals.keys():
+            key = k
+            if unicode(k).startswith("--"):
+                key = unicode(k)[2:]
+
+            retvals[key] = vals[k]
+
+        return retvals
+
+    return vals
 
 
 class SetEncoder(json.JSONEncoder):
@@ -57,6 +75,9 @@ def write_json(filepath, data):
 
     json.dump(data, outf, indent=4, encoding='utf-8', cls=SetEncoder)
     outf.close()
+
+def dump_var_to_json(data):
+    return json.dumps(data, indent=4, encoding='utf-8', cls=SetEncoder)
 
 
 def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield=None):

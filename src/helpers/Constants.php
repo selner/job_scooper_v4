@@ -104,3 +104,5 @@ define('REXPR_MATCH_URL_DOMAIN', '/^https*.{3}[^\/]*/');
 
 
 define('GEOLOCATION_GEOCODE_FAILED', -99999);
+
+define('DATABASE_STRING_ARRAY_SEPARATOR', '_||_');

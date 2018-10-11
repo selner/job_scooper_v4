@@ -25,6 +25,8 @@ import string
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 import os
+import re
+from collections import OrderedDict
 
 states = {
     'AK': 'Alaska',
@@ -95,12 +97,11 @@ class Tokenizer:
     _expandwords = None
 
     def __init__(self):
-
         self.exclude = set(codecs.encode(string.punctuation, "utf-8"))
         self.snowstemmer = SnowballStemmer("english")
         self.stopwrds = stopwords.words('english')
 
-    def tokenize_strings(self, list_data, field, field_tokenized="tokenized", ret_type="string"):
+    def batch_tokenize_strings(self, list_data, field, field_tokenized="tokenized", ret_type="string"):
         """
         Args:
             list_data:
@@ -114,19 +115,36 @@ class Tokenizer:
                 print "String value for key was empty.  Skipping..."
                 continue
 
-            tokens = self.get_scrubbed_string_tokens(list_data[k][field])
-            sorted(tokens)
+            tokens = self.tokenize_string(list_data[k][field])
+            final_tokens = []
 
             if ret_type == "list":
-                list_data[k][field_tokenized] = tokens
-
+                final_tokens = list(set(tokens))
             elif ret_type == "set":
-                list_data[k][field_tokenized] = set(tokens)
+                final_tokens = set(tokens)
+            elif ret_type == "dict":
+                final_tokens = OrderedDict(zip(tokens, tokens))
             else:
                 # if ret_type == "string" or ret_type is None:
-                list_data[k][field_tokenized] = "|{}|".format("|".join(tokens))
+                final_tokens = "|{}|".format("|".join(tokens))
 
+            list_data[k][field_tokenized] = final_tokens
         return list_data
+
+    def tokenize_string(self, value):
+        """
+        Args:
+            value
+        """
+
+        if not value or len(value) == 0:
+            return ""
+
+        tokens = self.get_tokens_from_string(value)
+        tokens = list(set(tokens))
+        tokens.sort()
+
+        return tokens
 
     def remove_stop_words(self, listwords):
         """
@@ -159,16 +177,27 @@ class Tokenizer:
         Args:
             str_words:
         """
+        ret_words = []
 
         if not isinstance(str_words, basestring):
-            str_words = str(str_words)
-        assert (len(str_words) > 0)
-        s = ''.join(ch for ch in str_words if ch not in self.exclude)
+            str_words = unicode(str_words)
+        if len(str_words) <= 0:
+            return ret_words
 
-        ret_words = []
+        s = u''.join(ch for ch in str_words if ch not in self.exclude)
+
         words = nltk.word_tokenize(s)
         for i in words:
-            loweri = i.strip().lower()
+
+            # for a given token, remove any unicode chars that
+            # can't translate to ascii.  This handles scrubbing out
+            # the myriad of dash variants, etc from the token
+            removeuni = i.encode('ascii', 'ignore')
+            loweri = removeuni.strip().lower()
+
+            if len(loweri) == 0 or loweri.isalnum() is not True:
+                continue
+
             if loweri in self.expandedwords:
                 ret_words.append(self.expandedwords[loweri]['expansion'])
             else:
@@ -177,14 +206,14 @@ class Tokenizer:
         ret_words = nltk.word_tokenize(" ".join(ret_words))
         return ret_words
 
-    def get_scrubbed_string_tokens(self, inputstring):
+    def get_tokens_from_string(self, value):
         """
         Args:
-            inputstring:
+            value:
         """
-        if not inputstring:
+        if not value:
             return ""
-        str_noabbrev = self.get_expanded_words(inputstring)
+        str_noabbrev = self.get_expanded_words(value)
         nostop_tokens = self.remove_stop_words(str_noabbrev)
         stemmed_tokens = self.get_stemmed_words(nostop_tokens)
 

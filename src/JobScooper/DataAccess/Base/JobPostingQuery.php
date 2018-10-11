@@ -37,6 +37,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery orderByLocationDisplayValue($order = Criteria::ASC) Order by the location_display_value column
  * @method     ChildJobPostingQuery orderByGeoLocationId($order = Criteria::ASC) Order by the geolocation_id column
  * @method     ChildJobPostingQuery orderByDuplicatesJobPostingId($order = Criteria::ASC) Order by the duplicates_posting_id column
+ * @method     ChildJobPostingQuery orderByTitleTokens($order = Criteria::ASC) Order by the title_tokens column
+ * @method     ChildJobPostingQuery orderByJobReferenceKey($order = Criteria::ASC) Order by the job_reference_key column
  * @method     ChildJobPostingQuery orderByKeyCompanyAndTitle($order = Criteria::ASC) Order by the key_company_and_title column
  *
  * @method     ChildJobPostingQuery groupByJobPostingId() Group by the jobposting_id column
@@ -56,6 +58,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery groupByLocationDisplayValue() Group by the location_display_value column
  * @method     ChildJobPostingQuery groupByGeoLocationId() Group by the geolocation_id column
  * @method     ChildJobPostingQuery groupByDuplicatesJobPostingId() Group by the duplicates_posting_id column
+ * @method     ChildJobPostingQuery groupByTitleTokens() Group by the title_tokens column
+ * @method     ChildJobPostingQuery groupByJobReferenceKey() Group by the job_reference_key column
  * @method     ChildJobPostingQuery groupByKeyCompanyAndTitle() Group by the key_company_and_title column
  *
  * @method     ChildJobPostingQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
@@ -138,6 +142,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting findOneByLocationDisplayValue(string $location_display_value) Return the first ChildJobPosting filtered by the location_display_value column
  * @method     ChildJobPosting findOneByGeoLocationId(int $geolocation_id) Return the first ChildJobPosting filtered by the geolocation_id column
  * @method     ChildJobPosting findOneByDuplicatesJobPostingId(int $duplicates_posting_id) Return the first ChildJobPosting filtered by the duplicates_posting_id column
+ * @method     ChildJobPosting findOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column
+ * @method     ChildJobPosting findOneByJobReferenceKey(string $job_reference_key) Return the first ChildJobPosting filtered by the job_reference_key column
  * @method     ChildJobPosting findOneByKeyCompanyAndTitle(string $key_company_and_title) Return the first ChildJobPosting filtered by the key_company_and_title column *
 
  * @method     ChildJobPosting requirePk($key, ConnectionInterface $con = null) Return the ChildJobPosting by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -160,6 +166,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting requireOneByLocationDisplayValue(string $location_display_value) Return the first ChildJobPosting filtered by the location_display_value column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByGeoLocationId(int $geolocation_id) Return the first ChildJobPosting filtered by the geolocation_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByDuplicatesJobPostingId(int $duplicates_posting_id) Return the first ChildJobPosting filtered by the duplicates_posting_id column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobPosting requireOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobPosting requireOneByJobReferenceKey(string $job_reference_key) Return the first ChildJobPosting filtered by the job_reference_key column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByKeyCompanyAndTitle(string $key_company_and_title) Return the first ChildJobPosting filtered by the key_company_and_title column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  *
  * @method     ChildJobPosting[]|ObjectCollection find(ConnectionInterface $con = null) Return ChildJobPosting objects based on current ModelCriteria
@@ -180,6 +188,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting[]|ObjectCollection findByLocationDisplayValue(string $location_display_value) Return ChildJobPosting objects filtered by the location_display_value column
  * @method     ChildJobPosting[]|ObjectCollection findByGeoLocationId(int $geolocation_id) Return ChildJobPosting objects filtered by the geolocation_id column
  * @method     ChildJobPosting[]|ObjectCollection findByDuplicatesJobPostingId(int $duplicates_posting_id) Return ChildJobPosting objects filtered by the duplicates_posting_id column
+ * @method     ChildJobPosting[]|ObjectCollection findByTitleTokens(string $title_tokens) Return ChildJobPosting objects filtered by the title_tokens column
+ * @method     ChildJobPosting[]|ObjectCollection findByJobReferenceKey(string $job_reference_key) Return ChildJobPosting objects filtered by the job_reference_key column
  * @method     ChildJobPosting[]|ObjectCollection findByKeyCompanyAndTitle(string $key_company_and_title) Return ChildJobPosting objects filtered by the key_company_and_title column
  * @method     ChildJobPosting[]|\Propel\Runtime\Util\PropelModelPager paginate($page = 1, $maxPerPage = 10, ConnectionInterface $con = null) Issue a SELECT query based on the current ModelCriteria and uses a page and a maximum number of results per page to compute an offset and a limit
  *
@@ -279,7 +289,7 @@ abstract class JobPostingQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT jobposting_id, jobsite_key, jobsite_post_id, title, url, employment_type, pay_range, company, location, department, category, last_updated_at, job_posted_date, first_seen_at, location_display_value, geolocation_id, duplicates_posting_id, key_company_and_title FROM jobposting WHERE jobposting_id = :p0';
+        $sql = 'SELECT jobposting_id, jobsite_key, jobsite_post_id, title, url, employment_type, pay_range, company, location, department, category, last_updated_at, job_posted_date, first_seen_at, location_display_value, geolocation_id, duplicates_posting_id, title_tokens, job_reference_key, key_company_and_title FROM jobposting WHERE jobposting_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -898,6 +908,56 @@ abstract class JobPostingQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(JobPostingTableMap::COL_DUPLICATES_POSTING_ID, $duplicatesJobPostingId, $comparison);
+    }
+
+    /**
+     * Filter the query on the title_tokens column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByTitleTokens('fooValue');   // WHERE title_tokens = 'fooValue'
+     * $query->filterByTitleTokens('%fooValue%', Criteria::LIKE); // WHERE title_tokens LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $titleTokens The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildJobPostingQuery The current query, for fluid interface
+     */
+    public function filterByTitleTokens($titleTokens = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($titleTokens)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(JobPostingTableMap::COL_TITLE_TOKENS, $titleTokens, $comparison);
+    }
+
+    /**
+     * Filter the query on the job_reference_key column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByJobReferenceKey('fooValue');   // WHERE job_reference_key = 'fooValue'
+     * $query->filterByJobReferenceKey('%fooValue%', Criteria::LIKE); // WHERE job_reference_key LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $jobReferenceKey The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildJobPostingQuery The current query, for fluid interface
+     */
+    public function filterByJobReferenceKey($jobReferenceKey = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($jobReferenceKey)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(JobPostingTableMap::COL_JOB_REFERENCE_KEY, $jobReferenceKey, $comparison);
     }
 
     /**

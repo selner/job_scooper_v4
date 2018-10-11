@@ -17,13 +17,14 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from docopt import docopt
-from task_match_titles import TaskMatchJobsToKeywords
+from task_tokenize_jobtitles import TaskAddTitleTokens
+from helpers import docopt_ext
+
 
 cli_usage = """
 Usage:
-  match_db_jobtitles.py -c <dbstring>
-  match_db_jobtitles.py --version
+  cmd_update_title_tokens.py -c <dbstring>
+  cmd_update_title_tokens.py --version
 
 Options:
   -h --help  show this help message and exit
@@ -33,7 +34,8 @@ Options:
 """
 
 if __name__ == '__main__':
-    arguments = docopt(cli_usage, version='0.1.1rc')
+    arguments = docopt_ext(cli_usage, version='0.1.1rc')
 
-    matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""),
-                                      outputfile=arguments["--output"].replace("'", ""))
+    toks = TaskAddTitleTokens(**arguments)
+    toks.update_jobs_without_tokens()
+

@@ -20,7 +20,7 @@
 import pandas
 from datetime import *
 from helpers import write_json, load_ucsv, load_json
-from task_tokenize import Tokenizer
+from util_tokenize import Tokenizer
 from database import DatabaseMixin
 from collections import OrderedDict
 from cleanco import cleanco
@@ -31,6 +31,8 @@ DATA_KEY_USER = u'user'
 DATA_KEY_OUTPUT_DUPLICATE_IDS = u'user'
 JSON_DEDUPE_FIELDS = ["JobPostingId", "Title", "Company", "JobSite", "GeoLocationId", "KeyCompanyAndTitle",
                       "FirstSeenAt", "DuplicatesJobPostingId", "WasDuplicate"]
+
+from task_tokenize_jobtitles import TaskAddTitleTokens
 
 
 class BaseTaskDedupeJobPostings:
@@ -62,6 +64,20 @@ class BaseTaskDedupeJobPostings:
         self.outputfile = outputfile
 
     def dedupe_jobs(self):
+
+
+        ##
+        #  TODO:  Consider doing this via a DB query instead.   Read more about query structure
+        # at https://stackoverflow.com/questions/688549/finding-duplicate-values-in-mysql?rq=1
+        ##
+
+        ##
+        #  TODO:  Use lat/long box or approximation to group posts in similar area but not same
+        # specific location.   E.g.  "Picadilly" vs. "Greater London" (same job really since
+        # Picadilly is within Greater London.
+        #
+        ##
+
         dfjobs = pandas.DataFrame.from_records(self.jobs.values(), index="JobPostingId")
         dfjobs["JobPostingId"] = dfjobs.index
         dfjobs.sort_values('JobPostingId', ascending=True)
@@ -104,7 +120,7 @@ class BaseTaskDedupeJobPostings:
         print("Tokenizing {} job titles....".format(len(jobsdata)))
         try:
             tokenizer = Tokenizer()
-            jobsdata = tokenizer.tokenize_strings(jobsdata, u'Title', u'TitleTokens', u'set')
+            jobsdata = tokenizer.batch_tokenize_strings(jobsdata, u'Title', u'TitleTokens', u'set')
         except Exception, ex:
             print("Error tokenizing strings:  {}".format(ex))
             raise ex
@@ -155,6 +171,13 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
         """
         self.init_connection(**kwargs)
 
+        print(u"Verifying title tokens are set for all jobpostings in database {}".format(self.dbparams))
+        # first we need to make sure all the jobpostings have title tokens
+        # and reference keys set already
+        #
+        toks = TaskAddTitleTokens(**kwargs)
+        toks.update_jobs_without_tokens()
+
         print(u"Processing job postings for duplicates from database {}".format(self.dbparams))
 
         print(u"Loading job list to match...")
@@ -164,6 +187,7 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
         backwardsdate = datetime.now() - timedelta(days=14)
 
         print(u"Connecting to database...")
+
 
         querysql = u"""
             SELECT 

@@ -86,15 +86,65 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         return $arrItem;
     }
 
+    protected function getTitleTokenArray() {
+        $title_toks = $this->getTitleTokens();
+        if(!is_empty_value($title_toks)) {
+            $toks = explode(DATABASE_STRING_ARRAY_SEPARATOR, $title_toks );
+            if(!is_empty_value($toks)) {
+                return $toks;
+            }
+        }
+
+        return null;
+    }
+
+    protected function updateKeyCompanyTitle() {
+
+        $title_portion = "";
+        $title_toks = $this->getTitleTokenArray();
+        if(!is_empty_value($title_toks)) {
+            $title_portion = implode("_", $title_toks );
+        }
+        else {
+            $title_portion = strScrub($this->getTitle(), FOR_LOOKUP_VALUE_MATCHING);
+        }
+        $title_portion = strtolower($title_portion);
+
+        $company_portion = strScrub($this->getCompany(), FOR_LOOKUP_VALUE_MATCHING);
+        $title_portion = strtolower($company_portion);
+
+        $this->setKeyCompanyAndTitle("{$company_portion}~{$title_portion}");
+    }
     /**
      *
      * @throws \Propel\Runtime\Exception\PropelException
      */
     protected function updateAutoColumns()
     {
-        $this->setKeyCompanyAndTitle(strScrub($this->getCompany() . $this->getTitle(), FOR_LOOKUP_VALUE_MATCHING));
+        //
+        // Null out fields that are derived from Title and Company so that
+        // later processors in JobNormalizer know to reset the value to a
+        // new one
+        //
+        if($this->wasTitleModified() === true) {
+            $this->setTitleTokens(null);
+            $this->updateKeyCompanyTitle();
+        }
 
-        if($this->isLocationModified()) {
+        if($this->wasCompanyModified() === true) {
+            $this->updateKeyCompanyTitle();
+        }
+
+        if(is_empty_value($this->getKeyCompanyAndTitle()))
+        {
+            $this->updateKeyCompanyTitle();
+        }
+
+        //
+        // If location was changed somehow, we need to
+        // re-denormalize the related facts back into this JobPosting record
+        //
+        if($this->wasLocationModified()) {
             $this->_updateAutoLocationColumns();
         }
     }
@@ -116,19 +166,10 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         return $ret;
     }
 
-    private function isLocationModified()
-    {
-        $cols = $this->getModifiedColumnsPhpNames();
-        $locChanged = false;
-        foreach ($cols as $col) {
-            if (stripos($col, "GeoLocation") !== false ||
-                stripos($col, "Location") !== false) {
-                $locChanged = true;
-            }
-        }
-        return $locChanged;
-    }
-
+    /**
+     * @return array
+     * @throws PropelException
+     */
     public function getModifiedColumnsPhpNames()
     {
         $cols = parent::getModifiedColumns();
@@ -139,6 +180,43 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
             }
             return $phpCols;
         }
+    }
+
+    /**
+     * @param $arrColsToCheck
+     * @return bool
+     * @throws PropelException
+     */
+    private function wasColumnModified($arrColsToCheck)
+    {
+        $colsChanged = $this->getModifiedColumnsPhpNames();
+        $colsOverlap = array_intersect_assoc($colsChanged, $arrColsToCheck);
+        return !is_empty_value($colsOverlap);
+
+    }
+
+    /**
+     * @return bool
+     * @throws PropelException
+     */
+    private function wasLocationModified() {
+        return $this->wasColumnModified(['GeoLocation', 'Location']);
+    }
+
+    /**
+     * @return bool
+     * @throws PropelException
+     */
+    private function wasTitleModified() {
+        return $this->wasColumnModified(['Title']);
+    }
+
+    /**
+     * @return bool
+     * @throws PropelException
+     */
+    private function wasCompanyModified() {
+        return $this->wasColumnModified(['Company']);
     }
 
     /**
@@ -265,7 +343,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
      */
     private function _updateAutoLocationColumns()
     {
-        if (true !== $this->isLocationModified()) {
+        if (true !== $this->wasLocationModified()) {
             return;
         }
 

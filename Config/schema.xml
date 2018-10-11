@@ -139,8 +139,8 @@
         <column name="url" phpName="Url" type="varchar" size="2500" required="true"/>
         <column name="employment_type" phpName="EmploymentType" type="varchar" size="100"/>
         <column name="pay_range" phpName="PayRange" type="varchar" size="100"/>
-        <column name="company" phpName="Company" type="varchar" size="100"/>
         <column name="location" phpName="Location" type="varchar" size="255"/>
+        <column name="company" phpName="Company" type="varchar" size="255"/>
         <column name="department" phpName="Department" type="varchar" size="255"/>
         <column name="category" phpName="Category" type="varchar" size="100"/>
 
@@ -183,6 +183,9 @@
         <foreign-key foreignTable="jobposting" phpName="DuplicateJobPosting">
             <reference local="duplicates_posting_id" foreign="jobposting_id"/>
         </foreign-key>
+
+        <column name="title_tokens" phpName="TitleTokens" type="varchar" size="200" required="false"/>
+        <column name="job_reference_key" phpName="JobReferenceKey" type="varchar" size="255"/>
 
         <!--
             The following columns are automatically set via code in the JobPosting class
