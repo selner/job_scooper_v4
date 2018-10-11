@@ -181,3 +181,7 @@ def combine_dicts(a, b):
         for kb in b[k]:
             z[k][kb] = b[k][kb]
     return z
+
+def dump_var_to_json(data):
+    return json.dumps(data, indent=4, encoding='utf-8', cls=SetEncoder)
+
