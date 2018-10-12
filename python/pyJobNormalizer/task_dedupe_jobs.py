@@ -141,7 +141,7 @@ class BaseTaskDedupeJobPostings:
                 subitem["CompanyTitleGeoLocation"] = "_".join([
                     subitem["TitleTokensString"],
                     subitem["CompanyCleaned"],
-                    loc
+                    str(loc)
                 ])
 
                 self.jobs[rowkey] = subitem
