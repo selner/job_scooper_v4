@@ -21,6 +21,30 @@ import codecs
 import json
 import csv
 
+import docopt
+docopt_func = getattr(docopt, 'docopt')
+
+def docopt_ext(doc, argv=None, help=True, version=None, options_first=False):
+
+    vals = docopt_func(doc, argv, help, version, options_first)
+    if vals and len(vals) > 0:
+        retvals = {}
+        for k in vals.keys():
+            key = k
+            if k.startswith("--"):
+                key = k[2:]
+
+            v = vals[k]
+
+            if v and isinstance(v, str) and v.startswith("'") and v.endswith("'"):
+                v = v[1:-1]
+
+            retvals[key] = v
+
+        return retvals
+
+    return vals
+
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):

@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 from task_find_and_match_places import FindPlacesFromDBLocationsTask
-from docopt import docopt
+from helpers import docopt_ext
 
 cli_usage = """
 Usage:
@@ -34,8 +34,7 @@ Options:
 """
 
 if __name__ == '__main__':
-    arguments = docopt(cli_usage, version='0.1.1rc')
-    args = {k.replace("--", ""): arguments[k] for k in arguments.keys()}
+    args = docopt_ext(cli_usage, version='0.1.1rc')
 
     if "connecturi" in args and args["connecturi"] and "server" in args and args["server"]:
         matcher = FindPlacesFromDBLocationsTask()

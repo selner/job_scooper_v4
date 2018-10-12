@@ -150,7 +150,7 @@ class BaseTaskDedupeJobPostings:
         print("{} job postings loaded.".format(len(self.jobs)))
 
 
-class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
+class TaskDedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
     dbparams = {}
 
     def load_data(self, **kwargs):
@@ -226,7 +226,7 @@ class DedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
                 nupdated, nskipped))
 
 
-class DedupeJobPostingFile(BaseTaskDedupeJobPostings):
+class TaskDedupeJobPostingFile(BaseTaskDedupeJobPostings):
     inputfile = None
 
     def load_data(self, **kwargs):

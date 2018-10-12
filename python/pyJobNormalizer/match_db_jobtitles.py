@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from docopt import docopt
+from helpers import docopt_ext
 from task_match_titles import TaskMatchJobsToKeywords
 
 cli_usage = """
@@ -33,7 +33,7 @@ Options:
 """
 
 if __name__ == '__main__':
-    arguments = docopt(cli_usage, version='0.1.1rc')
+    arguments = docopt_ext(cli_usage, version='0.1.1rc')
 
-    matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""),
-                                      outputfile=arguments["--output"].replace("'", ""))
+    matcher = TaskMatchJobsToKeywords(inputfile=arguments["input"],
+                                      outputfile=arguments["output"])

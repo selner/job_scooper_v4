@@ -17,9 +17,8 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from task_dedupe_jobs import DedupeJobPostingFromDB, DedupeJobPostingFile
-from docopt import docopt
-
+from task_dedupe_jobs import TaskDedupeJobPostingFromDB, TaskDedupeJobPostingFile
+from helpers import docopt_ext
 cli_usage = """
 Usage:
   mark_duplicates.py (-i <file> -o <file>) | -c <dbstring>
@@ -36,23 +35,23 @@ Options:
 
 
 if __name__ == '__main__':
-    arguments = docopt(cli_usage, version='0.1.1rc')
+    arguments = docopt_ext(cli_usage, version='0.1.1rc')
 
-    # if not arguments["--input"] or not arguments["--output"]:
+    # if not arguments["input"] or not arguments["output"]:
     #     print("Unable to deduplicate job postings.  Missing script arguments.")
     # else:
-    #     matcher = TaskDedupeJobPostings(arguments["--input"].replace("'", ""), arguments["--output"].replace("'", ""))
+    #     matcher = TaskDedupeJobPostings(arguments["input"].replace("'", ""), arguments["output"].replace("'", ""))
 
-    if "--input" in arguments and arguments["--input"] and "--output" in arguments and arguments["--output"]:
-        matcher = DedupeJobPostingFile()
-        matcher.outputfile = arguments["--output"].replace("'", "")
-        matcher.load_data(inputfile=arguments["--input"].replace("'", ""))
+    if "input" in arguments and arguments["input"] and "output" in arguments and arguments["output"]:
+        matcher = TaskDedupeJobPostingFile()
+        matcher.outputfile = arguments["output"].replace("'", "")
+        matcher.load_data(inputfile=arguments["input"].replace("'", ""))
         matcher.dedupe_jobs()
         matcher.export_results()
 
-    elif "--connecturi" in arguments and arguments["--connecturi"]:
-        matcher = DedupeJobPostingFromDB()
-        matcher.load_data(connecturi=arguments['--connecturi'])
+    elif "connecturi" in arguments and arguments["connecturi"]:
+        matcher = TaskDedupeJobPostingFromDB()
+        matcher.load_data(connecturi=arguments['connecturi'])
         matcher.dedupe_jobs()
         matcher.update_database()
     else:
