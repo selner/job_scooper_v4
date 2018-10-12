@@ -126,7 +126,7 @@ class DatabaseMixin:
             close_connection:
         """
         try:
-            print("Running command: {}".format(querysql))
+            # print("Running command: {}".format(querysql))
 
             with self.connection.cursor() as cursor:
                 return cursor.execute(querysql, values)
@@ -172,7 +172,7 @@ class DatabaseMixin:
 
             if len(rowdict) > len(matched_keys):
                 unknown_keys = set(rowdict) - allowed_keys
-                print >> sys.stderr, "skipping keys:", ", ".join(unknown_keys)
+                # print >> sys.stderr, "skipping keys:", ", ".join(unknown_keys)
 
             columns = ", ".join(matched_keys)
             values_template = ", ".join(["%s"] * len(matched_keys))
