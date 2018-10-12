@@ -42,7 +42,7 @@ class DataNormalizer
      *
      * @throws \Exception
      */
-    public function normalizeJobs($onlyNew=true)
+    public function normalizeJobs()
     {
         $startMem = getPhpMemoryUsage();
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
