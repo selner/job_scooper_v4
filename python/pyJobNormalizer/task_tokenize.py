@@ -25,6 +25,7 @@ import string
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 import os
+from past.builtins import basestring    # pip install future
 
 states = {
     'AK': 'Alaska',
@@ -90,6 +91,15 @@ states = {
 # NOTE:  Need to run the download once per machine to get the dictionaries
 # nltk.download()
 
+#
+#  expanded_words_list
+#
+#  Load the job title abbreviations into memory from file
+#
+filepath = os.path.dirname(os.path.abspath(__file__))  # /a/b/c/d/e
+abbrevfile = os.path.join(filepath, "static", "job-title-abbreviations.csv")
+expanded_words_list = loadcsv(abbrevfile, "abbreviation")['dict']
+
 
 class Tokenizer:
     _expandwords = None
@@ -111,7 +121,7 @@ class Tokenizer:
 
         for k in list_data.keys():
             if isinstance(k, basestring) and len(k) == 0:
-                print "String value for key was empty.  Skipping..."
+                print("String value for key was empty.  Skipping...")
                 continue
 
             tokens = self.get_scrubbed_string_tokens(list_data[k][field])
@@ -146,13 +156,9 @@ class Tokenizer:
 
     @property
     def expandedwords(self):
-        if not self._expandwords:
-            filepath = os.path.dirname(os.path.abspath(__file__))  # /a/b/c/d/e
+        global expanded_words_list
 
-            abbrevfile = os.path.join(filepath, "static", "job-title-abbreviations.csv")
-            self._expandwords = loadcsv(abbrevfile, "abbreviation")['dict']
-
-        return self._expandwords
+        return expanded_words_list
 
     def get_expanded_words(self, str_words):
         """

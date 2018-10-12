@@ -9,3 +9,4 @@ pymysql
 cleanco
 requests
 nltk
+future

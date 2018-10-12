@@ -41,6 +41,7 @@ class BaseTaskDedupeJobPostings:
     user_id = None
     df_job_tokens = None
     output_data = None
+    _outputfile = None
 
     @property
     def outputfile(self):
@@ -52,7 +53,7 @@ class BaseTaskDedupeJobPostings:
         Args:
             filepath:
         """
-        self.outputfile = filepath
+        self._outputfile = filepath
 
     def __init__(self, outputfile=None):
         """
@@ -62,7 +63,7 @@ class BaseTaskDedupeJobPostings:
         self.outputfile = outputfile
 
     def dedupe_jobs(self):
-        dfjobs = pandas.DataFrame.from_records(self.jobs.values(), index="JobPostingId")
+        dfjobs = pandas.DataFrame.from_dict(self.jobs, orient="index")
         dfjobs["JobPostingId"] = dfjobs.index
         dfjobs.sort_values('JobPostingId', ascending=True)
 
@@ -105,9 +106,9 @@ class BaseTaskDedupeJobPostings:
         try:
             tokenizer = Tokenizer()
             jobsdata = tokenizer.tokenize_strings(jobsdata, u'Title', u'TitleTokens', u'set')
-        except Exception, ex:
+        except Exception as ex:
             print("Error tokenizing strings:  {}".format(ex))
-            raise ex
+            raise(ex)
 
         print("Reorganizing source data for duplicate matching...")
         for rowkey in jobsdata.keys():
@@ -132,12 +133,17 @@ class BaseTaskDedupeJobPostings:
 
                 if "GeoLocationId" in subitem and subitem["GeoLocationId"]:
                     loc = subitem["GeoLocationId"]
-                if "LocationDisplayValue" in subitem and subitem["LocationDisplayValue"]:
+                elif "LocationDisplayValue" in subitem and subitem["LocationDisplayValue"]:
                     loc = subitem["LocationDisplayValue"]
                 else:
                     loc = "NOLOCATION"
-                subitem["CompanyTitleGeoLocation"] = u"{}_{}_{}".format(subitem["TitleTokensString"],
-                                                                        subitem["CompanyCleaned"], loc)
+
+                subitem["CompanyTitleGeoLocation"] = "_".join([
+                    subitem["TitleTokensString"],
+                    subitem["CompanyCleaned"],
+                    loc
+                ])
+
                 self.jobs[rowkey] = subitem
         jobsdata = None
 

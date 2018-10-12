@@ -118,7 +118,8 @@ def loadcsv(csvfilename, rowkeyname=None):
     """
 
     print(u"Loading {}...".format(csvfilename))
-    csv_fp = open(csvfilename, "rbU")
+    from io import open
+    csv_fp = open(csvfilename, 'rb')
     dict_records = {}
     fields = {}
 
@@ -133,7 +134,7 @@ def loadcsv(csvfilename, rowkeyname=None):
 
                 dict_records[row[rowkeyname]] = row
     except Exception as err:
-        print err
+        print(err)
         pass
 
     print(u"Loaded {} rows from {}.".format(len(dict_records), csvfilename))
@@ -151,7 +152,7 @@ def writedicttocsv(csvfilename, data, keys=None):
     print(u"Writing {} rows to file {}...".format(len(data), csvfilename))
 
     if keys is None:
-        item = data.itervalues().next()
+        item = data.items()[0]
         keys = item.keys()
 
     csvfile = open(csvfilename, "wb")
@@ -163,7 +164,7 @@ def writedicttocsv(csvfilename, data, keys=None):
                 del data[row][k]
         try:
             csv_writer.writerow(data[row])
-        except Exception:
+        except Exception as ex:
             pass
 
     csvfile.close()
@@ -183,5 +184,5 @@ def combine_dicts(a, b):
     return z
 
 def dump_var_to_json(data):
-    return json.dumps(data, indent=4, encoding='utf-8', cls=SetEncoder)
+    return json.dumps(data, indent=4, cls=SetEncoder)
 

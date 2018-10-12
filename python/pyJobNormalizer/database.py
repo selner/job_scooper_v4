@@ -22,6 +22,12 @@ import pymysql
 from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
 import sys
+# Python 2 and 3: easiest option
+
+from future.standard_library import install_aliases
+install_aliases()
+
+from urllib.parse import urlparse
 
 
 class OrderedDictCursor(DictCursorMixin, Cursor):
@@ -38,7 +44,6 @@ class DatabaseMixin:
         Args:
             **kwargs:
         """
-        from urlparse import urlparse
 
         if 'connecturi' in kwargs:
             parsed = urlparse(kwargs['connecturi'])
@@ -94,9 +99,9 @@ class DatabaseMixin:
                 cursor.execute(querysql)
                 result = cursor.fetchall()
             return result
-        except Exception, ex:
-            print ex
-            raise ex
+        except Exception as ex:
+            print(ex)
+            raise(ex)
 
         finally:
             self.connection.commit()
@@ -126,9 +131,9 @@ class DatabaseMixin:
             with self.connection.cursor() as cursor:
                 return cursor.execute(querysql, values)
 
-        except Exception, ex:
-            print ex
-            raise ex
+        except Exception as ex:
+            print(ex)
+            raise(ex)
 
         finally:
             self.connection.commit()
@@ -188,9 +193,9 @@ class DatabaseMixin:
                 else:
                     return None
 
-        except Exception, ex:
-            print ex
-            raise ex
+        except Exception as ex:
+            print(ex)
+            raise(ex)
 
         finally:
             self.connection.commit()
