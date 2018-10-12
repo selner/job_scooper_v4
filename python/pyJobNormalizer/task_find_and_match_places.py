@@ -236,9 +236,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
                 print(u"... calling API '{}?{}".format(kwargs['url'], urlencode(payload)))
                 place_details = self.call_geocode_api(**kwargs)
-                print(u"... place returned from API: {}".format(dump_var_to_json(place_details)))
 
                 if place_details and len(place_details) > 0:  # if found place:
+                    print(u"... place returned from API: place_id={}, location={}".format(place_details['place_id'],
+                                                                                          place_details[
+                                                                                              'formatted_address']))
 
                     #   insert GeoLocation into DB
                     geolocfacts = {PLACE_DETAIL_GEOCODE_MAPPING[pkey]: str(place_details[pkey]) for pkey in
@@ -246,10 +248,10 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                                    place_details[pkey] is not None
                                    }
                     if geolocfacts and len(geolocfacts) > 0:
-                        print(u"... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
+                        # print(u"... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
 
                         ins_result = self.add_row("geolocation", "geolocation_id", geolocfacts, self._geoloc_columns)
-                        print(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
+                        # print(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
 
                         total_loc_found += 1
 
@@ -262,12 +264,14 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                         rows_updated = self._update_mappings_for_loc(loc, locfacts)
                         total_jp_updated += rows_updated
                     else:
-                        print(u"... TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
+                        print(u"... place_id {} found for {} but could not be geocoded.".format(place_details['place_id'], str(loc)))
+                        # print(u"... TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
                         total_loc_notfound += 1
                     # if not found place:
                     #   add to failed lookups dataset
                 else:
-                    print(u"... TODO -- store failed lookups like '{}' to skip future failures".format(loc))
+                    print(u"... place for {} not found via API".format(str(loc)))
+                    # print(u"... TODO -- store failed lookups like '{}' to skip future failures".format(loc))
                     total_loc_notfound += 1
 
         except Exception as e:
