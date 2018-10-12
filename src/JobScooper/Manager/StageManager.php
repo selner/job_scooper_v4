@@ -136,89 +136,99 @@ class StageManager
         $sitePlugin = null;
 		$siteRuns = null;
 		$user = null;
-		
-        if (!is_empty_value($jobsiteKeys)) {
-            $usersForRun = Settings::getValue('users_for_run');
-            if(is_empty_value($usersForRun)) {
-            	throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
-            }
-            
-            foreach($usersForRun as $userFacts) {
-	            startLogSection(PHP_EOL . "Stage 1:  Downloading jobs for user={$userFacts['UserSlug']} from " . \count($jobsiteKeys) . " potential job sites");
+        $usersForRun = Settings::getValue('users_for_run');
 
-		        foreach($jobsiteKeys as $jobsiteKey)
-		        {
-			        startLogSection("Downloading jobs from {$jobsiteKey} for {$userFacts['UserSlug']}");
-		            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		            //
-		            // Run each plugin, set the searches to run and then download the jobs from that jobsite
-		            //
-		            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		            try {
-		                $user = User::getUserObjById($userFacts['UserId']);
-			            $siteRuns = $user->getUserSearchSiteRunsForJobSite($jobsiteKey);
-			            if(!is_empty_value($siteRuns)) {
-		                    $countTotalSiteSearches = \count($siteRuns);
-		                    $plugin = null;
-		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		                    //
-		                    // Add the user's searches to the plugin
-		                    //
-		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		                    startLogSection("Initializing {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
-		                    try {
-		                        $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
-		                        $sitePlugin->setSearches($siteRuns);
-		                    } catch (\Exception $classError) {
-		                        handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
-		                    } finally {
-		                        endLogSection(" {$jobsiteKey} searches initialized.");
-		                    }
+        startLogSection("Stage 1:  Downloading new jobs for " . \count($jobsiteKeys) . ' job sites and' . \count($usersForRun) . ' users.');
 
-		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		                    //
-		                    // Download all the job listings for all the users searches for this plugin
-		                    //
-		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		                    try {
-		                        startLogSection("Downloading jobs for {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
-		                        $sitePlugin->downloadLatestJobsForAllSearches();
-				            } catch (PropelException $pex) {
-				                handleException($pex, null, true);
-		                    } catch (\Exception $classError) {
-		                        handleException($classError, "{$jobsiteKey} failed to download job postings: %s", $raise = false);
-		                    } finally {
-		                        endLogSection("Job downloads have ended for {$jobsiteKey}.");
-		                    }
-			            }
-		            } catch (PropelException $pex) {
-		                handleException($pex, null, true);
-		            } catch (\Exception $ex) {
-		                handleException($ex, null, false);
-		            } finally {
-	                    $sitePlugin = null;
-						// make sure to clean up the references to each of the UserSiteSearchRun objects
-						// so we dont leave a DB connection open
-                        if(!is_empty_value($siteRuns)) {
-                            foreach(array_keys($siteRuns) as $k) {
-                                $siteRuns[$k] = null;
-                                unset($siteRuns[$k]);
-                            }
-                        }
-						$user = null;
-						$siteRuns = null;
-		            }
-
-			        endLogSection("Done downloading jobs from {$jobsiteKey} for {$userFacts['UserSlug']}");
-
-	            }
-	
-		        endLogSection("Stage 1 for {$userFacts['UserSlug']}");
-
-            }
-        } else {
-            LogWarning('No searches have been set to be run.');
+        if (is_empty_value($jobsiteKeys)) {
+            throw new \InvalidArgumentException('No job sites were set to be run.  Aborting');
         }
+
+        if(is_empty_value($usersForRun)) {
+            throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
+        }
+
+        foreach($jobsiteKeys as $jobsiteKey)
+        {
+            startLogSection("Downloading jobs from {$jobsiteKey} for " . \count($usersForRun) . ' users.');
+
+            try {
+                while(!is_empty_value($usersForRun)) {
+                    $userFacts = array_pop($usersForRun);
+
+                    startLogSection("Downloading jobs:  {$jobsiteKey}  / {$userFacts['UserSlug']}  ");
+
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    //
+                    // Run each plugin, set the searches to run and then download the jobs from that jobsite
+                    //
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    $user = User::getUserObjById($userFacts['UserId']);
+                    $siteRuns = $user->getUserSearchSiteRunsForJobSite($jobsiteKey);
+                    if(!is_empty_value($siteRuns)) {
+                        $countTotalSiteSearches = \count($siteRuns);
+                        $plugin = null;
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        //
+                        // Add the user's searches to the plugin
+                        //
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        startLogSection("Initializing {$countTotalSiteSearches} search(es) for {$jobsiteKey}  / {$userFacts['UserSlug']} ...");
+                        try {
+                            $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
+                            $sitePlugin->setSearches($siteRuns);
+                        } catch (\Exception $classError) {
+                            handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
+                        } finally {
+                            endLogSection(" {$jobsiteKey}  / {$userFacts['UserSlug']}  searches initialized.");
+                        }
+
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        //
+                        // Download all the job listings for all the users searches for this plugin
+                        //
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        try {
+                            startLogSection("Downloading jobs for {$countTotalSiteSearches} search(es) for {$jobsiteKey}  / {$userFacts['UserSlug']} ...");
+                            $sitePlugin->downloadLatestJobsForAllSearches();
+                        } catch (\Exception $classError) {
+                            handleException($classError, "{$jobsiteKey} failed to download job postings for user {$userFacts['UserSlug']}: %s", $raise = true);
+                        } finally {
+                            endLogSection("Finished downloads:  {$jobsiteKey}  / {$userFacts['UserSlug']}  ");
+                        }
+                    }
+
+                    endLogSection("Done downloading jobs from {$jobsiteKey} for {$userFacts['UserSlug']}");
+                }
+            } catch (PropelException $pex) {
+                if (!is_empty_value($usersForRun)) {
+                    $remainUsers = join(", ", $usersForRun);
+                    LogError("Skipping searches for {$remainUsers} users due to plugin failure to download listings.");
+                }
+            handleException($pex, null, false);
+            } catch (\Exception $ex) {
+                if (!is_empty_value($usersForRun)) {
+                    $remainUsers = join(", ", $usersForRun);
+                    LogError("Skipping searches for {$remainUsers} users due to plugin failure to download listings.");
+                }
+                handleException($ex, null, false);
+            } finally {
+                $sitePlugin = null;
+                // make sure to clean up the references to each of the UserSiteSearchRun objects
+                // so we dont leave a DB connection open
+                if(!is_empty_value($siteRuns)) {
+                    foreach(array_keys($siteRuns) as $k) {
+                        $siteRuns[$k] = null;
+                        unset($siteRuns[$k]);
+                    }
+                }
+                $user = null;
+                $siteRuns = null;
+            }
+            endLogSection("Done downloading jobs for {$jobsiteKey}");
+        }
+
+        endLogSection("End Stage 1: Finished downloading new jobs.");
 
     }
 
