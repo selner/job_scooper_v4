@@ -195,7 +195,7 @@ class JobsAutoMarker
                 '--user' => $userFacts['UserSlug']
             ];
 
-            $results = PythonRunner::execScript($runFile, $params);
+            $resultcode = PythonRunner::execScript($runFile, $params);
 
         } catch (Exception $ex) {
             handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
@@ -438,7 +438,7 @@ class JobsAutoMarker
                     '-o' => $resultsfile
                 ];
 
-                $results = PythonRunner::execScript($runFile, $params);
+                $resultcode = PythonRunner::execScript($runFile, $params);
 
                 LogMessage('Updating database with new match results...');
                 $this->_updateUserJobMatchesFromJson($resultsfile, $collJobsList);

@@ -33,8 +33,7 @@ class PythonRunner {
 	 * @throws \Exception
 	*/
 	static function execScript($python_file, $script_params=array()) {
-		$results = null;
-		
+
         try {
             $PYTHONPATH = realpath(__ROOT__ . "/python/{$python_file}");
             $cmdLine = "";
@@ -50,14 +49,12 @@ class PythonRunner {
             }
 
             LogMessage(PHP_EOL . "    ~~~~~~ Running command: {$pythonExec} {$pythonCmd}  ~~~~~~~" . PHP_EOL);
-            $results  = doExec("{$pythonExec} {$pythonCmd}");
+
+            $resultcode  = doExec("{$pythonExec} {$pythonCmd}");
         } catch (\Exception $ex) {
             throw $ex;
-        } finally {
-            LogMessage($results);
         }
-
-        return $results;
+        return $resultcode;
         
 	}
 }

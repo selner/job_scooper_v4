@@ -75,8 +75,7 @@ class DataNormalizer
                 '-c' => Settings::get_db_dsn()
             ];
 
-            $results = PythonRunner::execScript($runFile, $params);
-            LogMessage($results);
+            $resultcode = PythonRunner::execScript($runFile, $params);
             LogMessage('Python command call finished.');
 
         } catch (\Exception $ex) {
@@ -99,8 +98,7 @@ class DataNormalizer
                 '--server' => Settings::getValue('geocodeapi_server'),
             ];
 
-            $results = PythonRunner::execScript($runFile, $params);
-            LogMessage($results);
+            $resultcode = PythonRunner::execScript($runFile, $params);
             LogMessage('Python command call finished.');
 
         } catch (\Exception $ex) {
