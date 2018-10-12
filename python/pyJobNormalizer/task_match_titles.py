@@ -28,7 +28,8 @@ JSON_KEY_USER = u'user'
 
 
 class TaskMatchJobsToKeywords:
-    inputfile = None
+    _inputfile = None
+    _outputfile = None
     keywords = {}
     negative_keywords = {}
     jobs = {}
@@ -39,7 +40,7 @@ class TaskMatchJobsToKeywords:
 
     @property
     def outputfile(self):
-        return self.outputfile
+        return self._outputfile
 
     @outputfile.setter
     def outputfile(self, filepath):
@@ -47,12 +48,12 @@ class TaskMatchJobsToKeywords:
         Args:
             filepath:
         """
-        self.outputfile = filepath
+        self._outputfile = filepath
 
     @property
     def input_data(self):
         if not self._input_data:
-            self._input_data = load_json(self.inputfile)
+            self._input_data = load_json(self._inputfile)
         return self._input_data
 
     @property
@@ -67,12 +68,12 @@ class TaskMatchJobsToKeywords:
             **kwargs:
         """
         if 'inputfile' in kwargs:
-            self.inputfile = kwargs['inputfile']
+            self._inputfile = kwargs['inputfile']
         else:
             raise Exception(u"No input file specified for processing.")
 
         if 'outputfile' in kwargs:
-            self.outputfile = kwargs['outputfile']
+            self._outputfile = kwargs['outputfile']
 
         print(u"Loading job list to match...")
         self.load_jobs()
@@ -233,8 +234,8 @@ class TaskMatchJobsToKeywords:
 #         self.init_connection(**kwargs)
 #         TaskMatchJobsToKeywords.__init__(**kwargs)
 #
-#         if 'inputfile' in kwargs:
-#             self.inputfile = kwargs['inputfile']
+#         if '_inputfile' in kwargs:
+#             self._inputfile = kwargs['inputfile']
 #         else:
 #             raise Exception("No input file specified for processing.")
 #

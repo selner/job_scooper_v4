@@ -36,6 +36,9 @@ Options:
 
 if __name__ == '__main__':
     arguments = docopt(cli_usage, version='0.1.1rc')
+    args = {k.replace("--", ""): arguments[k] for k in arguments.keys()}
 
-    matcher = TaskMatchJobsToKeywords(inputfile=arguments["--input"].replace("'", ""), outputfile=arguments["--output"].replace("'", ""))
+    matcher = TaskMatchJobsToKeywords(
+        inputfile=args["input"].replace("'", ""),
+        outputfile=arguments["output"].replace("'", ""))
     matcher.export_results()
