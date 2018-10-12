@@ -19,7 +19,7 @@
 ###########################################################################
 import codecs
 import json
-import unicodecsv
+import csv
 
 
 class SetEncoder(json.JSONEncoder):
@@ -116,17 +116,19 @@ def loadcsv(csvfilename, rowkeyname=None):
         csvfilename:
         rowkeyname:
     """
+    import os
+
 
     print(u"Loading {}...".format(csvfilename))
     from io import open
-    csv_fp = open(csvfilename, 'rb')
+    csv_fp = open(csvfilename, 'r')
     dict_records = {}
     fields = {}
 
     csv_reader = None
     try:
         with csv_fp:
-            csv_reader = unicodecsv.DictReader(csv_fp, delimiter=",", quoting=unicodecsv.QUOTE_ALL, errors='strict')
+            csv_reader = csv.DictReader(csv_fp, delimiter=",", quoting=csv.QUOTE_ALL)
             fields = csv_reader.fieldnames
             for row in csv_reader:
                 if rowkeyname is None:
@@ -156,7 +158,7 @@ def writedicttocsv(csvfilename, data, keys=None):
         keys = item.keys()
 
     csvfile = open(csvfilename, "wb")
-    csv_writer = unicodecsv.DictWriter(csvfile, fieldnames=keys, dialect=unicodecsv.excel)
+    csv_writer = csv.DictWriter(csvfile, fieldnames=keys, dialect=csv.excel)
     csv_writer.writeheader()
     for row in data:
         for k in data[row].keys():
