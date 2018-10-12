@@ -65,7 +65,7 @@ def load_json(filepath):
     Args:
         filepath:
     """
-    f = codecs.open(filepath, 'rb', encoding='utf-8')
+    f = codecs.open(filepath, 'rb')
     result = json.load(f)
     f.close()
     return result
@@ -77,9 +77,9 @@ def write_json(filepath, data):
         filepath:
         data:
     """
-    outf = codecs.open(filepath, 'w', encoding='utf-8')
+    outf = codecs.open(filepath, 'w')
 
-    json.dump(data, outf, indent=4, encoding='utf-8', cls=SetEncoder)
+    json.dump(data, outf, indent=4, cls=SetEncoder)
     outf.close()
 
 
@@ -96,10 +96,10 @@ def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield
 
     fp = codecs.open(filepath, mode='r')
 
-    dialect = unicodecsv.Sniffer().sniff(fp.read(1024))
+    dialect = csv.Sniffer().sniff(fp.read(1024))
     fp.seek(0)
 
-    has_header = unicodecsv.Sniffer().has_header(fp.read(1024))
+    has_header = csv.Sniffer().has_header(fp.read(1024))
     fp.seek(0)
 
     if has_header is True and fieldnames is None:
@@ -107,7 +107,7 @@ def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield
         fp.seek(0)
         fieldnames = header_line.split(dialect.delimiter)
 
-    csv_reader = unicodecsv.DictReader(fp, dialect=dialect, delimiter=delimiter, quotechar=quotechar,
+    csv_reader = csv.DictReader(fp, dialect=dialect, delimiter=delimiter, quotechar=quotechar,
                                        fieldnames=fieldnames)
 
     if fieldnames is None:
