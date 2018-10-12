@@ -238,7 +238,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 place_details = self.call_geocode_api(**kwargs)
 
                 if place_details and len(place_details) > 0:  # if found place:
-                    print(u"... place returned from API: place_id={}, location={}".format(place_details['place_id'],
+                    msgPlaceMatch = " place_id=None "
+                    if 'place_id' in place_details and place_details['place_id']:
+                        msgPlaceMatch = " place_id={} ".format(place_details['place_id'])
+
+                    print(u"... place returned from API: {}, location={}".format(msgPlaceMatch,
                                                                                           place_details[
                                                                                               'formatted_address']))
 
