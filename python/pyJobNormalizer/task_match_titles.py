@@ -67,13 +67,13 @@ class TaskMatchJobsToKeywords:
         Args:
             **kwargs:
         """
-        if 'inputfile' in kwargs:
-            self._inputfile = kwargs['inputfile']
+        if 'input' in kwargs:
+            self._inputfile = kwargs['input']
         else:
             raise Exception(u"No input file specified for processing.")
 
-        if 'outputfile' in kwargs:
-            self._outputfile = kwargs['outputfile']
+        if 'output' in kwargs:
+            self._outputfile = kwargs['output']
 
         print(u"Loading job list to match...")
         self.load_jobs()
