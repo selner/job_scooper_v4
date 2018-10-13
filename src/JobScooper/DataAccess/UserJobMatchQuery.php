@@ -85,4 +85,13 @@ class UserJobMatchQuery extends BaseUserJobMatchQuery
                 ->endUse();
         }
     }
+
+
+    static function convertNotificationStateEnumToInt($enumName)
+    {
+        $values = UserJobMatchTableMap::getValueSet(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
+        $valsByEnum = array_flip($values);
+        return $valsByEnum[$enumName];
+    }
+
 }

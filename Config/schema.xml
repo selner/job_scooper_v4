@@ -402,7 +402,7 @@
         <column name="bad_company_name_keyword_matches" phpName="BadCompanyNameKeywordMatches" type="varchar" size="100"/>
 
         <column name="user_notification_state" phpName="UserNotificationState" type="enum"
-                valueSet="not-yet-marked,marked-ready-to-send,sent" defaultValue="not-yet-marked"/>
+                valueSet="not-yet-marked,marked,ready-to-send,skip-send,sent" defaultValue="not-yet-marked"/>
 
         <!--
             Date & times for various events related to this user job match

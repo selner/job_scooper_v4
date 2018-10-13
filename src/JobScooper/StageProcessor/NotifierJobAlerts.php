@@ -49,6 +49,7 @@ class NotifierJobAlerts extends JobsMailSender
     const KEYS_EXCLUDED = array(
         'JobSiteKey',
         'JobPostingId',
+        
         'PostedAt',
         'Company',
         'Title',
@@ -115,8 +116,9 @@ class NotifierJobAlerts extends JobsMailSender
     /**
      * @param \JobScooper\DataAccess\User $user
      *
-     * @throws \Exception
      * @return GeoLocation[]
+     *
+     * @throws \Exception
      */
     private function _getSearchPairLocations(User $user)
     {
@@ -133,7 +135,9 @@ class NotifierJobAlerts extends JobsMailSender
 
     /**
      * @param array $userFacts
+     *
      * @return void
+     *
      * @throws \Exception
      */
     public function processRunResultsNotifications(array $userFacts):void
@@ -187,7 +191,7 @@ class NotifierJobAlerts extends JobsMailSender
 	        
 	        doCallbackForAllMatches(
 	        	array($this, 'sendUserResultsBatch'),
-	            [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
+	            [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_READY_TO_SEND, Criteria::EQUAL],
                 $arrNearbyIds,
                 null,
                 $userFacts,
@@ -207,6 +211,7 @@ class NotifierJobAlerts extends JobsMailSender
     /**
 	* @param $dbMatches
 	* @param array $addlFacts
+     *
 	* @throws \Exception
 	*/
     function sendUserResultsBatch(&$dbMatches, array $addlFacts)
@@ -271,7 +276,9 @@ class NotifierJobAlerts extends JobsMailSender
     }
     /**
      * @param array $userFacts
-     * @return bool
+     *
+     * @return void
+     *
      * @throws \Exception
      */
     public function processWeekRecapNotifications(array $userFacts)
@@ -302,7 +309,7 @@ class NotifierJobAlerts extends JobsMailSender
             unset($geoLocation);
 
             $matches['all'] = getAllMatchesForUserNotification(
-                [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
+                [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_READY_TO_SEND, Criteria::EQUAL],
                 $arrNearbyIds,
                 7,
                 $user
@@ -330,8 +337,13 @@ class NotifierJobAlerts extends JobsMailSender
     }
 
     /**
+     * @param array $matches
+     * @param string $resultsTitle
      * @param array $userFacts
+     * @param int $geoLocationId
+     *
      * @return bool
+     *
      * @throws \Exception
      */
     private function _sendResultsNotification(&$matches, $resultsTitle, $userFacts, $geoLocationId=null)
@@ -430,7 +442,6 @@ class NotifierJobAlerts extends JobsMailSender
 	 * @param $strNewStatus
 	 *
 	 * @throws \Exception
-	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
 	function updateUserJobMatchesStatus($arrUserJobMatchIds, $strNewStatus)
 	{

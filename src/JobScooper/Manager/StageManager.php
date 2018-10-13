@@ -259,23 +259,22 @@ class StageManager
         $this->_initConfig();
 
         try {
+            startLogSection("Stage 3:  Auto-marking new potential job matches...");
             $marker = new JobsAutoMarker();
 
             $usersForRun = Settings::getValue('users_for_run');
             if(is_empty_value($usersForRun)) {
             	throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
             }
-            
-            foreach($usersForRun as $userFacts) {
-	            startLogSection("Stage 3:  Auto-marking all user job matches for user {$userFacts['UserSlug']}...");
-	            $marker->markJobs($userFacts);
-            }
+
+            $marker->markJobMatches($usersForRun);
+
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         } finally {
         	$marker = null;
         	$usersForRun = null;
-            endLogSection("End of stage 3 (auto-marking) for user {$userFacts['UserSlug']}.");
+            endLogSection("Stage 3: Completed auto-marking job matches.");
         }
     }
 

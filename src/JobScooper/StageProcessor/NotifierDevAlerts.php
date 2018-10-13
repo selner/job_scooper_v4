@@ -46,7 +46,7 @@ class NotifierDevAlerts extends JobsMailSender
         startLogSection("Processing run result summary for devs...");
 
         $countsByPlugin = getAllUserNotificationCounts(
-            [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND, Criteria::EQUAL],
+            [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_READY_TO_SEND, Criteria::EQUAL],
             null,
             2,
             null
