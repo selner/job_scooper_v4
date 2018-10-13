@@ -18,7 +18,7 @@ namespace JobScooper\StageProcessor;
 
 use Exception;
 use const JobScooper\DataAccess\LIST_SEPARATOR_TOKEN;
-use JobScooper\DataAccess\LocationCache;
+use JobScooper\DataAccess\LocationLookup;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatch;
@@ -37,7 +37,7 @@ class JobsAutoMarker
 {
 
     /**
-     * @var LocationCache
+     * @var LocationLookup
      */
     protected $_locmgr = null;
     protected $title_negative_keyword_tokens = null;
@@ -56,7 +56,7 @@ class JobsAutoMarker
      */
     public function __construct()
     {
-        $this->_locmgr = LocationCache::getInstance();
+        $this->_locmgr = LocationLookup::getInstance();
     }
 
 

@@ -301,7 +301,7 @@ class User extends BaseUser
             return ;
         }
 
-        $locmgr = LocationCache::getInstance();
+        $locmgr = LocationLookup::getInstance();
 
         $searchGeoLocIds = array();
 

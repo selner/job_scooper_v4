@@ -38,8 +38,6 @@
         "ext-PDO": "^7.1",
         "ext-zip": "^1.13",
         "ext-curl": "^7.1",
-        "matthiasmullie/scrapbook": "^1.4.6",
-        "league/flysystem": "^1.1@dev"
         "ext-iconv": "^7.2",
         "ext-dom": "20031129"
     },
