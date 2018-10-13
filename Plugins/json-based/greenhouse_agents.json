@@ -21,6 +21,7 @@
         {
             "JobSiteName": "AirBnB",
             "SiteReferenceKey" : "airbnb",
+            "CountryCodes" : ["US", "UK", "CA", "DE", "CN", "ES", "IE", "IT", "FR", "IN", "JP", "BR", "KR", "SG", "AU"],
             "SourceURL": "https://www.airbnb.com/careers",
             "PluginExtendsClassName": "AbstractGreenhouseATS"
         },
