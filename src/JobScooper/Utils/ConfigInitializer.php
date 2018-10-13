@@ -82,7 +82,7 @@ class ConfigInitializer
     {
         Settings::moveValue('command_line_args.debug', 'debug');
         
-        startLogSection('Setting up configuration... ');
+        LogMessage('Setting up configuration... ');
 
         $now = new \DateTime();
         Settings::setValue('app_run_id', $now->format('Ymd_His_') .__APP_VERSION__);
@@ -111,9 +111,9 @@ class ConfigInitializer
         $strOutfileArrString = getArrayValuesAsString(Settings::getValue('output_directories'));
         LogMessage('Output folders configured: ' . $strOutfileArrString);
 
-        endLogSection("Loaded configuration details from {$this->_iniFile}");
+        LogMessage("Loaded configuration details from {$this->_iniFile}");
 
-        startLogSection('Configuring specific settings for this run... ');
+        LogMessage('Configuring specific settings for this run... ');
         $this->setupRunnerFromConfig();
 
         Settings::setValue('number_days', 1);
@@ -124,7 +124,7 @@ class ConfigInitializer
         }
         LogDebug('Configuration options set:  ' . encodeJson($allSettings));
 		unset($allSettings);
-        endLogSection('Runner configured.');
+        LogMessage('Runner configured.');
         
     }
 
