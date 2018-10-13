@@ -40,6 +40,8 @@
         "ext-curl": "^7.1",
         "matthiasmullie/scrapbook": "^1.4.6",
         "league/flysystem": "^1.1@dev"
+        "ext-iconv": "^7.2",
+        "ext-dom": "20031129"
     },
     "autoload": {
         "psr-4": {

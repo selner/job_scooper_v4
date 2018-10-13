@@ -200,7 +200,6 @@ class ConfigInitializer
 
     /**
      *
-     * @throws \Propel\Runtime\Exception\PropelException
      */
     private function setupPropelForRun()
     {
@@ -272,7 +271,7 @@ class ConfigInitializer
     }
 
     /**
-     * @throws \Exception
+     * @throws \Propel\Runtime\Exception\PropelException
      */
     private function setupPropelLogging()
     {
@@ -310,8 +309,7 @@ class ConfigInitializer
 
     /**
      * @param $keyPath
-     *
-     * @return array|mixed
+     * @return array|mixed|null
      */
     private function getSetting($keyPath)
     {
@@ -415,6 +413,10 @@ class ConfigInitializer
         Settings::setValue('selenium', $settings);
     }
 
+    /**
+     * @return array|mixed|null
+     * @throws \Exception
+     */
     private function getConfigUsers()
     {
         $config_users = $this->getSetting('users');

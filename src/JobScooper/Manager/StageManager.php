@@ -90,9 +90,6 @@ class StageManager
                     try {
                         $this->$stageFunc();
                     }
-                    catch (PropelException $pex) {
-                    	throw $pex;
-                    }
 					catch (\Exception $ex) {
                         throw new \Exception("Error:  failed to call method \$this->{$stageFunc}() for {$stage} from option --StageProcessor " . implode(",", $arrRunStages) . ".  Error: {$ex}");
                     }
@@ -106,8 +103,7 @@ class StageManager
                 $this->doStage3();
                 $this->doStage4();
             }
-        } catch (PropelException $pex) {
-            handleException($pex, null, true);
+
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         } finally {
