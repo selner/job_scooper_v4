@@ -149,65 +149,47 @@ class StageManager
             startLogSection("Downloading jobs from {$jobsiteKey} for " . \count($usersForRun) . ' users.');
 
             try {
+                $site = JobSiteManager::getJobSiteByKey($jobsiteKey);
+                assert(!is_empty_value($site));
+
                 if(!is_empty_value($usersForRun)) {
-                    foreach($usersForRun as $userFacts) {
 
-                        startLogSection("Downloading jobs:  {$jobsiteKey}  / {$userFacts['UserSlug']}  ");
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    //
+                    // Add the user's searches to the plugin
+                    //
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    startLogSection("Initializing search(es) for users at {$jobsiteKey}");
+                    $searchRuns = array();
+                    $totalSearches = 0;
 
-                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        //
-                        // Run each plugin, set the searches to run and then download the jobs from that jobsite
-                        //
-                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        $user = User::getUserObjById($userFacts['UserId']);
-                        $siteRuns = $user->getUserSearchSiteRunsForJobSite($jobsiteKey);
-                        if (is_empty_value($siteRuns)) {
-                            LogMessage("No site runs generated for {$userFacts['UserSlug']} for {$jobsiteKey}");
-                        }
-                        else
-                        {
-                            $countTotalSiteSearches = \count($siteRuns);
-                            $plugin = null;
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            //
-                            // Add the user's searches to the plugin
-                            //
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            startLogSection("Initializing {$countTotalSiteSearches} search(es) for {$jobsiteKey}  / {$userFacts['UserSlug']} ...");
-                            try {
-                                $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
-                                $sitePlugin->setSearches($siteRuns);
-                            } catch (\Exception $classError) {
-                                handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
-                            } finally {
-                                endLogSection(" {$jobsiteKey}  / {$userFacts['UserSlug']}  searches initialized.");
-                            }
+                    try {
+                        $searchRuns = $site->generateUserSiteRuns($usersForRun);
+                        $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
+                        $sitePlugin->setSearches($searchRuns);
+                    } catch (\Exception $classError) {
+                        handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
+                    } finally {
+                        $totalSearches = \count($searchRuns);
+                        endLogSection(" {$totalSearches} {$jobsiteKey} searches were initialized.");
+                    }
 
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            //
-                            // Download all the job listings for all the users searches for this plugin
-                            //
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            try {
-                                startLogSection("Getting latest jobs for {$countTotalSiteSearches} search(es) for {$jobsiteKey}  / {$userFacts['UserSlug']} ...");
-                                $sitePlugin->downloadLatestJobsForAllSearches();
-                            } catch (\Exception $classError) {
-                                handleException($classError, "{$jobsiteKey} failed to get latest job postings for user {$userFacts['UserSlug']}: %s", $raise = true);
-                            } finally {
-                                endLogSection("Finished getting latest jobs:  {$jobsiteKey}  / {$userFacts['UserSlug']}  ");
-                            }
-                        }
-
-                        endLogSection("Done downloading jobs from {$jobsiteKey} for {$userFacts['UserSlug']}");
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    //
+                    // Download all the job listings for all the users searches for this plugin
+                    //
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    try {
+                        startLogSection("Getting latest jobs for {$totalSearches} search(es) for {$jobsiteKey} from the web...");
+                        $sitePlugin->downloadLatestJobsForAllSearches();
+                    } catch (\Exception $classError) {
+                        handleException($classError, "{$jobsiteKey} failed to get latest job postings for {$jobsiteKey}: %s", $raise = true);
+                    } finally {
+                        endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
                     }
                 }
-            } catch (PropelException $pex) {
-                if (!is_empty_value($usersForRun)) {
-                    $remainUsers = join(", ", $usersForRun);
-                    LogError("Skipping searches for {$remainUsers} users due to plugin failure to download listings.");
-                }
-            handleException($pex, null, false);
             } catch (\Exception $ex) {
+                // TODO:  MAKE THIS ABOUT SEARCHES THAT WERENT RUN AND UPDATE DB OBJECTS TO SAY SKIPPED CORRECTLY
                 if (!is_empty_value($usersForRun)) {
                     $remainUsers = join(", ", $usersForRun);
                     LogError("Skipping searches for {$remainUsers} users due to plugin failure to download listings.");
@@ -230,7 +212,6 @@ class StageManager
         }
 
         endLogSection("End Stage 1: Finished downloading new jobs.");
-
     }
 
     /**

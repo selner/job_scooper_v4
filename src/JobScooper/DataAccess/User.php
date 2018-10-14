@@ -163,6 +163,27 @@ class User extends BaseUser
     }
 
     /**
+     * @return string[]|null
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function getSearchLocationCountryCodes()
+    {
+        $arrCCs = array();
+        $loc = array();
+        $searchpairs = $this->getUserSearchPairs();
+        foreach ($searchpairs as $pair) {
+            $loc[] = $pair->getGeoLocationFromUS();
+            if(!is_empty_value($loc)) {
+                $cc = $loc->getCountryCode();
+                if(!is_empty_value($cc)) {
+                    $arrCCs[$cc] = $cc;
+                }
+            }
+        }
+        return array_unique($arrCCs);
+    }
+
+    /**
      * @param array  $arr
      * @param string $keyType
      *
@@ -191,10 +212,11 @@ class User extends BaseUser
         parent::fromArray($arrToSet, $keyType);
     }
 
+
     /**
-     * @param array $arrUserFacts
-     *
-     * @throws \Exception
+     * @param $arrUserFacts
+     * @return array
+     * @throws \ErrorException
      */
     static function parseConfigUserInputFiles($arrUserFacts):array
     {
@@ -402,123 +424,6 @@ class User extends BaseUser
         return $ret;
 	}
 
-	/**
-     * @param string $jobSiteKey
-     *
-     * @return array
-     * @throws \Propel\Runtime\Exception\PropelException
-     * @throws \Exception
-     */
-    public function getUserSearchSiteRunsForJobSite($jobSiteKey)
-    {
-
-        if(null === $jobSiteKey) {
-        	throw new \InvalidArgumentException('Cannot get UserSearchSiteRuns for null JobSiteKey.');
-        }
-
-        $arrSearchesToRun = array();
-
-        if (empty($this->_userSearchSiteRunsByJobSite)) {
-            $arrSearchesToRun = $this->initialRunsForJobSite($jobSiteKey);
-        }
-
-        if (is_empty_value($this->_userSearchSiteRunsByJobSite)) {
-            return null;
-        }
-
-		if(array_key_exists($jobSiteKey, $this->_userSearchSiteRunsByJobSite) &&  !is_empty_value($this->_userSearchSiteRunsByJobSite[$jobSiteKey])) {
-			$arrSearchesToRun = $this->_userSearchSiteRunsByJobSite[$jobSiteKey];
-		}
-
-        return $arrSearchesToRun;
-    }
-
-    /**
-    *
-    * @return void
-    * @throws \Propel\Runtime\Exception\PropelException
-    * @throws \Exception
-	*/
-    private function initialRunsForJobSite($jobSiteKey=null)
-    {
-    	if(null !== $this->_userSearchSiteRunsByJobSite && array_key_exists($jobSiteKey, $this->_userSearchSiteRunsByJobSite))
-    		return $this->_userSearchSiteRunsByJobSite[$jobSiteKey];
-
-    	if(null == $this->_userSearchSiteRunsByJobSite) {
-            $this->_userSearchSiteRunsByJobSite = array();
-        }
-        $this->_userSearchSiteRunsByJobSite[$jobSiteKey] = array();
-
-        $includedSitesByCC = JobSiteManager::getIncludedSitesByCountry();
-        $userCountryCodes = $this->getCountryCodesForUser();
-        $matrixUserCCSite = array_fill_keys($userCountryCodes, array($jobSiteKey=>$jobSiteKey));
-
-        $userSiteCCOverlaps = array_intersect_key($matrixUserCCSite, $includedSitesByCC);
-        if(is_empty_value($userSiteCCOverlaps)) {
-            LogMessage("JobSite {$jobSiteKey}'s country codes do not cover any of {$this->getUserSlug()}'s search pair's country codes " . getArrayDebugOutput($userCountryCodes).".  Skipping {$jobSiteKey} searches for {$this->getUserSlug()}...");
-            return $this->_userSearchSiteRunsByJobSite[$jobSiteKey];
-        }
-        $siteUserCountryCodes = array_keys($userSiteCCOverlaps);
-
-        $searchPairs = $this->getActiveUserSearchPairs();
-        $nTotalPairs = \count($searchPairs);
-        $nKeywords = \count($this->getSearchKeywords());
-        $nLocations = countAssociativeArrayValues($this->getSearchLocations());
-        $nTotalPossibleSearches = $nKeywords * $nLocations;
-
-        LogMessage("Configuring {$nTotalPairs} search pairs for {$jobSiteKey} = up to {$nTotalPossibleSearches} total searches, from {$nKeywords} search keywords and {$nLocations} search locations in " . implode(", ", $userCountryCodes) .".");
-
-
-        foreach ($searchPairs->getIterator() as $searchPair) {
-            $ccPair = $this->getCountryCodesForUser($searchPair->getUserSearchPairId());
-
-            if(!array_key_exists($ccPair, $userSiteCCOverlaps)) {
-                assert(!is_array($ccPair));
-                LogMessage("Skipping searches for SearchPairId {$searchPair->getUserSearchPairId()} because country code '{$ccPair}'' is not supported by {$jobSiteKey}.");
-            }
-            else
-            {
-                $site = JobSiteManager::getJobSiteByKey($jobSiteKey);
-
-                if($site->getResultsFilterType() !== JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
-                    !array_key_exists($jobSiteKey, $this->_userSearchSiteRunsByJobSite) || \count( $this->_userSearchSiteRunsByJobSite[$jobSiteKey]) < 1) {
-                    $searchrun = new UserSearchSiteRun();
-                    $searchrun->setUserSearchPairId($searchPair->getUserSearchPairId());
-                    $searchrun->setJobSiteKey($site);
-                    $searchrun->setAppRunId(Settings::getValue('app_run_id'));
-                    $searchrun->setStartedAt(time());
-                    $searchrun->save();
-                    if (!array_key_exists($jobSiteKey, $this->_userSearchSiteRunsByJobSite)) {
-                        $this->_userSearchSiteRunsByJobSite[$jobSiteKey]= array();
-                    }
-
-                    $this->_userSearchSiteRunsByJobSite[$jobSiteKey][$searchrun->getUserSearchSiteRunKey()] = $searchrun->toFlatArray();
-                }
-                $searchrun = null;
-            }
-
-            $site = null;
-        }
-
-        $totalRuns = 0;
-        foreach(array_keys($this->_userSearchSiteRunsByJobSite) as $siteKey)
-        {
-        	if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$siteKey])) {
-	            UserSearchSiteRunManager::filterRecentlyRunUserSearchRuns($this->_userSearchSiteRunsByJobSite[$siteKey]);
-	            if(!is_empty_value($this->_userSearchSiteRunsByJobSite[$siteKey])) {
-		            $totalRuns += \count($this->_userSearchSiteRunsByJobSite[$siteKey]);
-	            }
-            }
-		}
-        $totalSkippedSearches = $nTotalPossibleSearches - $totalRuns;
-        LogMessage("{$totalRuns} search runs configured for {$this->getUserSlug()}; {$totalSkippedSearches} searches were skipped.");
-
-		$searchPairs = null;
-        $sites = null;
-
-        return $this->_userSearchSiteRunsByJobSite[$jobSiteKey];
-
-    }
 
     /**
      * @param null $searchPairIdOnly
@@ -559,41 +464,4 @@ class User extends BaseUser
         return $this->_userSearchCountryCodes;
     }
 
-
-    /*
-    * @return array
-	* @throws \Propel\Runtime\Exception\PropelException
-	*/
-    /**
- * @return array|null
-* @throws \Propel\Runtime\Exception\PropelException
-*/
-    private function queryUserSearchSiteRuns()
-    {
-        $appRunId = Settings::getValue('app_run_id');
-    	$searchPairIds = array();
-
-        //
-        // let's start with the searches specified with the details in the the config.ini
-        //
-        $searchPairs = $this->getActiveUserSearchPairs();
-        $nTotalPairs = 0;
-        if (empty($searchPairs)) {
-            return null;
-        }
-
-    	foreach($searchPairs as $k => $pair) {
-    		$searchPairIds[] = $searchPairs[$k]->getUserSearchPairId();
-    	    ++$nTotalPairs;
-    		// free the object & related db connection
-    		$searchPairs[$k] = null;
-        }
-		$searchPairs = null;
-
-        return UserSearchSiteRunQuery::create()
-            ->filterByAppRunId($appRunId)
-            ->filterByUserSearchPairId($searchPairIds, Criteria::IN)
-            ->find()
-            ->toArray("UserSearchSiteRunKey");
-    }
 }

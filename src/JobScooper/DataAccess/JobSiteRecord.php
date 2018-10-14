@@ -18,7 +18,10 @@
 namespace JobScooper\DataAccess;
 
 use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;
+use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
+use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use JobScooper\SitePlugins\SitePluginFactory;
+use JobScooper\Utils\Settings;
 use Propel\Runtime\Connection\ConnectionInterface;
 
 /**
@@ -154,5 +157,123 @@ class JobSiteRecord extends BaseJobSiteRecord
         $ccMatches = array_intersect(array($countryCode), $ccSite);
         return (!is_empty_value($ccMatches));
     }
+
+    private $_searchRunsForUsers = array();
+
+    /**
+     *
+     * @return UserSearchSiteRun[]
+     * @throws \Propel\Runtime\Exception\PropelException
+     * @throws \Exception
+     */
+    private function addSiteRunsForUser($userFacts)
+    {
+
+        $siteCCs = $this->getSupportedCountryCodes();
+        $user = User::getUserObjById($userFacts['UserId']);
+        $searchPairs = $user->getActiveUserSearchPairs();
+
+        foreach($searchPairs as $pair) {
+            $pairCC = $pair->getCountryCode();
+            $pairId = $pair->getUserSearchPairId();
+
+            if (!is_empty_value($pairCC) && in_array($pairCC, $siteCCs)) {
+                $plugin = $this->getPlugin();
+
+                #
+                # TODO/PERFORMANCE:  Need to add check for KWD not supported but LOC is supported.
+                ##
+                if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && $plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
+                    $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY);
+
+                    if (\count($this->_searchRunsForUsers) === 0) {
+
+                        $searchrun = new UserSearchSiteRun();
+                        $searchrun->setUserSearchPairId($pairId);
+                        $searchrun->setJobSiteKey($this->getJobSiteKey());
+                        $searchrun->setAppRunId(Settings::getValue('app_run_id'));
+                        $searchrun->setStartedAt(time());
+                        $searchrun->save();
+
+                        $this->_searchRunsForUsers[$searchrun->getUserSearchSiteRunKey()] = $searchrun->toFlatArray();
+                        $searchrun = null;
+
+                        return $this->_searchRunsForUsers;
+                    }
+                }
+
+                $searchrun = new UserSearchSiteRun();
+                $searchrun->setUserSearchPairId($pairId);
+                $searchrun->setJobSiteKey($this->getJobSiteKey());
+                $searchrun->setAppRunId(Settings::getValue('app_run_id'));
+                $searchrun->setStartedAt(time());
+                $searchrun->save();
+
+                $this->_searchRunsForUsers[$searchrun->getUserSearchSiteRunKey()] = $searchrun->toFlatArray();
+
+                $searchrun = null;
+            }
+        }
+    }
+
+
+    /*
+* @return UserSearchSiteRun[]
+* @throws \Propel\Runtime\Exception\PropelException
+* @throws \Exception
+*/
+    public function generateUserSiteRuns($usersToRun)
+    {
+        if(!is_empty_value($this->_searchRunsForUsers)) {
+            return $this->_searchRunsForUsers;
+        }
+
+        foreach($usersToRun as $userFacts) {
+
+            $this->addSiteRunsForUser($userFacts);
+
+        }
+
+
+        $plugin = $this->getPlugin();
+
+        #
+        # TODO/PERFORMANCE:  Need to add check for KWD not supported but LOC is supported.
+        ##
+        if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && $plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
+            $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY);
+            if(\count($this->_searchRunsForUsers) > 1) {
+                $keepSearch = array_pop($this->_searchRunsForUsers);
+                foreach($this->_searchRunsForUsers as $key=>$search) {
+                    $search['RunResultCode'] = UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE_SKIPPED;
+                    $obj = UserSearchSiteRunQuery::create()
+                        ->findOneByUserSearchSiteRunId($search['UserSearchSiteRunId']);
+                    $obj->fromArray($search);
+                    $obj->save();
+                    unset($obj);
+                }
+                unset($this->_searchRunsForUsers);
+                $this->_searchRunsForUsers = array($keepSearch['UserSearchSiteRunId'] => $keepSearch);
+            }
+        }
+
+        if (\count($this->_searchRunsForUsers) > 0) {
+
+            $totalRuns = \count($this->_searchRunsForUsers);
+            if (!is_empty_value($this->_searchRunsForUsers)) {
+                UserSearchSiteRunManager::filterRecentlyRunUserSearchRuns($this->_searchRunsForUsers);
+                if (!is_empty_value($this->_searchRunsForUsers)) {
+                    $nTotalSkiipped = $totalRuns - \count($this->_searchRunsForUsers);
+                }
+            }
+        }
+        LogMessage("{$totalRuns} search runs configured for {$this->getJobSiteKey()}; {$nTotalSkiipped} searches were skipped.");
+
+        $searchPairs = null;
+        $sites = null;
+
+        return $this->_searchRunsForUsers;
+    }
+
 
 }

@@ -16,4 +16,17 @@ use JobScooper\DataAccess\Base\UserSearchPair as BaseUserSearchPair;
  */
 class UserSearchPair extends BaseUserSearchPair
 {
+
+    /**
+     * @return null|string
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
+    public function getCountryCode() {
+        $geoloc = $this->getGeoLocationFromUS();
+        if(!is_empty_value($geoloc)) {
+            return $geoloc->getCountryCode();
+        }
+
+        return null;
+    }
 }
