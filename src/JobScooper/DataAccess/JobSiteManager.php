@@ -99,7 +99,7 @@ class JobSiteManager
 
         return null;
     }
-    
+
     /**
      *
      * @return array|mixed
@@ -107,11 +107,43 @@ class JobSiteManager
      */
     public static function getJobSitesIncludedInRun()
     {
-    	$includedKeys = self::getJobSiteKeysIncludedInRun();
-    	return self::getJobSitesByKeys($includedKeys);
-	}
+        $includedKeys = self::getJobSiteKeysIncludedInRun();
+        return self::getJobSitesByKeys($includedKeys);
+    }
 
-	/**
+    /**
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public static function getIncludedSitesByCountry()
+    {
+        $arrIncludeSitesByCountryCode = Settings::getValue('jobsitemanager.included_sites_by_country_code');
+        if(!is_empty_value($arrIncludeSitesByCountryCode)) {
+            return $arrIncludeSitesByCountryCode;
+        }
+
+        $arrIncludeSitesByCountryCode = array('US' => []);
+
+        $includedSites = self::getJobSitesIncludedInRun();
+        foreach($includedSites as $site) {
+            $ccJobSite = $site->getSupportedCountryCodes();
+            if(!is_empty_value($ccJobSite)) {
+                foreach ($ccJobSite as $cc) {
+                    if (!array_key_exists($cc, $arrIncludeSitesByCountryCode)) {
+                        $arrIncludeSitesByCountryCode[$cc] = [];
+                    }
+                    $arrIncludeSitesByCountryCode[$cc][$site->getJobSiteKey()] = $site->getJobSiteKey();
+                }
+            }
+        }
+
+        Settings::setValue('jobsitemanager.included_sites_by_country_code', $arrIncludeSitesByCountryCode);
+
+        return $arrIncludeSitesByCountryCode;
+    }
+
+    /**
      *
      * @return array|null
      * @throws \Exception

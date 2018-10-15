@@ -254,6 +254,12 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                     if geolocfacts and len(geolocfacts) > 0:
                         # print(u"... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
 
+                        if 'geolocation_key' in geolocfacts and len(geolocfacts['geolocation_key']) > 100:
+                            geolocfacts['geolocation_key'] = geolocfacts['geolocation_key'][0:100]
+
+                        if 'display_name' in geolocfacts and len(geolocfacts['display_name']) > 100:
+                            geolocfacts['display_name'] = geolocfacts['display_name'][0:100]
+
                         ins_result = self.add_row("geolocation", "geolocation_id", geolocfacts, self._geoloc_columns)
                         # print(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
 
