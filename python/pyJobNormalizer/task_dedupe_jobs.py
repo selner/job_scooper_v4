@@ -21,7 +21,7 @@ import pandas
 from datetime import *
 from helpers import write_json, load_ucsv, load_json
 from task_tokenize import Tokenizer
-from database import DatabaseMixin
+from mixin_database import DatabaseMixin
 from collections import OrderedDict
 from cleanco import cleanco
 

@@ -17,17 +17,11 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
+import urllib.parse
 import pymysql
 
 from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
-import sys
-# Python 2 and 3: easiest option
-
-from future.standard_library import install_aliases
-install_aliases()
-
-from urllib.parse import urlparse
 
 
 class OrderedDictCursor(DictCursorMixin, Cursor):
@@ -46,7 +40,7 @@ class DatabaseMixin:
         """
 
         if 'connecturi' in kwargs:
-            parsed = urlparse(kwargs['connecturi'])
+            parsed = urllib.parse.urlparse(kwargs['connecturi'])
 
             if parsed.hostname:
                 self.dbparams['host'] = parsed.hostname
@@ -98,6 +92,8 @@ class DatabaseMixin:
             with self.connection.cursor() as cursor:
                 cursor.execute(querysql)
                 result = cursor.fetchall()
+                descr = cursor.description
+                fields = [col[0] for col in descr]
             return result
         except Exception as ex:
             print(ex)

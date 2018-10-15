@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 from __future__ import unicode_literals    # at top of module
-from database import DatabaseMixin
+from mixin_database import DatabaseMixin
 from future.standard_library import install_aliases
 install_aliases()
 
