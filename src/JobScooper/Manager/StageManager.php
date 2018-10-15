@@ -285,17 +285,13 @@ class StageManager
                     throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
                 }
 
-                foreach ($usersForRun as $userFacts) {
-                    startLogSection("{$userFacts['UserSlug']}:  Auto-marking job matches...");
-                    $marker->markJobs($userFacts);
-                    startLogSection("{$userFacts['UserSlug']}:  Finished auto-marking job matches.");
-                }
+            $marker->markJobMatches($usersForRun);
             } catch (\Exception $ex) {
                 handleException($ex, null, true);
             } finally {
                 $marker = null;
                 $usersForRun = null;
-                endLogSection("Stage 3:  completed auto-marking of job matches.");
+            endLogSection("Stage 3: Completed auto-marking job matches.");
             }
         }
 
