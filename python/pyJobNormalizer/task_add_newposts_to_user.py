@@ -36,35 +36,36 @@ class TaskAddNewMatchesToUser(DatabaseMixin):
 
     def add_new_posts_to_user(self, jobsitekey, user_id):
 
-        print(u"Adding all new jobpostings for {} to {}...".format(jobsitekey, user_id))
+        print(u"Adding all new jobpostings for {} to user_id={}...".format(jobsitekey, user_id))
 
         querysql = u"""
             INSERT IGNORE INTO user_job_match(
-                user_id,
-                jobposting_id, 
-                first_matched_at,
-                last_updated_at
+                user_job_match.user_id,
+                user_job_match.jobposting_id, 
+                user_job_match.first_matched_at,
+                user_job_match.last_updated_at
             )
             SELECT 
-                {},
-               jobposting_id,
+               {},
+               jp.jobposting_id,
                CURDATE(),
                CURDATE()
             FROM 
-                jobposting
+                jobposting jp
             WHERE 
                 first_seen_at >= CURDATE() - 1
             AND 
-                jobsite_key = '{}'
-            AND 
-                duplicates_posting_id IS NULL
+                jobsite_key = '{}' AND 
+                duplicates_posting_id IS NULL AND
+                jp.jobposting_id NOT IN (
+                    SELECT uj.jobposting_id FROM user_job_match uj WHERE uj.user_id={})
             -- AND 
             --	NOT (title_tokens like '%serv%' OR 
             --    title_tokens like '%barten%' )
         """
 
         try:
-            rows_updated = self.run_command(querysql.format(user_id, jobsitekey) )
+            rows_updated = self.run_command(querysql.format(user_id, jobsitekey, user_id))
             print("Added {} jobpostings to user for jobsite {}".format(rows_updated, jobsitekey))
 
         except Exception as e:

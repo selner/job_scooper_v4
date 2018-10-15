@@ -237,11 +237,15 @@ class JobSiteRecord extends BaseJobSiteRecord
 
         $plugin = $this->getPlugin();
 
-        #
-        # TODO/PERFORMANCE:  Need to add check for KWD not supported but LOC is supported.
-        ##
-        if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && $plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
-            $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY);
+        if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+
+            if ($plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
+               $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY);
+            }
+            if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
+                $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION);
+            }
+
             if(\count($this->_searchRunsForUsers) > 1) {
                 $keepSearch = array_pop($this->_searchRunsForUsers);
                 foreach($this->_searchRunsForUsers as $key=>$search) {
