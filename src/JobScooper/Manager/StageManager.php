@@ -225,12 +225,7 @@ class StageManager
 
                 }
             } catch (\Exception $ex) {
-                // TODO:  MAKE THIS ABOUT SEARCHES THAT WERENT RUN AND UPDATE DB OBJECTS TO SAY SKIPPED CORRECTLY
-                if (!is_empty_value($usersForRun)) {
-                    $remainUsers = join(", ", $usersForRun);
-                    // TODO:  FIX BUG with "ARRAY, ARRAY, ARRAY, ARRAY" here
-                    LogError("Skipping other searches for jobsite due to plugin failure..");
-                }
+                LogError("Skipping all other {$jobsiteKey} searches due to plugin failure.");
                 handleException($ex, null, false);
             } finally {
                 $sitePlugin = null;
