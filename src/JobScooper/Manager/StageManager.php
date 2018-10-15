@@ -17,15 +17,14 @@
 namespace JobScooper\Manager;
 
 use JobScooper\DataAccess\JobSiteManager;
-use JobScooper\DataAccess\User;
+use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
 use JobScooper\StageProcessor\DataNormalizer;
 use JobScooper\StageProcessor\JobsAutoMarker;
-use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Utils\ConfigInitializer;
 use JobScooper\Utils\DBRecordRemover;
+use JobScooper\Utils\PythonRunner;
 use JobScooper\Utils\Settings;
-use Propel\Runtime\Exception\PropelException;
 
 const JOBLIST_TYPE_UNFILTERED = 'unfiltered';
 const JOBLIST_TYPE_MARKED = 'marked';
@@ -166,7 +165,9 @@ class StageManager
                     try {
                         $searchRuns = $site->generateUserSiteRuns($usersForRun);
                         $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
-                        $sitePlugin->setSearches($searchRuns);
+                        if(!is_empty_value($searchRuns)) {
+                            $sitePlugin->setSearches($searchRuns);
+                        }
                     } catch (\Exception $classError) {
                         handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
                     } finally {
@@ -180,13 +181,48 @@ class StageManager
                     //
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     try {
-                        startLogSection("Getting latest jobs for {$totalSearches} search(es) for {$jobsiteKey} from the web...");
-                        $sitePlugin->downloadLatestJobsForAllSearches();
+                        if(!is_empty_value($searchRuns)) {
+                            startLogSection("Getting latest jobs for {$totalSearches} search(es) for {$jobsiteKey} from the web...");
+                            $sitePlugin->downloadLatestJobsForAllSearches();
+                        }
                     } catch (\Exception $classError) {
                         handleException($classError, "{$jobsiteKey} failed to get latest job postings for {$jobsiteKey}: %s", $raise = true);
                     } finally {
                         endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
                     }
+
+
+                    $filterType = $site->getResultsFilterType();
+
+                    if((!is_empty_value($searchRuns)) &&
+                        $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
+                        $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ) {
+
+
+                        startLogSection("Cloning new jobpostings to other users for {$jobsiteKey}");
+
+                        try {
+                            foreach($usersForRun as $userFacts) {
+
+                                $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
+                                $params = [
+                                    '-c' => Settings::get_db_dsn(),
+                                    '--userid' => $userFacts['UserId'],
+                                    '--jobsite' => $jobsiteKey
+                                ];
+
+                                $resultcode = PythonRunner::execScript($runFile, $params);
+                            }
+
+                        } catch (\Exception $ex) {
+                            handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
+                        } finally {
+                            endLogSection("End cloning to jobpostings to users");
+                        }
+
+
+                    }
+
                 }
             } catch (\Exception $ex) {
                 // TODO:  MAKE THIS ABOUT SEARCHES THAT WERENT RUN AND UPDATE DB OBJECTS TO SAY SKIPPED CORRECTLY
