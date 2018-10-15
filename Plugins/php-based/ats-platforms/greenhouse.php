@@ -24,7 +24,7 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
     protected $SiteReferenceKey = null;
     protected $JobListingsPerPage = 1000;
     protected $nTotalJobs = null;
-    protected $additionalBitFlags = [C__JOB_USE_SITENAME_AS_COMPANY];
+    protected $additionalBitFlags = [C__JOB_USE_SITENAME_AS_COMPANY, C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED, C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED];
 	
     protected $arrListingTagSetup = array(
 //		'JobPostItem' => array('Selector' => 'ul.list-group li.list-group-item'),
@@ -64,7 +64,7 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
     {
         $ret = array();
         foreach ($jobs as $job) {
-            $ret[$job->id] = array(
+            $item = array(
                 'JobSiteKey' => $this->JobSiteKey,
                 'JobSitePostId' => $job->id,
                 'Company' => $this->JobSiteName,
@@ -73,6 +73,26 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
                 'Location' => $job->location->name,
                 'PostedAt' => $job->updated_at
             );
+
+            if(!is_empty_value($job->metadata) && count($job->metadata) >= 1 && !is_empty_value($job->metadata[0]->value)) {
+                $item['Department'] = $job->metadata[0]->value;
+            }
+
+            if(!is_empty_value($job->metadata) && count($job->metadata) >= 2 && !is_empty_value($job->metadata[1]->value)) {
+                $item['ExperienceType'] = $job->metadata[1]->value;
+            }
+
+            $arrJobFacts = json_decode(json_encode($job), $assoc=true);
+
+            if(array_key_exists("internal_job_id", $arrJobFacts)) {
+                $item['InternalJobId'] = $arrJobFacts['internal_job_id'];
+            }
+
+            if(array_key_exists("education", $arrJobFacts)) {
+                $item['Education'] = $arrJobFacts['education'];
+            }
+
+            $ret[$job->id] = $item;
         }
         return $ret;
     }
