@@ -169,8 +169,7 @@ class NotifierDevAlerts extends JobsMailSender
         // Only send the alert if we ran all jobsites (aka not debugging a single one)
         // and if not in debug mode
         //
-//        if(!isDebug() && Settings::is_in_setting_value('command_line_args.jobsite', 'all')) {
-          if(true) {
+        if(!isDebug() && Settings::is_in_setting_value('command_line_args.jobsite', 'all')) {
 
             startLogSection("Generating plugin errors alerts email to developers...");
 
