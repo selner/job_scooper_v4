@@ -174,8 +174,7 @@ class DatabaseMixin:
             raise(ex)
 
         finally:
-            if self.connection.is_connected():
-                self.connection.close()
+            self.connection.close()
 
     def fetch_one_from_query(self, querysql):
         """

@@ -51,6 +51,7 @@ class DataNormalizer
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         try {
+            $this->_addMissingTitleTokens();
             $this->_markDuplicatesViaPython();
             $this->_findLocationsViaPython();
         } catch (Exception $ex) {
@@ -63,6 +64,27 @@ class DataNormalizer
 
     }
 
+    /**
+     * @throws \Exception
+     */
+    private function _addMissingTitleTokens()
+    {
+        try {
+            startLogSection('Calling python to set the title tokens for new job postings...');
+            $runFile = 'pyJobNormalizer/cmd_set_title_tokens.py';
+            $params = [
+                '-c' => Settings::get_db_dsn()
+            ];
+
+            $resultcode = PythonRunner::execScript($runFile, $params);
+            LogMessage('Python command call finished.');
+
+        } catch (\Exception $ex) {
+            handleException($ex, null, false);
+        } finally {
+            EndLogSection('Completed setting title tokens dedupe.');
+        }
+    }
     /**
      * @throws \Exception
      */
@@ -84,6 +106,9 @@ class DataNormalizer
             EndLogSection('Completed new job posting dedupe.');
         }
     }
+
+
+
 
     /**
      * @throws \Exception

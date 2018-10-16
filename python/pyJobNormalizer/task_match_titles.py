@@ -19,7 +19,7 @@
 ###########################################################################
 from helpers import load_json, write_json
 
-from task_tokenize import Tokenizer
+from task_tokenize_jobtitles import Tokenizer
 
 JSON_KEY_JOBMATCHES = u'job_matches'
 JSON_KEY_POS_KEYWORDS = u'SearchKeywords'

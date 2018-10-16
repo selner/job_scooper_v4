@@ -120,7 +120,7 @@ class Tokenizer:
         """
 
         for k in list_data.keys():
-            if isinstance(k, basestring) and len(k) == 0:
+            if isinstance(k, str) and len(k) == 0:
                 print("String value for key was empty.  Skipping...")
                 continue
 
@@ -184,7 +184,7 @@ class Tokenizer:
         """
         ret_words = []
 
-        if not isinstance(str_words, basestring):
+        if not isinstance(str_words, str):
             str_words = str(str_words)
         if len(str_words) <= 0:
             return ret_words
@@ -198,7 +198,7 @@ class Tokenizer:
             # can't translate to ascii.  This handles scrubbing out
             # the myriad of dash variants, etc from the token
             removeuni = i.encode('ascii', 'ignore')
-            loweri = removeuni.strip().lower()
+            loweri = removeuni.decode().strip().lower()
 
             if len(loweri) == 0 or loweri.isalnum() is not True:
                 continue
