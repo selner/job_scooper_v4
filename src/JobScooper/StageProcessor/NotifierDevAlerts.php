@@ -20,6 +20,8 @@ namespace JobScooper\StageProcessor;
 use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\Utils\JobsMailSender;
+use JobScooper\Utils\PythonRunner;
+use JobScooper\Utils\Settings;
 use Propel\Runtime\ActiveQuery\Criteria;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 
@@ -164,64 +166,69 @@ class NotifierDevAlerts extends JobsMailSender
      */
     public function processPluginErrorAlert()
     {
-        // TODO:  finish this email alert for plugin errors.  (Currently reports empty error values.)
+        // Only send the alert if we ran all jobsites (aka not debugging a single one)
+        // and if not in debug mode
+        //
+//        if(!isDebug() && Settings::is_in_setting_value('command_line_args.jobsite', 'all')) {
+          if(true) {
 
-        /*
-        $reportJobSites = $this->getPluginErrorData();
-        $countsJobSites = $this->getRunResultData();
-        $monolog_error_content = ErrorEmailLogHandler::getEmailErrorLogContent();
-        $jobSiteReports = array_merge_recursive_distinct($countsJobSites, $reportJobSites);
+            startLogSection("Generating plugin errors alerts email to developers...");
 
-        $renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_plugin_error_alert.tmpl")));
-        $subject = "Plugin Results for [" . gethostname() . "]: for " . getRunDateRange(5);
-        $data = array(
-            "Email"                 => array(
-                "Subject"       => $subject,
-                "BannerText"    => "",
-                "Headline"      => $subject,
-                "IntroText"     => "",
-                "PreHeaderText" => ""
-            ),
-            "Plugins"          => $jobSiteReports,
-            "monolog_error_content" => $monolog_error_content
-        );
+            try {
+                $outputReportFile = generateOutputFileName('broken_plugins_report', 'html', false, 'debug');
+                $runFile = 'pyJobNormalizer/cmd_generate_plugins_report.py';
+                $params = [
+                    '-c' => Settings::get_db_dsn(),
+                    '--output' => $outputReportFile
+                ];
 
-        $html = call_user_func($renderer, $data);
+                $resultcode = PythonRunner::execScript($runFile, $params);
 
-//			$objPageHtml = new SimpleHTMLHelper($html);
-//			$filepath = $objPageHtml->debug_dump_to_file();
-//			LogMessage("Debug template for html error email saved to: {$filepath}");
 
-        $attach = array();
-        if (!empty($GLOBALS['logger']) && isset($GLOBALS['logger'])) {
-            $logpath = $GLOBALS['logger']->getMainLogFilePath();
-            if (!empty($logpath))
-                $attach[] = $logpath;
-        }
+                $plugins_report = file_get_contents($outputReportFile);
 
-        foreach ($reportJobSites as $jobsite) {
-            if (array_key_exists("RunErrorPageHtml", $jobsite) && is_file($jobsite["RunErrorPageHtml"]))
-                $attach[] = $jobsite['RunErrorPageHtml'];
-        }
 
-        $ret = false;
-        try {
-            $mailer = new JobsMailSender(true);
-            $ret = $mailer->sendEmail("", $html, $attach, $subject, "errors");
-        } catch (\Exception $ex) {
-            handleException($ex);
-        } finally {
-            if ($ret !== true || isDebug())
-            {
-                file_put_contents(getDefaultJobsOutputFileName("dev_error_email", "notification", "html", "_", "debug"), $html);
+                $renderer = loadTemplate(join(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "html_email_error_alerts.tmpl")));
+
+                $subject = "Broken Jobsite Plugins on [" . gethostname() . "]: for " . getRunDateRange(5);
+                $data = array(
+                    "Email"                 => array(
+                        "Subject"       => $subject,
+                        "BannerText"    => "",
+                        "Headline"      => $subject,
+                        "IntroText"     => "",
+                        "PreHeaderText" => ""
+                    ),
+                    "alert_content"          => $plugins_report
+                );
+
+                $html = call_user_func($renderer, $data);
+
+                $ret = false;
+                try {
+                    $mailer = new JobsMailSender(true);
+                    $ret = $mailer->sendEmail("", $html, [], $subject, "errors");
+                } catch (\Exception $ex) {
+                    handleException($ex);
+                } finally {
+                    if ($ret !== true || isDebug())
+                    {
+                        file_put_contents(getDefaultJobsOutputFileName("dev_error_email", "notification", "html", "_", "debug"), $html);
+                    }
+                    unset($mailer);
+                }
+                unset($renderer);
+                unset($reportJobSites);
+                unset($returnedJobSites);
+
+
+            } catch (\Exception $ex) {
+                handleException($ex, 'ERROR:  Failed to generate broken plugins report');
+            } finally {
+                endLogSection("Finished sending broken plugins error alert");
             }
-            unset($mailer);
-        }
-        unset($renderer);
-        unset($reportJobSites);
-        unset($returnedJobSites);
 
-        endLogSection(" Dev Plugin Failure Notification.");
-*/
+        }
+        
     }
 }

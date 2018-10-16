@@ -9,3 +9,5 @@ cleanco
 requests
 nltk
 future
+jinja2
+premailer

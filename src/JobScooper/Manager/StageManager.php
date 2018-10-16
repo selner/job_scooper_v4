@@ -21,6 +21,7 @@ use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
 use JobScooper\StageProcessor\DataNormalizer;
 use JobScooper\StageProcessor\JobsAutoMarker;
+use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Utils\ConfigInitializer;
 use JobScooper\Utils\DBRecordRemover;
@@ -143,9 +144,12 @@ class StageManager
             throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
         }
 
+        $didRunSearches = false;
+
         foreach ($jobsiteKeys as $jobsiteKey) {
 
             startLogSection("Downloading jobs from {$jobsiteKey} for " . \count($usersForRun) . ' users.');
+            $searchRuns = array();
 
             try {
                 $site = JobSiteManager::getJobSiteByKey($jobsiteKey);
@@ -159,7 +163,6 @@ class StageManager
                     //
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     startLogSection("Initializing search(es) for users at {$jobsiteKey}");
-                    $searchRuns = array();
                     $totalSearches = 0;
 
                     try {
@@ -219,13 +222,12 @@ class StageManager
                         } finally {
                             endLogSection("End cloning to jobpostings to users");
                         }
-
-
                     }
 
                 } else {
                     LogWarning('No searches have been set to be run.');
                 }
+
             } catch (\Exception $ex) {
                 LogError("Skipping all other {$jobsiteKey} searches due to plugin failure.");
                 handleException($ex, null, false);
@@ -233,19 +235,28 @@ class StageManager
                 $sitePlugin = null;
                 // make sure to clean up the references to each of the UserSiteSearchRun objects
                 // so we dont leave a DB connection open
-                if (!is_empty_value($siteRuns)) {
-                    foreach (array_keys($siteRuns) as $k) {
-                        $siteRuns[$k] = null;
-                        unset($siteRuns[$k]);
+                if (!is_empty_value($searchRuns)) {
+                    $didRunSearches = true;
+
+                    foreach (array_keys($searchRuns) as $k) {
+                        $searchRuns[$k] = null;
+                        unset($searchRuns[$k]);
                     }
                 }
                 $user = null;
-                $siteRuns = null;
+                $searchRuns = null;
             }
             endLogSection("Done downloading jobs for {$jobsiteKey}");
         }
 
         endLogSection("End Stage 1: Finished downloading new jobs.");
+
+//        if($didRunSearches === true) {
+        if(true) {
+            $pluginAlerts = new NotifierDevAlerts();
+            $pluginAlerts->processPluginErrorAlert();
+
+        }
     }
 
         /**

@@ -2,10 +2,21 @@
 <p>The following errors occurred during UserSearchRun {{app_run_id}} on <strong>{{server}}</strong>
     running <strong>{{app_version}}</strong> for {{daterange}}:</p>
 <div>
-    {{{monolog_error_content}}}
+    {{#if alert_content}}
+        {{{alert_content}}}
+    {{/if}}
+
+</div>
+<div>
+    {{#if monolog_error_content}}
+        {{{monolog_error_content}}}
+    {{/if}}
 </div>
 
 <div>
-    {{{search_parameters_content}}}
+
+    {{#if search_parameters_content}}
+        {{{search_parameters_content}}}
+    {{/if}}
 </div>
 
