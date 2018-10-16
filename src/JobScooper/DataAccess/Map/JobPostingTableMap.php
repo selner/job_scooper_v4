@@ -107,14 +107,14 @@ class JobPostingTableMap extends TableMap
     const COL_PAY_RANGE = 'jobposting.pay_range';
 
     /**
-     * the column name for the company field
-     */
-    const COL_COMPANY = 'jobposting.company';
-
-    /**
      * the column name for the location field
      */
     const COL_LOCATION = 'jobposting.location';
+
+    /**
+     * the column name for the company field
+     */
+    const COL_COMPANY = 'jobposting.company';
 
     /**
      * the column name for the department field
@@ -183,10 +183,10 @@ class JobPostingTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('JobPostingId', 'JobSiteKey', 'JobSitePostId', 'Title', 'Url', 'EmploymentType', 'PayRange', 'Company', 'Location', 'Department', 'Category', 'UpdatedAt', 'PostedAt', 'FirstSeenAt', 'LocationDisplayValue', 'GeoLocationId', 'DuplicatesJobPostingId', 'TitleTokens', 'JobReferenceKey', 'KeyCompanyAndTitle', ),
-        self::TYPE_CAMELNAME     => array('jobPostingId', 'jobSiteKey', 'jobSitePostId', 'title', 'url', 'employmentType', 'payRange', 'company', 'location', 'department', 'category', 'updatedAt', 'postedAt', 'firstSeenAt', 'locationDisplayValue', 'geoLocationId', 'duplicatesJobPostingId', 'titleTokens', 'jobReferenceKey', 'keyCompanyAndTitle', ),
-        self::TYPE_COLNAME       => array(JobPostingTableMap::COL_JOBPOSTING_ID, JobPostingTableMap::COL_JOBSITE_KEY, JobPostingTableMap::COL_JOBSITE_POST_ID, JobPostingTableMap::COL_TITLE, JobPostingTableMap::COL_URL, JobPostingTableMap::COL_EMPLOYMENT_TYPE, JobPostingTableMap::COL_PAY_RANGE, JobPostingTableMap::COL_COMPANY, JobPostingTableMap::COL_LOCATION, JobPostingTableMap::COL_DEPARTMENT, JobPostingTableMap::COL_CATEGORY, JobPostingTableMap::COL_LAST_UPDATED_AT, JobPostingTableMap::COL_JOB_POSTED_DATE, JobPostingTableMap::COL_FIRST_SEEN_AT, JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE, JobPostingTableMap::COL_GEOLOCATION_ID, JobPostingTableMap::COL_DUPLICATES_POSTING_ID, JobPostingTableMap::COL_TITLE_TOKENS, JobPostingTableMap::COL_JOB_REFERENCE_KEY, JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE, ),
-        self::TYPE_FIELDNAME     => array('jobposting_id', 'jobsite_key', 'jobsite_post_id', 'title', 'url', 'employment_type', 'pay_range', 'company', 'location', 'department', 'category', 'last_updated_at', 'job_posted_date', 'first_seen_at', 'location_display_value', 'geolocation_id', 'duplicates_posting_id', 'title_tokens', 'job_reference_key', 'key_company_and_title', ),
+        self::TYPE_PHPNAME       => array('JobPostingId', 'JobSiteKey', 'JobSitePostId', 'Title', 'Url', 'EmploymentType', 'PayRange', 'Location', 'Company', 'Department', 'Category', 'UpdatedAt', 'PostedAt', 'FirstSeenAt', 'LocationDisplayValue', 'GeoLocationId', 'DuplicatesJobPostingId', 'TitleTokens', 'JobReferenceKey', 'KeyCompanyAndTitle', ),
+        self::TYPE_CAMELNAME     => array('jobPostingId', 'jobSiteKey', 'jobSitePostId', 'title', 'url', 'employmentType', 'payRange', 'location', 'company', 'department', 'category', 'updatedAt', 'postedAt', 'firstSeenAt', 'locationDisplayValue', 'geoLocationId', 'duplicatesJobPostingId', 'titleTokens', 'jobReferenceKey', 'keyCompanyAndTitle', ),
+        self::TYPE_COLNAME       => array(JobPostingTableMap::COL_JOBPOSTING_ID, JobPostingTableMap::COL_JOBSITE_KEY, JobPostingTableMap::COL_JOBSITE_POST_ID, JobPostingTableMap::COL_TITLE, JobPostingTableMap::COL_URL, JobPostingTableMap::COL_EMPLOYMENT_TYPE, JobPostingTableMap::COL_PAY_RANGE, JobPostingTableMap::COL_LOCATION, JobPostingTableMap::COL_COMPANY, JobPostingTableMap::COL_DEPARTMENT, JobPostingTableMap::COL_CATEGORY, JobPostingTableMap::COL_LAST_UPDATED_AT, JobPostingTableMap::COL_JOB_POSTED_DATE, JobPostingTableMap::COL_FIRST_SEEN_AT, JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE, JobPostingTableMap::COL_GEOLOCATION_ID, JobPostingTableMap::COL_DUPLICATES_POSTING_ID, JobPostingTableMap::COL_TITLE_TOKENS, JobPostingTableMap::COL_JOB_REFERENCE_KEY, JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE, ),
+        self::TYPE_FIELDNAME     => array('jobposting_id', 'jobsite_key', 'jobsite_post_id', 'title', 'url', 'employment_type', 'pay_range', 'location', 'company', 'department', 'category', 'last_updated_at', 'job_posted_date', 'first_seen_at', 'location_display_value', 'geolocation_id', 'duplicates_posting_id', 'title_tokens', 'job_reference_key', 'key_company_and_title', ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, )
     );
 
@@ -197,10 +197,10 @@ class JobPostingTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('JobPostingId' => 0, 'JobSiteKey' => 1, 'JobSitePostId' => 2, 'Title' => 3, 'Url' => 4, 'EmploymentType' => 5, 'PayRange' => 6, 'Company' => 7, 'Location' => 8, 'Department' => 9, 'Category' => 10, 'UpdatedAt' => 11, 'PostedAt' => 12, 'FirstSeenAt' => 13, 'LocationDisplayValue' => 14, 'GeoLocationId' => 15, 'DuplicatesJobPostingId' => 16, 'TitleTokens' => 17, 'JobReferenceKey' => 18, 'KeyCompanyAndTitle' => 19, ),
-        self::TYPE_CAMELNAME     => array('jobPostingId' => 0, 'jobSiteKey' => 1, 'jobSitePostId' => 2, 'title' => 3, 'url' => 4, 'employmentType' => 5, 'payRange' => 6, 'company' => 7, 'location' => 8, 'department' => 9, 'category' => 10, 'updatedAt' => 11, 'postedAt' => 12, 'firstSeenAt' => 13, 'locationDisplayValue' => 14, 'geoLocationId' => 15, 'duplicatesJobPostingId' => 16, 'titleTokens' => 17, 'jobReferenceKey' => 18, 'keyCompanyAndTitle' => 19, ),
-        self::TYPE_COLNAME       => array(JobPostingTableMap::COL_JOBPOSTING_ID => 0, JobPostingTableMap::COL_JOBSITE_KEY => 1, JobPostingTableMap::COL_JOBSITE_POST_ID => 2, JobPostingTableMap::COL_TITLE => 3, JobPostingTableMap::COL_URL => 4, JobPostingTableMap::COL_EMPLOYMENT_TYPE => 5, JobPostingTableMap::COL_PAY_RANGE => 6, JobPostingTableMap::COL_COMPANY => 7, JobPostingTableMap::COL_LOCATION => 8, JobPostingTableMap::COL_DEPARTMENT => 9, JobPostingTableMap::COL_CATEGORY => 10, JobPostingTableMap::COL_LAST_UPDATED_AT => 11, JobPostingTableMap::COL_JOB_POSTED_DATE => 12, JobPostingTableMap::COL_FIRST_SEEN_AT => 13, JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE => 14, JobPostingTableMap::COL_GEOLOCATION_ID => 15, JobPostingTableMap::COL_DUPLICATES_POSTING_ID => 16, JobPostingTableMap::COL_TITLE_TOKENS => 17, JobPostingTableMap::COL_JOB_REFERENCE_KEY => 18, JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE => 19, ),
-        self::TYPE_FIELDNAME     => array('jobposting_id' => 0, 'jobsite_key' => 1, 'jobsite_post_id' => 2, 'title' => 3, 'url' => 4, 'employment_type' => 5, 'pay_range' => 6, 'company' => 7, 'location' => 8, 'department' => 9, 'category' => 10, 'last_updated_at' => 11, 'job_posted_date' => 12, 'first_seen_at' => 13, 'location_display_value' => 14, 'geolocation_id' => 15, 'duplicates_posting_id' => 16, 'title_tokens' => 17, 'job_reference_key' => 18, 'key_company_and_title' => 19, ),
+        self::TYPE_PHPNAME       => array('JobPostingId' => 0, 'JobSiteKey' => 1, 'JobSitePostId' => 2, 'Title' => 3, 'Url' => 4, 'EmploymentType' => 5, 'PayRange' => 6, 'Location' => 7, 'Company' => 8, 'Department' => 9, 'Category' => 10, 'UpdatedAt' => 11, 'PostedAt' => 12, 'FirstSeenAt' => 13, 'LocationDisplayValue' => 14, 'GeoLocationId' => 15, 'DuplicatesJobPostingId' => 16, 'TitleTokens' => 17, 'JobReferenceKey' => 18, 'KeyCompanyAndTitle' => 19, ),
+        self::TYPE_CAMELNAME     => array('jobPostingId' => 0, 'jobSiteKey' => 1, 'jobSitePostId' => 2, 'title' => 3, 'url' => 4, 'employmentType' => 5, 'payRange' => 6, 'location' => 7, 'company' => 8, 'department' => 9, 'category' => 10, 'updatedAt' => 11, 'postedAt' => 12, 'firstSeenAt' => 13, 'locationDisplayValue' => 14, 'geoLocationId' => 15, 'duplicatesJobPostingId' => 16, 'titleTokens' => 17, 'jobReferenceKey' => 18, 'keyCompanyAndTitle' => 19, ),
+        self::TYPE_COLNAME       => array(JobPostingTableMap::COL_JOBPOSTING_ID => 0, JobPostingTableMap::COL_JOBSITE_KEY => 1, JobPostingTableMap::COL_JOBSITE_POST_ID => 2, JobPostingTableMap::COL_TITLE => 3, JobPostingTableMap::COL_URL => 4, JobPostingTableMap::COL_EMPLOYMENT_TYPE => 5, JobPostingTableMap::COL_PAY_RANGE => 6, JobPostingTableMap::COL_LOCATION => 7, JobPostingTableMap::COL_COMPANY => 8, JobPostingTableMap::COL_DEPARTMENT => 9, JobPostingTableMap::COL_CATEGORY => 10, JobPostingTableMap::COL_LAST_UPDATED_AT => 11, JobPostingTableMap::COL_JOB_POSTED_DATE => 12, JobPostingTableMap::COL_FIRST_SEEN_AT => 13, JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE => 14, JobPostingTableMap::COL_GEOLOCATION_ID => 15, JobPostingTableMap::COL_DUPLICATES_POSTING_ID => 16, JobPostingTableMap::COL_TITLE_TOKENS => 17, JobPostingTableMap::COL_JOB_REFERENCE_KEY => 18, JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE => 19, ),
+        self::TYPE_FIELDNAME     => array('jobposting_id' => 0, 'jobsite_key' => 1, 'jobsite_post_id' => 2, 'title' => 3, 'url' => 4, 'employment_type' => 5, 'pay_range' => 6, 'location' => 7, 'company' => 8, 'department' => 9, 'category' => 10, 'last_updated_at' => 11, 'job_posted_date' => 12, 'first_seen_at' => 13, 'location_display_value' => 14, 'geolocation_id' => 15, 'duplicates_posting_id' => 16, 'title_tokens' => 17, 'job_reference_key' => 18, 'key_company_and_title' => 19, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, )
     );
 
@@ -228,8 +228,8 @@ class JobPostingTableMap extends TableMap
         $this->addColumn('url', 'Url', 'VARCHAR', true, 2500, null);
         $this->addColumn('employment_type', 'EmploymentType', 'VARCHAR', false, 100, null);
         $this->addColumn('pay_range', 'PayRange', 'VARCHAR', false, 100, null);
-        $this->addColumn('company', 'Company', 'VARCHAR', false, 100, null);
         $this->addColumn('location', 'Location', 'VARCHAR', false, 255, null);
+        $this->addColumn('company', 'Company', 'VARCHAR', false, 255, null);
         $this->addColumn('department', 'Department', 'VARCHAR', false, 255, null);
         $this->addColumn('category', 'Category', 'VARCHAR', false, 100, null);
         $this->addColumn('last_updated_at', 'UpdatedAt', 'DATE', true, null, null);
@@ -456,8 +456,8 @@ class JobPostingTableMap extends TableMap
             $criteria->addSelectColumn(JobPostingTableMap::COL_URL);
             $criteria->addSelectColumn(JobPostingTableMap::COL_EMPLOYMENT_TYPE);
             $criteria->addSelectColumn(JobPostingTableMap::COL_PAY_RANGE);
-            $criteria->addSelectColumn(JobPostingTableMap::COL_COMPANY);
             $criteria->addSelectColumn(JobPostingTableMap::COL_LOCATION);
+            $criteria->addSelectColumn(JobPostingTableMap::COL_COMPANY);
             $criteria->addSelectColumn(JobPostingTableMap::COL_DEPARTMENT);
             $criteria->addSelectColumn(JobPostingTableMap::COL_CATEGORY);
             $criteria->addSelectColumn(JobPostingTableMap::COL_LAST_UPDATED_AT);
@@ -477,8 +477,8 @@ class JobPostingTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.url');
             $criteria->addSelectColumn($alias . '.employment_type');
             $criteria->addSelectColumn($alias . '.pay_range');
-            $criteria->addSelectColumn($alias . '.company');
             $criteria->addSelectColumn($alias . '.location');
+            $criteria->addSelectColumn($alias . '.company');
             $criteria->addSelectColumn($alias . '.department');
             $criteria->addSelectColumn($alias . '.category');
             $criteria->addSelectColumn($alias . '.last_updated_at');

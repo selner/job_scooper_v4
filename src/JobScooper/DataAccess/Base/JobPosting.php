@@ -122,18 +122,18 @@ abstract class JobPosting implements ActiveRecordInterface
     protected $pay_range;
 
     /**
-     * The value for the company field.
-     *
-     * @var        string
-     */
-    protected $company;
-
-    /**
      * The value for the location field.
      *
      * @var        string
      */
     protected $location;
+
+    /**
+     * The value for the company field.
+     *
+     * @var        string
+     */
+    protected $company;
 
     /**
      * The value for the department field.
@@ -571,16 +571,6 @@ abstract class JobPosting implements ActiveRecordInterface
     }
 
     /**
-     * Get the [company] column value.
-     *
-     * @return string
-     */
-    public function getCompany()
-    {
-        return $this->company;
-    }
-
-    /**
      * Get the [location] column value.
      *
      * @return string
@@ -588,6 +578,16 @@ abstract class JobPosting implements ActiveRecordInterface
     public function getLocation()
     {
         return $this->location;
+    }
+
+    /**
+     * Get the [company] column value.
+     *
+     * @return string
+     */
+    public function getCompany()
+    {
+        return $this->company;
     }
 
     /**
@@ -875,26 +875,6 @@ abstract class JobPosting implements ActiveRecordInterface
     } // setPayRange()
 
     /**
-     * Set the value of [company] column.
-     *
-     * @param string $v new value
-     * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
-     */
-    public function setCompany($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->company !== $v) {
-            $this->company = $v;
-            $this->modifiedColumns[JobPostingTableMap::COL_COMPANY] = true;
-        }
-
-        return $this;
-    } // setCompany()
-
-    /**
      * Set the value of [location] column.
      *
      * @param string $v new value
@@ -913,6 +893,26 @@ abstract class JobPosting implements ActiveRecordInterface
 
         return $this;
     } // setLocation()
+
+    /**
+     * Set the value of [company] column.
+     *
+     * @param string $v new value
+     * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
+     */
+    public function setCompany($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->company !== $v) {
+            $this->company = $v;
+            $this->modifiedColumns[JobPostingTableMap::COL_COMPANY] = true;
+        }
+
+        return $this;
+    } // setCompany()
 
     /**
      * Set the value of [department] column.
@@ -1199,11 +1199,11 @@ abstract class JobPosting implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : JobPostingTableMap::translateFieldName('PayRange', TableMap::TYPE_PHPNAME, $indexType)];
             $this->pay_range = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : JobPostingTableMap::translateFieldName('Company', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->company = (null !== $col) ? (string) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : JobPostingTableMap::translateFieldName('Location', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : JobPostingTableMap::translateFieldName('Location', TableMap::TYPE_PHPNAME, $indexType)];
             $this->location = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : JobPostingTableMap::translateFieldName('Company', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->company = (null !== $col) ? (string) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : JobPostingTableMap::translateFieldName('Department', TableMap::TYPE_PHPNAME, $indexType)];
             $this->department = (null !== $col) ? (string) $col : null;
@@ -1593,11 +1593,11 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_PAY_RANGE)) {
             $modifiedColumns[':p' . $index++]  = 'pay_range';
         }
-        if ($this->isColumnModified(JobPostingTableMap::COL_COMPANY)) {
-            $modifiedColumns[':p' . $index++]  = 'company';
-        }
         if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION)) {
             $modifiedColumns[':p' . $index++]  = 'location';
+        }
+        if ($this->isColumnModified(JobPostingTableMap::COL_COMPANY)) {
+            $modifiedColumns[':p' . $index++]  = 'company';
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_DEPARTMENT)) {
             $modifiedColumns[':p' . $index++]  = 'department';
@@ -1664,11 +1664,11 @@ abstract class JobPosting implements ActiveRecordInterface
                     case 'pay_range':
                         $stmt->bindValue($identifier, $this->pay_range, PDO::PARAM_STR);
                         break;
-                    case 'company':
-                        $stmt->bindValue($identifier, $this->company, PDO::PARAM_STR);
-                        break;
                     case 'location':
                         $stmt->bindValue($identifier, $this->location, PDO::PARAM_STR);
+                        break;
+                    case 'company':
+                        $stmt->bindValue($identifier, $this->company, PDO::PARAM_STR);
                         break;
                     case 'department':
                         $stmt->bindValue($identifier, $this->department, PDO::PARAM_STR);
@@ -1789,10 +1789,10 @@ abstract class JobPosting implements ActiveRecordInterface
                 return $this->getPayRange();
                 break;
             case 7:
-                return $this->getCompany();
+                return $this->getLocation();
                 break;
             case 8:
-                return $this->getLocation();
+                return $this->getCompany();
                 break;
             case 9:
                 return $this->getDepartment();
@@ -1864,8 +1864,8 @@ abstract class JobPosting implements ActiveRecordInterface
             $keys[4] => $this->getUrl(),
             $keys[5] => $this->getEmploymentType(),
             $keys[6] => $this->getPayRange(),
-            $keys[7] => $this->getCompany(),
-            $keys[8] => $this->getLocation(),
+            $keys[7] => $this->getLocation(),
+            $keys[8] => $this->getCompany(),
             $keys[9] => $this->getDepartment(),
             $keys[10] => $this->getCategory(),
             $keys[11] => $this->getUpdatedAt(),
@@ -2027,10 +2027,10 @@ abstract class JobPosting implements ActiveRecordInterface
                 $this->setPayRange($value);
                 break;
             case 7:
-                $this->setCompany($value);
+                $this->setLocation($value);
                 break;
             case 8:
-                $this->setLocation($value);
+                $this->setCompany($value);
                 break;
             case 9:
                 $this->setDepartment($value);
@@ -2113,10 +2113,10 @@ abstract class JobPosting implements ActiveRecordInterface
             $this->setPayRange($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setCompany($arr[$keys[7]]);
+            $this->setLocation($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
-            $this->setLocation($arr[$keys[8]]);
+            $this->setCompany($arr[$keys[8]]);
         }
         if (array_key_exists($keys[9], $arr)) {
             $this->setDepartment($arr[$keys[9]]);
@@ -2213,11 +2213,11 @@ abstract class JobPosting implements ActiveRecordInterface
         if ($this->isColumnModified(JobPostingTableMap::COL_PAY_RANGE)) {
             $criteria->add(JobPostingTableMap::COL_PAY_RANGE, $this->pay_range);
         }
-        if ($this->isColumnModified(JobPostingTableMap::COL_COMPANY)) {
-            $criteria->add(JobPostingTableMap::COL_COMPANY, $this->company);
-        }
         if ($this->isColumnModified(JobPostingTableMap::COL_LOCATION)) {
             $criteria->add(JobPostingTableMap::COL_LOCATION, $this->location);
+        }
+        if ($this->isColumnModified(JobPostingTableMap::COL_COMPANY)) {
+            $criteria->add(JobPostingTableMap::COL_COMPANY, $this->company);
         }
         if ($this->isColumnModified(JobPostingTableMap::COL_DEPARTMENT)) {
             $criteria->add(JobPostingTableMap::COL_DEPARTMENT, $this->department);
@@ -2344,8 +2344,8 @@ abstract class JobPosting implements ActiveRecordInterface
         $copyObj->setUrl($this->getUrl());
         $copyObj->setEmploymentType($this->getEmploymentType());
         $copyObj->setPayRange($this->getPayRange());
-        $copyObj->setCompany($this->getCompany());
         $copyObj->setLocation($this->getLocation());
+        $copyObj->setCompany($this->getCompany());
         $copyObj->setDepartment($this->getDepartment());
         $copyObj->setCategory($this->getCategory());
         $copyObj->setUpdatedAt($this->getUpdatedAt());
@@ -3373,8 +3373,8 @@ abstract class JobPosting implements ActiveRecordInterface
         $this->url = null;
         $this->employment_type = null;
         $this->pay_range = null;
-        $this->company = null;
         $this->location = null;
+        $this->company = null;
         $this->department = null;
         $this->category = null;
         $this->last_updated_at = null;

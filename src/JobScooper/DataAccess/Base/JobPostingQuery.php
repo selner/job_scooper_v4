@@ -27,8 +27,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery orderByUrl($order = Criteria::ASC) Order by the url column
  * @method     ChildJobPostingQuery orderByEmploymentType($order = Criteria::ASC) Order by the employment_type column
  * @method     ChildJobPostingQuery orderByPayRange($order = Criteria::ASC) Order by the pay_range column
- * @method     ChildJobPostingQuery orderByCompany($order = Criteria::ASC) Order by the company column
  * @method     ChildJobPostingQuery orderByLocation($order = Criteria::ASC) Order by the location column
+ * @method     ChildJobPostingQuery orderByCompany($order = Criteria::ASC) Order by the company column
  * @method     ChildJobPostingQuery orderByDepartment($order = Criteria::ASC) Order by the department column
  * @method     ChildJobPostingQuery orderByCategory($order = Criteria::ASC) Order by the category column
  * @method     ChildJobPostingQuery orderByUpdatedAt($order = Criteria::ASC) Order by the last_updated_at column
@@ -48,8 +48,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPostingQuery groupByUrl() Group by the url column
  * @method     ChildJobPostingQuery groupByEmploymentType() Group by the employment_type column
  * @method     ChildJobPostingQuery groupByPayRange() Group by the pay_range column
- * @method     ChildJobPostingQuery groupByCompany() Group by the company column
  * @method     ChildJobPostingQuery groupByLocation() Group by the location column
+ * @method     ChildJobPostingQuery groupByCompany() Group by the company column
  * @method     ChildJobPostingQuery groupByDepartment() Group by the department column
  * @method     ChildJobPostingQuery groupByCategory() Group by the category column
  * @method     ChildJobPostingQuery groupByUpdatedAt() Group by the last_updated_at column
@@ -132,8 +132,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting findOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column
  * @method     ChildJobPosting findOneByEmploymentType(string $employment_type) Return the first ChildJobPosting filtered by the employment_type column
  * @method     ChildJobPosting findOneByPayRange(string $pay_range) Return the first ChildJobPosting filtered by the pay_range column
- * @method     ChildJobPosting findOneByCompany(string $company) Return the first ChildJobPosting filtered by the company column
  * @method     ChildJobPosting findOneByLocation(string $location) Return the first ChildJobPosting filtered by the location column
+ * @method     ChildJobPosting findOneByCompany(string $company) Return the first ChildJobPosting filtered by the company column
  * @method     ChildJobPosting findOneByDepartment(string $department) Return the first ChildJobPosting filtered by the department column
  * @method     ChildJobPosting findOneByCategory(string $category) Return the first ChildJobPosting filtered by the category column
  * @method     ChildJobPosting findOneByUpdatedAt(string $last_updated_at) Return the first ChildJobPosting filtered by the last_updated_at column
@@ -156,8 +156,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting requireOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByEmploymentType(string $employment_type) Return the first ChildJobPosting filtered by the employment_type column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByPayRange(string $pay_range) Return the first ChildJobPosting filtered by the pay_range column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
- * @method     ChildJobPosting requireOneByCompany(string $company) Return the first ChildJobPosting filtered by the company column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByLocation(string $location) Return the first ChildJobPosting filtered by the location column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
+ * @method     ChildJobPosting requireOneByCompany(string $company) Return the first ChildJobPosting filtered by the company column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByDepartment(string $department) Return the first ChildJobPosting filtered by the department column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByCategory(string $category) Return the first ChildJobPosting filtered by the category column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOneByUpdatedAt(string $last_updated_at) Return the first ChildJobPosting filtered by the last_updated_at column and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -178,8 +178,8 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildJobPosting[]|ObjectCollection findByUrl(string $url) Return ChildJobPosting objects filtered by the url column
  * @method     ChildJobPosting[]|ObjectCollection findByEmploymentType(string $employment_type) Return ChildJobPosting objects filtered by the employment_type column
  * @method     ChildJobPosting[]|ObjectCollection findByPayRange(string $pay_range) Return ChildJobPosting objects filtered by the pay_range column
- * @method     ChildJobPosting[]|ObjectCollection findByCompany(string $company) Return ChildJobPosting objects filtered by the company column
  * @method     ChildJobPosting[]|ObjectCollection findByLocation(string $location) Return ChildJobPosting objects filtered by the location column
+ * @method     ChildJobPosting[]|ObjectCollection findByCompany(string $company) Return ChildJobPosting objects filtered by the company column
  * @method     ChildJobPosting[]|ObjectCollection findByDepartment(string $department) Return ChildJobPosting objects filtered by the department column
  * @method     ChildJobPosting[]|ObjectCollection findByCategory(string $category) Return ChildJobPosting objects filtered by the category column
  * @method     ChildJobPosting[]|ObjectCollection findByUpdatedAt(string $last_updated_at) Return ChildJobPosting objects filtered by the last_updated_at column
@@ -289,7 +289,7 @@ abstract class JobPostingQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT jobposting_id, jobsite_key, jobsite_post_id, title, url, employment_type, pay_range, company, location, department, category, last_updated_at, job_posted_date, first_seen_at, location_display_value, geolocation_id, duplicates_posting_id, title_tokens, job_reference_key, key_company_and_title FROM jobposting WHERE jobposting_id = :p0';
+        $sql = 'SELECT jobposting_id, jobsite_key, jobsite_post_id, title, url, employment_type, pay_range, location, company, department, category, last_updated_at, job_posted_date, first_seen_at, location_display_value, geolocation_id, duplicates_posting_id, title_tokens, job_reference_key, key_company_and_title FROM jobposting WHERE jobposting_id = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -571,31 +571,6 @@ abstract class JobPostingQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the company column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByCompany('fooValue');   // WHERE company = 'fooValue'
-     * $query->filterByCompany('%fooValue%', Criteria::LIKE); // WHERE company LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $company The value to use as filter.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return $this|ChildJobPostingQuery The current query, for fluid interface
-     */
-    public function filterByCompany($company = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($company)) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(JobPostingTableMap::COL_COMPANY, $company, $comparison);
-    }
-
-    /**
      * Filter the query on the location column
      *
      * Example usage:
@@ -618,6 +593,31 @@ abstract class JobPostingQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(JobPostingTableMap::COL_LOCATION, $location, $comparison);
+    }
+
+    /**
+     * Filter the query on the company column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByCompany('fooValue');   // WHERE company = 'fooValue'
+     * $query->filterByCompany('%fooValue%', Criteria::LIKE); // WHERE company LIKE '%fooValue%'
+     * </code>
+     *
+     * @param     string $company The value to use as filter.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return $this|ChildJobPostingQuery The current query, for fluid interface
+     */
+    public function filterByCompany($company = null, $comparison = null)
+    {
+        if (null === $comparison) {
+            if (is_array($company)) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(JobPostingTableMap::COL_COMPANY, $company, $comparison);
     }
 
     /**
