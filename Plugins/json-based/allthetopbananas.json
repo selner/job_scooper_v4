@@ -2,7 +2,7 @@
   "jobsite_plugins": [
     {
       "JobSiteName": "allthetopbananas",
-      "SourceURL": "https://www.allthetopbananas.com/JobResults.aspx?ms=1&minsalary=0&maxsalary=0&radius=10&searchtext=***KEYWORDS***&location=***LOCATION:{Place}***&jobtype=1&locationid=0&posted=7&page=***PAGE_NUMBER***",
+      "SourceURL": "https://www.allthetopbananas.com/JobResults.aspx?ms=1&minsalary=0&maxsalary=0&radius=10&searchtext=***KEYWORDS***&location=***LOCATION:{Place}***&jobtype=1&locationid=0&posted=7",
       "BaseURL": "https://www.allthetopbananas.com/",
       "LocationType": "location-city",
       "CountryCodes": [
@@ -15,6 +15,15 @@
         {
           "Name": "PageFields",
           "Fields": [
+            {
+              "Name": "NoPostsFound",
+              "Selector": "#cphMainColumn_uctlSearchHelp1_NoResultsText h1",
+              "Index" : 0,
+              "Callback" : "matchesNoResultsPattern",
+              "CallbackParameter": "no match",
+              "Attribute": "text",
+              "Type": "CSS"
+            },
             {
               "Name": "TotalResultPageCount",
               "Selector": "span.pagination__info",
@@ -80,7 +89,8 @@
       ],
       "Pagination": {
         "PageLimit": 20,
-        "Type": "PAGE-VIA-URL"
+        "Type": "C__PAGINATION_PAGE_VIA_NEXTBUTTON",
+        "Selector": "a.pagination__right"
       }
     }
   ]
