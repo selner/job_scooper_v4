@@ -52,8 +52,14 @@ class DataNormalizer
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         try {
             $this->_addMissingTitleTokens();
-            $this->_markDuplicatesViaPython();
+
+
             $this->_findLocationsViaPython();
+
+            // Must first match locations to jobs before we can dedupe.  Dedupe uses location
+            // as part of the determination of whether we have that same listing already.
+            //
+            $this->_markDuplicatesViaPython();
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);
         } finally {
