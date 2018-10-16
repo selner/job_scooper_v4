@@ -124,8 +124,8 @@ class StageManager
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
-        // OK, now we have our list of searches & sites we are going to actually run
-        // Let's go get the jobs for those searches
+        // OK, let's go through each site, generate the site searches & then
+        // download the jobs for those searches.
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $jobsiteKeys = JobSiteManager::getJobSiteKeysIncludedInRun();
@@ -133,129 +133,131 @@ class StageManager
         $siteRuns = null;
         $user = null;
         $usersForRun = Settings::getValue('users_for_run');
+        $didRunSearches = false;
 
         startLogSection("Stage 1:  Downloading new jobs for " . \count($jobsiteKeys) . ' job sites and' . \count($usersForRun) . ' users.');
 
-        if (is_empty_value($jobsiteKeys)) {
-            throw new \InvalidArgumentException('No job sites were set to be run.  Aborting');
-        }
+        try {
+            if (is_empty_value($jobsiteKeys)) {
+                throw new \InvalidArgumentException('No job sites were set to be run.  Aborting');
+            }
 
-        if (is_empty_value($usersForRun)) {
-            throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
-        }
+            if (is_empty_value($usersForRun)) {
+                throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
+            }
 
-        $didRunSearches = false;
+            foreach ($jobsiteKeys as $jobsiteKey) {
 
-        foreach ($jobsiteKeys as $jobsiteKey) {
+                startLogSection("Downloading jobs from {$jobsiteKey} for " . \count($usersForRun) . ' users.');
+                $searchRuns = array();
 
-            startLogSection("Downloading jobs from {$jobsiteKey} for " . \count($usersForRun) . ' users.');
-            $searchRuns = array();
+                try {
+                    $site = JobSiteManager::getJobSiteByKey($jobsiteKey);
+                    assert(!is_empty_value($site));
 
-            try {
-                $site = JobSiteManager::getJobSiteByKey($jobsiteKey);
-                assert(!is_empty_value($site));
+                    if (!is_empty_value($usersForRun)) {
 
-                if (!is_empty_value($usersForRun)) {
-
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    //
-                    // Add the user's searches to the plugin
-                    //
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    startLogSection("Initializing search(es) for users at {$jobsiteKey}");
-                    $totalSearches = 0;
-
-                    try {
-                        $searchRuns = $site->generateUserSiteRuns($usersForRun);
-                        $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
-                        if (!is_empty_value($searchRuns)) {
-                            $sitePlugin->setSearches($searchRuns);
-                        }
-                    } catch (\Exception $classError) {
-                        handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
-                    } finally {
-                        $totalSearches = \count($searchRuns);
-                        endLogSection(" {$totalSearches} {$jobsiteKey} searches were initialized.");
-                    }
-
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    //
-                    // Download all the job listings for all the users searches for this plugin
-                    //
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    try {
-                        if (!is_empty_value($searchRuns)) {
-                            startLogSection("Getting latest jobs for {$totalSearches} search(es) for {$jobsiteKey} from the web...");
-                            $sitePlugin->downloadLatestJobsForAllSearches();
-                        }
-                    } catch (\Exception $classError) {
-                        handleException($classError, "{$jobsiteKey} failed to get latest job postings for {$jobsiteKey}: %s", $raise = true);
-                    } finally {
-                        endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
-                    }
-
-
-                    $filterType = $site->getResultsFilterType();
-
-                    if ((!is_empty_value($searchRuns)) &&
-                        $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
-                        $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY) {
-
-
-                        startLogSection("Cloning new jobpostings to other users for {$jobsiteKey}");
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        //
+                        // Add the user's searches to the plugin
+                        //
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        startLogSection("Initializing search(es) for users at {$jobsiteKey}");
 
                         try {
-                            foreach ($usersForRun as $userFacts) {
-
-                                $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
-                                $params = [
-                                    '-c' => Settings::get_db_dsn(),
-                                    '--userid' => $userFacts['UserId'],
-                                    '--jobsite' => $jobsiteKey
-                                ];
-
-                                $resultcode = PythonRunner::execScript($runFile, $params);
+                            $searchRuns = $site->generateUserSiteRuns($usersForRun);
+                            $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
+                            if (!is_empty_value($searchRuns)) {
+                                $sitePlugin->setSearches($searchRuns);
                             }
-
-                        } catch (\Exception $ex) {
-                            handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
+                        } catch (\Exception $classError) {
+                            handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
                         } finally {
-                            endLogSection("End cloning to jobpostings to users");
+                            $totalSearches = \count($searchRuns);
+                            endLogSection(" {$totalSearches} {$jobsiteKey} searches were initialized.");
+                        }
+
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        //
+                        // Download all the job listings for all the users searches for this plugin
+                        //
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        try {
+                            if (!is_empty_value($searchRuns)) {
+                                startLogSection("Getting latest jobs for {$totalSearches} search(es) for {$jobsiteKey} from the web...");
+                                $sitePlugin->downloadLatestJobsForAllSearches();
+                            }
+                        } catch (\Exception $classError) {
+                            handleException($classError, "{$jobsiteKey} failed to get latest job postings for {$jobsiteKey}: %s", $raise = true);
+                        } finally {
+                            endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
+                        }
+
+
+                        $filterType = $site->getResultsFilterType();
+
+                        if ((!is_empty_value($searchRuns)) &&
+                            $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
+                            $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY) {
+
+                            try {
+                                startLogSection("Cloning new jobpostings to other users for {$jobsiteKey}");
+                                foreach ($usersForRun as $userFacts) {
+
+                                    $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
+                                    $params = [
+                                        '-c' => Settings::get_db_dsn(),
+                                        '--userid' => $userFacts['UserId'],
+                                        '--jobsite' => $jobsiteKey
+                                    ];
+
+                                    $resultcode = PythonRunner::execScript($runFile, $params);
+                                }
+
+                            } catch (\Exception $ex) {
+                                handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
+                            } finally {
+                                endLogSection("End cloning to jobpostings to users");
+                            }
+                        }
+
+                    } else {
+                        LogWarning('No searches have been set to be run.');
+                    }
+
+                } catch (\Exception $ex) {
+                    LogError("Skipping all other {$jobsiteKey} searches due to plugin failure.");
+                    handleException($ex, null, false);
+                } finally {
+                    $sitePlugin = null;
+                    // make sure to clean up the references to each of the UserSiteSearchRun objects
+                    // so we dont leave a DB connection open
+                    if (!is_empty_value($searchRuns)) {
+                        $didRunSearches = true;
+
+                        foreach (array_keys($searchRuns) as $k) {
+                            $searchRuns[$k] = null;
+                            unset($searchRuns[$k]);
                         }
                     }
-
-                } else {
-                    LogWarning('No searches have been set to be run.');
+                    $user = null;
+                    $searchRuns = null;
+                    endLogSection("Done downloading jobs for {$jobsiteKey}");
                 }
-
-            } catch (\Exception $ex) {
-                LogError("Skipping all other {$jobsiteKey} searches due to plugin failure.");
-                handleException($ex, null, false);
-            } finally {
-                $sitePlugin = null;
-                // make sure to clean up the references to each of the UserSiteSearchRun objects
-                // so we dont leave a DB connection open
-                if (!is_empty_value($searchRuns)) {
-                    $didRunSearches = true;
-
-                    foreach (array_keys($searchRuns) as $k) {
-                        $searchRuns[$k] = null;
-                        unset($searchRuns[$k]);
-                    }
-                }
-                $user = null;
-                $searchRuns = null;
             }
-            endLogSection("Done downloading jobs for {$jobsiteKey}");
+        } catch (\Exception $ex) {
+            $msg = "Stage 1 failed to run due to error: {$ex->getMessage()}";
+            LogError($msg);
+            handleException($ex, $msg, false);
+        } finally {
+            endLogSection("End Stage 1: Finished downloading new jobs.");
+            if($didRunSearches === true) {
+                $pluginAlerts = new NotifierDevAlerts();
+                $pluginAlerts->processPluginErrorAlert();
+
+            }
         }
 
-        endLogSection("End Stage 1: Finished downloading new jobs.");
-
-        if($didRunSearches === true) {
-            $pluginAlerts = new NotifierDevAlerts();
-            $pluginAlerts->processPluginErrorAlert();
-
-        }
     }
 
         /**
