@@ -251,8 +251,7 @@ class StageManager
 
         endLogSection("End Stage 1: Finished downloading new jobs.");
 
-//        if($didRunSearches === true) {
-        if(true) {
+        if($didRunSearches === true) {
             $pluginAlerts = new NotifierDevAlerts();
             $pluginAlerts->processPluginErrorAlert();
 
@@ -449,8 +448,7 @@ class StageManager
          * @throws \Exception
          * @return \JobScooper\SitePlugins\IJobSitePlugin
          */
-        private
-        function _getJobSitePluginInstance($siteKey)
+        private function _getJobSitePluginInstance($siteKey)
         {
             $ret = null;
             $site = JobSiteManager::getJobSiteByKey($siteKey);
