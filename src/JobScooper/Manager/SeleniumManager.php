@@ -82,10 +82,6 @@ class SeleniumManager extends PropertyObject
             $src = $driver->getPageSource();
 
             return $src;
-        } catch (WebDriverCurlException $ex) {
-            handleException($ex, null, true);
-        } catch (WebDriverException $ex) {
-            handleException($ex, null, true);
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         }
@@ -107,10 +103,6 @@ class SeleniumManager extends PropertyObject
                 $driver->get($url);
                 sleep(2 + $this->additionalLoadDelaySeconds);
             }
-        } catch (WebDriverCurlException $ex) {
-            handleException($ex, "Error retrieving Selenium page at {$url}", false);
-        } catch (WebDriverException $ex) {
-            handleException($ex, "Error retrieving Selenium page at {$url} ", false);
         } catch (Exception $ex) {
             handleException($ex, "Error retrieving Selenium page at {$url}", false);
         }

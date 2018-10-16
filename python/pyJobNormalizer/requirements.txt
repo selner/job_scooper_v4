@@ -1,7 +1,6 @@
 nltk
 # nltk data also required
 # run 'sudo python -m nltk.downloader -d /usr/local/share/nltk_data all' to download all the data files for nltk
-unicodecsv
 docopt
 pandas
 pymysql
@@ -9,3 +8,6 @@ pymysql
 cleanco
 requests
 nltk
+future
+jinja2
+premailer

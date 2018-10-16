@@ -110,24 +110,22 @@ RUN composer --version
 
 #######################################################
 ##
-## Install Miniconda with Python 2.7
+## Install Miniconda with Python 3
 ##
 #######################################################
-
 RUN apt-get -qq update && apt-get -qq -y install curl bzip2 \
-    && curl -sSL https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -o /tmp/miniconda.sh \
+    && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh \
     && bash /tmp/miniconda.sh -bfp /usr/local \
     && rm -rf /tmp/miniconda.sh \
-    && conda install -y python=2 \
-    && conda install -y pip \
+    && conda install -y python=3 \
     && conda update conda \
     && apt-get -qq -y remove curl bzip2 \
     && apt-get -qq -y autoremove \
     && apt-get autoclean \
     && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log \
     && conda clean --all --yes
-
 ENV PATH /opt/conda/bin:$PATH
+
 
 #######################################################
 ##
@@ -137,6 +135,7 @@ ENV PATH /opt/conda/bin:$PATH
 RUN which python
 RUN echo PATH=$PATH
 RUN python -v
+
 
 ########################################################
 ###
@@ -162,6 +161,7 @@ RUN python -v
 RUN ls -al /usr/bin
 RUN docker-php-ext-enable zip
 RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/docker-php-memory.ini
+
 
 ########################################################
 ###
@@ -193,6 +193,7 @@ WORKDIR /opt/jobs_scooper
 ADD composer.json /opt/jobs_scooper/
 RUN composer install --no-interaction -vv
 
+
 ########################################################
 ###
 ### Install python dependencies
@@ -213,6 +214,7 @@ ADD . /opt/jobs_scooper/
 
 RUN echo "Verifying correct source installed..."
 RUN ls -al /opt/jobs_scooper
+
 
 ########################################################
 ###

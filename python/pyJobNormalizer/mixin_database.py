@@ -17,11 +17,11 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
+import urllib.parse
 import pymysql
 
 from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
-import sys
 
 ARRAY_JOIN_TOKEN = u"_||_"
 
@@ -40,10 +40,9 @@ class DatabaseMixin:
         Args:
             **kwargs:
         """
-        from urlparse import urlparse
 
         if 'connecturi' in kwargs:
-            parsed = urlparse(kwargs['connecturi'])
+            parsed = urllib.parse.urlparse(kwargs['connecturi'])
 
             if parsed.hostname:
                 self.dbparams['host'] = parsed.hostname
@@ -71,6 +70,11 @@ class DatabaseMixin:
             self._debug = self.dbparams['debug']
 
     @property
+    def connect_params(self):
+        return {k: self.dbparams[k] for k in self.dbparams if
+                  k in ["host", "password", "user", "port", "cursorclass", "use_unicode", "database"]}
+
+    @property
     def connection(self):
         if not self._connection:
             if not self.dbparams:
@@ -81,7 +85,7 @@ class DatabaseMixin:
             if 'use_unicode' not in self.dbparams:
                 self.dbparams['use_unicode'] = True
 
-            self._connection = pymysql.connect(**self.dbparams)
+            self._connection = pymysql.connect(**self.connect_params)
 
         return self._connection
 
@@ -114,10 +118,12 @@ class DatabaseMixin:
             with self.new_cursor() as cursor:
                 cursor.execute(querysql)
                 result = cursor.fetchall()
+                descr = cursor.description
+                fields = [col[0] for col in descr]
             return result
-        except Exception, ex:
-            print ex
-            raise ex
+        except Exception as ex:
+            print(ex)
+            raise(ex)
 
         finally:
             self.connection.commit()
@@ -206,14 +212,14 @@ class DatabaseMixin:
             close_connection:
         """
         try:
-            print(u"Running command: {}".format(querysql))
+            # print("Running command: {}".format(querysql))
 
-            with self.new_cursor() as cursor:
+            with self.connection.cursor() as cursor:
                 return cursor.execute(querysql, values)
 
-        except Exception, ex:
-            print ex
-            raise ex
+        except Exception as ex:
+            print(ex)
+            raise(ex)
 
         finally:
             self.connection.commit()
@@ -252,7 +258,7 @@ class DatabaseMixin:
 
             if len(rowdict) > len(matched_keys):
                 unknown_keys = set(rowdict) - allowed_keys
-                print >> sys.stderr, "skipping keys:", ", ".join(unknown_keys)
+                # print >> sys.stderr, "skipping keys:", ", ".join(unknown_keys)
 
             columns = ", ".join(matched_keys)
             values_template = ", ".join(["%s"] * len(matched_keys))
@@ -273,9 +279,9 @@ class DatabaseMixin:
                 else:
                     return None
 
-        except Exception, ex:
-            print ex
-            raise ex
+        except Exception as ex:
+            print(ex)
+            raise(ex)
 
         finally:
             self.connection.commit()

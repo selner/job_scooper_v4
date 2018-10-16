@@ -17,24 +17,16 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from helpers import docopt_ext
-from task_match_titles import TaskMatchJobsToKeywords
+import base64
+import os
 
-cli_usage = """
-Usage:
-  cmd_update_title_tokens.py -c <dbstring>
-  cmd_update_title_tokens.py --version
 
-Options:
-  -h --help  show this help message and exit
-  --version  show version and exit
-  -v --verbose  print status messages
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-"""
+def generate_base64_for_image(filepath):
 
-if __name__ == '__main__':
-    arguments = docopt_ext(cli_usage, version='0.1.1rc')
+    fpath = os.path.abspath(filepath)
+    data = base64.b64encode(open(fpath, 'rb').read())
+    return "data:image/png;base64,%s" % data.decode()
 
-    toks = TaskAddTitleTokens(**arguments)
-    toks.update_jobs_without_tokens()
+
+
 

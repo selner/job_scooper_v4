@@ -19,7 +19,8 @@
 ###########################################################################
 import codecs
 import json
-import unicodecsv
+import csv
+
 import docopt
 docopt_func = getattr(docopt, 'docopt')
 
@@ -30,10 +31,15 @@ def docopt_ext(doc, argv=None, help=True, version=None, options_first=False):
         retvals = {}
         for k in vals.keys():
             key = k
-            if unicode(k).startswith("--"):
-                key = unicode(k)[2:]
+            if k.startswith("--"):
+                key = k[2:]
 
-            retvals[key] = vals[k]
+            v = vals[k]
+
+            if v and isinstance(v, str) and v.startswith("'") and v.endswith("'"):
+                v = v[1:-1]
+
+            retvals[key] = v
 
         return retvals
 
@@ -59,7 +65,7 @@ def load_json(filepath):
     Args:
         filepath:
     """
-    f = codecs.open(filepath, 'rb', encoding='utf-8')
+    f = codecs.open(filepath, 'rb')
     result = json.load(f)
     f.close()
     return result
@@ -71,13 +77,13 @@ def write_json(filepath, data):
         filepath:
         data:
     """
-    outf = codecs.open(filepath, 'w', encoding='utf-8')
+    outf = codecs.open(filepath, 'w')
 
-    json.dump(data, outf, indent=4, encoding='utf-8', cls=SetEncoder)
+    json.dump(data, outf, indent=4, cls=SetEncoder)
     outf.close()
 
 def dump_var_to_json(data):
-    return json.dumps(data, indent=4, encoding='utf-8', cls=SetEncoder)
+    return json.dumps(data, indent=4, cls=SetEncoder)
 
 
 def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield=None):
@@ -93,10 +99,10 @@ def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield
 
     fp = codecs.open(filepath, mode='r')
 
-    dialect = unicodecsv.Sniffer().sniff(fp.read(1024))
+    dialect = csv.Sniffer().sniff(fp.read(1024))
     fp.seek(0)
 
-    has_header = unicodecsv.Sniffer().has_header(fp.read(1024))
+    has_header = csv.Sniffer().has_header(fp.read(1024))
     fp.seek(0)
 
     if has_header is True and fieldnames is None:
@@ -104,7 +110,7 @@ def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield
         fp.seek(0)
         fieldnames = header_line.split(dialect.delimiter)
 
-    csv_reader = unicodecsv.DictReader(fp, dialect=dialect, delimiter=delimiter, quotechar=quotechar,
+    csv_reader = csv.DictReader(fp, dialect=dialect, delimiter=delimiter, quotechar=quotechar,
                                        fieldnames=fieldnames)
 
     if fieldnames is None:
@@ -137,16 +143,19 @@ def loadcsv(csvfilename, rowkeyname=None):
         csvfilename:
         rowkeyname:
     """
+    import os
+
 
     print(u"Loading {}...".format(csvfilename))
-    csv_fp = open(csvfilename, "rbU")
+    from io import open
+    csv_fp = open(csvfilename, 'r')
     dict_records = {}
     fields = {}
 
     csv_reader = None
     try:
         with csv_fp:
-            csv_reader = unicodecsv.DictReader(csv_fp, delimiter=",", quoting=unicodecsv.QUOTE_ALL, errors='strict')
+            csv_reader = csv.DictReader(csv_fp, delimiter=",", quoting=csv.QUOTE_ALL)
             fields = csv_reader.fieldnames
             for row in csv_reader:
                 if rowkeyname is None:
@@ -154,7 +163,7 @@ def loadcsv(csvfilename, rowkeyname=None):
 
                 dict_records[row[rowkeyname]] = row
     except Exception as err:
-        print err
+        print(err)
         pass
 
     print(u"Loaded {} rows from {}.".format(len(dict_records), csvfilename))
@@ -172,11 +181,11 @@ def writedicttocsv(csvfilename, data, keys=None):
     print(u"Writing {} rows to file {}...".format(len(data), csvfilename))
 
     if keys is None:
-        item = data.itervalues().next()
+        item = data.items()[0]
         keys = item.keys()
 
     csvfile = open(csvfilename, "wb")
-    csv_writer = unicodecsv.DictWriter(csvfile, fieldnames=keys, dialect=unicodecsv.excel)
+    csv_writer = csv.DictWriter(csvfile, fieldnames=keys, dialect=csv.excel)
     csv_writer.writeheader()
     for row in data:
         for k in data[row].keys():
@@ -184,7 +193,7 @@ def writedicttocsv(csvfilename, data, keys=None):
                 del data[row][k]
         try:
             csv_writer.writerow(data[row])
-        except Exception:
+        except Exception as ex:
             pass
 
     csvfile.close()
@@ -202,3 +211,7 @@ def combine_dicts(a, b):
         for kb in b[k]:
             z[k][kb] = b[k][kb]
     return z
+
+def dump_var_to_json(data):
+    return json.dumps(data, indent=4, cls=SetEncoder)
+

@@ -363,16 +363,19 @@ class LoggingManager extends \Monolog\Logger
      */
     private function _logSectionHeader($headerText, $nType)
     {
+
         if ($nType == LoggingManager::C__LOG_SECTION_BEGIN) {
-            $indentCount = $this->_openSections * 2;
-            $lineChar = (string) $this->_openSections + 1;
-            $intro = 'BEGIN: ';
+            assert($this->_openSections >= 0);
             $this->_openSections += 1;
+            $indentCount = ($this->_openSections - 1) * 2;
+            $lineChar = strval($this->_openSections);
+            $intro = 'BEGIN: ';
         } else {
-            $this->_openSections -= 1;
-            $lineChar = (string) $this->_openSections + 1;
-            $indentCount = $this->_openSections * 2;
+            assert($this->_openSections > 0);
+            $lineChar = strval($this->_openSections);
+            $indentCount = ($this->_openSections - 1) * 2;
             $intro = 'END: ';
+            $this->_openSections -= 1;
         }
 
         $indent = sprintf("%-{$indentCount}s", '');
@@ -385,7 +388,7 @@ class LoggingManager extends \Monolog\Logger
             "{$indent}{$sepLine}" . PHP_EOL .
             "{$indent}%-5s%s%s " . PHP_EOL . PHP_EOL .
             "{$indent}{$sepLine}" .
-            PHP_EOL;
+            PHP_EOL . PHP_EOL . PHP_EOL;
 
         $lineContent = sprintf($fmt, '', $intro, $headerText);
 

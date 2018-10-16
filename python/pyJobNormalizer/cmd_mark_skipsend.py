@@ -17,27 +17,25 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from task_find_and_match_places import FindPlacesFromDBLocationsTask
+from task_skip_nontitle_matches import TaskMarkNonMatchesAsSkipSend
 from helpers import docopt_ext
 
 cli_usage = """
 Usage:
-  set_geolocations.py -c <dbstring> -s <server>
-  set_geolocations.py --version
+  cmd_mark_skipsend.py -c <dbstring>
+  cmd_mark_skipsend.py --version
   
 Options:
   -h --help     show this help message and exit
   --version     show version and exit
   -v --verbose      print status messages
   -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-  -s <server>, --server <server>    hostname for geocode api server [default: http://0.0.0.0:5000]
 """
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
 
-    if "connecturi" in args and args["connecturi"] and "server" in args and args["server"]:
-        matcher = FindPlacesFromDBLocationsTask()
-        matcher.update_all_locations(**args)
+    if "connecturi" in args and args["connecturi"]:
+        matcher = TaskMarkNonMatchesAsSkipSend(**args)
     else:
-        print(u"Unable to update locations for job postings.  Missing script arguments.")
+        print(u"Unable to update user job matches that should be skipped.  Missing script arguments.")

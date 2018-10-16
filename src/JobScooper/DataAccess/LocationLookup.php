@@ -23,32 +23,12 @@ use JobScooper\Traits\Singleton;
 use JobScooper\Utils\CurlWrapper;
 use JobScooper\Utils\Settings;
 use Monolog\Logger;
-use \MatthiasMullie\Scrapbook\Psr16\SimpleCache;
 
-class LocationCache {
+class LocationLookup {
 	use Singleton;
-    /**
-     * @var SimpleCache|null
-     */
-    private $_cache = null;
-	private $_nFailures = 0;
-
-	/**
-	 * @return SimpleCache|null
-	 */
-	public function getCache(){
-	    return $this->_cache;
-	}
-	/**
-	 * @param SimpleCache $cache
-	 */
-	public  function setCache($cache):void {
-	    $this->_cache = $cache;
-	}
-
 	private $_geoapi_srvr = null;
 	private $_loggerName = 'geocode_api_calls';
-	
+	private $_nFailures = 0;
 	/* @var \Monolog\Logger */
 	private $logger = null;
 	
@@ -58,18 +38,8 @@ class LocationCache {
 	protected function init(){
 
 		$this->_initializeLogger();
-		// create Flysystem object
-        $cachedir = getOutputDirectory('reusable_caches') . DIRECTORY_SEPARATOR . 'geocode_api_calls';
-
-		$adapter = new \League\Flysystem\Adapter\Local($cachedir, LOCK_EX);
-		$filesystem = new \League\Flysystem\Filesystem($adapter);
-		// create Scrapbook KeyValueStore object
-		$cache = new \MatthiasMullie\Scrapbook\Adapters\Flysystem($filesystem);
 
 	    $this->_geoapi_srvr = Settings::getValue('geocodeapi_server');
-		
-		$buffcache = new \MatthiasMullie\Scrapbook\Buffered\BufferedStore($cache);
-		$this->_cache = new SimpleCache($buffcache);
 
 	}
 
@@ -121,44 +91,13 @@ class LocationCache {
 				return null;
 			}
 
-			$cacheSlug = cleanupSlugPart($scrubbed);
-			$context = array(
-				'query' => str_replace(',', '\,', $str),
-				'scrubbed' => $scrubbed,
-				'cachekey' => $cacheSlug,
-				'hit_type' => 'FAILED',
-				'geolocationid' => null,
-				'geolocationkey' => null
-			);
-			try {
-                $result = $this->_cache->get($cacheSlug); // returns 'value'
-                if($result !== false && !is_empty_value($result)) {
-                    $context['hit_type'] = 'CACHE_HIT';
-                    return $result;
-                }
-            }
-            catch (\Psr\SimpleCache\InvalidArgumentException $ex) {
-                handleException($ex, null, false, $context);
-            }
 
 			if(!\is_array($args)) {
 				$args = [];
 			}
 			$args['query'] = $scrubbed;
-			
-			$result = $this->_callApi($args);
-			if(!is_empty_value($result)) {
-                try {
-    				$this->_cache->set($cacheSlug, $result); // returns 'value'
-                }
-                catch (\Psr\SimpleCache\InvalidArgumentException $ex) {
-                    handleException($ex, null, true, $context);
-                }
 
-                $context['hit_type'] = 'API_HIT';
-			}
-			
-			return $result;
+            return  $this->_callApi($args);
 		}
 		catch (\Exception $ex) {
 			$this->_nFailures += 1;
@@ -168,7 +107,6 @@ class LocationCache {
             $msg = "Unknown geoloc state for {$scrubbed}";
             if($result !== false && !is_empty_value($result))
             {
-                $msg = "Geolocation cache hit found for {$cacheSlug}";
                 $context['geolocationid'] = $result->getGeoLocationId();
                 $context['geolocationkey'] = $result->getGeoLocationKey();
                 $this->logger->info($msg, $context);

@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 from task_mark_outofarea_matches import TaskMarkOutOfAreaMatches
-from docopt import docopt
+from helpers import docopt_ext
 
 cli_usage = """
 Usage:
@@ -34,8 +34,7 @@ Options:
 """
 
 if __name__ == '__main__':
-    arguments = docopt(cli_usage, version='0.1.1rc')
-    args = {k.replace("--", ""): arguments[k] for k in arguments.keys()}
+    args = docopt_ext(cli_usage, version='0.1.1rc')
 
     if "connecturi" in args and args["connecturi"] and "user" in args and args["user"]:
         matcher = TaskMarkOutOfAreaMatches(**args)

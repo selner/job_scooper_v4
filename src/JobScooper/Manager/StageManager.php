@@ -14,18 +14,19 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 namespace JobScooper\Manager;
 
 use JobScooper\DataAccess\JobSiteManager;
-use JobScooper\DataAccess\User;
+use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
 use JobScooper\StageProcessor\DataNormalizer;
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Utils\ConfigInitializer;
 use JobScooper\Utils\DBRecordRemover;
+use JobScooper\Utils\PythonRunner;
 use JobScooper\Utils\Settings;
-use Propel\Runtime\Exception\PropelException;
 
 const JOBLIST_TYPE_UNFILTERED = 'unfiltered';
 const JOBLIST_TYPE_MARKED = 'marked';
@@ -37,12 +38,12 @@ const JSON_FILENAME = '-alljobsites.json';
  */
 class StageManager
 {
-	public function __construct($config = null)
-	{
-		if(null !== $config) {
-			$this->classConfig = $config;
-		}
-	}
+    public function __construct($config = null)
+    {
+        if (null !== $config) {
+            $this->classConfig = $config;
+        }
+    }
 
     protected $JobSiteName = 'StageManager';
     private $classConfig = null;
@@ -59,7 +60,7 @@ class StageManager
     {
         $runStartTime = Settings::getValue('app_run_start_datetime');
         if (empty($runStartTime)) {
-	        Settings::setValue('app_run_start_datetime', new \DateTime());
+            Settings::setValue('app_run_start_datetime', new \DateTime());
         }
 
         if (empty($this->classConfig)) {
@@ -89,11 +90,7 @@ class StageManager
                     $stageFunc = "doStage{$stage}";
                     try {
                         $this->$stageFunc();
-                    }
-                    catch (PropelException $pex) {
-                    	throw $pex;
-                    }
-					catch (\Exception $ex) {
+                    } catch (\Exception $ex) {
                         throw new \Exception("Error:  failed to call method \$this->{$stageFunc}() for {$stage} from option --StageProcessor " . implode(",", $arrRunStages) . ".  Error: {$ex}");
                     }
                 }
@@ -106,8 +103,7 @@ class StageManager
                 $this->doStage3();
                 $this->doStage4();
             }
-        } catch (PropelException $pex) {
-            handleException($pex, null, true);
+
         } catch (\Exception $ex) {
             handleException($ex, null, true);
         } finally {
@@ -134,254 +130,300 @@ class StageManager
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $jobsiteKeys = JobSiteManager::getJobSiteKeysIncludedInRun();
         $sitePlugin = null;
-		$siteRuns = null;
-		$user = null;
-		
-        if (!is_empty_value($jobsiteKeys)) {
-            $usersForRun = Settings::getValue('users_for_run');
-            if(is_empty_value($usersForRun)) {
-            	throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
-            }
-            
-            foreach($usersForRun as $userFacts) {
-	            startLogSection(PHP_EOL . "Stage 1:  Downloading jobs for user={$userFacts['UserSlug']} from " . \count($jobsiteKeys) . " potential job sites");
+        $siteRuns = null;
+        $user = null;
+        $usersForRun = Settings::getValue('users_for_run');
 
-		        foreach($jobsiteKeys as $jobsiteKey)
-		        {
-			        startLogSection("Downloading jobs from {$jobsiteKey} for {$userFacts['UserSlug']}");
-		            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		            //
-		            // Run each plugin, set the searches to run and then download the jobs from that jobsite
-		            //
-		            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		            try {
-		                $user = User::getUserObjById($userFacts['UserId']);
-			            $siteRuns = $user->getUserSearchSiteRunsForJobSite($jobsiteKey);
-			            if(!is_empty_value($siteRuns)) {
-		                    $countTotalSiteSearches = \count($siteRuns);
-		                    $plugin = null;
-		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		                    //
-		                    // Add the user's searches to the plugin
-		                    //
-		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		                    startLogSection("Initializing {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
-		                    try {
-		                        $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
-		                        $sitePlugin->setSearches($siteRuns);
-		                    } catch (\Exception $classError) {
-		                        handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
-		                    } finally {
-		                        endLogSection(" {$jobsiteKey} searches initialized.");
-		                    }
+        startLogSection("Stage 1:  Downloading new jobs for " . \count($jobsiteKeys) . ' job sites and' . \count($usersForRun) . ' users.');
 
-		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		                    //
-		                    // Download all the job listings for all the users searches for this plugin
-		                    //
-		                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		                    try {
-		                        startLogSection("Downloading jobs for {$countTotalSiteSearches} search(es) for {$jobsiteKey}...");
-		                        $sitePlugin->downloadLatestJobsForAllSearches();
-				            } catch (PropelException $pex) {
-				                handleException($pex, null, true);
-		                    } catch (\Exception $classError) {
-		                        handleException($classError, "{$jobsiteKey} failed to download job postings: %s", $raise = false);
-		                    } finally {
-		                        endLogSection("Job downloads have ended for {$jobsiteKey}.");
-		                    }
-			            }
-		            } catch (PropelException $pex) {
-		                handleException($pex, null, true);
-		            } catch (\Exception $ex) {
-		                handleException($ex, null, false);
-		            } finally {
-	                    $sitePlugin = null;
-						// make sure to clean up the references to each of the UserSiteSearchRun objects
-						// so we dont leave a DB connection open
-                        if(!is_empty_value($siteRuns)) {
-                            foreach(array_keys($siteRuns) as $k) {
-                                $siteRuns[$k] = null;
-                                unset($siteRuns[$k]);
-                            }
+        if (is_empty_value($jobsiteKeys)) {
+            throw new \InvalidArgumentException('No job sites were set to be run.  Aborting');
+        }
+
+        if (is_empty_value($usersForRun)) {
+            throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
+        }
+
+        $didRunSearches = false;
+
+        foreach ($jobsiteKeys as $jobsiteKey) {
+
+            startLogSection("Downloading jobs from {$jobsiteKey} for " . \count($usersForRun) . ' users.');
+            $searchRuns = array();
+
+            try {
+                $site = JobSiteManager::getJobSiteByKey($jobsiteKey);
+                assert(!is_empty_value($site));
+
+                if (!is_empty_value($usersForRun)) {
+
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    //
+                    // Add the user's searches to the plugin
+                    //
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    startLogSection("Initializing search(es) for users at {$jobsiteKey}");
+                    $totalSearches = 0;
+
+                    try {
+                        $searchRuns = $site->generateUserSiteRuns($usersForRun);
+                        $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
+                        if (!is_empty_value($searchRuns)) {
+                            $sitePlugin->setSearches($searchRuns);
                         }
-						$user = null;
-						$siteRuns = null;
-		            }
+                    } catch (\Exception $classError) {
+                        handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
+                    } finally {
+                        $totalSearches = \count($searchRuns);
+                        endLogSection(" {$totalSearches} {$jobsiteKey} searches were initialized.");
+                    }
 
-			        endLogSection("Done downloading jobs from {$jobsiteKey} for {$userFacts['UserSlug']}");
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    //
+                    // Download all the job listings for all the users searches for this plugin
+                    //
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    try {
+                        if (!is_empty_value($searchRuns)) {
+                            startLogSection("Getting latest jobs for {$totalSearches} search(es) for {$jobsiteKey} from the web...");
+                            $sitePlugin->downloadLatestJobsForAllSearches();
+                        }
+                    } catch (\Exception $classError) {
+                        handleException($classError, "{$jobsiteKey} failed to get latest job postings for {$jobsiteKey}: %s", $raise = true);
+                    } finally {
+                        endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
+                    }
 
-	            }
-	
-		        endLogSection("Stage 1 for {$userFacts['UserSlug']}");
 
+                    $filterType = $site->getResultsFilterType();
+
+                    if ((!is_empty_value($searchRuns)) &&
+                        $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
+                        $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY) {
+
+
+                        startLogSection("Cloning new jobpostings to other users for {$jobsiteKey}");
+
+                        try {
+                            foreach ($usersForRun as $userFacts) {
+
+                                $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
+                                $params = [
+                                    '-c' => Settings::get_db_dsn(),
+                                    '--userid' => $userFacts['UserId'],
+                                    '--jobsite' => $jobsiteKey
+                                ];
+
+                                $resultcode = PythonRunner::execScript($runFile, $params);
+                            }
+
+                        } catch (\Exception $ex) {
+                            handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
+                        } finally {
+                            endLogSection("End cloning to jobpostings to users");
+                        }
+                    }
+
+                } else {
+                    LogWarning('No searches have been set to be run.');
+                }
+
+            } catch (\Exception $ex) {
+                LogError("Skipping all other {$jobsiteKey} searches due to plugin failure.");
+                handleException($ex, null, false);
+            } finally {
+                $sitePlugin = null;
+                // make sure to clean up the references to each of the UserSiteSearchRun objects
+                // so we dont leave a DB connection open
+                if (!is_empty_value($searchRuns)) {
+                    $didRunSearches = true;
+
+                    foreach (array_keys($searchRuns) as $k) {
+                        $searchRuns[$k] = null;
+                        unset($searchRuns[$k]);
+                    }
+                }
+                $user = null;
+                $searchRuns = null;
             }
-        } else {
-            LogWarning('No searches have been set to be run.');
+            endLogSection("Done downloading jobs for {$jobsiteKey}");
         }
 
-    }
+        endLogSection("End Stage 1: Finished downloading new jobs.");
 
-    /**
-     * @throws \Exception
-     */
-    public function doStage2()
-    {
-        $this->_initConfig();
+//        if($didRunSearches === true) {
+        if(true) {
+            $pluginAlerts = new NotifierDevAlerts();
+            $pluginAlerts->processPluginErrorAlert();
 
-        try {
-            startLogSection('Stage 2:  Normalizing job posting details for recent posts...');
-            $normer = new DataNormalizer();
-            $normer->normalizeJobs();
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        } finally {
-        	$normer = null;
-            endLogSection('End of stage 2 (job posting normalization).');
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function doStage3()
-    {
-        $this->_initConfig();
-
-        try {
-            $marker = new JobsAutoMarker();
-
-            $usersForRun = Settings::getValue('users_for_run');
-            if(is_empty_value($usersForRun)) {
-            	throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
-            }
-            
-            foreach($usersForRun as $userFacts) {
-	            startLogSection("Stage 3:  Auto-marking all user job matches for user {$userFacts['UserSlug']}...");
-	            $marker->markJobs($userFacts);
-            }
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        } finally {
-        	$marker = null;
-        	$usersForRun = null;
-            endLogSection("End of stage 3 (auto-marking) for user {$userFacts['UserSlug']}.");
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function doStage4()
-    {
-        $this->_initConfig();
- 
-        try {
-            $usersForRun = Settings::getValue('users_for_run');
-            if(is_empty_value($usersForRun)) {
-            	throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
-            }
-            
-            foreach($usersForRun as $userFacts) {
-	            startLogSection("Stage 4: Notifying User '{$userFacts['UserSlug']}'");
-	            $notifier = new NotifierJobAlerts();
-	            
-                $notifier->processRunResultsNotifications($userFacts);
-	            endLogSection("End of stage 4 (notifying {$userFacts['UserSlug']})");
-            }
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        } finally {
-        	$notifier = null;
-        	$usersForRun = null;
-            endLogSection('End of stage 4: user notifications');
         }
     }
 
+        /**
+         * @throws \Exception
+         */
+        public
+        function doStage2()
+        {
+            $this->_initConfig();
 
-    /**
-     * @param array[] $userFacts
-     *
-     * @throws \Exception
-     */
-    public function doWeeklyRecaps()
-    {
-        $this->_initConfig();
-
-        startLogSection('do Weekly Recaps: Sending Weekly Recaps to Users');
-        try {
-            /*
-             * Run specific stages requested via command-line
-             */
-            $usersForRun = Settings::getValue('users_for_run');
-            if(is_empty_value($usersForRun)) {
-            	throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
+            try {
+                startLogSection('Stage 2:  Normalizing job posting details for recent posts...');
+                $normer = new DataNormalizer();
+                $normer->normalizeJobs();
+            } catch (\Exception $ex) {
+                handleException($ex, null, true);
+            } finally {
+                $normer = null;
+                endLogSection('End of stage 2 (job posting normalization).');
             }
+        }
 
-            if (!empty($usersForRun)) {
+        /**
+         * @throws \Exception
+         */
+        public
+        function doStage3()
+        {
+            $this->_initConfig();
+
+            try {
+                startLogSection("Stage 3:  Auto-marking new potential job matches...");
+                $marker = new JobsAutoMarker();
+
+                $usersForRun = Settings::getValue('users_for_run');
+                if (is_empty_value($usersForRun)) {
+                    throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
+                }
+
+            $marker->markJobMatches($usersForRun);
+            } catch (\Exception $ex) {
+                handleException($ex, null, true);
+            } finally {
+                $marker = null;
+                $usersForRun = null;
+            endLogSection("Stage 3: Completed auto-marking job matches.");
+            }
+        }
+
+        /**
+         * @throws \Exception
+         */
+        public
+        function doStage4()
+        {
+            $this->_initConfig();
+
+            try {
+                $usersForRun = Settings::getValue('users_for_run');
+                if (is_empty_value($usersForRun)) {
+                    throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
+                }
+
                 foreach ($usersForRun as $userFacts) {
-                    startLogSection("Recap begun for '{$userFacts['UserSlug']}'");
-                    $notify = new NotifierJobAlerts();
+                    startLogSection("Stage 4: Notifying User '{$userFacts['UserSlug']}'");
+                    $notifier = new NotifierJobAlerts();
 
-		            // BUGBBUG
-		            throw new \Exception('Not yet converted to use array users!');
-
-                    $notify->processWeekRecapNotifications($userFacts);
-                    endLogSection("Recap done for {$userFacts['UserSlug']}'");
+                    $notifier->processRunResultsNotifications($userFacts);
+                    endLogSection("End of stage 4 (notifying {$userFacts['UserSlug']})");
                 }
+            } catch (\Exception $ex) {
+                handleException($ex, null, true);
+            } finally {
+                $notifier = null;
+                $usersForRun = null;
+                endLogSection('End of stage 4: user notifications');
             }
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        } finally {
-        	$usersForRun = null;
-        	$notify = null;
-            endLogSection('End of do Weekly Recaps command');
-        }
-    }
-    /**
-     * @param array[] $users
-     *
-     * @throws \Exception
-     */
-    public function removeUserData()
-    {
-        $this->_initConfig();
-
-        startLogSection('BEGIN: removeUserData from database command');
-        if (!isDebug()) {
-            throw new \Exception('Removing user data is only allowed if the developer is running in debug mode.  Please set --debug flag when running. Aborting.');
         }
 
-        try {
-            /*
-             * Run specific stages requested via command-line
-             */
-            $usersForRun = Settings::getValue('users_for_run');
-            if(is_empty_value($usersForRun)) {
-            	throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
-            }
 
-            if (!empty($usersForRun)) {
-                foreach ($usersForRun as $user) {
-		            // BUGBBUG
-		            throw new \Exception('Not yet converted to use array users!');
+        /**
+         * @param array[] $userFacts
+         *
+         * @throws \Exception
+         */
+        public
+        function doWeeklyRecaps()
+        {
+            $this->_initConfig();
 
-                    $remover = DBRecordRemover::removeUsers($usersForRun);
+            startLogSection('do Weekly Recaps: Sending Weekly Recaps to Users');
+            try {
+                /*
+                 * Run specific stages requested via command-line
+                 */
+                $usersForRun = Settings::getValue('users_for_run');
+                if (is_empty_value($usersForRun)) {
+                    throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
                 }
-            }
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        } finally {
-            endLogSection('END:  removeUserData from database');
-            $usersForRun = null;
-        }
-    }
 
-    /**
-     * @throws \Exception
-     */
-    public function doFinalStage()
-    {
+                if (!empty($usersForRun)) {
+                    foreach ($usersForRun as $userFacts) {
+                        startLogSection("Recap begun for '{$userFacts['UserSlug']}'");
+                        $notify = new NotifierJobAlerts();
+
+                        // BUGBBUG
+                        throw new \Exception('Not yet converted to use array users!');
+
+                        $notify->processWeekRecapNotifications($userFacts);
+                        endLogSection("Recap done for {$userFacts['UserSlug']}'");
+                    }
+                }
+            } catch (\Exception $ex) {
+                handleException($ex, null, true);
+            } finally {
+                $usersForRun = null;
+                $notify = null;
+                endLogSection('End of do Weekly Recaps command');
+            }
+        }
+
+        /**
+         * @param array[] $users
+         *
+         * @throws \Exception
+         */
+        public
+        function removeUserData()
+        {
+            $this->_initConfig();
+
+            startLogSection('BEGIN: removeUserData from database command');
+            if (!isDebug()) {
+                throw new \Exception('Removing user data is only allowed if the developer is running in debug mode.  Please set --debug flag when running. Aborting.');
+            }
+
+            try {
+                /*
+                 * Run specific stages requested via command-line
+                 */
+                $usersForRun = Settings::getValue('users_for_run');
+                if (is_empty_value($usersForRun)) {
+                    throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
+                }
+
+                if (!empty($usersForRun)) {
+                    foreach ($usersForRun as $user) {
+                        // BUGBBUG
+                        throw new \Exception('Not yet converted to use array users!');
+
+                        $remover = DBRecordRemover::removeUsers($usersForRun);
+                    }
+                }
+            } catch (\Exception $ex) {
+                handleException($ex, null, true);
+            } finally {
+                endLogSection('END:  removeUserData from database');
+                $usersForRun = null;
+            }
+        }
+
+        /**
+         * @throws \Exception
+         */
+        public
+        function doFinalStage()
+        {
 //        $this->_initConfig();
 //        try {
 //            startLogSection("Processing any developer alerts for plugin errors...");
@@ -393,29 +435,30 @@ class StageManager
 //            endLogSection("End of dev alerts for plugin errors");
 //        }
 //
-        $runStartTime = Settings::getValue('app_run_start_datetime');
+            $runStartTime = Settings::getValue('app_run_start_datetime');
 
-        if (!empty($runStartTime)) {
-            $runtime = $runStartTime->diff(new \DateTime());
+            if (!empty($runStartTime)) {
+                $runtime = $runStartTime->diff(new \DateTime());
 
-            logMessage("JobScooper runtime was " . $runtime->format("%h hours, %i minutes and %s seconds (%h:%i:%s)."));
-        }
-    }
-    
-   /**
-     * @param string $siteKey
-     * @throws \Exception
-     * @return \JobScooper\SitePlugins\IJobSitePlugin
-     */
-    private function _getJobSitePluginInstance($siteKey)
-    {
-    	$ret = null;
-        $site = JobSiteManager::getJobSiteByKey($siteKey);
-        if(null !== $site) {
-        	$ret = $site->getPlugin();
+                logMessage("JobScooper runtime was " . $runtime->format("%h hours, %i minutes and %s seconds (%h:%i:%s)."));
+            }
         }
 
-		$site = null;
-        return $ret;
+        /**
+         * @param string $siteKey
+         * @throws \Exception
+         * @return \JobScooper\SitePlugins\IJobSitePlugin
+         */
+        private
+        function _getJobSitePluginInstance($siteKey)
+        {
+            $ret = null;
+            $site = JobSiteManager::getJobSiteByKey($siteKey);
+            if (null !== $site) {
+                $ret = $site->getPlugin();
+            }
+
+            $site = null;
+            return $ret;
+        }
     }
-}

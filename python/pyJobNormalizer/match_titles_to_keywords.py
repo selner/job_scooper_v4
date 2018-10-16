@@ -35,25 +35,7 @@ Options:
 """
 
 if __name__ == '__main__':
-    arguments = docopt_ext(cli_usage, version='0.1.1rc')
+    args = docopt_ext(cli_usage, version='0.1.1rc')
 
-
-
-if __name__ == '__main__':
-    arguments = docopt_ext(cli_usage, version='0.1.1rc')
-
-    # if not arguments["--input"] or not arguments["--output"]:
-    #     print("Unable to deduplicate job postings.  Missing script arguments.")
-    # else:
-    #     matcher = TaskDedupeJobPostings(arguments["--input"].replace("'", ""), arguments["--output"].replace("'", ""))
-
-    if "input" in arguments and arguments["input"] and "output" in arguments and arguments["output"]:
-        matcher = TaskMatchJobsToKeywords(inputfile=arguments["input"].replace("'", ""),
-                                          outputfile=arguments["output"].replace("'", ""))
-        matcher.export_results()
-
-    elif "--connecturi" in arguments and arguments["--connecturi"]:
-        matcher = TaskMatchJobsToKeywords(connecturi=arguments['--connecturi'])
-        matcher.export_results()
-    else:
-        print(u"Unable to deduplicate job postings.  Missing script arguments.")
+    matcher = TaskMatchJobsToKeywords(**args)
+    matcher.export_results()

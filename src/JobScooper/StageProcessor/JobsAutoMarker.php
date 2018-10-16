@@ -18,7 +18,7 @@ namespace JobScooper\StageProcessor;
 
 use Exception;
 use const JobScooper\DataAccess\LIST_SEPARATOR_TOKEN;
-use JobScooper\DataAccess\LocationCache;
+use JobScooper\DataAccess\LocationLookup;
 use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatch;
@@ -26,7 +26,6 @@ use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\Utils\PythonRunner;
 use JobScooper\Utils\Settings;
 use Propel\Runtime\ActiveQuery\Criteria;
-use Propel\Runtime\Collection\ArrayCollection;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
 
@@ -38,7 +37,7 @@ class JobsAutoMarker
 {
 
     /**
-     * @var LocationCache
+     * @var LocationLookup
      */
     protected $_locmgr = null;
     protected $title_negative_keyword_tokens = null;
@@ -57,37 +56,70 @@ class JobsAutoMarker
      */
     public function __construct()
     {
-        $this->_locmgr = LocationCache::getInstance();
+        $this->_locmgr = LocationLookup::getInstance();
     }
+
 
     /**
      *
      * @param array $userFacts
      * @throws \Exception
      */
-    public function markJobs($userFacts)
+    public function markJobMatches($usersForRun)
     {
-		$this->_markingUserFacts = $userFacts;
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Filter the full jobs list looking for duplicates, etc.
         //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        LogMessage(PHP_EOL . '**************  Updating job match list for known filters ***************' . PHP_EOL);
+        foreach($usersForRun as $userFacts) {
+            $this->_markingUserFacts = $userFacts;
+
+            startLogSection("'{$userFacts['UserSlug']}': Processing user's job matches...");
+            try {
+                $this->_markJobMatchesForUser($userFacts);
+            } catch (\Exception $ex) {
+                handleException($ex, null, true);
+            } finally {
+                $usersForRun = null;
+                endLogSection("{$userFacts['UserSlug']}: Finished job match processing..");
+            }
+        }
 
         try {
-            $this->_markJobsList_OutOfArea_($userFacts);
+            $this->_markJobMatches_ForSend();
         } catch (Exception $ex) {
             LogError($ex->getMessage(), null, $ex);
             $errs[] = $ex;
         }
 
-        try {
+    }
 
-            // Get all the postings that are in the table but not marked as ready-to-send
-            //
+
+    /**
+     *
+     * @param array $userFacts
+     * @throws \Exception
+     */
+    private function _markJobMatchesForUser($userFacts)
+    {
+		$this->_markingUserFacts = $userFacts;
+
+        try {
+            $this->_markJobMatches_OutOfArea($userFacts);
+        } catch (Exception $ex) {
+            LogError($ex->getMessage(), null, $ex);
+            $errs[] = $ex;
+        }
+
+        //
+        // Get all the postings that are in the table but not yet automarked and automark them
+        // in batches so we don't max out RAM
+        //
+        try {
+            startLogSection("{$userFacts['UserSlug']}:  Marking title matches / exclusions...");
             doCallbackForAllMatches(
-                array($this, '_markJobsListSubset_'),
+                array($this, 'markJobsListSubset_KwdsComps'),
                 [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, Criteria::EQUAL],
                 null,
                 null,
@@ -100,6 +132,9 @@ class JobsAutoMarker
         } catch (Exception $ex) {
 	        handleException($ex, null, true);
         }
+        finally {
+            endLogSection("{$userFacts['UserSlug']}: Finished title match / exclusion marking.");
+        }
     }
 
     /**
@@ -107,7 +142,7 @@ class JobsAutoMarker
      *
      * @throws \Exception
      */
-    public function _markJobsListSubset_($results)
+    public function markJobsListSubset_KwdsComps($results)
     {
         $errs = array();
 
@@ -125,6 +160,18 @@ class JobsAutoMarker
             $errs[] = $ex;
         }
 
+        //
+        // Done Automarking this set of Job Matches, so set them to the Marked state
+        //
+        $arrIdsToSetMarked = array_keys($results->toKeyIndex('UserJobMatchId'));
+        $rowsSetAsMarked = UserJobMatchQuery::create()
+            ->filterByUserJobMatchId($arrIdsToSetMarked, Criteria::IN)
+            ->update(array("UserNotificationState" =>
+                UserJobMatchQuery::convertNotificationStateEnumToInt(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED))
+            );
+        LogMessage("... set {$rowsSetAsMarked} user job matches to the 'marked' user notification state.");
+
+
 
         if (!empty($errs)) {
             $err_to_return = '';
@@ -138,69 +185,56 @@ class JobsAutoMarker
             $last = array_pop($ex);
             throw new Exception("AutoMarking Errors Occurred:  {$err_to_return}", $last->getCode(), $last);
         }
-
-
-        //
-        // Since we did not require each update in the previous calls to call save()
-        // for each UserJobMatch and take the perf hit that would generate, it is
-        // probable that some of the rows are inconsistent between their facts for
-        // match exclusion and the IsExcluded fact.  So let's grab them all fresh
-        // from the DB with the updated data and re-save each of them, which will
-        // cause IsExcluded to get updated and back in sync for each record.
-        //
-        // We'll use this same Save call to store that the record has been automarked
-        // and is ready for sending.
-        //
-        LogMessage('Auto-marking complete. Setting marked jobs to \'ready-to-send\'...');
-        try {
-            $con = Propel::getWriteConnection('default');
-            $totalMarkedReady = 0;
-            foreach ($results as $jobMatch) {
-                $jobMatch->setUserNotificationState(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED_READY_TO_SEND);
-                $jobMatch->save($con);
-                $totalMarkedReady = $totalMarkedReady + 1;
-                if ($totalMarkedReady % 100 === 0) {
-                    $con->commit();
-
-                    // fetch a new connection
-                    $con = Propel::getWriteConnection('default');
-                    $nStartMarked = $totalMarkedReady - 100;
-                    LogMessage("... user job matches {$nStartMarked} - {$totalMarkedReady} marked 'ready-to-send.'");
-                }
-            }
-
-            $con->commit();
-        } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
-        }
     }
 
 
     /**
-     * @param \Propel\Runtime\Collection\ObjectCollection $collJobsList
+     * @param array $userFacts
      * @throws \Exception
      */
-    private function _markJobsList_OutOfArea_($userFacts)
+    private function _markJobMatches_OutOfArea($userFacts)
     {
 
-        startLogSection("Automarker: beginning job tagging as in or out of {$userFacts['UserSlug']}'s search areas...");
+        startLogSection("{$userFacts['UserSlug']}:  Marking in/out of search areas...");
 
         try {
-            startLogSection('Calling python to do heavy lifting of out of area tagging in the database...');
-
-
             $runFile = 'pyJobNormalizer/set_out_of_area.py';
             $params = [
                 '-c' => Settings::get_db_dsn(),
                 '--user' => $userFacts['UserSlug']
             ];
 
-            $results = PythonRunner::execScript($runFile, $params);
+            $resultcode = PythonRunner::execScript($runFile, $params);
 
         } catch (Exception $ex) {
             handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
         } finally {
-            endLogSection('Out of area processing finished.');
+            endLogSection("{$userFacts['UserSlug']}':  Finished out of area marking.");
+        }
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    private function _markJobMatches_ForSend()
+    {
+
+        startLogSection("Marking matches for sending...");
+
+        try {
+
+            $runFile = 'pyJobNormalizer/cmd_mark_skipsend.py';
+            $params = [
+                '-c' => Settings::get_db_dsn()
+            ];
+
+            $resultcode = PythonRunner::execScript($runFile, $params);
+
+        } catch (Exception $ex) {
+            handleException($ex, 'ERROR:  Failed to mark job matches for sending.');
+        } finally {
+            endLogSection('Finished marking matches for sending.');
         }
     }
 
@@ -213,7 +247,7 @@ class JobsAutoMarker
     private function _markJobsList_SetAutoExcludedCompaniesFromRegex_(&$arrJobsList)
     {
         try {
-            startLogSection('Automarker: marking company names as excluded based on user input files...');
+            startLogSection('Marking jobs in excluded companies...');
 
             //
             // Load the exclusion filter and other user data from files
@@ -256,7 +290,7 @@ class JobsAutoMarker
         } catch (Exception $ex) {
             handleException($ex, 'Error in _markJobsList_SetAutoExcludedCompaniesFromRegex_: %s', true);
         } finally {
-            endLogSection('Company exclusion by name finished.');
+            startLogSection('Finished marking jobs in excluded companies...');
         }
     }
 
@@ -402,7 +436,6 @@ class JobsAutoMarker
             unset($jobsToUpdate);
             unset($arrMatchRecs);
             $totalMarked =  \count($retUJMIds);
-
             LogMessage("... updated {$totalMarked} user job matches loaded from json file '{$datafile}.");
         } catch (Exception $ex) {
             throw $ex;
@@ -420,7 +453,7 @@ class JobsAutoMarker
             return;
         }
 
-        startLogSection('Automarker: Starting matching of ' .  \count($collJobsList) . ' job role titles against user search keywords ...');
+        startLogSection('Matching user\'s keywords against ' .  \count($collJobsList) . ' job titles...');
 
         try {
             $basefile = 'mark_titlematches';
@@ -429,28 +462,28 @@ class JobsAutoMarker
             $sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $collJobsList);
             $resultsfile = generateOutputFileName("{$basefile}_results", 'json', true, 'debug');
 
+            LogMessage('Calling python to do work of job title matching...');
+
+            $runFile = 'pyJobNormalizer/match_titles_to_keywords.py';
+            $params = [
+                '-i' => $sourcefile,
+                '-o' => $resultsfile
+            ];
+
             try {
-                startLogSection('Calling python to do work of job title matching.');
-
-                $runFile = 'pyJobNormalizer/match_titles_to_keywords.py';
-                $params = [
-                    '-i' => $sourcefile,
-                    '-o' => $resultsfile
-                ];
-
-                $results = PythonRunner::execScript($runFile, $params);
+                $resultcode = PythonRunner::execScript($runFile, $params);
 
                 LogMessage('Updating database with new match results...');
                 $this->_updateUserJobMatchesFromJson($resultsfile, $collJobsList);
             } catch (Exception $ex) {
                 throw $ex;
             } finally {
-                endLogSection('Python command call finished.');
+                LogMessage("Python command {$runFile} finished.");
             }
         } catch (Exception $ex) {
             handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s');
         } finally {
-            endLogSection('Job role title matching finished.');
+            endLogSection('Finished: search keyword/job title matching.');
         }
     }
 

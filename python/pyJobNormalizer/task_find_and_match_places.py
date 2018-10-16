@@ -17,8 +17,8 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from database import DatabaseMixin
-from urllib import urlencode
+from mixin_database import DatabaseMixin
+from urllib.parse import urlencode
 import requests
 from helpers import dump_var_to_json
 
@@ -100,7 +100,8 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             WHERE 
                 jobposting.geolocation_id IS NULL AND 
                 location IS NOT NULL AND 
-                location NOT LIKE ''
+                location NOT LIKE '' AND 
+                first_seen_at >= CURDATE() - 7
             GROUP BY location
             ORDER BY location
             """
@@ -135,7 +136,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         rows_updated = self.run_command(statement, close_connection=False)
         print(u"Updated {} rows missing information for '{} ({})'".format(rows_updated, loc,
-                                                                          unicode(locfacts)))
+                                                                          str(locfacts)))
         return rows_updated
 
     def _update_missing_db_known_locs(self, locs):
@@ -181,7 +182,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             else:
                 r.raise_for_status()
 
-        except requests.exceptions.Timeout, t:
+        except requests.exceptions.Timeout as t:
             if retries < MAX_RETRIES:
                 print(u"Warning:  API request '{}' timed out on retry #.   Retrying {} more times...".format(r.url,
                                                                                                              MAX_RETRIES - retries))
@@ -192,9 +193,9 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 print(u"ERROR:  API request '{}' timed out and has exceeded max retry count.".format(r.url))
                 raise t
             pass
-        except Exception, ex:
+        except Exception as ex:
             print(u"ERROR:  API request '{}' failed:  ".format(r.url), str(ex))
-            raise ex
+            raise(ex)
 
         finally:
             r = None
@@ -217,10 +218,10 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 # Do place lookup
                 place_details = {}
 
-                payload = {'query': unicode(loc)}
+                payload = {'query': str(loc)}
                 # headers = {'content-type': 'application/json'}
                 headers = {}
-                print(u"Looking up place for location search value '{}'".format(unicode(loc)))
+                print(u"Looking up place for location search value '{}'".format(str(loc)))
                 kwargs = {
                     'url': u"{}/places/lookup".format(geocode_server),
                     'params': payload,
@@ -230,20 +231,32 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
                 print(u"... calling API '{}?{}".format(kwargs['url'], urlencode(payload)))
                 place_details = self.call_geocode_api(**kwargs)
-                print(u"... place returned from API: {}".format(dump_var_to_json(place_details)))
 
                 if place_details and len(place_details) > 0:  # if found place:
+                    msgPlaceMatch = " place_id=None "
+                    if 'place_id' in place_details and place_details['place_id']:
+                        msgPlaceMatch = " place_id={} ".format(place_details['place_id'])
+
+                    print(u"... place returned from API: {}, location={}".format(msgPlaceMatch,
+                                                                                          place_details[
+                                                                                              'formatted_address']))
 
                     #   insert GeoLocation into DB
-                    geolocfacts = {PLACE_DETAIL_GEOCODE_MAPPING[pkey]: unicode(place_details[pkey]) for pkey in
+                    geolocfacts = {PLACE_DETAIL_GEOCODE_MAPPING[pkey]: str(place_details[pkey]) for pkey in
                                    place_details.keys() if pkey in PLACE_DETAIL_GEOCODE_MAPPING.keys() and
                                    place_details[pkey] is not None
                                    }
                     if geolocfacts and len(geolocfacts) > 0:
-                        print(u"... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
+                        # print(u"... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
+
+                        if 'geolocation_key' in geolocfacts and len(geolocfacts['geolocation_key']) > 100:
+                            geolocfacts['geolocation_key'] = geolocfacts['geolocation_key'][0:100]
+
+                        if 'display_name' in geolocfacts and len(geolocfacts['display_name']) > 100:
+                            geolocfacts['display_name'] = geolocfacts['display_name'][0:100]
 
                         ins_result = self.add_row("geolocation", "geolocation_id", geolocfacts, self._geoloc_columns)
-                        print(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
+                        # print(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
 
                         total_loc_found += 1
 
@@ -256,12 +269,14 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                         rows_updated = self._update_mappings_for_loc(loc, locfacts)
                         total_jp_updated += rows_updated
                     else:
-                        print(u"... TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
+                        print(u"... place_id {} found for {} but could not be geocoded.".format(place_details['place_id'], str(loc)))
+                        # print(u"... TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
                         total_loc_notfound += 1
                     # if not found place:
                     #   add to failed lookups dataset
                 else:
-                    print(u"... TODO -- store failed lookups like '{}' to skip future failures".format(loc))
+                    print(u"... place for {} not found via API".format(str(loc)))
+                    # print(u"... TODO -- store failed lookups like '{}' to skip future failures".format(loc))
                     total_loc_notfound += 1
 
         except Exception as e:
