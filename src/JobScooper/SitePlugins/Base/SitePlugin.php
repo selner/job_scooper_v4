@@ -1778,15 +1778,26 @@ JSCODE;
                         $this->selenium->done();
                     }
 
+                    // First load the home page of the search site.  This allows us to get any cookies set we may need
+                    $searchStartUrl = $searchDetails->getSearchStartUrl();
+                    $parsed = parse_url($searchStartUrl);
+                    $parsed['path'] = null;
+                    $parsed['query'] = null;
+                    $parsed['fragment'] = null;
+                    $homePageUrl = glue_url($parsed);
+                    $html = null;
+
+                    $this->log("Browsing to {$homePageUrl} home page...");
+                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $homePageUrl);
+
+
                     if (method_exists($this, 'doFirstPageLoad') && $nPageCount == 1) {
                         $html = $this->doFirstPageLoad($searchDetails);
-                        if (empty($html) && $this->getActiveWebdriver()->getCurrentURL() === 'about:blank') {
-		                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
-                        }
-                    } else {
-	                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
                     }
-                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
+                    if(is_empty_value($html)) {
+                        $this->getActiveWebdriver()->get($searchStartUrl);
+                        $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
+                    }
                 } catch (Exception $ex) {
                     $strError = 'Failed to get dynamic HTML via Selenium due to error:  ' . $ex->getMessage();
                     handleException(new Exception($strError), null, true, $extraData=$searchDetails->toLoggedContext());
