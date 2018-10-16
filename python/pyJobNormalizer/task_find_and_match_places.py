@@ -20,8 +20,6 @@
 from mixin_database import DatabaseMixin
 from urllib.parse import urlencode
 import requests
-from helpers import dump_var_to_json
-
 MAX_RETRIES = 3
 PLACE_DETAIL_GEOCODE_MAPPING = {
     "formatted_address": "display_name",

@@ -122,9 +122,9 @@ class BaseTaskDedupeJobPostings:
         try:
             tokenizer = Tokenizer()
             jobsdata = tokenizer.batch_tokenize_strings(jobsdata, u'Title', u'TitleTokens', u'set')
-        except Exception, ex:
+        except Exception as ex:
             print("Error tokenizing strings:  {}".format(ex))
-            raise ex
+            raise(ex)
 
         print("Reorganizing source data for duplicate matching...")
         for rowkey in jobsdata.keys():

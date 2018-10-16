@@ -169,9 +169,9 @@ class DatabaseMixin:
             else:
                 return total_rows
 
-        except Exception, ex:
-            print ex
-            raise ex
+        except Exception as ex:
+            print(ex)
+            raise(ex)
 
         finally:
             if self.connection.is_connected():
@@ -196,9 +196,10 @@ class DatabaseMixin:
             with self.new_cursor() as cursor:
                 return cursor.executemany(querysql, records)
 
-        except Exception, ex:
-            print ex
-            raise ex
+        except Exception as ex:
+            print(ex)
+            raise (ex)
+
 
         finally:
             self.connection.commit()
@@ -295,5 +296,5 @@ class DatabaseMixin:
     @staticmethod
     def convert_column_value_to_array(str):
         if str and len(str) > 0:
-            return unicode(str).split(ARRAY_JOIN_TOKEN)
+            return str.split(ARRAY_JOIN_TOKEN)
 

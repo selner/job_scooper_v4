@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 from util_tokenize import Tokenizer
-from database import DatabaseMixin
+from mixin_database import DatabaseMixin
 
 class TaskAddTitleTokens(DatabaseMixin):
     _tokenizer = None

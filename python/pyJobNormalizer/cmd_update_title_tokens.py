@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 from helpers import docopt_ext
-from task_match_titles import TaskMatchJobsToKeywords
+from task_tokenize_jobtitles import TaskAddTitleTokens
 
 cli_usage = """
 Usage:
