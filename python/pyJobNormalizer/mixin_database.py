@@ -65,12 +65,17 @@ class DatabaseMixin:
             self.dbparams['port'] = int(self.dbparams.pop('port'))
 
     @property
+    def connect_params(self):
+        return {k: self.dbparams[k] for k in self.dbparams if
+                  k in ["host", "password", "user", "port", "cursorclass", "use_unicode", "database"]}
+
+    @property
     def connection(self):
         if not self._connection:
             if not self.dbparams:
                 raise Exception(u"Connection must be initialized before it can be accessed.")
 
-            self._connection = pymysql.connect(**self.dbparams)
+            self._connection = pymysql.connect(**self.connect_params)
 
         return self._connection
 
