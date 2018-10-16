@@ -47,22 +47,14 @@ class BaseTaskDedupeJobPostings:
 
     @property
     def outputfile(self):
-        return self.outputfile
-
-    @outputfile.setter
-    def outputfile(self, filepath):
-        """
-        Args:
-            filepath:
-        """
-        self._outputfile = filepath
+        return self._outputfile
 
     def __init__(self, outputfile=None):
         """
         Args:
             outputfile:
         """
-        self.outputfile = outputfile
+        self._outputfile = outputfile
 
     def dedupe_jobs(self):
 
