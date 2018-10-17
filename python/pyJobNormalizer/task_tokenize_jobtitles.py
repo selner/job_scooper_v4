@@ -78,18 +78,28 @@ class TaskAddTitleTokens(DatabaseMixin):
         if len(jobs_to_process) > 0:
             updated_jobs = self._tokenizer.batch_tokenize_strings(jobs_to_process, u'title', u'title_tokens', u'dict')
             for key in updated_jobs.keys():
-                row_refkey_titleval = u"_".join(updated_jobs[key]['title_tokens'])
-                company = updated_jobs[key]['company']
-                if len(company) > 0:
-                    company = company.lower().replace(" ", "")
+                if not ('title_tokens' in updated_jobs[key] and
+                        updated_jobs[key]['title_tokens'] and
+                        len(updated_jobs[key]['title_tokens']) > 0):
+                    print("Warning:  job {} did not successfully generate the needed title tokens for title '{}'".format(key, updated_jobs[key]['title']))
+                else:
+                    row_refkey_titleval = u"_".join(updated_jobs[key]['title_tokens'])
 
-                val_comptitle = u"{}{}".format(company, u"".join(updated_jobs[key]['title_tokens']))
-                db_updates.append([
-                    self.convert_array_to_column_value(updated_jobs[key]['title_tokens']),
-                    row_refkey_titleval,
-                    val_comptitle,
-                    key
-                ])
+                    val_comptitle = "UNKNOWN_COMPANY"
+                    if ('company' in updated_jobs[key] and
+                            updated_jobs[key]['company'] and
+                            len(updated_jobs[key]['company']) > 0):
+                        company = updated_jobs[key]['company']
+                        company = company.lower().replace(" ", "")
+
+                        val_comptitle = u"{}{}".format(company, u"".join(updated_jobs[key]['title_tokens']))
+
+                    db_updates.append([
+                        self.convert_array_to_column_value(updated_jobs[key]['title_tokens']),
+                        row_refkey_titleval,
+                        val_comptitle,
+                        key
+                    ])
 
             rowcount = self.update_many(upd_query, db_updates)
             # print(u"Updated title tokens for {} jobposting records".format(rowcount))
