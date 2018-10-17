@@ -183,13 +183,14 @@ class StageManager
                         //
                         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         try {
-                            startLogSection("Downloading latest jobs from {$jobsiteKey} for users...");
-                            if (!is_empty_value($searchRuns)) {
-                                startLogSection("Getting latest jobs for {$totalSearches} search(es) for {$jobsiteKey} from the web...");
+                            startLogSection("Getting latest jobs {$jobsiteKey} from the web for {$totalSearches} potential search(es)...");
+                            if (!is_empty_value($searchRuns) && \count($searchRuns) > 0) {
                                 $sitePlugin->downloadLatestJobsForAllSearches();
                             }
+                            $didRunSearches = true;
                         } catch (\Exception $classError) {
                             handleException($classError, "{$jobsiteKey} failed to get latest job postings for {$jobsiteKey}: %s", $raise = true);
+                            $didRunSearches = false;
                         } finally {
                             endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
                         }
@@ -223,7 +224,7 @@ class StageManager
                         }
 
                     } else {
-                        LogWarning('No searches have been set to be run.');
+                        LogWarning('No users have been set to be run.');
                     }
 
                 } catch (\Exception $ex) {
