@@ -106,7 +106,7 @@ class Tokenizer:
     _expandwords = None
 
     def __init__(self):
-        self.exclude = set(codecs.encode(string.punctuation, "utf-8"))
+        self.exclude = string.punctuation
         self.snowstemmer = SnowballStemmer("english")
         self.stopwrds = stopwords.words('english')
 
@@ -171,6 +171,15 @@ class Tokenizer:
         retwords = [self.snowstemmer.stem(i) for i in listwords]
         return retwords
 
+    def replace_punctuation(self, value, replace_with=" "):
+        s = ""
+        for ch in str(value):
+            if ch in self.exclude:
+                s += replace_with
+            else:
+                s += ch
+        return s
+
     @property
     def expandedwords(self):
         global expanded_words_list
@@ -189,7 +198,7 @@ class Tokenizer:
         if len(str_words) <= 0:
             return ret_words
 
-        s = u''.join(ch for ch in str_words if ch not in self.exclude)
+        s = self.replace_punctuation(str_words, " ")
 
         words = nltk.word_tokenize(s)
         for i in words:
