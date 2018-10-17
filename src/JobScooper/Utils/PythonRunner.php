@@ -25,34 +25,43 @@ namespace JobScooper\Utils;
  */
 class PythonRunner {
 
-	
+    static function getPythonExec() {
+        $pythonExec = 'python ';
+        $venvDir = __ROOT__ . '/python/.venv/bin';
+        if(is_dir($venvDir)) {
+            $pythonExec = preg_replace("/python /", "source {$venvDir}/activate; python ", $pythonExec);
+        }
+
+        return $pythonExec;
+    }
+
 	/**
-	 * @param $python_file
-	 * @param array $script_params
-	 * @return null|string
+	 * @param string $scriptFile
+	 * @param string[] $script_params
+	 * @return null|string|integer
+     *
 	 * @throws \Exception
 	*/
-	static function execScript($python_file, $script_params=array()) {
+	static function execScript($scriptFile, $script_params=array()) {
 
         try {
-            $PYTHONPATH = realpath(__ROOT__ . "/python/{$python_file}");
+            $exec = PythonRunner::getPythonExec();
+
+            $scriptPath = __ROOT__ . "/python/{$scriptFile}";
             $cmdLine = "";
             foreach($script_params as $key => $value) {
             	$cmdLine .= " {$key} " . escapeshellarg($value);
             }
-            
-            $pythonCmd = $PYTHONPATH . $cmdLine;
-            $pythonExec = 'python ';
-            $venvDir = __ROOT__ . '/python/.venv/bin';
-            if(is_dir($venvDir)) {
-                $pythonExec = preg_replace("/python /", "source {$venvDir}/activate; python ", $pythonExec);
+
+            $pythonScriptPath = realpath($scriptPath);
+            if(is_empty_value($pythonScriptPath) || $pythonScriptPath === false) {
+                throw new \Exception("Python script file '{$scriptPath} could not be found.");
             }
+            LogMessage(PHP_EOL . "    ~~~~~~ Running command: {$exec} {$pythonScriptPath} {$cmdLine}  ~~~~~~~" . PHP_EOL);
 
-            LogMessage(PHP_EOL . "    ~~~~~~ Running command: {$pythonExec} {$pythonCmd}  ~~~~~~~" . PHP_EOL);
-
-            $resultcode  = doExec("{$pythonExec} {$pythonCmd}");
+            $resultcode  = doExec("{$exec} {$pythonScriptPath} {$cmdLine}");
         } catch (\Exception $ex) {
-            throw $ex;
+            handleException($ex);
         }
         return $resultcode;
         
