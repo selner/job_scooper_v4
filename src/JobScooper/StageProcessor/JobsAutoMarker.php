@@ -290,7 +290,7 @@ class JobsAutoMarker
         } catch (Exception $ex) {
             handleException($ex, 'Error in _markJobsList_SetAutoExcludedCompaniesFromRegex_: %s', true);
         } finally {
-            startLogSection('Finished marking jobs in excluded companies...');
+            endLogSection('Finished marking jobs in excluded companies...');
         }
     }
 

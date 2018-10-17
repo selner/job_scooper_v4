@@ -148,10 +148,10 @@ class StageManager
 
             foreach ($jobsiteKeys as $jobsiteKey) {
 
-                startLogSection("Downloading jobs from {$jobsiteKey} for " . \count($usersForRun) . ' users.');
                 $searchRuns = array();
 
                 try {
+                    startLogSection("Downloading new jobs from {$jobsiteKey} for " . \count($usersForRun) . ' users.');
                     $site = JobSiteManager::getJobSiteByKey($jobsiteKey);
                     assert(!is_empty_value($site));
 
@@ -162,9 +162,9 @@ class StageManager
                         // Add the user's searches to the plugin
                         //
                         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        startLogSection("Initializing search(es) for users at {$jobsiteKey}");
 
                         try {
+                            startLogSection("Initializing search(es) for users at {$jobsiteKey}");
                             $searchRuns = $site->generateUserSiteRuns($usersForRun);
                             $sitePlugin = $this->_getJobSitePluginInstance($jobsiteKey);
                             if (!is_empty_value($searchRuns)) {
@@ -183,6 +183,7 @@ class StageManager
                         //
                         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         try {
+                            startLogSection("Downloading latest jobs from {$jobsiteKey} for users...");
                             if (!is_empty_value($searchRuns)) {
                                 startLogSection("Getting latest jobs for {$totalSearches} search(es) for {$jobsiteKey} from the web...");
                                 $sitePlugin->downloadLatestJobsForAllSearches();
@@ -217,7 +218,7 @@ class StageManager
                             } catch (\Exception $ex) {
                                 handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
                             } finally {
-                                endLogSection("End cloning to jobpostings to users");
+                                endLogSection("End cloning {$jobsiteKey} jobpostings to other users.");
                             }
                         }
 
@@ -242,7 +243,7 @@ class StageManager
                     }
                     $user = null;
                     $searchRuns = null;
-                    endLogSection("Done downloading jobs for {$jobsiteKey}");
+                    endLogSection("Completed getting new job postings for {$jobsiteKey}.'");
                 }
             }
         } catch (\Exception $ex) {
