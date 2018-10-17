@@ -144,46 +144,31 @@ class JobsAutoMarker
      */
     public function markJobsListSubset_KwdsComps($results)
     {
-        $errs = array();
-
         try {
             $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($results);
         } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
-            $errs[] = $ex;
+            handleException($ex, "Failed to mark job postings from excluded companies: %s", true);
         }
 
         try {
             $this->_markJobsList_KeywordMatches_($results);
         } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
-            $errs[] = $ex;
+            handleException($ex, "Failed to mark job postings matches to user keywords: %s", true);
         }
 
         //
         // Done Automarking this set of Job Matches, so set them to the Marked state
         //
-        $arrIdsToSetMarked = array_keys($results->toKeyIndex('UserJobMatchId'));
-        $rowsSetAsMarked = UserJobMatchQuery::create()
-            ->filterByUserJobMatchId($arrIdsToSetMarked, Criteria::IN)
-            ->update(array("UserNotificationState" =>
-                UserJobMatchQuery::convertNotificationStateEnumToInt(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED))
-            );
-        LogMessage("... set {$rowsSetAsMarked} user job matches to the 'marked' user notification state.");
-
-
-
-        if (!empty($errs)) {
-            $err_to_return = '';
-            foreach ($errs as $ex) {
-                if (!empty($err_to_return)) {
-                    $err_to_return .= PHP_EOL . PHP_EOL;
-                }
-                $err_to_return .= getArrayDebugOutput(object_to_array($ex));
-            }
-
-            $last = array_pop($ex);
-            throw new Exception("AutoMarking Errors Occurred:  {$err_to_return}", $last->getCode(), $last);
+        try {
+            $arrIdsToSetMarked = array_keys($results->toKeyIndex('UserJobMatchId'));
+            $rowsSetAsMarked = UserJobMatchQuery::create()
+                ->filterByUserJobMatchId($arrIdsToSetMarked, Criteria::IN)
+                ->update(array("UserNotificationState" =>
+                    UserJobMatchQuery::convertNotificationStateEnumToInt(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_MARKED))
+                );
+            LogMessage("... set {$rowsSetAsMarked} user job matches to the 'marked' user notification state.");
+        } catch (Exception $ex) {
+            handleException($ex, "Failed to move job postings to 'marked' state: %s", true);
         }
     }
 
