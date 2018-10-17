@@ -117,7 +117,7 @@ class TaskMatchJobsToKeywords:
                     print("Loaded {} jobs for matching.".format(len(self.input_data[JSON_KEY_JOBMATCHES])))
 
                     tokenizer = Tokenizer()
-                    self.jobs = tokenizer.tokenize_strings(self.jobs, u'Title', u'TitleTokens', u'set')
+                    self.jobs = tokenizer.batch_tokenize_strings(self.jobs, u'Title', u'TitleTokens', u'set')
 
     @staticmethod
     def get_unique_keywd_set(keywords):
@@ -211,7 +211,7 @@ class TaskMatchJobsToKeywords:
                         'keyword': keyword,
                         'tokens': None
                     }
-                    outdata = self.tokenizer.tokenize_strings(self.keywords, 'keyword', 'tokens')
+                    outdata = self.tokenizer.batch_tokenize_strings(self.keywords, 'keyword', 'tokens')
 
                 self.keywords = outdata
 
@@ -222,7 +222,7 @@ class TaskMatchJobsToKeywords:
                     'keyword': kwdkey,
                     'tokens': None
                 }
-            data = self.tokenizer.tokenize_strings(self.negative_keywords, 'keyword', 'tokens')
+            data = self.tokenizer.batch_tokenize_strings(self.negative_keywords, 'keyword', 'tokens')
             self.negative_keywords = data
 
         print(u"Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords),
