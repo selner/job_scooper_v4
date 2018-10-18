@@ -29,7 +29,7 @@ DATA_KEY_JOBPOSTINGS = u'job_postings'
 DATA_KEY_JOBPOSTINGS_KEYFIELD = u'JobPostingId'
 DATA_KEY_USER = u'user'
 DATA_KEY_OUTPUT_DUPLICATE_IDS = u'user'
-JSON_DEDUPE_FIELDS = ["JobPostingId", "Title", "Company", "JobSite", "GeoLocationId", "KeyCompanyAndTitle",
+JSON_DEDUPE_FIELDS = ["JobPostingId", "Title", "Company", "JobSite", "LocationDisplayValue", "KeyCompanyAndTitle",
                       "FirstSeenAt", "DuplicatesJobPostingId", "WasDuplicate"]
 
 from task_tokenize_jobtitles import TaskAddTitleTokens
@@ -76,27 +76,44 @@ class BaseTaskDedupeJobPostings:
         dfjobs.sort_values('JobPostingId', ascending=True)
 
         print("Marking jobs as duplicate...")
-        dfjobs["is_duplicate"] = dfjobs.duplicated({"Company", "TitleTokensString", "GeoLocationId"}, keep="first")
-        dfjobs["is_duplicate_stringver"] = dfjobs.duplicated("CompanyTitleGeoLocation", keep="first")
+        dfjobs["is_duplicate"] = dfjobs.duplicated({"Company", "TitleTokensString", "LocationDisplayValue"}, keep="first")
+        dfjobs["is_duplicate_stringver"] = dfjobs.duplicated("CompanyTitleLocation", keep="first")
         dict_orig_posts = dfjobs[(dfjobs["is_duplicate"] == False)].to_dict(orient="index")
         dict_dupe_posts = dfjobs[(dfjobs["is_duplicate"] == True)].to_dict(orient="index")
-        dict_orig_by_comptitle = {v["CompanyTitleGeoLocation"]: v["JobPostingId"] for (n, v) in dict_orig_posts.items() if
-                               "CompanyTitleGeoLocation" in v.keys()}
+        dict_orig_by_comptitle = {v["CompanyTitleLocation"]: v["JobPostingId"] for (n, v) in dict_orig_posts.items() if
+                               "CompanyTitleLocation" in v.keys()}
+
+
+        # self.df_to_csv("/tmp/dfjobs_export.csv", dfjobs)
 
         print("Preparing duplicate job post results for export...")
         ret_dupes_by_jobid = {}
         for jobid in dict_dupe_posts:
             item = dict_dupe_posts[jobid]
-            str_comptitle = item["CompanyTitleGeoLocation"]
+            str_comptitle = item["CompanyTitleLocation"]
             ret_dupes_by_jobid[jobid] = {
                 "JobPostingId": jobid,
-                "CompanyTitleGeoLocation": str_comptitle,
+                "CompanyTitleLocation": str_comptitle,
                 "isDuplicateOf": dict_orig_by_comptitle[str_comptitle],
                 "WasDuplicate": item["WasDuplicate"]
             }
 
         print("{} / {} job postings have been marked as duplicate".format(len(ret_dupes_by_jobid), len(self.jobs)))
         self.output_data = {"duplicate_job_postings": ret_dupes_by_jobid}
+
+    # def df_to_csv(self, csvpath, dfdata):
+    #     dict_jobs = dfdata.to_dict(orient="index")
+    #     loutput = list()
+    #
+    #     import os, sys
+    #     loutput.append(",".join(dfdata.columns) + os.linesep)
+    #     for row in dict_jobs.values():
+    #         rowfacts = [str(k).replace(os.linesep, "") for k in row.values()]
+    #         loutput.append("\"" + "\",\"".join(rowfacts) + "\"" + os.linesep)
+    #
+    #     with open(csvpath, "w") as fp:
+    #         fp.writelines(loutput)
+    #     print("Data written to {}".format(csvpath))
 
     def export_results(self):
         print("Exporting final match results to {}".format(self.outputfile))
@@ -139,14 +156,12 @@ class BaseTaskDedupeJobPostings:
 
                 subitem["WasDuplicate"] = (item['DuplicatesJobPostingId'] is not None)
 
-                if "GeoLocationId" in subitem and subitem["GeoLocationId"]:
-                    loc = subitem["GeoLocationId"]
-                elif "LocationDisplayValue" in subitem and subitem["LocationDisplayValue"]:
+                if "LocationDisplayValue" in subitem and subitem["LocationDisplayValue"]:
                     loc = subitem["LocationDisplayValue"]
                 else:
                     loc = "NOLOCATION"
 
-                subitem["CompanyTitleGeoLocation"] = "_".join([
+                subitem["CompanyTitleLocation"] = "_".join([
                     subitem["TitleTokensString"],
                     subitem["CompanyCleaned"],
                     str(loc)
@@ -186,14 +201,13 @@ class TaskDedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
 
         print(u"Connecting to database...")
 
-
         querysql = u"""
             SELECT 
                 jobposting_id as `JobPostingId`, 
                 key_company_and_title as `KeyCompanyTitle`, 
                 title as `Title`, 
                 company as `Company`, 
-                geolocation_id as `GeoLocationId`, 
+                location_display_value as `LocationDisplayValue`,
                 duplicates_posting_id as `DuplicatesJobPostingId`
             FROM jobposting
             WHERE job_posted_date >= '{}'
