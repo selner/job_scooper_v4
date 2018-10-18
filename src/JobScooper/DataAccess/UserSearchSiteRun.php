@@ -346,6 +346,9 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
      */
     private function _callPluginMethodIfExists($method, $arr)
     {
+        if(!is_array($arr) && !is_empty_value($arr)) {
+            $arr = array($arr);
+        }
         $plugin = $this->getSitePlugin();
         if (null !== $plugin) {
             if (method_exists($plugin, $method)) {
