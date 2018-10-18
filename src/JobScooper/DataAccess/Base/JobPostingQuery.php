@@ -1363,23 +1363,6 @@ abstract class JobPostingQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related User object
-     * using the user_job_match table as cross reference
-     *
-     * @param User $user the related object to use as filter
-     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildJobPostingQuery The current query, for fluid interface
-     */
-    public function filterByUserFromUJM($user, $comparison = Criteria::EQUAL)
-    {
-        return $this
-            ->useUserJobMatchQuery()
-            ->filterByUserFromUJM($user, $comparison)
-            ->endUse();
-    }
-
-    /**
      * Exclude object from result
      *
      * @param   ChildJobPosting $jobPosting Object to remove from the list of results

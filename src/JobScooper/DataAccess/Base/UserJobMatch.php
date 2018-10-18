@@ -1205,6 +1205,10 @@ abstract class UserJobMatch implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
+        $this->modifiedColumns[UserJobMatchTableMap::COL_USER_JOB_MATCH_ID] = true;
+        if (null !== $this->user_job_match_id) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . UserJobMatchTableMap::COL_USER_JOB_MATCH_ID . ')');
+        }
 
          // check the columns in natural order for more readable SQL queries
         if ($this->isColumnModified(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID)) {
@@ -1303,7 +1307,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
         } catch (Exception $e) {
             throw new PropelException('Unable to get autoincrement id.', 0, $e);
         }
-        $this->setUserId($pk);
+        $this->setUserJobMatchId($pk);
 
         $this->setNew(false);
     }
@@ -1705,8 +1709,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     public function buildPkeyCriteria()
     {
         $criteria = ChildUserJobMatchQuery::create();
-        $criteria->add(UserJobMatchTableMap::COL_USER_ID, $this->user_id);
-        $criteria->add(UserJobMatchTableMap::COL_JOBPOSTING_ID, $this->jobposting_id);
+        $criteria->add(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $this->user_job_match_id);
 
         return $criteria;
     }
@@ -1719,25 +1722,10 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function hashCode()
     {
-        $validPk = null !== $this->getUserId() &&
-            null !== $this->getJobPostingId();
+        $validPk = null !== $this->getUserJobMatchId();
 
-        $validPrimaryKeyFKs = 2;
+        $validPrimaryKeyFKs = 0;
         $primaryKeyFKs = [];
-
-        //relation user_job_match_fk_38da1e to table user
-        if ($this->aUserFromUJM && $hash = spl_object_hash($this->aUserFromUJM)) {
-            $primaryKeyFKs[] = $hash;
-        } else {
-            $validPrimaryKeyFKs = false;
-        }
-
-        //relation user_job_match_fk_dd5799 to table jobposting
-        if ($this->aJobPostingFromUJM && $hash = spl_object_hash($this->aJobPostingFromUJM)) {
-            $primaryKeyFKs[] = $hash;
-        } else {
-            $validPrimaryKeyFKs = false;
-        }
 
         if ($validPk) {
             return crc32(json_encode($this->getPrimaryKey(), JSON_UNESCAPED_UNICODE));
@@ -1749,29 +1737,23 @@ abstract class UserJobMatch implements ActiveRecordInterface
     }
 
     /**
-     * Returns the composite primary key for this object.
-     * The array elements will be in same order as specified in XML.
-     * @return array
+     * Returns the primary key for this object (row).
+     * @return int
      */
     public function getPrimaryKey()
     {
-        $pks = array();
-        $pks[0] = $this->getUserId();
-        $pks[1] = $this->getJobPostingId();
-
-        return $pks;
+        return $this->getUserJobMatchId();
     }
 
     /**
-     * Set the [composite] primary key.
+     * Generic method to set the primary key (user_job_match_id column).
      *
-     * @param      array $keys The elements of the composite key (order must match the order in XML file).
+     * @param       int $key Primary key.
      * @return void
      */
-    public function setPrimaryKey($keys)
+    public function setPrimaryKey($key)
     {
-        $this->setUserId($keys[0]);
-        $this->setJobPostingId($keys[1]);
+        $this->setUserJobMatchId($key);
     }
 
     /**
@@ -1780,7 +1762,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function isPrimaryKeyNull()
     {
-        return (null === $this->getUserId()) && (null === $this->getJobPostingId());
+        return null === $this->getUserJobMatchId();
     }
 
     /**

@@ -197,7 +197,6 @@ class UserTableMap extends TableMap
     1 => ':user_id',
   ),
 ), 'CASCADE', null, 'UserJobMatches', false);
-        $this->addRelation('JobPostingFromUJM', '\\JobScooper\\DataAccess\\JobPosting', RelationMap::MANY_TO_MANY, array(), 'CASCADE', null, 'JobPostingFromUJMs');
     } // buildRelations()
 
     /**

@@ -358,25 +358,26 @@
 
 
     <table name="user_job_match" phpName="UserJobMatch" isCrossRef="true" heavyIndexing="true">
+        <!-- ~~~~~~~~~  PRIMARY KEY ~~~~~~~~~~~~~~~~  -->
+
+        <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true"
+                autoIncrement="true" primaryKey="true"/>
+        <unique>
+            <unique-column name="user_job_match_id"/>
+        </unique>
+
 
         <vendor type="mysql">
             <parameter name="Charset" value="utf8mb4"/>
             <parameter name="Collate" value="utf8mb4_unicode_ci"/>
         </vendor>
 
+
         <!-- ~~~~~~~~~  ALTERNATE KEY ~~~~~~~~~~~~~~~~  -->
 
-        <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true"
-                autoIncrement="true"/>
-        <unique>
-            <unique-column name="user_job_match_id"/>
-        </unique>
+        <column name="user_id" phpName="UserId" type="integer" required="true"/>
 
-        <!-- ~~~~~~~~~  PRIMARY KEY ~~~~~~~~~~~~~~~~  -->
-
-        <column name="user_id" phpName="UserId" type="integer" required="true" primaryKey="true"/>
-
-        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true"/>
+        <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
 
         <!-- ~~~~~~~~~  OTHER COLUMNS  ~~~~~~~~~~~~~~~~  -->
 

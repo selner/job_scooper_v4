@@ -170,10 +170,10 @@ abstract class UserJobMatchQuery extends ModelCriteria
      * Go fast if the query is untouched.
      *
      * <code>
-     * $obj = $c->findPk(array(12, 34), $con);
+     * $obj  = $c->findPk(12, $con);
      * </code>
      *
-     * @param array[$user_id, $jobposting_id] $key Primary key to use for the query
+     * @param mixed $key Primary key to use for the query
      * @param ConnectionInterface $con an optional connection object
      *
      * @return ChildUserJobMatch|array|mixed the result, formatted by the current formatter
@@ -198,7 +198,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
             return $this->findPkComplex($key, $con);
         }
 
-        if ((null !== ($obj = UserJobMatchTableMap::getInstanceFromPool(serialize([(null === $key[0] || is_scalar($key[0]) || is_callable([$key[0], '__toString']) ? (string) $key[0] : $key[0]), (null === $key[1] || is_scalar($key[1]) || is_callable([$key[1], '__toString']) ? (string) $key[1] : $key[1])]))))) {
+        if ((null !== ($obj = UserJobMatchTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
             // the object is already in the instance pool
             return $obj;
         }
@@ -219,11 +219,10 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     protected function findPkSimple($key, ConnectionInterface $con)
     {
-        $sql = 'SELECT user_job_match_id, user_id, jobposting_id, is_job_match, good_job_title_keyword_matches, is_excluded, out_of_user_area, bad_job_title_keyword_matches, bad_company_name_keyword_matches, user_notification_state, last_updated_at, first_matched_at FROM user_job_match WHERE user_id = :p0 AND jobposting_id = :p1';
+        $sql = 'SELECT user_job_match_id, user_id, jobposting_id, is_job_match, good_job_title_keyword_matches, is_excluded, out_of_user_area, bad_job_title_keyword_matches, bad_company_name_keyword_matches, user_notification_state, last_updated_at, first_matched_at FROM user_job_match WHERE user_job_match_id = :p0';
         try {
             $stmt = $con->prepare($sql);
-            $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);
-            $stmt->bindValue(':p1', $key[1], PDO::PARAM_INT);
+            $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
             $stmt->execute();
         } catch (Exception $e) {
             Propel::log($e->getMessage(), Propel::LOG_ERR);
@@ -234,7 +233,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
             /** @var ChildUserJobMatch $obj */
             $obj = new ChildUserJobMatch();
             $obj->hydrate($row);
-            UserJobMatchTableMap::addInstanceToPool($obj, serialize([(null === $key[0] || is_scalar($key[0]) || is_callable([$key[0], '__toString']) ? (string) $key[0] : $key[0]), (null === $key[1] || is_scalar($key[1]) || is_callable([$key[1], '__toString']) ? (string) $key[1] : $key[1])]));
+            UserJobMatchTableMap::addInstanceToPool($obj, null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key);
         }
         $stmt->closeCursor();
 
@@ -263,7 +262,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
     /**
      * Find objects by primary key
      * <code>
-     * $objs = $c->findPks(array(array(12, 56), array(832, 123), array(123, 456)), $con);
+     * $objs = $c->findPks(array(12, 56, 832), $con);
      * </code>
      * @param     array $keys Primary keys to use for the query
      * @param     ConnectionInterface $con an optional connection object
@@ -293,10 +292,8 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     public function filterByPrimaryKey($key)
     {
-        $this->addUsingAlias(UserJobMatchTableMap::COL_USER_ID, $key[0], Criteria::EQUAL);
-        $this->addUsingAlias(UserJobMatchTableMap::COL_JOBPOSTING_ID, $key[1], Criteria::EQUAL);
 
-        return $this;
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $key, Criteria::EQUAL);
     }
 
     /**
@@ -308,17 +305,8 @@ abstract class UserJobMatchQuery extends ModelCriteria
      */
     public function filterByPrimaryKeys($keys)
     {
-        if (empty($keys)) {
-            return $this->add(null, '1<>1', Criteria::CUSTOM);
-        }
-        foreach ($keys as $key) {
-            $cton0 = $this->getNewCriterion(UserJobMatchTableMap::COL_USER_ID, $key[0], Criteria::EQUAL);
-            $cton1 = $this->getNewCriterion(UserJobMatchTableMap::COL_JOBPOSTING_ID, $key[1], Criteria::EQUAL);
-            $cton0->addAnd($cton1);
-            $this->addOr($cton0);
-        }
 
-        return $this;
+        return $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $keys, Criteria::IN);
     }
 
     /**
@@ -887,9 +875,7 @@ abstract class UserJobMatchQuery extends ModelCriteria
     public function prune($userJobMatch = null)
     {
         if ($userJobMatch) {
-            $this->addCond('pruneCond0', $this->getAliasedColName(UserJobMatchTableMap::COL_USER_ID), $userJobMatch->getUserId(), Criteria::NOT_EQUAL);
-            $this->addCond('pruneCond1', $this->getAliasedColName(UserJobMatchTableMap::COL_JOBPOSTING_ID), $userJobMatch->getJobPostingId(), Criteria::NOT_EQUAL);
-            $this->combine(array('pruneCond0', 'pruneCond1'), Criteria::LOGICAL_OR);
+            $this->addUsingAlias(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID, $userJobMatch->getUserJobMatchId(), Criteria::NOT_EQUAL);
         }
 
         return $this;
