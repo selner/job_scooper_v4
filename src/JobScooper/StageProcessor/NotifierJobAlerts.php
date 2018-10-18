@@ -360,8 +360,8 @@ class NotifierJobAlerts extends JobsMailSender
         // Output the final files we'll send to the user
         //
         $arrFilesToAttach = array();
-        startLogSection('Generating Excel file for user\'s job match results...');
         try {
+            startLogSection('Generating Excel file for user\'s job match results...');
 
            $pathExcelResults = $this->_generateMatchResultsExcelFile($matches);
            $arrFilesToAttach[] = $pathExcelResults;
@@ -377,9 +377,10 @@ class NotifierJobAlerts extends JobsMailSender
         // For our final output, we want the jobs to be sorted by company and then role name.
         // Create a copy of the jobs list that is sorted by that value.
         //
-        startLogSection('Generating HTML & text email content for user ');
 
         try {
+            startLogSection('Generating HTML & text email content for user ');
+
             $messageHtml = $this->_generateHTMLEmailContent($resultsTitle, $matches, \count($allJobMatchIds), $userFacts, $geoLocationId);
             if (empty($messageHtml)) {
                 throw new Exception("Failed to generate email notification content for email {$resultsTitle} to sent to user {$userFacts['UserSlug']}.");
@@ -410,11 +411,10 @@ class NotifierJobAlerts extends JobsMailSender
                     $this->updateUserJobMatchesStatus($allJobMatchIds, UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_SENT);
                 }
             }
-            endLogSection(' Email send completed...');
         } catch (Exception $ex) {
-            endLogSection(' Email send failed.');
             handleException($ex);
         } finally {
+            endLogSection('Email generation and send finished.');
             $sendToUser = null;
             unset($messageHtml, $matches);
         }
@@ -432,7 +432,6 @@ class NotifierJobAlerts extends JobsMailSender
             }
         }
 
-        endLogSection(' User Results Notification.');
 
         return $ret;
     }
