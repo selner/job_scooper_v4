@@ -246,14 +246,40 @@ class TaskDedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
                 else:
                     nskipped += 1
 
+            print(u"Updated {} new duplicates in the database.  Skipped {} previously marked as duplicate.".format(
+                nupdated, nskipped))
+            self.update_jobmatch_exclusions()
+
         except Exception as e:
             print(u"Exception occurred:{}".format(e))
             raise e
 
         finally:
             self.close_connection()
-            print(u"Updated {} new duplicates in the database.  Skipped {} previously marked as duplicate.".format(
-                nupdated, nskipped))
+
+    def update_jobmatch_exclusions(self):
+        """
+        Args:
+        """
+        print(u"Updating duplicate-related user_job_matches...")
+
+        statement = u"""
+            UPDATE user_job_match 
+            SET 
+                is_excluded = 1
+            WHERE
+                user_job_match_id > 0 AND 
+                user_job_match.jobposting_id IN (SELECT 
+                        jobposting.jobposting_id
+                    FROM
+                        jobposting
+                    WHERE
+                        duplicates_posting_id IS NOT NULL);
+            """
+
+        rows_updated = self.run_command(statement, close_connection=True)
+        print(u"Updated {} user_job_matches marked excluded because they map to duplicate job postings.'".format(rows_updated))
+        return rows_updated
 
 
 class TaskDedupeJobPostingFile(BaseTaskDedupeJobPostings):
