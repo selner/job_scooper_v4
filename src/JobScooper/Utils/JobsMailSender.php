@@ -78,10 +78,11 @@ class JobsMailSender
             }
 
             $this->phpmailer = new PHPMailer();
+            $this->phpmailer->CharSet = 'utf-8';
+            $this->phpmailer->Encoding = 'base64';
 
 
-
-            $smtpSettings = \JobScooper\Utils\Settings::getValue('alerts.configuration.smtp');
+            $smtpSettings = Settings::getValue('alerts.configuration.smtp');
 
             if ($smtpSettings != null && is_array($smtpSettings)) {
                 $this->phpmailer->isSMTP();
