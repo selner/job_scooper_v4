@@ -67,15 +67,6 @@ class JobsMailSender
         LogMessage(PHP_EOL . "Sending email titled '{$subject}'..." . PHP_EOL);
 
         try {
-            if ($this->alwaysNotify === false) {
-                $skipNotify = getGlobalConfigOptionBoolean('command_line_args.disable-notifications');
-                if ($skipNotify === true) {
-                    LogMessage(PHP_EOL . 'User set -send_notifications = false so skipping email notification.)' . PHP_EOL);
-                    LogMessage('Mail contents would have been:' . PHP_EOL . $strBodyText);
-
-                    return null;
-                }
-            }
 
             $this->phpmailer = new PHPMailer();
             $this->phpmailer->CharSet = 'utf-8';

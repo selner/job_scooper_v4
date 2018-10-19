@@ -274,67 +274,6 @@ class NotifierJobAlerts extends JobsMailSender
 		}
 
     }
-    /**
-     * @param array $userFacts
-     *
-     * @return void
-     *
-     * @throws \Exception
-     */
-    public function processWeekRecapNotifications(array $userFacts)
-    {
-        if(null === $userFacts || null === $userFacts['UserId']) {
-        	throw new \InvalidArgumentException('Cannot send notifications for a null UserId.');
-        }
-        $user = User::getUserObjById($userFacts['UserId']);
-
-        //
-        // Send a separate notification for each GeoLocation the user had set
-        //
-        foreach ($this->_getSearchPairLocations($user) as $geoLocation) {
-            startLogSection("Processing week recap notification for {$user->getUserSlug()} in {$geoLocation->getDisplayName()}...");
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // Output the full jobs list into a file and into files for different cuts at the jobs list data
-            //
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            $class = null;
-
-            LogMessage('Building job match lists for past week');
-            $matches = array();
-            $arrNearbyIds = getGeoLocationsNearby($geoLocation);
-            $place = $geoLocation->getPlace();
-            $geoLocationId = $geoLocation->getGeoLocationId();
-            unset($geoLocation);
-
-            $matches['all'] = getAllMatchesForUserNotification(
-                [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_READY_TO_SEND, Criteria::EQUAL],
-                $arrNearbyIds,
-                7,
-                $user
-            );
-
-            if (empty($matches['all'])) {
-                $matches['all'] = array();
-            } else {
-                LogMessage('Converting ' . countAssociativeArrayValues($matches['all']) . ' UserJobMatch objects to array data for use in notifications...');
-
-                foreach ($matches['all'] as $userMatchId => $item) {
-                    $item = $matches['all'][$userMatchId]->toFlatArrayForCSV();
-                    unset($matches['all'][$userMatchId]);
-                    $matches['all'][$userMatchId] = $item;
-                }
-            }
-            $matches['isUserJobMatchAndNotExcluded'] = array_filter($matches['all'], 'isUserJobMatchAndNotExcluded');
-
-            $subject = "Weekly {$place} Roundup for " . getRunDateRange(7);
-            $this->_sendResultsNotification($matches, $subject, $userFacts, $geoLocationId);
-
-            unset($matches);
-            $user = null;
-        }
-    }
 
     /**
      * @param array $matches

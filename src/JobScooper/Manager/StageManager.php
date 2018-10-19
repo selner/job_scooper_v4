@@ -24,7 +24,6 @@ use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierDevAlerts;
 use JobScooper\StageProcessor\NotifierJobAlerts;
 use JobScooper\Utils\ConfigInitializer;
-use JobScooper\Utils\DBRecordRemover;
 use JobScooper\Utils\PythonRunner;
 use JobScooper\Utils\Settings;
 
@@ -79,11 +78,7 @@ class StageManager
             $this->_initConfig();
 
             $cmds = Settings::getValue('command_line_args');
-            if (array_key_exists('recap', $cmds) && !empty($cmds['recap'])) {
-                $this->doWeeklyRecaps();
-            } elseif (array_key_exists('delete', $cmds) && !empty($cmds['delete'])) {
-                $this->removeUserData();
-            } elseif (array_key_exists('stages', $cmds) && !empty($cmds['stages'])) {
+            if (array_key_exists('stages', $cmds) && !empty($cmds['stages'])) {
                 $arrRunStages = Settings::getValue('command_line_args.stages');
 
                 foreach ($arrRunStages as $stage) {
@@ -339,87 +334,6 @@ class StageManager
         }
     }
 
-
-    /**
-     * @param array[] $userFacts
-     *
-     * @throws \Exception
-     */
-    public
-    function doWeeklyRecaps()
-    {
-        $this->_initConfig();
-
-        startLogSection('do Weekly Recaps: Sending Weekly Recaps to Users');
-        try {
-            /*
-             * Run specific stages requested via command-line
-             */
-            $usersForRun = Settings::getValue('users_for_run');
-            if (is_empty_value($usersForRun)) {
-                throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
-            }
-
-            if (!empty($usersForRun)) {
-                foreach ($usersForRun as $userFacts) {
-                    startLogSection("Recap begun for '{$userFacts['UserSlug']}'");
-                    $notify = new NotifierJobAlerts();
-
-                    // BUGBBUG
-                    throw new \Exception('Not yet converted to use array users!');
-
-                    $notify->processWeekRecapNotifications($userFacts);
-                    endLogSection("Recap done for {$userFacts['UserSlug']}'");
-                }
-            }
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        } finally {
-            $usersForRun = null;
-            $notify = null;
-            endLogSection('End of do Weekly Recaps command');
-        }
-    }
-
-    /**
-     * @param array[] $users
-     *
-     * @throws \Exception
-     */
-    public
-    function removeUserData()
-    {
-        $this->_initConfig();
-
-        startLogSection('BEGIN: removeUserData from database command');
-        if (!isDebug()) {
-            throw new \Exception('Removing user data is only allowed if the developer is running in debug mode.  Please set --debug flag when running. Aborting.');
-        }
-
-        try {
-            /*
-             * Run specific stages requested via command-line
-             */
-            $usersForRun = Settings::getValue('users_for_run');
-            if (is_empty_value($usersForRun)) {
-                throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
-            }
-
-            if (!empty($usersForRun)) {
-                foreach ($usersForRun as $user) {
-                    // BUGBBUG
-                    throw new \Exception('Not yet converted to use array users!');
-
-                    $remover = DBRecordRemover::removeUsers($usersForRun);
-                }
-            }
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
-        } finally {
-            endLogSection('END:  removeUserData from database');
-            $usersForRun = null;
-        }
-    }
 
     /**
      * @throws \Exception
