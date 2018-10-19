@@ -18,15 +18,26 @@
 namespace JobScooper\Utils;
 
 use Noodlehaus\Config;
+use Noodlehaus\Exception\EmptyDirectoryException;
 
 class Settings extends \Adbar\Dot
 {
+    /**
+     * @param $file
+     * @return array|null
+     * @throws EmptyDirectoryException
+     */
     public static function loadConfig($file)
     {
         $config = self::loadFile($file);
         return $config->all();
     }
 
+    /**
+     * @param $file
+     * @return Config
+     * @throws \Noodlehaus\Exception\EmptyDirectoryException
+     */
     public static function loadFile($file)
     {
         $config = new Config($file);
@@ -41,8 +52,16 @@ class Settings extends \Adbar\Dot
         return $config;
     }
 
+    /**
+     *
+     */
     const JSCOOP_GLOBALS = 'JSCOOP';
 
+    /**
+     * @param $key
+     * @param null $default
+     * @return mixed|null
+     */
     public static function getValue($key, $default=null)
     {
         $set = new Settings();
@@ -53,18 +72,29 @@ class Settings extends \Adbar\Dot
         return $val;
     }
 
+    /**
+     * @param $key
+     * @param $value
+     */
     public static function setValue($key, $value)
     {
         $set = new Settings();
         $set->set($key, $value);
     }
 
+    /**
+     * @return array
+     */
     public static function getAllValues()
     {
         $set = new Settings();
         return $set->all();
     }
 
+    /**
+     * Settings constructor.
+     * @param array $items
+     */
     public function __construct($items = [])
     {
         if (empty($items) && array_key_exists(self::JSCOOP_GLOBALS, $GLOBALS)) {
@@ -76,6 +106,10 @@ class Settings extends \Adbar\Dot
         $GLOBALS[self::JSCOOP_GLOBALS] = $this;
     }
 
+    /**
+     * @param $oldKey
+     * @param $newKey
+     */
     public static function moveValue($oldKey, $newKey)
     {
         $settings = new Settings();
@@ -84,18 +118,30 @@ class Settings extends \Adbar\Dot
         $settings->clear($oldKey);
     }
 
+    /**
+     * @param array|int|string $keys
+     * @param null $value
+     */
     public function set($keys, $value = null)
     {
         parent::set($keys, $value);
         $GLOBALS[self::JSCOOP_GLOBALS] = $this;
     }
 
+    /**
+     * @param null $keys
+     */
     public function clear($keys = null)
     {
         parent::clear($keys);
         $GLOBALS[self::JSCOOP_GLOBALS] = $this;
     }
 
+    /**
+     * @param $key
+     * @param $checkVal
+     * @return bool
+     */
     public static function is_in_setting_value($key, $checkVal) {
 
         $valuesSet = self::getValue($key);
@@ -109,7 +155,11 @@ class Settings extends \Adbar\Dot
 
         return $valuesSet == $checkVal;
     }
-    
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public static function get_db_dsn() {
     	$cfg = self::getValue('db_config');
     	if(is_empty_value($cfg)) {

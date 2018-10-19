@@ -75,6 +75,11 @@ class NotifierDevAlerts extends JobsMailSender
         return $arrPluginResults;
     }
 
+    /**
+     * @param $arrPluginResults
+     * @return mixed
+     * @throws \Exception
+     */
     public function getRunResultHtml($arrPluginResults)
     {
         $renderer = loadTemplate(implode(DIRECTORY_SEPARATOR, array(__ROOT__, "src", "assets", "templates", "partials", "html_email_run_counts.tmpl")));
