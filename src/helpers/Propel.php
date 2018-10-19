@@ -336,5 +336,8 @@ function getGeoLocationsNearby(\JobScooper\DataAccess\GeoLocation $sourceGeoLoca
  */
 function isUserJobMatchAndNotExcluded($var)
 {
-    return ((empty($var['IsExcluded']) || $var['IsExcluded'] !== true) && (!empty($var['IsJobMatch']) && $var['IsJobMatch'] === true));
+    if(array_key_exists('IsExcluded', $var) && array_key_exists('IsJobMatch', $var)) {
+        return ($var['IsExcluded'] === false && $var['IsJobMatch'] === true);
+    }
+    return false;
 }
