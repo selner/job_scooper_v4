@@ -76,7 +76,7 @@ class BaseTaskDedupeJobPostings:
         dfjobs.sort_values('JobPostingId', ascending=True)
 
         print("Marking jobs as duplicate...")
-        dfjobs["is_duplicate"] = dfjobs.duplicated({"Company", "TitleTokensString", "LocationDisplayValue"}, keep="first")
+        dfjobs["is_duplicate"] = dfjobs.duplicated({"CompanyCleaned", "TitleTokensString", "LocationDisplayValue"}, keep="first")
         dfjobs["is_duplicate_stringver"] = dfjobs.duplicated("CompanyTitleLocation", keep="first")
         dict_orig_posts = dfjobs[(dfjobs["is_duplicate"] == False)].to_dict(orient="index")
         dict_dupe_posts = dfjobs[(dfjobs["is_duplicate"] == True)].to_dict(orient="index")
@@ -149,8 +149,11 @@ class BaseTaskDedupeJobPostings:
                 # Clean up things like LTD from the company name
                 # so we can match on cleaner company names
                 #
-                subitem["CompanyCleaned"] = "NO COMPANY LISTED"
-                if item["Company"]:
+                subitem["CompanyCleaned"] = "UNKNOWN"
+                if 'JobSite' in item and item['JobSite']:
+                    subitem["CompanyCleaned"] = "UNKNOWN_" + item['JobSite']
+
+                if "Company" in item and item["Company"]:
                     ccleaner = cleanco(item["Company"])
                     subitem["CompanyCleaned"] = ccleaner.clean_name()
 
@@ -206,12 +209,13 @@ class TaskDedupeJobPostingFromDB(BaseTaskDedupeJobPostings, DatabaseMixin):
                 jobposting_id as `JobPostingId`, 
                 key_company_and_title as `KeyCompanyTitle`, 
                 title as `Title`, 
+                jobsite_key as `JobSite`, 
                 company as `Company`, 
                 location_display_value as `LocationDisplayValue`,
                 duplicates_posting_id as `DuplicatesJobPostingId`
             FROM jobposting
             WHERE job_posted_date >= '{}'
-            ORDER BY title, company 
+            ORDER BY title, company, location_display_value, jobsite_key
             """.format(backwardsdate.strftime("%Y-%m-%d"))
 
         result = self.fetch_all_from_query(querysql)
@@ -294,6 +298,11 @@ class TaskDedupeJobPostingFile(BaseTaskDedupeJobPostings):
             self.inputfile = kwargs['inputfile']
         else:
             raise Exception(u"No input file specified for processing.")
+
+        if 'outputfile' in kwargs:
+            self._outputfile = kwargs['outputfile']
+        else:
+            raise Exception(u"No output file specified for processing.")
 
         print(u"Processing job postings for duplicates from input file {}".format(self.inputfile))
 

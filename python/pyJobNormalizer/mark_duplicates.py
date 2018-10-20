@@ -44,12 +44,11 @@ if __name__ == '__main__':
 
     if "input" in arguments and arguments["input"] and "output" in arguments and arguments["output"]:
         matcher = TaskDedupeJobPostingFile()
-        matcher.outputfile = arguments["output"].replace("'", "")
-        matcher.load_data(inputfile=arguments["input"].replace("'", ""))
+        matcher.load_data(inputfile=arguments["input"].replace("'", ""), outputfile=arguments["output"].replace("'", ""))
         matcher.dedupe_jobs()
         matcher.export_results()
 
-    elif "connecturi" in arguments and arguments["connecturi"]:
+    elif 'connecturi' in arguments and arguments['connecturi']:
         matcher = TaskDedupeJobPostingFromDB()
         matcher.load_data(connecturi=arguments['connecturi'])
         matcher.dedupe_jobs()
