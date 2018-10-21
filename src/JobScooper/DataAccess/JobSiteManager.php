@@ -278,7 +278,7 @@ class JobSiteManager
                 }
                 $objJobSite->setisDisabled(true);
             }
-            else if(is_empty_value($jobSiteFacts['PhpClassName'])) {
+            else if(!array_key_exists('PhpClassName', $jobSiteFacts) || is_empty_value($jobSiteFacts['PhpClassName'])) {
                 if($objJobSite->getisDisabled() === true) {
                     LogMessage("{$jobSiteKey}: new site plugin class was detected; enabling job site.");
                 }

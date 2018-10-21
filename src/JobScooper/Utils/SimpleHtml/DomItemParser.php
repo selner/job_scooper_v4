@@ -293,7 +293,11 @@ class DomItemParser
 
                 if (preg_match($newPattern, $value, $matches) > 0) {
                     array_shift($matches);
-                    $ret = $this->_getReturnValueByIndex($matches, $arrTag['Index']);
+                    $index = null;
+                    if(array_key_exists('Index', $arrTag)) {
+                       $index = $arrTag['Index'];
+                    }
+                    $ret = $this->_getReturnValueByIndex($matches, $index);
                 }
             }
         }

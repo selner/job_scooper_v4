@@ -1411,7 +1411,7 @@ JSCODE;
                 $arrItem['Url'] = '[UNKNOWN]';
             } else {
                 $urlParts = parse_url($arrItem['Url']);
-                if ($urlParts == false || stristr($urlParts['scheme'], 'http') == false) {
+                if ($urlParts == false || !array_key_exists('scheme', $urlParts) || stristr($urlParts['scheme'], 'http') == false) {
                     $sep = '';
                     if (substr($arrItem['Url'], 0, 1) != '/') {
                         $sep = '/';
@@ -1976,8 +1976,9 @@ JSCODE;
                                 unset($arrJsonLDJobs);
                             }
 
+                            if(array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs)) {
                             $arrPreviouslyLoadedJobs = $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()];
-                            if (!empty($arrPreviouslyLoadedJobs)) {
+                                if (!is_empty_value($arrPreviouslyLoadedJobs)) {
                                 $arrPreviouslyLoadedJobSiteIds = array_column($arrPreviouslyLoadedJobs, 'JobSitePostId');
                                 $newJobThisPage = array_diff(array_column($arrPageJobsList, 'JobSitePostId'), $arrPreviouslyLoadedJobSiteIds);
                                 if (empty($newJobThisPage)) {
