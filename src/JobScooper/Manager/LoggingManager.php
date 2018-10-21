@@ -187,15 +187,16 @@ class LoggingManager extends \Monolog\Logger
      */
     private function _addSentryHandler():void
     {
-        $settings = Settings::getValue('config_file_settings.sentry');
+        $settings = Settings::getValue('logging.sentry.options');
         if (!empty($settings)) {
             if (array_key_exists('dsn', $settings)) {
-                LogMessage('Found Sentry config properties; setting up Sentry logging...');
-                $sentryOptions = array(
+                $this->log(Logger::INFO, 'Found Sentry config properties; setting up Sentry logging...');
+                $settings = array_merge(array(
                     'server' => gethostname(),
                     'auto_log_stacks' => true
-                );
-                $this->_sentryClient = new \Raven_Client($settings['dsn'], $sentryOptions);
+                ), $settings);
+
+                $this->_sentryClient = new \Raven_Client($settings);
 
                 $handler = new RavenHandler($this->_sentryClient, Logger::ERROR);
                 $handler->setFormatter(new LineFormatter('%message% %context% %extra%\n'));
@@ -459,14 +460,14 @@ class LoggingManager extends \Monolog\Logger
 	                    if (strcasecmp($objclass, $dbg[$i]['class']) != 0) {
 	                        $class = "{$objclass} -> {$class}";
 	                        if(is_empty_value($jobsiteKey)) {
-	                        try {
-	                            if (is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], 'getName')) {
-	                                $jobsiteKey = $dbg[$i]['object']->getName();
-	                            }
-	                        } catch (Exception $ex) {
+                                try {
+                                    if (is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], 'getName')) {
+                                        $jobsiteKey = $dbg[$i]['object']->getName();
+                                    }
+                                } catch (Exception $ex) {
 
-	                            }
-	                        }
+                                }
+                            }
 //	                        try {
 //	                            if (array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']) && array_key_exists(0, $dbg[$i]['args'])) {
 //	                                if (is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), 'getUserSearchSiteRunKey')) {
