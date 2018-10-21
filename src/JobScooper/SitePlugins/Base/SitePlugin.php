@@ -160,7 +160,7 @@ abstract class SitePlugin implements IJobSitePlugin
 
         if (empty($this->JobPostingBaseUrl)) {
             $urlparts = parse_url($this->SearchUrlFormat);
-            $this->JobPostingBaseUrl = "{$urlparts['scheme']}://{$urlparts['host']}";
+            $this->JobPostingBaseUrl = getArrayItem('scheme', $urlparts, '') . '//' . getArrayItem('host', $urlparts, '');
         }
 
 

@@ -218,16 +218,25 @@ class SitePluginFactory
 
 
         $listingTagBucket = 'arrListingTagSetup';
-        if (!empty($arrConfigData['PluginExtendsClassName']) && false === stripos($arrConfigData['PluginExtendsClassName'], 'Abstract'))
+        $pluginExtendsClass = "";
+        if(array_key_exists('PluginExtendsClassName', $arrConfigData)) {
+            $pluginExtendsClass = $arrConfigData['PluginExtendsClassName'];
+        }
+        if (!is_empty_value($pluginExtendsClass) && false === stripos($pluginExtendsClass, 'Abstract'))
         {
             setArrayItem($pluginData, 'PluginExtendsClassName', $arrConfigData, 'PluginExtendsClassName');
         }
-        elseif(false !== stripos($arrConfigData['PluginExtendsClassName'], 'Abstract'))
+        elseif(false !== stripos($pluginExtendsClass, 'Abstract'))
         {
             $listingTagBucket = 'arrBaseListingTagSetup';
         }
+        if(!array_key_exists($listingTagBucket, $pluginData)) {
+            $pluginData[$listingTagBucket] = array();
+        }
 
-        $pluginData['PluginExtendsClassName'] = str_replace('\\\\', '\\', $pluginData['PluginExtendsClassName']);
+        if(array_key_exists('PluginExtendsClassName', $pluginData)) {
+            $pluginData['PluginExtendsClassName'] = str_replace('\\\\', '\\', $pluginData['PluginExtendsClassName']);
+        }
 
         setArrayItem($pluginData, 'JobPostingBaseUrl', $arrConfigData, 'BaseURL');
         setArrayItem($pluginData, 'SearchUrlFormat', $arrConfigData, 'SourceURL');
@@ -243,16 +252,16 @@ class SitePluginFactory
                 switch (strtoupper($arrConfigData['Pagination']['Type'])) {
                     case 'NEXT-BUTTON':
                         $pluginData[$listingTagBucket]['NextButton'] = array(
-                            'Selector' => $arrConfigData['Pagination']['Selector'],
-                            'Index' => $arrConfigData['Pagination']['Index'],
+                            'Selector' => getArrayItem('Selector', $arrConfigData['Pagination']),
+                            'Index' => getArrayItem('Index', $arrConfigData['Pagination']),
                             'type' => 'CSS'
                         );
                         break;
 
                     case 'LOAD-MORE':
                         $pluginData[$listingTagBucket]['LoadMoreControl'] = array(
-                            'Selector' => $arrConfigData['Pagination']['Selector'],
-                            'Index' => $arrConfigData['Pagination']['Index'],
+                            'Selector' => getArrayItem('Selector', $arrConfigData['Pagination']),
+                            'Index' => getArrayItem('Index', $arrConfigData['Pagination']),
                             'type' => 'CSS'
                         );
                         break;
@@ -265,9 +274,6 @@ class SitePluginFactory
 
 
         if (array_key_exists('Collections', $arrConfigData) && null !== $arrConfigData['Collections'] && is_array($arrConfigData['Collections']) && \count($arrConfigData['Collections']) > 0 && array_key_exists('Fields', $arrConfigData['Collections'][0])) {
-            if (!is_array($pluginData[$listingTagBucket])) {
-                $pluginData[$listingTagBucket] = array();
-            }
             foreach ($arrConfigData['Collections'] as $coll) {
             	if(array_key_exists('Fields', $coll)) {
 					foreach ($coll['Fields'] as $field) {
