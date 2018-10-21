@@ -63,6 +63,7 @@ class JSONEncoderExt(json.JSONEncoder):
 NUMBER_DAYS_BACK = 3
 
 class TaskGenerateBrokenPluginReportData(DatabaseMixin):
+    _outputfile = None
 
     def __init__(self, **kwargs):
         """
@@ -71,6 +72,8 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
         """
 
         DatabaseMixin.__init__(self, **kwargs)
+        if 'output' in kwargs:
+            self._outputfile = kwargs['output']
 
         self.gather_report_data()
 
@@ -123,7 +126,7 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
             import os
             templpath = os.path.join(os.path.dirname(__file__), "templates", "layouts", "email_broken_plugins_section.html")
             html = self.render_template(templpath, broken_sites_by_key)
-            self.export_html_to_file(self._dbparams['output'], html)
+            self.export_html_to_file(self._outputfile, html)
 
 
         except Exception as e:

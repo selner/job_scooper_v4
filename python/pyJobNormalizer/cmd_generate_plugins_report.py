@@ -37,7 +37,8 @@ if __name__ == '__main__':
 
     args = docopt_ext(cli_usage.format(__file__, __file__), version='0.1.1rc')
 
-    if "output" in args and args["output"]:
+    if "output" in args and args["output"] and 'connecturi' in args \
+            and args['connecturi']:
         reporter = TaskGenerateBrokenPluginReportData(**args)
     else:
         print(u"Unable to generate broken plugin report data.  Missing script arguments.")
