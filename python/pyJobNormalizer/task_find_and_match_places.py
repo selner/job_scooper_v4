@@ -189,7 +189,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         except requests.exceptions.Timeout as t:
             if retries < MAX_RETRIES:
-                self.log(u"Warning:  API request '{}' timed out on retry #.   Retrying {} more times...".format(r.url,
+                url = "unknown_api_url"
+                if hasattr(r, 'url', ):
+                    url = r.url
+
+                self.log(u"Warning:  API request '{}' timed out on retry #.   Retrying {} more times...".format(url,
                                                                                                              MAX_RETRIES - retries))
                 retries += 1
                 kwargs['retry_count'] = retries
