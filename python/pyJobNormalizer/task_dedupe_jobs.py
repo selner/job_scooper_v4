@@ -37,18 +37,22 @@ class TaskDedupeJobPosting(DatabaseMixin):
     _dupe_job_groups = {}
 
     def __init__(self, **kwargs):
-        self.init_connection(**kwargs)
+        """
+        Args:
+            **kwargs:
+        """
+
+        DatabaseMixin.__init__(self, **kwargs)
 
     def dedupe_jobs(self):
 
-        print(u"Processing job postings for duplicates from database {}".format(self.dbparams))
+        print(u"Processing job postings for duplicates from database {}".format(self._dbparams))
 
         self.get_recent_duplicate_posts()
 
         self.update_database()
 
         self.update_jobmatch_exclusions()
-
 
     def get_recent_duplicate_posts(self):
         print(u"Getting groups of duplicate job postings...")
@@ -129,12 +133,11 @@ class TaskDedupeJobPosting(DatabaseMixin):
                 """
 
             rows_updated = self.run_command(statement, close_connection=False)
-            print(u"Updated {} user_job_matches marked excluded because they map to duplicate job postings.'".format(rows_updated))
+            print(u"Updated {} user_job_matches marked excluded because they map to duplicate job postings.".format(rows_updated))
             return rows_updated
 
         except Exception as e:
-            print(u"Exception occurred:{}".format(e))
-            raise e
+            self.handle_error(e)
 
         finally:
             self.close_connection()

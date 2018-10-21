@@ -59,6 +59,23 @@ class SetEncoder(json.JSONEncoder):
 
 xstr = lambda s: str(s) or ""
 
+def strip_control_chars(val):
+    stripped = lambda s: "".join(i for i in val if 31 < ord(i) < 127)
+    return stripped
+
+def simpleuni(val):
+    """
+        unidecode(u'ko\u017eu\u0161\u010dek')
+        'kozuscek'
+
+        unidecode(u'30 \U0001d5c4\U0001d5c6/\U0001d5c1')
+        '30 km/h'
+
+        unidecode(u"\u5317\u4EB0")
+        'Bei Jing '
+    """
+    from unidecode import unidecode
+    return unidecode(val)
 
 def load_json(filepath):
     """

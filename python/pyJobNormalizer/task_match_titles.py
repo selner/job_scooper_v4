@@ -67,6 +67,8 @@ class TaskMatchJobsToKeywords:
         Args:
             **kwargs:
         """
+
+        # DatabaseMixin.__init__(self, **kwargs)
         if 'input' in kwargs:
             self._inputfile = kwargs['input']
         else:
@@ -245,7 +247,6 @@ class TaskMatchJobsToKeywords:
 #         self.mark_title_matches()
 #
 #     def load_jobs(self):
-#         print("Connecting to database...")
 #         backwardsdate = datetime.now() - timedelta(days=3)
 #
 #         querysql = """

@@ -33,13 +33,21 @@ PLACE_DETAIL_GEOCODE_MAPPING = {
     "latitude": "latitude",
     "longitude": "longitude"
 }
+from helpers import simpleuni
 
 
 class FindPlacesFromDBLocationsTask(DatabaseMixin):
-    dbparams = {}
     _geoloc_columns = None
 
     _location_mapping = {}
+
+    def __init__(self, **kwargs):
+        """
+        Args:
+            **kwargs:
+        """
+
+        DatabaseMixin.__init__(self, **kwargs)
 
     def update_all_locations(self, **kwargs):
 
@@ -47,8 +55,6 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         Args:
             **kwargs:
         """
-        self.init_connection(**kwargs)
-
         self._geoloc_columns = self.get_table_columns("geolocation")
 
         self.load_known_locations()
@@ -56,8 +62,6 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         self.update_job_posting_locations(kwargs["server"])
 
     def load_known_locations(self):
-        print(u"Connecting to database...")
-
         querysql = """
             SELECT 
                 location as `Location`, 
@@ -74,13 +78,14 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             ORDER BY location
             """
 
+        self.log(u"Getting known locations from DB...")
         result = self.fetch_all_from_query(querysql)
 
         for val in result:
             self._location_mapping[val['Location']] = {'GeoLocationId': val['GeoLocationId'],
                                                        'DisplayName': val['DisplayName']}
 
-        print(u"Loaded {} known location mappings from DB")
+        self.log(u"Loaded {} known location mappings from DB".format(len(self._location_mapping)))
 
     def update_job_posting_locations(self, geocode_server):
 
@@ -88,7 +93,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         Args:
             geocode_server:
         """
-        print(u"Getting locations needing lookup/update...")
+        self.log(u"Getting locations needing lookup/update...")
 
         querysql = u"""
             SELECT 
@@ -133,7 +138,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             """.format(locfacts['GeoLocationId'], self.connection.escape_string(locfacts['DisplayName']), self.connection.escape_string(loc))
 
         rows_updated = self.run_command(statement, close_connection=False)
-        print(u"Updated {} rows missing information for '{} ({})'".format(rows_updated, loc,
+        self.log(u"Updated {} rows missing information for '{} ({})'".format(rows_updated, loc,
                                                                           str(locfacts)))
         return rows_updated
 
@@ -142,7 +147,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         Args:
             locs:
         """
-        print(u"Updating {} known locations who are missing geolocation details in the database...".format(len(locs)))
+        self.log(u"Updating {} known locations who are missing geolocation details in the database...".format(len(locs)))
         total_updated = 0
 
         try:
@@ -152,12 +157,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 total_updated += rows_updated
 
         except Exception as e:
-            print(u"Exception occurred:{}".format(e))
-            raise e
+            self.handle_error(e)
 
         finally:
             self.close_connection()
-            print(
+            self.log(
                 u"Updated {} job postings in the database that were missing location details for {} known locations.".format(
                     total_updated, len(locs)))
 
@@ -176,24 +180,28 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         try:
             r = requests.get(**kwargs)
             if r.status_code == requests.codes.ok:
-                return r.json()
+                data = r.json()
+                import json
+                return json.loads(simpleuni(json.dumps(data)))
             else:
                 r.raise_for_status()
 
         except requests.exceptions.Timeout as t:
             if retries < MAX_RETRIES:
-                print(u"Warning:  API request '{}' timed out on retry #.   Retrying {} more times...".format(r.url,
+                self.log(u"Warning:  API request '{}' timed out on retry #.   Retrying {} more times...".format(r.url,
                                                                                                              MAX_RETRIES - retries))
                 retries += 1
                 kwargs['retry_count'] = retries
-                self.call_geocode_api(**kwargs)
+                return self.call_geocode_api(**kwargs)
             else:
-                print(u"ERROR:  API request '{}' timed out and has exceeded max retry count.".format(r.url))
-                raise t
+                from logging import ERROR
+                msg = u"ERROR:  API request '{}' timed out and has exceeded max retry count.".format(r.url)
+                self.handle_error(Exception(msg))
+
             pass
         except Exception as ex:
-            print(u"ERROR:  API request '{}' failed:  ".format(r.url), str(ex))
-            raise(ex)
+            msg = u"ERROR:  API request '{}' failed:  ".format(r.url), str(ex)
+            self.handle_error(ex, msg)
 
         finally:
             r = None
@@ -212,11 +220,12 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         r = None
 
         try:
-            for loc in locs:
+            for l in locs:
+                loc = simpleuni(str(l)).strip()
                 # Do place lookup
                 place_details = {}
 
-                payload = {'query': str(loc)}
+                payload = {'query': loc}
                 # headers = {'content-type': 'application/json'}
                 headers = {}
                 print(u"Looking up place for location search value '{}'".format(str(loc)))
@@ -228,9 +237,10 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 }
 
                 print(u"... calling API '{}?{}".format(kwargs['url'], urlencode(payload)))
-                place_details = self.call_geocode_api(**kwargs)
 
+                place_details = self.call_geocode_api(**kwargs)
                 if place_details and len(place_details) > 0:  # if found place:
+
                     msgPlaceMatch = " place_id=None "
                     if 'place_id' in place_details and place_details['place_id']:
                         msgPlaceMatch = " place_id={} ".format(place_details['place_id'])
@@ -278,8 +288,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                     total_loc_notfound += 1
 
         except Exception as e:
-            print(u"Exception occurred: {}".format(e))
-            raise e
+            self.handle_error(e)
 
         finally:
             self.close_connection()

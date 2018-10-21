@@ -20,15 +20,14 @@
 from mixin_database import DatabaseMixin
 
 class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
-    dbparams = {}
 
     def __init__(self, **kwargs):
-
         """
         Args:
             **kwargs:
         """
-        self.init_connection(**kwargs)
+
+        DatabaseMixin.__init__(self, **kwargs)
 
         self.update_job_nonmatches()
         self.update_job_matches()
@@ -54,8 +53,7 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
             print("Marked {} user job matches as skip-send because they failed to match a user's job title.".format(rows_updated))
 
         except Exception as e:
-            print(u"Exception occurred: {}".format(e))
-            raise e
+            self.handle_error(e)
 
     def update_job_matches(self):
 
@@ -77,6 +75,5 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
             print("Marked {} user job matches as ready-to-send because they matched a user's job title.".format(rows_updated))
 
         except Exception as e:
-            print(u"Exception occurred: {}".format(e))
-            raise e
+            self.handle_error(e)
 

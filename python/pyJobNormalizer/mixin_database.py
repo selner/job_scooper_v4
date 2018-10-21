@@ -24,6 +24,64 @@ from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
 
 ARRAY_JOIN_TOKEN = u"_||_"
+from logging import INFO, DEBUG, WARNING, ERROR, CRITICAL
+
+import structlog
+
+structlog.configure(
+    processors=[
+        # This performs the initial filtering, so we don't
+        # evaluate e.g. DEBUG when unnecessary
+        structlog.stdlib.filter_by_level,
+        # Adds logger=module_name (e.g __main__)
+        structlog.stdlib.add_logger_name,
+        # Adds level=info, debug, etc.
+        structlog.stdlib.add_log_level,
+        # Performs the % string interpolation as expected
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        # Include the stack when stack_info=True
+        structlog.processors.StackInfoRenderer(),
+        # Include the exception when exc_info=True
+        # e.g log.exception() or log.warning(exc_info=True)'s behavior
+        structlog.processors.format_exc_info,
+        # Decodes the unicode values in any kv pairs
+        structlog.processors.UnicodeDecoder(),
+        # Creates the necessary args, kwargs for log()
+        structlog.stdlib.render_to_log_kwargs,
+    ],
+    # Our "event_dict" is explicitly a dict
+    # There's also structlog.threadlocal.wrap_dict(dict) in some examples
+    # which keeps global context as well as thread locals
+    context_class=dict,
+    # Provides the logging.Logger for the underlaying log call
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    # Provides predefined methods - log.debug(), log.info(), etc.
+    wrapper_class=structlog.stdlib.BoundLogger,
+    # Caching of our logger
+    cache_logger_on_first_use=True,
+)
+#
+# structlog.configure(
+#     processors=[
+#         structlog.stdlib.filter_by_level,
+#         structlog.stdlib.add_logger_name,
+#         structlog.stdlib.add_log_level,
+#         structlog.stdlib.PositionalArgumentsFormatter(),
+#         structlog.processors.TimeStamper(fmt='iso'),
+#         structlog.processors.StackInfoRenderer(),
+#         structlog.processors.format_exc_info,
+#         structlog.processors.KeyValueRenderer(),
+#         # ,
+#         structlog.dev.ConsoleRenderer(colors=False)
+#         # structlog.processors.JSONRenderer(),
+#     ],
+#     context_class=dict,
+#     logger_factory=structlog.stdlib.LoggerFactory(),
+#     wrapper_class=structlog.stdlib.BoundLogger,
+#     cache_logger_on_first_use=True,
+# )
+
+
 
 class OrderedDictCursor(DictCursorMixin, Cursor):
     dict_type = OrderedDict
@@ -31,11 +89,28 @@ class OrderedDictCursor(DictCursorMixin, Cursor):
 
 class DatabaseMixin:
     _debug = False
-    dbparams = {}
+    _dbparams = {}
     _connection = None
+    _logger = None
+    
+    def __init__(self, **kwargs):
+        self._logger = structlog.getLogger()
+        self._logger.setLevel(DEBUG)
 
-    def init_connection(self, **kwargs):
+        self.log("Parsing commmand line parameters...")
+        self._parse_arguments(**kwargs)
 
+    def log(self, msg, level=INFO):
+        self._logger.log(level, msg)
+
+    def handle_error(self, err, msg=None):
+        if msg and len(msg) > 0:
+            self._logger.error(msg, exc_info=1)
+        else:
+            self._logger.error("Exception occurred: {}".format(err), exc_info=1)
+        raise(err)
+
+    def _parse_arguments(self, **kwargs):
         """
         Args:
             **kwargs:
@@ -45,45 +120,45 @@ class DatabaseMixin:
             parsed = urllib.parse.urlparse(kwargs['connecturi'])
 
             if parsed.hostname:
-                self.dbparams['host'] = parsed.hostname
-                self.dbparams['user'] = parsed.username
-                self.dbparams['password'] = parsed.password
-                self.dbparams['port'] = parsed.port
-                self.dbparams['database'] = parsed.path.replace("/", "")
+                self._dbparams['host'] = parsed.hostname
+                self._dbparams['user'] = parsed.username
+                self._dbparams['password'] = parsed.password
+                self._dbparams['port'] = parsed.port
+                self._dbparams['database'] = parsed.path.replace("/", "")
             else:
                 params = kwargs['connecturi'].split(":")
 
                 args = {x.split('=')[0]: x.split('=')[1] for x in params[1].split(';') if len(x) > 1}
                 for a in args:
-                    self.dbparams[a] = args[a]
+                    self._dbparams[a] = args[a]
 
-        self.dbparams['cursorclass'] = OrderedDictCursor
-        if 'use_unicode' not in self.dbparams:
-            self.dbparams['use_unicode'] = True
-        self.dbparams['charset'] = "utf8mb4"
-        if 'dbname' in self.dbparams:
-            self.dbparams['database'] = self.dbparams.pop('dbname')
-        if 'port' in self.dbparams:
-            self.dbparams['port'] = int(self.dbparams.pop('port'))
+        self._dbparams['cursorclass'] = OrderedDictCursor
+        if 'use_unicode' not in self._dbparams:
+            self._dbparams['use_unicode'] = True
+        self._dbparams['charset'] = "utf8mb4"
+        if 'dbname' in self._dbparams:
+            self._dbparams['database'] = self._dbparams.pop('dbname')
+        if 'port' in self._dbparams:
+            self._dbparams['port'] = int(self._dbparams.pop('port'))
 
-        if 'debug' in self.dbparams:
-            self._debug = self.dbparams['debug']
-
+        if 'debug' in self._dbparams:
+            self._debug = self._dbparams['debug']
+            
     @property
     def connect_params(self):
-        return {k: self.dbparams[k] for k in self.dbparams if
+        return {k: self._dbparams[k] for k in self._dbparams if
                   k in ["host", "password", "user", "port", "cursorclass", "use_unicode", "database"]}
 
     @property
     def connection(self):
         if not self._connection:
-            if not self.dbparams:
+            if not self._dbparams:
                 raise Exception(u"Connection must be initialized before it can be accessed.")
 
-            if 'charset' not in self.dbparams:
-                self.dbparams['charset'] = 'utf8'
-            if 'use_unicode' not in self.dbparams:
-                self.dbparams['use_unicode'] = True
+            if 'charset' not in self._dbparams:
+                self._dbparams['charset'] = 'utf8'
+            if 'use_unicode' not in self._dbparams:
+                self._dbparams['use_unicode'] = True
 
             self._connection = pymysql.connect(**self.connect_params)
 
@@ -113,7 +188,7 @@ class DatabaseMixin:
         result = {}
 
         try:
-            print(u"Querying database: {}".format(querysql))
+            self.log(u"Querying database: {}".format(querysql))
 
             with self.new_cursor() as cursor:
                 cursor.execute(querysql)
@@ -122,8 +197,7 @@ class DatabaseMixin:
                 fields = [col[0] for col in descr]
             return result
         except Exception as ex:
-            print(ex)
-            raise(ex)
+            self.handle_error(ex)
 
         finally:
             self.connection.commit()
@@ -137,7 +211,7 @@ class DatabaseMixin:
         results = []
 
         try:
-            print(u"Querying database: {}".format(querysql))
+            self.log(u"Querying database: {}".format(querysql))
 
             with self.new_cursor() as cursor:
                 total_rows = cursor.execute(querysql)
@@ -147,11 +221,11 @@ class DatabaseMixin:
                     total_num_batches += 1
                 batch_counter = 0
 
-                print(u"... matched {} DB records".format(total_rows))
+                self.log(u"... matched {} DB records".format(total_rows))
 
                 while batch_counter < total_num_batches:
                     curidx = batch_counter * batch_size
-                    print(u"... processing records {} - {} through callback {}".format(curidx, curidx+batch_size, str(callback)))
+                    self.log(u"... processing records {} - {} through callback {}".format(curidx, curidx+batch_size, str(callback)))
 
                     rows = cursor.fetchmany(batch_size)
                     if not rows or len(rows) == 0:
@@ -170,8 +244,7 @@ class DatabaseMixin:
                 return total_rows
 
         except Exception as ex:
-            print(ex)
-            raise(ex)
+            self.handle_error(ex)
 
         finally:
             self.connection.close()
@@ -190,14 +263,13 @@ class DatabaseMixin:
     def update_many(self, querysql, records):
 
         try:
-            print(u"...updating {} database rows".format(len(records)))
+            self.log(u"...updating {} database rows".format(len(records)))
 
             with self.new_cursor() as cursor:
                 return cursor.executemany(querysql, records)
 
         except Exception as ex:
-            print(ex)
-            raise (ex)
+            self.handle_error(ex)
 
 
         finally:
@@ -212,14 +284,13 @@ class DatabaseMixin:
             close_connection:
         """
         try:
-            # print("Running command: {}".format(querysql))
+            self.log("executing SQL: {}".format(querysql), DEBUG)
 
             with self.connection.cursor() as cursor:
                 return cursor.execute(querysql, values)
 
         except Exception as ex:
-            print(ex)
-            raise(ex)
+            self.handle_error(ex)
 
         finally:
             self.connection.commit()
@@ -263,15 +334,14 @@ class DatabaseMixin:
             columns = ", ".join(matched_keys)
             values_template = ", ".join(["%s"] * len(matched_keys))
 
-            sql = u"insert into %s (%s) values (%s)" % (
-                tablename, columns, values_template)
+            sql = u"insert into %s (%s) values (%s)" % (tablename, columns, values_template)
             values = tuple(self.connection.escape_string(rowdict[key]) for key in matched_keys)
             with self.new_cursor() as cursor:
                 cursor.execute(sql, values)
                 inserted_id = cursor.lastrowid
                 if inserted_id:
-                    result = self.fetch_all_from_query(
-                        u"SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id))
+                    query = u"SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id)
+                    result = self.fetch_all_from_query(query)
                     if result and len(result) > 0:
                         return result[0]
                     else:
@@ -280,8 +350,7 @@ class DatabaseMixin:
                     return None
 
         except Exception as ex:
-            print(ex)
-            raise(ex)
+            self.handle_error(ex)
 
         finally:
             self.connection.commit()

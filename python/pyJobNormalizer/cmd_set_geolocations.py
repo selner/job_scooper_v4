@@ -22,8 +22,8 @@ from helpers import docopt_ext
 
 cli_usage = """
 Usage:
-  set_geolocations.py -c <dbstring> -s <server>
-  set_geolocations.py --version
+  cmd_set_geolocations.py -c <dbstring> -s <server>
+  cmd_set_geolocations.py --version
   
 Options:
   -h --help     show this help message and exit
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
 
     if "connecturi" in args and args["connecturi"] and "server" in args and args["server"]:
-        matcher = FindPlacesFromDBLocationsTask()
+        matcher = FindPlacesFromDBLocationsTask(**args)
         matcher.update_all_locations(**args)
     else:
         print(u"Unable to update locations for job postings.  Missing script arguments.")

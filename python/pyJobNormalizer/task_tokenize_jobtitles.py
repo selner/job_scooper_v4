@@ -29,10 +29,11 @@ class TaskAddTitleTokens(DatabaseMixin):
         Args:
             **kwargs:
         """
-        self._tokenizer = Tokenizer()
 
+        DatabaseMixin.__init__(self, **kwargs)
+
+        self._tokenizer = Tokenizer()
         self._config = dict(kwargs)
-        self.init_connection(**kwargs)
 
     def update_jobs_without_tokens(self):
 

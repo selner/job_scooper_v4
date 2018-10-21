@@ -183,7 +183,7 @@ class JobsAutoMarker
         startLogSection("{$userFacts['UserSlug']}:  Marking in/out of search areas...");
 
         try {
-            $runFile = 'pyJobNormalizer/set_out_of_area.py';
+            $runFile = 'pyJobNormalizer/cmd_set_out_of_area.py';
             $params = [
                 '-c' => Settings::get_db_dsn(),
                 '--user' => $userFacts['UserSlug']
@@ -449,7 +449,7 @@ class JobsAutoMarker
 
             LogMessage('Calling python to do work of job title matching...');
 
-            $runFile = 'pyJobNormalizer/match_titles_to_keywords.py';
+            $runFile = 'pyJobNormalizer/cmd_match_titles_to_keywords.py';
             $params = [
                 '-i' => $sourcefile,
                 '-o' => $resultsfile

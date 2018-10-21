@@ -20,15 +20,14 @@
 from mixin_database import DatabaseMixin
 
 class TaskAddNewMatchesToUser(DatabaseMixin):
-    dbparams = {}
 
     def __init__(self, **kwargs):
-
         """
         Args:
             **kwargs:
         """
-        self.init_connection(**kwargs)
+
+        DatabaseMixin.__init__(self, **kwargs)
 
         if 'jobsite' in kwargs and 'userid' in kwargs:
             self.add_new_posts_to_user(jobsitekey=kwargs['jobsite'], user_id=kwargs['userid'])
@@ -36,7 +35,7 @@ class TaskAddNewMatchesToUser(DatabaseMixin):
 
     def add_new_posts_to_user(self, jobsitekey, user_id):
 
-        print(u"Adding all new jobpostings for {} to user_id={}...".format(jobsitekey, user_id))
+        self.log(u"Adding all new jobpostings for {} to user_id={}...".format(jobsitekey, user_id))
 
         querysql = u"""
             INSERT IGNORE INTO user_job_match(
@@ -66,8 +65,7 @@ class TaskAddNewMatchesToUser(DatabaseMixin):
 
         try:
             rows_updated = self.run_command(querysql.format(user_id, jobsitekey, user_id))
-            print("Added {} jobpostings to user for jobsite {}".format(rows_updated, jobsitekey))
+            self.log("Added {} jobpostings to user for jobsite {}".format(rows_updated, jobsitekey))
 
         except Exception as e:
-            print(u"Exception occurred: {}".format(e))
-            raise e
+            self.handle_error(e)

@@ -123,7 +123,7 @@ class DataNormalizer
     {
         try {
             startLogSection('Calling python to find & map missing locations...');
-            $runFile = 'pyJobNormalizer/set_geolocations.py';
+            $runFile = 'pyJobNormalizer/cmd_set_geolocations.py';
             $params = [
                 '-c' => Settings::get_db_dsn(),
                 '--server' => Settings::getValue('geocodeapi_server'),

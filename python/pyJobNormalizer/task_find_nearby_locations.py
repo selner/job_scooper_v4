@@ -21,14 +21,14 @@ from mixin_database import DatabaseMixin
 
 
 class TaskFindNearbyGeolocationsFromDb(DatabaseMixin):
-    dbparams = {}
 
     def __init__(self, **kwargs):
         """
         Args:
             **kwargs:
         """
-        self.init_connection(**kwargs)
+
+        DatabaseMixin.__init__(self, **kwargs)
 
     def get_geolocation(self, geolocation_id):
         """
@@ -59,8 +59,6 @@ class TaskFindNearbyGeolocationsFromDb(DatabaseMixin):
             radius:
             columns:
         """
-        print(u"Connecting to database...")
-
         if not columns:
             columns = ["*"]
 
@@ -80,22 +78,22 @@ class TaskFindNearbyGeolocationsFromDb(DatabaseMixin):
         # @link https://clickherelabs.com/development-2/distance-searching-and-mysql/
 
         querysql = u"""
-SELECT %(column_fields)s
-FROM (
-  SELECT 
-    *,
-    3956 * ACOS(COS(RADIANS(%(orig_latitude)s)) * COS(RADIANS(`latitude`)) * COS(RADIANS(%(orig_longitude)s) - RADIANS(`longitude`)) + SIN(RADIANS(%(orig_latitude)s)) * SIN(RADIANS(`latitude`))) AS `distance`
-  FROM `geolocation`
-  WHERE
-    `latitude` 
-      BETWEEN %(orig_latitude)s - (%(radius)s / 69) 
-      AND %(orig_latitude)s + (%(radius)s / 69)
-    AND `longitude` 
-      BETWEEN %(orig_longitude)s - (%(radius)s / (69 * COS(RADIANS(%(orig_latitude)s)))) 
-      AND %(orig_longitude)s + (%(radius)s / (69* COS(RADIANS(%(orig_latitude)s))))
-) r
-WHERE `distance` <= %(radius)s
--- ORDER BY `distance` ASC
-""" % values
+            SELECT %(column_fields)s
+            FROM (
+              SELECT 
+                *,
+                3956 * ACOS(COS(RADIANS(%(orig_latitude)s)) * COS(RADIANS(`latitude`)) * COS(RADIANS(%(orig_longitude)s) - RADIANS(`longitude`)) + SIN(RADIANS(%(orig_latitude)s)) * SIN(RADIANS(`latitude`))) AS `distance`
+              FROM `geolocation`
+              WHERE
+                `latitude` 
+                  BETWEEN %(orig_latitude)s - (%(radius)s / 69) 
+                  AND %(orig_latitude)s + (%(radius)s / 69)
+                AND `longitude` 
+                  BETWEEN %(orig_longitude)s - (%(radius)s / (69 * COS(RADIANS(%(orig_latitude)s)))) 
+                  AND %(orig_longitude)s + (%(radius)s / (69* COS(RADIANS(%(orig_latitude)s))))
+            ) r
+            WHERE `distance` <= %(radius)s
+            -- ORDER BY `distance` ASC
+        """ % values
 
         return querysql

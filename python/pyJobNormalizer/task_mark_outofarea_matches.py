@@ -22,7 +22,6 @@ from task_find_nearby_locations import TaskFindNearbyGeolocationsFromDb
 
 
 class TaskMarkOutOfAreaMatches(DatabaseMixin):
-    dbparams = {}
     _geolocation_id = None
     _userkey = None
     _findtask = None
@@ -33,7 +32,9 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         Args:
             **kwargs:
         """
-        self.init_connection(**kwargs)
+
+        DatabaseMixin.__init__(self, **kwargs)
+
         if 'geolocation_id' in kwargs:
             self._geolocation_id = kwargs['geolocation_id']
         if 'user' in kwargs:
