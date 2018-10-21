@@ -20,7 +20,7 @@
 from mixin_database import DatabaseMixin
 from urllib.parse import urlencode
 import requests
-MAX_RETRIES = 3
+MAX_RETRIES = 1
 PLACE_DETAIL_GEOCODE_MAPPING = {
     "formatted_address": "display_name",
     "location_slug": "geolocation_key",
@@ -177,6 +177,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         if 'retry_count' in kwargs:
             retries = kwargs['retry_count']
+            del(kwargs['retry_count'])
 
         try:
             r = requests.get(**kwargs)
@@ -188,11 +189,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 r.raise_for_status()
 
         except requests.exceptions.Timeout as t:
-            if retries < MAX_RETRIES:
-                url = "unknown_api_url"
-                if hasattr(r, 'url', ):
-                    url = r.url
+            url = "unknown_api_url"
+            if hasattr(r, 'url', ):
+                url = r.url
 
+            if retries < MAX_RETRIES:
                 self.log(u"Warning:  API request '{}' timed out on retry #.   Retrying {} more times...".format(url,
                                                                                                              MAX_RETRIES - retries))
                 retries += 1
@@ -200,12 +201,16 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 return self.call_geocode_api(**kwargs)
             else:
                 from logging import ERROR
-                msg = u"ERROR:  API request '{}' timed out and has exceeded max retry count.".format(r.url)
+                msg = u"ERROR:  API request '{}' timed out and has exceeded max retry count.".format(url)
                 self.handle_error(Exception(msg))
 
             pass
         except Exception as ex:
-            msg = u"ERROR:  API request '{}' failed:  ".format(r.url), str(ex)
+            url = "unknown_api_url"
+            if hasattr(r, 'url', ):
+                url = r.url
+
+            msg = u"ERROR:  API request '{}' failed:  ".format(url), str(ex)
             self.handle_error(ex, msg)
 
         finally:
