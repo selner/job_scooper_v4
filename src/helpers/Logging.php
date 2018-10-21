@@ -157,15 +157,8 @@ function getChannelLogger($channel)
  */
 function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null, $channel=null, $exceptClass = null)
 {
-    if(is_empty_value($exceptClass)) {
-        $exceptClass = get_class($ex);
-    }
     $logLevel = Logger::ERROR;
 
-    $toThrow = $ex;
-    if (null === $toThrow) {
-        $toThrow = new $exceptClass($fmtLogMsg);
-    }
 
     if(!is_empty_value($extraData) && array_key_exists('JobSiteKey', $extraData)) {
         $channel = 'plugins';
@@ -180,17 +173,32 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
 	}
 
     $msg = $fmtLogMsg;
-    if (null !== $toThrow && null !== $fmtLogMsg && null !== $ex && strlen($fmtLogMsg) > 0) {
+    if (null !== $ex && null !== $fmtLogMsg && null !== $ex && strlen($fmtLogMsg) > 0) {
         if (false !== stripos($fmtLogMsg, '%s')) {
-            $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
-            $toThrow = new $exceptClass($message=$msg, $previous=$ex);
+            $msg = sprintf($fmtLogMsg, $ex->getMessage());
         } else {
-            $msg = $fmtLogMsg . PHP_EOL . ' ~ ' . $toThrow->getMessage();
+            $msg = $fmtLogMsg . PHP_EOL . ' ~ ' . $ex->getMessage();
         }
     } elseif (null !== $ex) {
-        $msg = $toThrow->getMessage();
+        $msg = $ex->getMessage();
         $logLevel = Logger::DEBUG;
     }
+
+    $toThrow = $ex;
+    if (null === $toThrow) {
+        if(!is_empty_value($exceptClass)) {
+            try {
+                $toThrow = new $exceptClass($msg, $previous=$ex);
+            }
+            catch (Exception $ex) {
+                $toThrow = new \Exception($msg, $previous = $ex);
+            }
+        }
+        else {
+            $toThrow = new \Exception($msg, $previous = $ex);
+        }
+    }
+
 
     LogMessage($msg, $logLevel, $extras=$extraData, $ex=$toThrow, $channel);
 
