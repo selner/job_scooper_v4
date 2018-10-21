@@ -26,9 +26,6 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use \Propel\Runtime\Propel;
 
-$GLOBALS['CACHES'] = array('LOCATION_MANAGER' =>null, 'GEOCODER_ENABLED' => true);
-
-
 /**
  * Class ConfigInitializer
  * @package JobScooper\Utils

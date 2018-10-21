@@ -1731,7 +1731,7 @@ JSCODE;
             }
 
             $this->log("... sleeping {$this->additionalLoadDelaySeconds} seconds while the page results load for {$this->JobSiteName}");
-            sleep($this>$this->additionalLoadDelaySeconds);
+            sleep($this->additionalLoadDelaySeconds);
 
             $html = $this->getActiveWebdriver()->getPageSource();
             $objSimpleHTML = new SimpleHtmlHelper($html);
@@ -1977,13 +1977,14 @@ JSCODE;
                             }
 
                             if(array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs)) {
-                            $arrPreviouslyLoadedJobs = $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()];
+                                $arrPreviouslyLoadedJobs = $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()];
                                 if (!is_empty_value($arrPreviouslyLoadedJobs)) {
-                                $arrPreviouslyLoadedJobSiteIds = array_column($arrPreviouslyLoadedJobs, 'JobSitePostId');
-                                $newJobThisPage = array_diff(array_column($arrPageJobsList, 'JobSitePostId'), $arrPreviouslyLoadedJobSiteIds);
-                                if (empty($newJobThisPage)) {
-                                    $site = $this->JobSiteKey;
-                                    throw new Exception("{$site} returned the same jobs for page {$nPageCount}.  We likely are not paginating successfully to new results; aborting to prevent infinite results parsing.");
+                                    $arrPreviouslyLoadedJobSiteIds = array_column($arrPreviouslyLoadedJobs, 'JobSitePostId');
+                                    $newJobThisPage = array_diff(array_column($arrPageJobsList, 'JobSitePostId'), $arrPreviouslyLoadedJobSiteIds);
+                                    if (empty($newJobThisPage)) {
+                                        $site = $this->JobSiteKey;
+                                        throw new Exception("{$site} returned the same jobs for page {$nPageCount}.  We likely are not paginating successfully to new results; aborting to prevent infinite results parsing.");
+                                    }
                                 }
                             }
 
@@ -2135,8 +2136,8 @@ JSCODE;
             $this->log($this->JobSiteName . '[' . $searchDetails->getUserSearchSiteRunKey() . ']' . ': ' . $nJobsFound . ' jobs found.' . PHP_EOL);
         } catch (Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex, false, $objSimpleHTML);
-            handleException($ex, null, true, $extraData=$searchDetails->toLoggedContext());
-            $this->log('Failed to download new job postings for search run ' . $searchDetails->getUserSearchSiteRunKey() . '.  Continuing to next search.   Error details: ' . $ex->getMessage(), \Monolog\Logger::WARNING);
+            $msg = 'Failed to download new job postings for search run ' . $searchDetails->getUserSearchSiteRunKey() . '.  Error details: %s';
+            handleException($ex, $msg, true, $extraData=$searchDetails->toLoggedContext());
         } finally {
             unset($objSimpleHTML);
             $arrPageJobsList = null;

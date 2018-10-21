@@ -223,8 +223,8 @@ class StageManager
                     }
 
                 } catch (\Exception $ex) {
-                    LogError("Skipping all other {$jobsiteKey} searches due to plugin failure.");
-                    handleException($ex, null, false);
+                    $msg = "Skipping all other {$jobsiteKey} searches due to plugin failure: %s";
+                    handleException($ex, $msg, false);
                 } finally {
                     $sitePlugin = null;
                     // make sure to clean up the references to each of the UserSiteSearchRun objects
@@ -243,8 +243,7 @@ class StageManager
                 }
             }
         } catch (\Exception $ex) {
-            $msg = "Stage 1 failed to run due to error: {$ex->getMessage()}";
-            LogError($msg);
+            $msg = "Stage 1 failed to run due to error: %s";
             handleException($ex, $msg, false);
         } finally {
             endLogSection("End Stage 1: Finished downloading new jobs.");
