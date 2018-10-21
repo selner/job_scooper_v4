@@ -183,7 +183,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
     if (null !== $toThrow && null !== $fmtLogMsg && null !== $ex && strlen($fmtLogMsg) > 0) {
         if (false !== stripos($fmtLogMsg, '%s')) {
             $msg = sprintf($fmtLogMsg, $toThrow->getMessage());
-            $toThrow = new $exceptClass($msg, null, $ex);
+            $toThrow = new $exceptClass($message=$msg, $previous=$ex);
         } else {
             $msg = $fmtLogMsg . PHP_EOL . ' ~ ' . $toThrow->getMessage();
         }
