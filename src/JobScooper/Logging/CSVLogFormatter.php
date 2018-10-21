@@ -85,17 +85,34 @@ class CSVLogFormatter extends \Monolog\Formatter\LineFormatter
             } elseif (is_array($v)) {
                 foreach ($record[$k] as $key => $val) {
                     $this->checkColumnName($key);
-                    $outRecord[$key] = (string) $val;
+
+                    if(is_array($val)) {
+                        try {
+                            $outRecord[$key] = encodeJson($val);
+                        } catch (\Exception $e) {
+                        }
+                    }
+                    else {
+                        $outRecord[$key] = strval($val);
+                    }
                 }
                 unset($record[$k]);
             } elseif (is_object($v)) {
                 foreach (object_to_array($v) as $key => $val) {
                     $this->checkColumnName($key);
-                    $outRecord[$key] = (string) $val;
+                    if(is_array($val)) {
+                        try {
+                            $outRecord[$key] = encodeJson($val);
+                        } catch (\Exception $e) {
+                        }
+                    }
+                    else {
+                        $outRecord[$key] = strval($val);
+                    }
                 }
             } else {
                 $this->checkColumnName($k);
-                $outRecord[$k] = (string) $v;
+                $outRecord[$k] = strval($v);
             }
         }
 
