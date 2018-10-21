@@ -63,7 +63,7 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
             UPDATE
                 user_job_match
             SET 
-                user_notification_state = 2  -- 3 is "ready-to-send"
+                user_notification_state = 2  -- 2 is "ready-to-send"
             WHERE 
                 user_notification_state = 1 AND -- 1 is "marked"
                 is_job_match = 1
