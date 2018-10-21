@@ -75,66 +75,65 @@ class JobsAutoMarker
         foreach($usersForRun as $userFacts) {
             $this->_markingUserFacts = $userFacts;
 
-            startLogSection("'{$userFacts['UserSlug']}': Processing user's job matches...");
             try {
-                $this->_markJobMatchesForUser($userFacts);
-            } catch (\Exception $ex) {
+                $this->_callPythonCmd(
+                    $filename = "cmd_set_out_of_area.py",
+                    $descr = "{$userFacts['UserSlug']}:  Marking in/out of search areas...",
+                    $extraParams = array( '--user' => $userFacts['UserSlug'])
+                );
+            }
+            catch (Exception $ex)
+            {
+                handleException($ex);
+            }
+
+            //
+            // Get all the postings that are in the table but not yet automarked and automark them
+            // in batches so we don't max out RAM
+            //
+            try {
+                startLogSection("{$userFacts['UserSlug']}:  Marking title matches / exclusions...");
+                doCallbackForAllMatches(
+                    array($this, 'markJobsListSubset_KwdsComps'),
+                    [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, Criteria::EQUAL],
+                    null,
+                    null,
+                    $userFacts
+                );
+            } catch (PropelException $ex) {
                 handleException($ex, null, true);
-            } finally {
-                $usersForRun = null;
-                endLogSection("{$userFacts['UserSlug']}: Finished job match processing..");
+            } catch (\PDOException $ex) {
+                handleException($ex, null, true);
+            } catch (Exception $ex) {
+                handleException($ex, null, true);
+            }
+            finally {
+                endLogSection("{$userFacts['UserSlug']}: Finished title match / exclusion marking.");
             }
         }
 
         try {
-            $this->_markJobMatches_ForSend();
-        } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
-            $errs[] = $ex;
-        }
-
-    }
-
-
-    /**
-     *
-     * @param array $userFacts
-     * @throws \Exception
-     */
-    private function _markJobMatchesForUser($userFacts)
-    {
-		$this->_markingUserFacts = $userFacts;
-
-        try {
-            $this->_markJobMatches_OutOfArea($userFacts);
-        } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
-            $errs[] = $ex;
-        }
-
-        //
-        // Get all the postings that are in the table but not yet automarked and automark them
-        // in batches so we don't max out RAM
-        //
-        try {
-            startLogSection("{$userFacts['UserSlug']}:  Marking title matches / exclusions...");
-            doCallbackForAllMatches(
-                array($this, 'markJobsListSubset_KwdsComps'),
-                [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, Criteria::EQUAL],
-                null,
-                null,
-                $userFacts
+            $this->_callPythonCmd(
+                $filename = "cmd_exclude_duplicate_matches.py",
+                $descr = "excluding duplicate job posts"
             );
-        } catch (PropelException $ex) {
-	        handleException($ex, null, true);
-        } catch (\PDOException $ex) {
-	        handleException($ex, null, true);
-        } catch (Exception $ex) {
-	        handleException($ex, null, true);
         }
-        finally {
-            endLogSection("{$userFacts['UserSlug']}: Finished title match / exclusion marking.");
+        catch (Exception $ex)
+        {
+            handleException($ex);
         }
+
+        try {
+            $this->_callPythonCmd(
+                $filename = "cmd_mark_skipsend.py",
+                $descr = "marking job matches for user notification"
+            );
+        }
+        catch (Exception $ex)
+        {
+            handleException($ex);
+        }
+
     }
 
     /**
@@ -172,58 +171,28 @@ class JobsAutoMarker
         }
     }
 
-
     /**
-     * @param array $userFacts
-     * @throws \Exception
+     * @param $filename
+     * @param $descr
+     * @param array $extraParams
+     * @throws Exception
      */
-    private function _markJobMatches_OutOfArea($userFacts)
+    private function _callPythonCmd($filename, $descr, $extraParams=array())
     {
-
-        startLogSection("{$userFacts['UserSlug']}:  Marking in/out of search areas...");
+        startLogSection($descr);
 
         try {
-            $runFile = 'pyJobNormalizer/cmd_set_out_of_area.py';
-            $params = [
-                '-c' => Settings::get_db_dsn(),
-                '--user' => $userFacts['UserSlug']
-            ];
+            $runFile = "pyJobNormalizer" . DIRECTORY_SEPARATOR . "{$filename}";
+            $params = array_merge(array( '-c' => Settings::get_db_dsn()), $extraParams);
 
             $resultcode = PythonRunner::execScript($runFile, $params);
 
         } catch (Exception $ex) {
-            handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
+            handleException($ex, "ERROR:  Failed {$descr}");
         } finally {
-            endLogSection("{$userFacts['UserSlug']}':  Finished out of area marking.");
+            endLogSection($descr);
         }
     }
-
-
-    /**
-     * @throws \Exception
-     */
-    private function _markJobMatches_ForSend()
-    {
-
-        startLogSection("Marking matches for sending...");
-
-        try {
-
-            $runFile = 'pyJobNormalizer/cmd_mark_skipsend.py';
-            $params = [
-                '-c' => Settings::get_db_dsn()
-            ];
-
-            $resultcode = PythonRunner::execScript($runFile, $params);
-
-        } catch (Exception $ex) {
-            handleException($ex, 'ERROR:  Failed to mark job matches for sending.');
-        } finally {
-            endLogSection('Finished marking matches for sending.');
-        }
-    }
-
-
 
     /**
      * @param \JobScooper\DataAccess\UserJobMatch[] $arrJobsList
@@ -447,24 +416,17 @@ class JobsAutoMarker
             $sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $collJobsList);
             $resultsfile = generateOutputFileName("{$basefile}_results", 'json', true, 'debug');
 
-            LogMessage('Calling python to do work of job title matching...');
+            $this->_callPythonCmd(
+                $filename = "cmd_match_titles_to_keywords.py",
+                $descr = "matching job titles for user",
+                $extraParams = [
+                    '-i' => $sourcefile,
+                    '-o' => $resultsfile
+                ]
+            );
+            LogMessage('Updating database with new match results...');
+            $this->_updateUserJobMatchesFromJson($resultsfile, $collJobsList);
 
-            $runFile = 'pyJobNormalizer/cmd_match_titles_to_keywords.py';
-            $params = [
-                '-i' => $sourcefile,
-                '-o' => $resultsfile
-            ];
-
-            try {
-                $resultcode = PythonRunner::execScript($runFile, $params);
-
-                LogMessage('Updating database with new match results...');
-                $this->_updateUserJobMatchesFromJson($resultsfile, $collJobsList);
-            } catch (Exception $ex) {
-                throw $ex;
-            } finally {
-                LogMessage("Python command {$runFile} finished.");
-            }
         } catch (Exception $ex) {
             handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s');
         } finally {
