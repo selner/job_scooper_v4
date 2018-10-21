@@ -162,10 +162,16 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
         $toThrow = new Exception($fmtLogMsg);
     }
 
+    if(!is_empty_value($extraData) && array_key_exists('JobSiteKey', $extraData)) {
+        $channel = 'plugins';
+    }
+
+
 	if(is_a($ex, PDOException::class))
 	{
 	    $conmgr = Propel\Runtime\Propel::getConnectionManager(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
 	    $conmgr->closeConnections();
+	    $channel = 'database';
 	}
 
     $msg = $fmtLogMsg;

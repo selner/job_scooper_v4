@@ -435,15 +435,18 @@ class LoggingManager extends \Monolog\Logger
 //		'exception_trace' => '',
             'hostname' => gethostname(),
             'channel' => '',
-            'jobsite' => ''];
+            'jobsitekey' => ''];
 
             $context = array_merge($errContext, $context);
 
+            $jobsiteKey = null;
+            if(!is_empty_value($context['jobsitekey'])) {
+                $jobsiteKey = $context['jobsitekey'];
+            }
 
 	        //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
 	        $dbg = debug_backtrace();
 	        $i = 0;
-	        $jobsiteKey = null;
 	        $usersearch = null;
 	
 	        $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
@@ -455,24 +458,26 @@ class LoggingManager extends \Monolog\Logger
 	                    $objclass = get_class($dbg[$i]['object']);
 	                    if (strcasecmp($objclass, $dbg[$i]['class']) != 0) {
 	                        $class = "{$objclass} -> {$class}";
+	                        if(is_empty_value($jobsiteKey)) {
 	                        try {
 	                            if (is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], 'getName')) {
 	                                $jobsiteKey = $dbg[$i]['object']->getName();
 	                            }
 	                        } catch (Exception $ex) {
-	                            $jobsiteKey = '';
-	                        }
-	                        try {
-	                            if (array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args'])) {
-	                                if (is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), 'getUserSearchSiteRunKey')) {
-	                                    $usersearch = $dbg[$i]['args'][0]->getUserSearchSiteRunKey();
-	                                } else {
-	                                    $usersearch = '';
-	                                }
+
 	                            }
-	                        } catch (Exception $ex) {
-	                            $usersearch = '';
 	                        }
+//	                        try {
+//	                            if (array_key_exists('args', $dbg[$i]) & is_array($dbg[$i]['args']) && array_key_exists(0, $dbg[$i]['args'])) {
+//	                                if (is_object($dbg[$i]['args'][0]) && method_exists(get_class($dbg[$i]['args'][0]), 'getUserSearchSiteRunKey')) {
+//	                                    $usersearch = $dbg[$i]['args'][0]->getUserSearchSiteRunKey();
+//	                                } else {
+//	                                    $usersearch = '';
+//	                                }
+//	                            }
+//	                        } catch (Exception $ex) {
+//	                            $usersearch = '';
+//	                        }
 	                    }
 	                    break;
 	                }
@@ -483,7 +488,7 @@ class LoggingManager extends \Monolog\Logger
 	
 	        $context['class_call'] = $class;
 	        $context['channel'] = null === $jobsiteKey ? 'default' : 'plugins';
-	        $context['jobsite'] = $jobsiteKey;
+	        $context['jobsitekey'] = $jobsiteKey;
 
             $context['exception_message'] = $thrownExc->getMessage();
             $context['exception_file'] = $thrownExc->getFile();
