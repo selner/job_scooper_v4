@@ -551,9 +551,9 @@ function substr_count_multi($subject = "", array $patterns = array(), &$findings
  *
  * @return null
  */
-function getArrayItem($key, $arr)
+function getArrayItem($key, $arr, $default=null)
 {
-    $ret = null;
+    $ret = $default;
     if (array_key_exists($key, $arr)) {
         if (is_numeric($arr[$key])) {
             $ret = $arr[$key];
