@@ -436,16 +436,22 @@ class LoggingManager extends \Monolog\Logger
 //		'exception_trace' => '',
             'hostname' => gethostname(),
             'channel' => '',
-            'jobsitekey' => ''];
+            'jobsitekey' => '',
+            'search_user' => ''];
 
             $context = array_merge($errContext, $context);
 
             $jobsiteKey = null;
+            if(array_key_exists('user', $context)) {
+                $context['search_user'] = $context['user'];
+                unset($context['user']);
+            }
+
             if(!is_empty_value($context['jobsitekey'])) {
                 $jobsiteKey = $context['jobsitekey'];
             }
 
-	        //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
+            //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
 	        $dbg = debug_backtrace();
 	        $i = 0;
 	        $usersearch = null;
