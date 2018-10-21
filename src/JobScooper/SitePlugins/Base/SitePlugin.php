@@ -19,6 +19,7 @@ namespace JobScooper\SitePlugins\Base;
 
 require_once(__ROOT__ . '/src/helpers/Constants.php');
 use Exception;
+use JobScooper\SitePlugins\JobSitePluginException;
 use JobScooper\Utils\CurlWrapper;
 use JobScooper\Utils\Settings;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -285,6 +286,18 @@ abstract class SitePlugin implements IJobSitePlugin
     }
 
     /**
+     * @param $ex
+     * @param null $fmtLogMsg
+     * @param bool $raise
+     * @param null $extraData
+     * @throws Exception
+     */
+    private function _handleException($ex, $fmtLogMsg= null, $raise=true, $extraData=null) {
+        handleException($ex, $fmtLogMsg, $raise, $extraData, $channel = "plugin", $exceptClass = JobSitePluginException::class);
+    }
+
+
+    /**
      * @throws \Exception
      */
     public function downloadLatestJobsForAllSearches()
@@ -310,7 +323,7 @@ abstract class SitePlugin implements IJobSitePlugin
                         try {
                             $this->selenium = new SeleniumManager();
                         } catch (Exception $ex) {
-                            handleException($ex, "Unable to start Selenium to get jobs for plugin '{$this->JobSiteName}'", true);
+                            $this->_handleException($ex, "Unable to start Selenium to get jobs for plugin '{$this->JobSiteName}'", true);
                         }
                     }
 
@@ -319,7 +332,7 @@ abstract class SitePlugin implements IJobSitePlugin
                     $this->_setSearchResult_($search, true);
                 } catch (Exception $ex) {
                     $this->_setSearchResult_($search, false, new Exception('Unable to download jobs: ' . (string)$ex));
-                    handleException($ex, null, true, $extraData = $search->toArray());
+                    $this->_handleException($ex, null, true, $extraData = $search->toArray());
                 } finally {
                     $search->save();
                 }
@@ -360,7 +373,7 @@ abstract class SitePlugin implements IJobSitePlugin
                         LogMessage("User {$userFacts['UserSlug']} had no missing previously loaded listings from {$this->JobSiteKey}.");
                     }
                 } catch (Exception $ex) {
-                    handleException($ex);
+                    $this->_handleException($ex);
                 }
             }
         } catch (Exception $ex) {
@@ -1169,7 +1182,7 @@ JSCODE;
         } catch (Exception $ex) {
             $strError = 'Failed to download jobs from ' . $this->JobSiteName . ' jobs for search ' . $searchDetails->getUserSearchSiteRunKey() . '[URL=' . $searchDetails->getSearchStartUrl() . ']. Exception Details: ';
             $this->_setSearchResult_($searchDetails, false, new Exception($strError . (string) $ex));
-            handleException($ex, $strError, false);
+            $this->_handleException($ex, null, false);
         } finally {
             endLogSection('Finished data pull for ' . $this->JobSiteName . '[' . $searchDetails->getUserSearchSiteRunKey() . ']');
         }
@@ -1292,7 +1305,7 @@ JSCODE;
 
             return $objSimpleHTML;
         } catch (Exception $ex) {
-            handleException($ex, null, true);
+            $this->_handleException($ex, null, true);
         }
 
 
@@ -1487,7 +1500,7 @@ JSCODE;
 					$jp->save();
 					$arrJobList[$k] = $jp->toArray();
 				} catch (Exception $ex) {
-					handleException($ex, "Failed to save JobPosting: %s", false);
+					$this->_handleException($ex, "Failed to save JobPosting: %s", false);
 					unset($arrJobList[$k]);
 				}
 				finally {
@@ -1500,7 +1513,7 @@ JSCODE;
     
             $nCountNewJobs = \count($arrJobsToAdd);
         } catch (Exception $ex) {
-            handleException($ex, 'Unable to save job search results to database.', true);
+            $this->_handleException($ex, 'Unable to save job search results to database.', true);
         }
         
     }
@@ -1546,7 +1559,7 @@ JSCODE;
 	        }
         }
         catch (Exception $ex) {
-        	handleException($ex);
+        	$this->_handleException($ex);
         }
         finally {
             $alreadyMatched = null;
@@ -1592,7 +1605,7 @@ JSCODE;
 	                $response = $response['body'];
     	        }
             } catch (Exception $ex) {
-                handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+                $this->_handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
             }
         }
     	else
@@ -1602,7 +1615,7 @@ JSCODE;
 	            try {
 	                $this->selenium = new SeleniumManager();
 	            } catch (Exception $ex) {
-	                handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+	                $this->_handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
 	            }
 	        }
 	
@@ -1689,7 +1702,7 @@ JSCODE;
 	            if(null !== $response && null !== $response->error) {
 	                $msg = "{$msg} {$response->error}";
 	            }
-	            handleException($ex, "{$msg} Error:  ", true);
+	            $this->_handleException($ex, "{$msg} Error:  ", true);
             }
 		}
 
@@ -1747,7 +1760,7 @@ JSCODE;
             }
         } catch (Exception $ex) {
             $strError = 'Failed to get dynamic HTML via Selenium due to error:  ' . $ex->getMessage();
-            handleException(new Exception($strError), null, true);
+            $this->_handleException(new Exception($strError), null, true);
         }
         return $objSimpleHTML;
     }
@@ -1800,7 +1813,7 @@ JSCODE;
                     }
                 } catch (Exception $ex) {
                     $strError = 'Failed to get dynamic HTML via Selenium due to error:  ' . $ex->getMessage();
-                    handleException(new Exception($strError), null, true, $extraData=$searchDetails->toLoggedContext());
+                    $this->_handleException(new Exception($strError), null, true, $extraData=$searchDetails->toLoggedContext());
                 }
             } else {
                 $objSimpleHTML = $this->getSimpleObjFromPathOrURL($searchDetails, null, $searchDetails->getSearchStartUrl(), $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
@@ -1936,7 +1949,7 @@ JSCODE;
 
                             $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
                         } catch (Exception $ex) {
-                            handleException($ex, 'Failed to get dynamic HTML via Selenium due to error:  %s', true, $extraData=$searchDetails->toLoggedContext());
+                            $this->_handleException($ex, 'Failed to get dynamic HTML via Selenium due to error:  %s', true, $extraData=$searchDetails->toLoggedContext());
                         }
                     } else {
                         $strURL = $this->setResultPageUrl($searchDetails, $nPageCount, $nItemCount);
@@ -2065,7 +2078,7 @@ JSCODE;
                         } else {
                             $err = 'Error: ' . $err . '  Aborting job site plugin to prevent further errors.';
                             $this->log($err, \Monolog\Logger::ERROR);
-                            handleException(new Exception($err), null, true, $extraData=$searchDetails->toLoggedContext());
+                            $this->_handleException(new Exception($err), null, true, $extraData=$searchDetails->toLoggedContext());
                         }
                     }
 
@@ -2116,7 +2129,7 @@ JSCODE;
                                             $this->takeNextPageAction();
                                             sleep($this->additionalLoadDelaySeconds + 2);
                                         } catch (Exception $ex) {
-                                            handleException($ex, ('Failed to take nextPageAction on page ' . $nPageCount . '.  Error:  %s'), true, $extraData=$searchDetails->toLoggedContext());
+                                            $this->_handleException($ex, ('Failed to take nextPageAction on page ' . $nPageCount . '.  Error:  %s'), true, $extraData=$searchDetails->toLoggedContext());
                                         }
                                     }
                                     $strURL = $this->getActiveWebdriver()->getCurrentURL();
@@ -2125,7 +2138,7 @@ JSCODE;
                             }
                             unset($objSimpleHTML);
                         } catch (Exception $ex) {
-                            handleException($ex, 'Failed to get dynamic HTML via Selenium due to error:  %s', true, $extraData=$searchDetails->toLoggedContext());
+                            $this->_handleException($ex, 'Failed to get dynamic HTML via Selenium due to error:  %s', true, $extraData=$searchDetails->toLoggedContext());
                         } finally {
                             unset($arrPageJobsList);
                         }
@@ -2137,7 +2150,7 @@ JSCODE;
         } catch (Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex, false, $objSimpleHTML);
             $msg = 'Failed to download new job postings for search run ' . $searchDetails->getUserSearchSiteRunKey() . '.  Error details: %s';
-            handleException($ex, $msg, true, $extraData=$searchDetails->toLoggedContext());
+            $this->_handleException($ex, $msg, true, $extraData=$searchDetails->toLoggedContext());
         } finally {
             unset($objSimpleHTML);
             $arrPageJobsList = null;

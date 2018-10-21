@@ -19,6 +19,7 @@ namespace JobScooper\Manager;
 
 use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
+use JobScooper\SitePlugins\JobSitePluginException;
 use JobScooper\StageProcessor\DataNormalizer;
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierDevAlerts;
@@ -165,6 +166,8 @@ class StageManager
                             if (!is_empty_value($searchRuns)) {
                                 $sitePlugin->setSearches($searchRuns);
                             }
+                        } catch (JobSitePluginException $classError) {
+                            handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = false);
                         } catch (\Exception $classError) {
                             handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
                         } finally {
@@ -184,7 +187,7 @@ class StageManager
                             }
                             $didRunSearches = true;
                         } catch (\Exception $classError) {
-                            handleException($classError, "{$jobsiteKey} failed to get latest job postings for {$jobsiteKey}: %s", $raise = true);
+                            handleException($classError, "{$jobsiteKey} failed to get latest job postings: %s", $raise = true);
                             $didRunSearches = false;
                         } finally {
                             endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
@@ -224,7 +227,7 @@ class StageManager
 
                 } catch (\Exception $ex) {
                     $msg = "Skipping all other {$jobsiteKey} searches due to plugin failure: %s";
-                    handleException($ex, $msg, false);
+                    LogWarning($msg);
                 } finally {
                     $sitePlugin = null;
                     // make sure to clean up the references to each of the UserSiteSearchRun objects
