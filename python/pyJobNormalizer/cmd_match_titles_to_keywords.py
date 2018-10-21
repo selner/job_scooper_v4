@@ -23,7 +23,7 @@ from task_match_titles import TaskMatchJobsToKeywords
 
 cli_usage = """
 Usage:
-  cmd_match_titles_to_keywords.py -i <file> -o <file>
+  cmd_match_titles_to_keywords.py -i <file> -o <file> -c <dbstring> 
   cmd_match_titles_to_keywords.py --version
 
 Options:
@@ -32,6 +32,7 @@ Options:
   -v --verbose  print status messages
   -o <file>, --output <file> output file with job match results 
   -i <file>, --input <file> input JSON data file with jobs and keywords
+  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
 """
 
 if __name__ == '__main__':
