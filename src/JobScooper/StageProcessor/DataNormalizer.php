@@ -98,7 +98,7 @@ class DataNormalizer
     {
         try {
             startLogSection('Calling python to dedupe new job postings...');
-            $runFile = 'pyJobNormalizer/mark_duplicates.py';
+            $runFile = 'pyJobNormalizer/cmd_mark_duplicates.py';
             $params = [
                 '-c' => Settings::get_db_dsn()
             ];
