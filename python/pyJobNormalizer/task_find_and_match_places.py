@@ -111,7 +111,8 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         result = self.fetch_all_from_query(querysql)
         locs_needing_setting = set(
-            [l["Location"] for l in result if l["Location"] and l["Location"] in self._location_mapping.keys()])
+            [l["Location"] for l in result if l["Location"] and l["Location"] in self._location_mapping.keys() and
+             len(str(l["Location"]).strip()) > 0 ])
 
         if len(locs_needing_setting) > 0:
             self._update_missing_db_known_locs(locs_needing_setting)
@@ -222,13 +223,17 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         try:
             for l in locs:
                 loc = simpleuni(str(l)).strip()
+                if len(loc) <= 0:
+                    continue
+
                 # Do place lookup
                 place_details = {}
 
                 payload = {'query': loc}
                 # headers = {'content-type': 'application/json'}
                 headers = {}
-                print(u"Looking up place for location search value '{}'".format(str(loc)))
+
+                print(u"Looking up place for location search value '{}'".format(loc))
                 kwargs = {
                     'url': u"{}/places/lookup".format(geocode_server),
                     'params': payload,
