@@ -277,14 +277,29 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                         if 'display_name' in geolocfacts and len(geolocfacts['display_name']) > 100:
                             geolocfacts['display_name'] = geolocfacts['display_name'][0:100]
 
-                        ins_result = self.add_row("geolocation", "geolocation_id", geolocfacts, self._geoloc_columns)
-                        # print(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
+                        query = """ 
+                            SELECT
+                                geolocation.geolocation_id as `GeoLocationId`,
+                                geolocation.display_name as `DisplayName`
+                            FROM geolocation
+                            WHERE geolocation_key like '{}'
+                            ORDER by geolocation.geolocation_id
+                        """.format(geolocfacts['geolocation_key'])
 
-                        total_loc_found += 1
+                        existingGeo = self.fetch_one_from_query(query)
+                        if existingGeo is not None:
+                            print(u"... found existing geolocation_id {} for '{}'.  Using it instead." .format(existingGeo['GeoLocationId'], existingGeo['DisplayName']))
+                            locfacts = {'GeoLocationId': existingGeo['GeoLocationId'],
+                                        'DisplayName': existingGeo['DisplayName']}
+                        else:
+                            ins_result = self.add_row("geolocation", "geolocation_id", geolocfacts, self._geoloc_columns)
+                            # print(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
+
+                            total_loc_found += 1
+                            locfacts = {'GeoLocationId': ins_result['geolocation_id'],
+                                        'DisplayName': ins_result['display_name']}
 
                         #   add the new loc to the known location mappings list
-                        locfacts = {'GeoLocationId': ins_result['geolocation_id'],
-                                    'DisplayName': ins_result['display_name']}
                         self._location_mapping[loc] = locfacts
 
                         #   update location mappings for loc
