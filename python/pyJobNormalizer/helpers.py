@@ -198,10 +198,11 @@ def writedicttocsv(csvfilename, data, keys=None):
     print(u"Writing {} rows to file {}...".format(len(data), csvfilename))
 
     if keys is None:
-        item = data.items()[0]
-        keys = item.keys()
+        itemkey = list(data)[0]
+        item = data[itemkey]
+        keys = list(item)
 
-    csvfile = open(csvfilename, "wb")
+    csvfile = open(csvfilename, "w")
     csv_writer = csv.DictWriter(csvfile, fieldnames=keys, dialect=csv.excel)
     csv_writer.writeheader()
     for row in data:
