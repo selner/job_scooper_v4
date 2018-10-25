@@ -6,7 +6,11 @@
           defaultPhpNamingMethod="phpname"
           xsi:noNamespaceSchemaLocation="file://code/job_scooper_v4/vendor/propel/propel/resources/xsd/database.xsd"
 >
-
+    <vendor type="mysql">
+        <parameter name="Engine" value="InnoDB"/>
+        <parameter name="Charset" value="utf8mb4"/>
+        <parameter name="Collate" value="utf8mb4_bin"/>
+    </vendor>
     <!--
         *************************************************
 
@@ -16,11 +20,6 @@
     -->
 
     <table name="job_site" phpName="JobSiteRecord" allowPkInsert="true" heavyIndexing="true">
-
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8mb4"/>
-            <parameter name="Collate" value="utf8mb4_unicode_ci"/>
-        </vendor>
 
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         PRIMARY KEY
@@ -39,6 +38,12 @@
 
         <column name="results_filter_type" phpName="ResultsFilterType" type="enum"
                 valueSet="unknown, all-only, all-by-location, user-filtered" defaultValue="unknown"/>
+
+        <index name="js_pkey">
+            <index-column name="jobsite_key" size="100" />
+        </index>
+
+
     </table>
 
 
@@ -52,11 +57,6 @@
 
 
     <table name="geolocation" phpName="GeoLocation" allowPkInsert="true" heavyIndexing="true">
-
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8mb4"/>
-            <parameter name="Collate" value="utf8mb4_unicode_ci"/>
-        </vendor>
 
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         PRIMARY KEY
@@ -106,11 +106,6 @@
 
     <table name="jobposting" phpName="JobPosting" allowPkInsert="true" heavyIndexing="true">
 
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8mb4"/>
-            <parameter name="Collate" value="utf8mb4_unicode_ci"/>
-        </vendor>
-
         <!-- ~~~~~~~~~  PRIMARY KEY  ~~~~~~~~~~~~~~~~~~  -->
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true" primaryKey="true"
                 autoIncrement="true"/>
@@ -132,6 +127,7 @@
             <unique-column name="jobsite_key" size="25"/>
             <unique-column name="jobsite_post_id" size="190"/>
         </unique>
+
         <!--
             Job posting facts
         -->
@@ -158,8 +154,8 @@
         <!--
             GeoLocation Data for the Job Posting
         -->
-        <column name="location_display_value" phpName="LocationDisplayValue" type="varchar" size="255"
-        />
+        <column name="location_display_value" phpName="LocationDisplayValue" type="varchar" size="255"/>
+
         <column name="geolocation_id" phpName="GeoLocationId" type="integer"/>
         <foreign-key foreignTable="geolocation" phpName="GeoLocationFromJP">
             <reference local="geolocation_id" foreign="geolocation_id"/>
@@ -181,6 +177,21 @@
         -->
         <column name="key_company_and_title" phpName="KeyCompanyAndTitle" type="varchar" size="255" required="true"/>
 
+        <index name="jobposting_lookup">
+            <index-column name="jobsite_key" size="100"/>
+            <index-column name="jobsite_post_id" size="190"/>
+        </index>
+
+        <index name="jobposting_pkey">
+            <index-column name="jobposting_id"/>
+        </index>
+
+
+        <index name="jobposting_loc">
+            <index-column name="location_display_value"/>
+        </index>
+
+
     </table>
 
     <!--
@@ -193,11 +204,6 @@
 
 
     <table name="user" phpName="User" allowPkInsert="true">
-
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8mb4"/>
-            <parameter name="Collate" value="utf8mb4_unicode_ci"/>
-        </vendor>
 
         <!-- ~~~~~~~~~  PRIMARY KEY  ~~~~~~~~~~~~~~~~~~  -->
         <column name="user_id" phpName="UserId" type="integer" required="true" autoIncrement="true"
@@ -235,11 +241,6 @@
 
     <table name="user_search_pair" phpName="UserSearchPair" isCrossRef="true" reloadOnUpdate="true">
 
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8mb4"/>
-            <parameter name="Collate" value="utf8mb4_unicode_ci"/>
-        </vendor>
-
         <!-- ~~~~~~~~~  PRIMARY KEY  ~~~~~~~~~~~~~~~~~~  -->
         <column name="user_search_pair_id" phpName="UserSearchPairId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
 
@@ -256,6 +257,7 @@
             <unique-column name="user_keyword" size="50"/>
             <unique-column name="geolocation_id"/>
         </unique>
+
 
         <!-- ~~~~~~~~~  OTHER FACTS ~~~~~~~~~~~~~~~~  -->
 
@@ -284,16 +286,11 @@
 
     <table name="user_search_site_run" phpName="UserSearchSiteRun" isCrossRef="true" reloadOnUpdate="true" heavyIndexing="true">
 
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8mb4"/>
-            <parameter name="Collate" value="utf8mb4_unicode_ci"/>
-        </vendor>
-
         <!-- Primary Key -->
         <column name="user_search_site_run_id" phpName="UserSearchSiteRunId" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
 
         <!-- Alternate Key -->
-        <column name="user_search_pair_id" phpName="UserSearchPairId" type="integer" required="true"/>
+        <column name="user_search_pair_id" phpName="UserSearchPairId" type="integer" required="true" primaryKey="false"/>
 
         <column name="jobsite_key" phpName="JobSiteKey" type="varchar" size="100" required="true" primaryKey="false"/>
 
@@ -321,12 +318,6 @@
         <column name="date_started" phpName="StartedAt" type="timestamp"/>
         <column name="date_ended" phpName="EndedAt" type="timestamp"/>
 
-        <index>
-            <index-column name="user_search_site_run_key" size="100"/>
-            <index-column name="date_ended"/>
-        </index>
-
-
         <column name="search_start_url" phpName="SearchStartUrl" type="varchar" size="1024"/>
 
         <column name="run_result_code" phpName="RunResultCode" type="enum"
@@ -346,6 +337,16 @@
             <reference local="user_search_pair_id" foreign="user_search_pair_id"/>
         </foreign-key>
 
+        <index>
+            <index-column name="jobsite_key" size="100"/>
+            <index-column name="date_started"/>
+            <index-column name="run_result_code"/>
+        </index>
+
+        <index name="ussr_lookup">
+            <index-column name="user_search_pair_id"/>
+            <index-column name="jobsite_key" size="100"/>
+        </index>
     </table>
 
     <!--
@@ -357,27 +358,23 @@
     -->
 
 
-    <table name="user_job_match" phpName="UserJobMatch" isCrossRef="true" heavyIndexing="true">
+    <table name="user_job_match" phpName="UserJobMatch" isCrossRef="true">
+
         <!-- ~~~~~~~~~  PRIMARY KEY ~~~~~~~~~~~~~~~~  -->
 
         <column name="user_job_match_id" phpName="UserJobMatchId" type="integer" required="true"
                 autoIncrement="true" primaryKey="true"/>
-        <unique>
-            <unique-column name="user_job_match_id"/>
-        </unique>
-
-
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8mb4"/>
-            <parameter name="Collate" value="utf8mb4_unicode_ci"/>
-        </vendor>
-
 
         <!-- ~~~~~~~~~  ALTERNATE KEY ~~~~~~~~~~~~~~~~  -->
 
         <column name="user_id" phpName="UserId" type="integer" required="true"/>
 
         <column name="jobposting_id" phpName="JobPostingId" type="integer" required="true"/>
+
+        <unique>
+            <unique-column name="user_id"/>
+            <unique-column name="jobposting_id"/>
+        </unique>
 
         <!-- ~~~~~~~~~  OTHER COLUMNS  ~~~~~~~~~~~~~~~~  -->
 
@@ -421,6 +418,18 @@
         <!--<foreign-key foreignTable="user_search_site_run" phpName="UserSearchSiteRunFromUJM">-->
             <!--<reference local="set_by_user_search_site_run_key" foreign="user_search_site_run_key"/>-->
         <!--</foreign-key>-->
+
+        <index name="ujm_lookup">
+            <index-column name="user_id"/>
+            <index-column name="jobposting_id"/>
+        </index>
+
+        <index name="ujm_idx_matches">
+            <index-column name="user_id"/>
+            <index-column name="is_job_match"/>
+        </index>
+
+
 
     </table>
 
