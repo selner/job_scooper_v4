@@ -238,18 +238,38 @@ class JobSiteRecord extends BaseJobSiteRecord
             $this->addSiteRunsForUser($userFacts);
         }
 
+        $siteResultsType = $this->getResultsFilterType();
 
         $plugin = $this->getPlugin();
 
-        if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+        //
+        // If the jobsite results type is not yet set, check the plugin settings and set it in the DB.  We'll need
+        // to know its value in the next bit.
+        //
+        if(is_empty_value($siteResultsType) || $siteResultsType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_UNKNOWN) {
 
-            if ($plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
-                $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY);
+            if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
+                if ($plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
+                    $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY);
+                    $this->save();
+                }
+                else
+                {
+                    $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION);
+                    $this->save();
+                }
             }
-            if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
-                $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION);
+            else {
+                $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_USER_FILTERED);
+                $this->save();
             }
+        }
 
+        if($siteResultsType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
+            $siteResultsType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION) {
+
+            // TODO:  BUGBUG -- if ALL_BY_LOCATION_ONLY this will skip other locations incorrectly.
+            //        Not a huge issue right now but will be if we expand users & searches
             if(\count($this->_searchRunsForUsers) > 1) {
                 $keepSearch = array_pop($this->_searchRunsForUsers);
                 foreach($this->_searchRunsForUsers as $key=>$search) {
