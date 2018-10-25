@@ -110,12 +110,12 @@ class JobSiteRecord extends BaseJobSiteRecord
      * Derived method to catches calls to undefined methods.
      *
      *
-     * @param string $name
+     * @param string $method
      * @param mixed  $params
      *
      * @return array|string
-     *@throws \Exception
-*/
+     * @throws \Exception
+    */
     public function __call($method, $params)
     {
     	$obj = null;
@@ -151,7 +151,6 @@ class JobSiteRecord extends BaseJobSiteRecord
         if(is_array($countryCode) && \count($countryCode) >= 1) {
     		$countryCode = array_pop($countryCode);
         }
-        $siteKeysOutOfSearchArea = array();
 
         $ccSite = $this->getSupportedCountryCodes();
         $ccMatches = array_intersect(array($countryCode), $ccSite);
@@ -161,10 +160,10 @@ class JobSiteRecord extends BaseJobSiteRecord
     private $_searchRunsForUsers = array();
 
     /**
-     *
-     * @return UserSearchSiteRun[]
+     * @param array $userFacts
      * @throws \Propel\Runtime\Exception\PropelException
      * @throws \Exception
+     * @return UserSearchSiteRun[]
      */
     private function addSiteRunsForUser($userFacts)
     {
@@ -214,16 +213,22 @@ class JobSiteRecord extends BaseJobSiteRecord
                 $searchrun = null;
             }
         }
+
+        return $this->_searchRunsForUsers;
     }
 
 
-    /*
-* @return UserSearchSiteRun[]
-* @throws \Propel\Runtime\Exception\PropelException
-* @throws \Exception
-*/
+    /**
+     * @param $usersToRun
+     * @return array
+     * @throws \Propel\Runtime\Exception\PropelException
+     * @throws \Exception
+     */
     public function generateUserSiteRuns($usersToRun)
     {
+        $totalRuns = 0;
+        $totalSkipped = 0;
+
         if(!is_empty_value($this->_searchRunsForUsers)) {
             return $this->_searchRunsForUsers;
         }
@@ -231,7 +236,6 @@ class JobSiteRecord extends BaseJobSiteRecord
         foreach($usersToRun as $userFacts) {
 
             $this->addSiteRunsForUser($userFacts);
-
         }
 
 
@@ -240,7 +244,7 @@ class JobSiteRecord extends BaseJobSiteRecord
         if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
 
             if ($plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
-               $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY);
+                $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY);
             }
             if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
                 $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION);
@@ -262,16 +266,15 @@ class JobSiteRecord extends BaseJobSiteRecord
         }
 
         if (\count($this->_searchRunsForUsers) > 0) {
-
             $totalRuns = \count($this->_searchRunsForUsers);
             if (!is_empty_value($this->_searchRunsForUsers)) {
                 UserSearchSiteRunManager::filterRecentlyRunUserSearchRuns($this->_searchRunsForUsers);
                 if (!is_empty_value($this->_searchRunsForUsers)) {
-                    $nTotalSkiipped = $totalRuns - \count($this->_searchRunsForUsers);
+                    $totalSkipped = $totalRuns - \count($this->_searchRunsForUsers);
                 }
             }
         }
-        LogMessage("{$totalRuns} search runs configured for {$this->getJobSiteKey()}; {$nTotalSkiipped} searches were skipped.");
+        LogMessage("{$totalRuns} search runs configured for {$this->getJobSiteKey()}; {$totalSkipped} searches were skipped.");
 
         $searchPairs = null;
         $sites = null;
