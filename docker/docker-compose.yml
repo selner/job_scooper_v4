@@ -3,9 +3,9 @@ version: "3.2"
 services:
   selenium:
     image: selenium/standalone-firefox:latest
-    ports:
-      - 4448:4448
-      - 5901:5900
+    expose:
+      - 4448
+      - 5900
     shm_size: 2g
     restart: always
     environment:
@@ -19,8 +19,6 @@ services:
 
 #  geocodeapi:
 #    image: "${REPONAME}selner/geocodeapi:latest"
-#    ports:
-#      - 5000:5000
 #    restart: always
 #    volumes:
 #      - type: bind
@@ -32,6 +30,8 @@ services:
 #      container_net:
 #        aliases:
 #          - geocodeapi.jobscooper.local
+    expose:
+      - 5000
 #
 # Uncomment this section if you want to use a mysql instance that
 # is brought up and torn down alongside the other containers
@@ -58,6 +58,13 @@ services:
       - JOBSCOOPER_CONFIG
       - NLTK_DATA
       - JOBSCOOPER_GEOCODEAPI_SERVER="http://jobscooperv4_geocodeapi:5000"
+
+#
+# Uncomment & set this value if you are using a MySql instance external to 
+# the Docker config
+#
+#    extra_hosts:
+#      - "mysql.jobscooper.local:192.168.25.209"
 
     volumes:
       - type: bind
