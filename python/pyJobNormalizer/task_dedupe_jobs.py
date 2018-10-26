@@ -59,8 +59,8 @@ class TaskDedupeJobPosting(DatabaseMixin):
 
         querysql = u"""
                 SELECT 
-                MIN(jobposting_id) AS `first_posting_id`,
-                --    COUNT(jobposting_id) AS `count_jobpostings`,
+                -- MIN(jobposting_id) AS `first_posting_id`,
+                -- COUNT(jobposting_id) AS `count_jobpostings`,
                     GROUP_CONCAT(jobposting_id) as `dupe_jobposting_ids`,
                     title_tokens,
                     REGEXP_REPLACE(IF(company IS NULL OR company = '',
@@ -91,13 +91,16 @@ class TaskDedupeJobPosting(DatabaseMixin):
                 dupe_jobposting_ids = rec['dupe_jobposting_ids']
                 if dupe_jobposting_ids and len(dupe_jobposting_ids) > 0:
                     ids = dupe_jobposting_ids.split(",")
-                    dupe_ids = [id for id in ids if id != str(rec['first_posting_id'])]
+                    dupe_ids = list(sorted(ids))
+                    first_posting_id = dupe_ids.pop(0)
+
                     total_dupe_posts += len(dupe_ids)
 
                     statement = u"""
                         UPDATE jobposting 
                         SET duplicates_posting_id={} 
-                        WHERE jobposting_id IN ({})""".format(rec['first_posting_id'], ",".join(dupe_ids))
+                        WHERE jobposting_id IN ({})
+                        AND jobposting_id <> {}""".format(first_posting_id, ",".join(dupe_ids), first_posting_id)
 
                     nupdated += self.run_command(statement, close_connection=False)
 
