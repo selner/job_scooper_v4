@@ -8,8 +8,8 @@ pymysql
 cleanco
 requests
 nltk
+unidecode
 future
 jinja2
 structlog
-
 
