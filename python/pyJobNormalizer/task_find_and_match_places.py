@@ -287,7 +287,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                         """.format(geolocfacts['geolocation_key'])
 
                         existingGeo = self.fetch_one_from_query(query)
-                        if existingGeo is not None:
+                        if existingGeo is not None and len(existingGeo) > 0:
                             print(u"... found existing geolocation_id {} for '{}'.  Using it instead." .format(existingGeo['GeoLocationId'], existingGeo['DisplayName']))
                             locfacts = {'GeoLocationId': existingGeo['GeoLocationId'],
                                         'DisplayName': existingGeo['DisplayName']}
