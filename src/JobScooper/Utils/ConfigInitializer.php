@@ -19,6 +19,7 @@ namespace JobScooper\Utils;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserQuery;
 use JobScooper\DataAccess\JobSiteManager;
+use JobScooper\Manager\LoggingManager;
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Runtime\Exception\InvalidArgumentException;
 use \SplFileInfo;
@@ -149,7 +150,7 @@ class ConfigInitializer
         Settings::setValue('logging', $this->getSetting('logging'));
 
         if (!isset($GLOBALS['logger'])) {
-            $GLOBALS['logger'] = new \JobScooper\Manager\LoggingManager(C__APPNAME__);
+            $GLOBALS['logger'] = LoggingManager::getInstance();
         }
 
         $GLOBALS['logger']->addFileHandlers(getOutputDirectory('logs'));

@@ -35,6 +35,7 @@ use Monolog\Logger;
 use DateTime;
 use Exception;
 use \Bramus\Monolog\Formatter\ColoredLineFormatter;
+use JobScooper\Traits\Singleton;
 
 /****************************************************************************************************************/
 /****                                                                                                        ****/
@@ -48,6 +49,8 @@ use \Bramus\Monolog\Formatter\ColoredLineFormatter;
  */
 class LoggingManager extends \Monolog\Logger
 {
+    use Singleton;
+
     protected $arrCumulativeErrors = array();
 
     private $_handlersByType = array();
@@ -56,8 +59,8 @@ class LoggingManager extends \Monolog\Logger
     private $_sentryClient = null;
 
     private $_shouldLogContext = false;
-    private $_defaultLogLevel = self::ERROR;
-
+    private $_monologLevelForRun = self::ERROR;
+    
     /**
      * LoggingManager constructor.
      *
@@ -86,19 +89,23 @@ class LoggingManager extends \Monolog\Logger
 
         $logOptions = Settings::getValue('logging', array());
         $this->_shouldLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
-        if (array_key_exists('log_level', $logOptions) and !empty($logOptions['log_level'])) {
-            if (strtoupper($logOptions['log_level']) === 'DEBUG') {
-                Settings::setValue('debug', true);
-            }
-            $this->_defaultLogLevel = self::toMonologLevel($logOptions['log_level']);
+        if(isDebug()) {
+            $this->_monologLevelForRun = self::DEBUG;
+        }
+        elseif (array_key_exists('log_level', $logOptions) and 
+            !empty($logOptions['log_level'])) {
+                if (strtoupper($logOptions['log_level']) === 'DEBUG') {
+                    Settings::setValue('debug', true);
+                }
+                $this->_monologLevelForRun = self::toMonologLevel($logOptions['log_level']);
         } else {
-            $this->_defaultLogLevel = self::ERROR;
+            $this->_monologLevelForRun = self::INFO;
         }
 
 
         $now = new DateTime('NOW');
 
-        $stderrHandler = new StreamHandler('php://stderr', Logger::DEBUG);
+        $stderrHandler = new StreamHandler('php://stderr', $this->_monologLevelForRun);
         $fmter = new ColoredLineFormatter(new DefaultScheme());
         $fmter->allowInlineLineBreaks(true);
         $fmter->includeStacktraces(true);
@@ -111,11 +118,8 @@ class LoggingManager extends \Monolog\Logger
 
 
         $this->_loggers[$this->_loggerName] = $this;
-        $this->_loggers['plugins'] = $this->withName('plugins');
-        $this->_loggers['database'] = $this->withName('database');
-        $this->_loggers['caches'] = $this->withName('caches');
 
-        $this->LogRecord(LogLevel::INFO, 'Logging started from STDIN');
+        $this->logRecord(LogLevel::INFO, 'Logging started from STDIN');
 
 //        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
         $propelContainer = Propel::getServiceContainer();
@@ -143,20 +147,6 @@ class LoggingManager extends \Monolog\Logger
     }
 
     /**
-     * @param $channel
-     *
-     * @return mixed
-     */
-    public function getChannelLogger($channel)
-    {
-        if (empty($channel) || !array_key_exists($channel, $this->_loggers)) {
-            $channel = $this->_loggerName;
-        }
-
-        return $this->_loggers[$channel];
-    }
-
-    /**
 	* @param \Exception $e
 	* @param array $record
 	* @throws \Exception
@@ -172,9 +162,7 @@ class LoggingManager extends \Monolog\Logger
      */
     public function updatePropelLogging():void
     {
-        $logger = $this->getChannelLogger('database');
-
-        Propel::getServiceContainer()->setLogger($logger->getName(), $logger);
+        Propel::getServiceContainer()->setLogger($this->getName(), $this);
         if (isDebug()) {
             $con = Propel::getWriteConnection(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
             $con->useDebug(true);
@@ -212,6 +200,7 @@ class LoggingManager extends \Monolog\Logger
     /**
      * Pushes a handler on to the stack.
      *
+     * @param  string $logType
      * @param  HandlerInterface $handler
      * @return $this
      */
@@ -230,8 +219,7 @@ class LoggingManager extends \Monolog\Logger
      */
     public function addFileHandlers($logPath)
     {
-        $logLevel = (isDebug() ? Logger::DEBUG : $this->_defaultLogLevel);
-        
+
 		//
 		// Define the various output log filenames
 		//
@@ -245,7 +233,7 @@ class LoggingManager extends \Monolog\Logger
 		//
 		// Configure and add the main output log handler
 		//
-        $mainHandler = new StreamHandler($mainLog, $logLevel, $bubble = true);
+        $mainHandler = new StreamHandler($mainLog, $this->_monologLevelForRun, $bubble = true);
         $fmter = $mainHandler->getFormatter();
 	        $fmter->allowInlineLineBreaks(true);
             $fmter->includeStacktraces(true);
@@ -258,11 +246,11 @@ class LoggingManager extends \Monolog\Logger
 		// Configure the error log handler.  Error log includes the log context for the last
 		// few entries before an error as well as the error record itself.
 		//
-        $errLogHandler = new StreamHandler($errorLog, LogLevel::DEBUG, $bubble = true);
+        $errLogHandler = new StreamHandler($errorLog, self::DEBUG, $bubble = true);
 		$errLogHandler->setFormatter($fmter);
         $fingersHandler = new FingersCrossedHandler(
 		    $errLogHandler,
-		    new ErrorLevelActivationStrategy(Logger::ERROR),
+		    new ErrorLevelActivationStrategy(self::ERROR),
 		    10,
 		    true,
 		    false,
@@ -275,7 +263,7 @@ class LoggingManager extends \Monolog\Logger
 		// Configure the CSV-format error log
 		//
         $fpcsv = fopen($csvlog, 'wb');
-        $csvErrHandler = new CSVLogHandler($fpcsv, LogLevel::ERROR, $bubble = true);
+        $csvErrHandler = new CSVLogHandler($fpcsv, self::ERROR, $bubble = true);
         $this->addHandler('csverrors', $csvErrHandler);
         $this->logRecord(LogLevel::INFO, "Error logging to CSV file: {$csvlog}");
 
@@ -283,7 +271,7 @@ class LoggingManager extends \Monolog\Logger
 		// Configure the errors email log handler
 		//
         $emailHandler = new BufferHandler(
-        	    new ErrorEmailLogHandler(Logger::ERROR, true),
+        	    new ErrorEmailLogHandler(self::ERROR, true),
                 100);
         $this->addHandler('email_errors', $emailHandler);
 
@@ -315,19 +303,17 @@ class LoggingManager extends \Monolog\Logger
     public function logRecord($level, $message, $extras=array(), $ex=null, $channel=null)
     {
         if (empty($level)) {
-            $level = $this->_defaultLogLevel;
+            $level = $this->_monologLevelForRun;
         }
 
-        $logger = $this->getChannelLogger($channel);
-
         $context = array();
-        $monologLevel = \Monolog\Logger::toMonologLevel($level);
+        $monologLevel = Logger::toMonologLevel($level);
         if ($this->_shouldLogContext === true || in_array($monologLevel, array(
-            \Monolog\Logger::WARNING, \Monolog\Logger::EMERGENCY, \Monolog\Logger::ERROR, \Monolog\Logger::DEBUG, \Monolog\Logger::CRITICAL))) {
+            Logger::WARNING, Logger::EMERGENCY, Logger::ERROR, Logger::DEBUG, Logger::CRITICAL))) {
             $context = $this->getDebugContext($extras, $ex);
         }
 
-        if ($logger->log($monologLevel, $message, $context) === false) {
+        if ($this->log($monologLevel, $message, $context) === false) {
             print($message .PHP_EOL . PHP_EOL);
         }
     }

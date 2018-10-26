@@ -25,17 +25,13 @@ use Monolog\Logger;
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
-function getLogger($channel=null)
+function getLogger()
 {
-    if (array_key_exists('logger', $GLOBALS)) {
-        if (!empty($channel)) {
-            return getChannelLogger($channel);
-        }
-
-        return $GLOBALS['logger'];
+    if (!array_key_exists('logger', $GLOBALS)) {
+        $GLOBALS['logger'] = \JobScooper\Manager\LoggingManager::getInstance();
     }
 
-    return null;
+    return $GLOBALS['logger'];
 }
 /**
  * @param $headerText
@@ -129,23 +125,6 @@ function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $channel=
             LogMessage($part, $logLevel, $extras, null, $channel);
         }
     }
-}
-
-
-
-/**
- * @param $channel
- *
- * @return mixed
- */
-function getChannelLogger($channel)
-{
-    $logger = getLogger();
-    if (empty($logger)) {
-        return $logger->getChannelLogger($channel);
-    }
-
-    return null;
 }
 
 /**

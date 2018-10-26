@@ -18,6 +18,7 @@ namespace JobScooper\Utils;
 
 use JobScooper\DataAccess\JobPostingQuery;
 use JobScooper\DataAccess\Map\JobPostingTableMap;
+use JobScooper\Manager\LoggingManager;
 use Monolog\ErrorHandler;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
@@ -39,7 +40,7 @@ class JobsExceptionHandler extends ErrorHandler
         }
 
         if (empty($GLOBALS['logger'])) {
-            $GLOBALS['logger'] = getChannelLogger('default');
+            $GLOBALS['logger'] = LoggingManager::getInstance();
         }
 
         LogError(sprintf('Uncaught Exception: %s', $e->getMessage()), null, $e);
