@@ -102,7 +102,7 @@ function isBitFlagSet($flagSettings = null, $flagToCheck= null)
         return false;
     }
 
-    return ($flagSettings & $flagToCheck);
+    return ($flagSettings & $flagToCheck) == $flagToCheck;
 }
 
 /**

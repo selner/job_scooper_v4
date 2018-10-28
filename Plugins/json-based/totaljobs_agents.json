@@ -2,7 +2,7 @@
     "jobsite_plugins": [
         {
             "PhpClassName": "AbstractTotalJobsSites",
-            "SourceURL": "https://www.totaljobs.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2&page=***PAGE_NUMBER***",
+            "SourceURL": "https://www.totaljobs.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
             "CountryCodes": [
                 "UK"
             ],
@@ -92,27 +92,27 @@
         },
         {
             "JobSiteName": "TotalJobs",
-            "SourceURL": "https://www.totaljobs.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2&page=***PAGE_NUMBER***",
+            "SourceURL": "https://www.totaljobs.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
             "PluginExtendsClassName": "AbstractTotalJobsSites"
         },
         {
             "JobSiteName": "CWJobs",
-            "SourceURL": "https://www.cwjobs.co.uk/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2&page=***PAGE_NUMBER***",
+            "SourceURL": "https://www.cwjobs.co.uk/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
             "PluginExtendsClassName": "AbstractTotalJobsSites"
         },
         {
             "JobSiteName": "CatererCom",
-            "SourceURL": "https://www.caterer.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2&page=***PAGE_NUMBER***",
+            "SourceURL": "https://www.caterer.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
             "PluginExtendsClassName": "AbstractTotalJobsSites"
         },
         {
             "JobSiteName": "MilkRound",
-            "SourceURL": "https://www.milkround.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2&page=***PAGE_NUMBER***",
+            "SourceURL": "https://www.milkround.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
             "PluginExtendsClassName": "AbstractTotalJobsSites"
         },
         {
             "JobSiteName": "RetailChoice",
-            "SourceURL": "https://www.retailchoice.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2&page=***PAGE_NUMBER***",
+            "SourceURL": "https://www.retailchoice.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
             "PluginExtendsClassName": "AbstractTotalJobsSites"
         }
     ]
