@@ -89,7 +89,7 @@
       ],
       "Pagination": {
         "PageLimit": 20,
-        "Type": "C__PAGINATION_PAGE_VIA_NEXTBUTTON",
+        "Type": "NEXT-BUTTON",
         "Selector": "a.pagination__right"
       }
     }
