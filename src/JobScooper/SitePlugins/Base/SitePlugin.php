@@ -1831,7 +1831,6 @@ JSCODE;
                     case C__PAGINATION_INFSCROLLPAGE_PAGEDOWN:
                     case C__PAGINATION_INFSCROLLPAGE_VIALOADMORE:
                     case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
-                    case C__PAGINATION_INFSCROLLPAGE_VIA_JS:
                     case C__PAGINATION_PAGE_VIA_CALLBACK:
                         $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
                         $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__;
@@ -1932,18 +1931,6 @@ JSCODE;
                                         $nPageCount = $nPageCount + 1;
                                     }
                                     $totalPagesCount = $nPageCount;
-                                    break;
-
-                                case C__PAGINATION_INFSCROLLPAGE_VIA_JS:
-                                    if (null === $this->nextPageScript) {
-                                        throw new Exception("Plugin {$this->JobSiteName} is missing nextPageScript settings for the defined pagination type.");
-                                    }
-                                    $this->selenium->loadPage($strURL);
-
-                                    if ($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
-                                        $this->runJavaScriptSnippet($this->nextPageScript, true);
-                                        sleep($this->additionalLoadDelaySeconds + 1);
-                                    }
                                     break;
                             }
 
