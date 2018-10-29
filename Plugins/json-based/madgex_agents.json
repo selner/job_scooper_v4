@@ -123,8 +123,7 @@
         },
         {
             "JobSiteName": "ExecAppointments",
-            "SiteReferenceKey": "www.exec-appointments",
-            "BaseURL": "https://www.exec-appointments.com",
+            "BaseURL": "https://www.exec-appointments.com/searchjobs",
             "PluginExtendsClassName": "AbstractMadgexATS",
             "CountryCodes": [
                 "GB"
