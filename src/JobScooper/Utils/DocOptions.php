@@ -57,19 +57,15 @@ Options:
 
             $argval = $v;
             
-            // If the command line option was empty, false or a default value, check for a matching environment variable
-            // and use the value from it if it exists.  All environment setting values start
-            // with JOBSCOOPER_ and then the all caps name of the command line switch.
+            // check for a matching environment variable and use the value from it if it exists, overriding
+            // the command line. All environment setting values start with JOBSCOOPER_
+            // and then the all caps name of the command line switch.
             // e.g.  JOBSCOOPER_CONFIG or JOBSCOOPER_USER
-            if (empty($argval) || $argval === false ||
-                ($argkey === 'jobsite' && $argval === ['all']) ||
-                ($argkey === 'stages' && $argval === '1,2,3')) {
-                $envkey = strtoupper('JOBSCOOPER_' . strtoupper($argkey));
-                $envval = getenv($envkey);
-                if ($envval !== false) {
-                    $argval=$envval;
-                    Settings::setValue("environment.{$argkey}", $argval);
-                }
+            $envkey = strtoupper('JOBSCOOPER_' . strtoupper($argkey));
+            $envval = getenv($envkey);
+            if ($envval !== false) {
+                $argval=$envval;
+                Settings::setValue("environment.{$argkey}", $argval);
             }
 
             if (is_array($argval) && in_array($argkey, array('jobsite', 'stages'))) {

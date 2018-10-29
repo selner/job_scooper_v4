@@ -56,6 +56,10 @@ services:
     environment:
       - JOBSCOOPER_OUTPUT
       - JOBSCOOPER_CONFIG
+      - JOBSCOOPER_STAGES
+      - JOBSCOOPER_JOBSITE
+      - JOBSCOOPER_USER
+      - JOBSCOOPER_DEBUG
       - NLTK_DATA
       - JOBSCOOPER_GEOCODEAPI_SERVER="http://jobscooperv4_geocodeapi:5000"
 
