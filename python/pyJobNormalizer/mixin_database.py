@@ -361,6 +361,33 @@ class DatabaseMixin:
         if arr and len(arr) > 0:
             return ARRAY_JOIN_TOKEN.join(arr)
 
+    def get_table_column_info(self, tablename):
+        # print("Running command: {}".format(querysql))
+        """
+        Args:
+            tablename:
+        """
+
+        column_data = self.fetch_all_from_query(u"SHOW columns from %s" % tablename)
+
+        column_info = {}
+        for col in column_data:
+            import re
+            size = re.sub("[^0-9]", "", str(col['Type']))
+            if not size or len(size) == 0:
+                size = None
+            else:
+                size = int(size)
+
+            column_info[col['Field']] = {
+                "type" : re.sub("[^a-z]", "", str(col['Type'])),
+                "name" : col['Field'],
+                "default_value" : col['Default'],
+                "size" : size
+            }
+
+        return column_info
+
     @staticmethod
     def convert_column_value_to_array(str):
         if str and len(str) > 0:
