@@ -38,6 +38,7 @@ class TaskNormalizeJobPosts(DatabaseMixin):
 
         self._tokenizer = Tokenizer()
         self._config = dict(kwargs)
+        self._jpcolumns = self.get_table_column_info("jobposting")
 
     def normalize_new_unprocessed_posts(self):
         raise Exception("Not implemented!")
@@ -82,28 +83,35 @@ class TaskNormalizeJobPosts(DatabaseMixin):
                         #
                         # Do any additional processing specific to a particular field for the jobrecord (e.g. company)
                         #
-                        if k_compare is "title":
+                        if k_compare == "title":
+                            jobrecord[k] = re.sub("(new|easy apply|updated)?", "", jobrecord[k], re.IGNORECASE)
                             jobrecord[k] = self._tokenizer.get_expanded_words(jobrecord[k])
-                        elif k_compare is "company":
+                        elif k_compare == "location":
+                            jobrecord[k] = re.sub("(^\(|\)$)?", "", jobrecord[k], re.IGNORECASE)
+                        elif k_compare == "company":
                             if len(xstr(jobrecord[k])) > 0:
                                 newco = cleanco(jobrecord[k])
                                 jobrecord[k] = newco.clean_name()
                         elif k_compare in ["first_seen_at", "last_updated_at", "job_posted_date"]:
                             import chronyk
-                            if jobrecord[k].lower() is "just posted":
+                            if jobrecord[k].lower() == "just posted":
                                 jobrecord[k] = chronyk.Chronyk("now")
                             else:
                                 try:
-                                    import re
                                     if isinstance(jobrecord[k], str):
-                                        jobrecord[k] = re.sub("(posted\s(date|at)?)?", "", jobrecord[k])
+                                        jobrecord[k] = re.sub("(posted\s(date|at)?)?", "", jobrecord[k], re.IGNORECASE)
                                     t = chronyk.Chronyk(jobrecord[k], allowfuture=False)
                                 except chronyk.DateRangeError:
-                                    pass
+                                   pass
                                 except ValueError:
                                     pass
                                 else:
                                     jobrecord[k] = t.timestring("%Y%m%d")
+
+                        if k_compare in list(self._jpcolumns.keys()) and self._jpcolumns[k_compare]['type'] == "varchar" \
+                                and 'size' in self._jpcolumns[k_compare]:
+                            if len(jobrecord[k]) > self._jpcolumns[k_compare]['size']:
+                                jobrecord[k] = jobrecord[k][0:(self._jpcolumns[k_compare]['size']-1)]
 
                     normalized_jobs[jobkey] = jobrecord
 

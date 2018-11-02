@@ -1406,11 +1406,6 @@ JSCODE;
             }
         }
 
-        $keys = array_keys($arrItem);
-        foreach ($keys as $key) {
-            $arrItem[$key] = cleanupTextValue($arrItem[$key]);
-        }
-
         if (is_empty_value($arrItem['JobSiteKey'])) {
             $arrItem['JobSiteKey'] = $this->JobSiteName;
         }

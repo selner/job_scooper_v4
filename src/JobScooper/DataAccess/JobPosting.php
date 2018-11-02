@@ -278,27 +278,6 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         return $ret;
     }
 
-    /**
-     * @param string $v
-     *
-     * @return $this|\JobScooper\DataAccess\JobPosting|void
-     * @throws \Exception
-     */
-    public function setTitle($v)
-    {
-        // Removes " NEW!", etc from the job title.  ZipRecruiter tends to occasionally
-        // have that appended which then fails de-duplication. (Fixes issue #45) Glassdoor has "- easy apply" as well.
-        $v = str_ireplace(" NEW!", "", $v);
-        $v = str_ireplace("- new", "", $v);
-        $v = str_ireplace("- easy apply", "", $v);
-        $v = $this->_cleanupTextValue($v);
-
-        if (is_empty_value($v)) {
-            throw new \Exception($this->getJobSiteKey() . " posting's title string is empty.");
-        }
-
-        parent::setTitle($v);
-    }
 
 
     /**
@@ -318,7 +297,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         $this->setGeoLocationFromJP(null);
         $this->setGeoLocationId(null);
 
-        $v = $this->_cleanupTextValue($v, 255, "(", ")");
+        $v = $this->_cleanupTextValue($v, 255);
 
         //
         // Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
@@ -356,177 +335,6 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
 
             return;
         }
-    }
-
-    /**
-     * @param string $v
-     *
-     * @return $this|\JobScooper\DataAccess\JobPosting|void
-     */
-    public function setCompany($v)
-    {
-        $v = $this->_cleanupTextValue($v, $maxLength=100);
-
-        if (empty($v)) {
-            return;
-        }
-
-        $v = strip_punctuation($v);
-
-        // Remove common company name extensions like "Corporation" or "Inc." so we have
-        // a higher match likelihood
-        $v = preg_replace(array('/\s[Cc]orporat[e|ion]/', '/\s[Cc]orp\W{0,1}/', '/\.com/', '/\W{0,}\s[iI]nc/', '/\W{0,}\s[lL][lL][cC]/', '/\W{0,}\s[lL][tT][dD]/'), "", $v);
-
-        switch (strScrub($v)) {
-            case "amazon":
-            case "amazon com":
-            case "a2z":
-            case "lab 126":
-            case "amazon Web Services":
-            case "amazon fulfillment services":
-            case "amazonwebservices":
-            case "amazon (seattle)":
-                $v = "Amazon";
-                break;
-
-            case "market leader":
-            case "market leader inc":
-            case "market leader llc":
-                $v = "Market Leader";
-                break;
-
-
-            case "walt disney parks &amp resorts online":
-            case "walt disney parks resorts online":
-            case "the walt disney studios":
-            case "walt disney studios":
-            case "the walt disney company corporate":
-            case "the walt disney company":
-            case "disney parks &amp resorts":
-            case "disney parks resorts":
-            case "walt disney parks resorts":
-            case "walt disney parks &amp resorts":
-            case "walt disney parks resorts careers":
-            case "walt disney parks &amp resorts careers":
-            case "disney":
-                $v = "Disney";
-                break;
-
-        }
-        parent::setCompany($v);
-    }
-
-    /**
-     * @param string $v
-     *
-     * @return $this|\JobScooper\DataAccess\JobPosting|void
-     */
-    public function setDepartment($v)
-    {
-        $v = $this->_cleanupTextValue($v);
-        parent::setDepartment($v);
-    }
-
-    /**
-     * @param string $v
-     *
-     * @return $this|\JobScooper\DataAccess\JobPosting|void
-     */
-    public function setPayRange($v)
-    {
-        $v = $this->_cleanupTextValue($v, $maxLength=100);
-        parent::setPayRange($v);
-    }
-
-    /**
-     * @param string $v
-     *
-     * @return $this|\JobScooper\DataAccess\JobPosting|void
-     */
-    public function setEmploymentType($v)
-    {
-        $v = $this->_cleanupTextValue($v, $maxLength=100);
-        parent::setEmploymentType($v);
-    }
-
-    /**
-     * @param string $v
-     *
-     * @return $this|\JobScooper\DataAccess\JobPosting|void
-     */
-    public function setCategory($v)
-    {
-        $v = $this->_cleanupTextValue($v, $maxLength=100);
-        parent::setCategory($v);
-    }
-
-    /**
-     * @param mixed $v
-     *
-     * @return $this|\JobScooper\DataAccess\JobPosting|null
-     */
-    public function setPostedAt($v)
-    {
-        if (empty($v)) {
-            return null;
-        }
-
-        $newV = null;
-
-        if (strcasecmp($v, "Just posted") == 0) {
-            $newV = getTodayAsString();
-        }
-
-        $v = strtolower(str_ireplace(array("Posted Date", "posted", "posted at"), "", $v));
-        $v = $this->_cleanupTextValue($v);
-
-        if (empty($newV)) {
-            $dateVal = strtotime($v, $now = time());
-            if (!($dateVal === false)) {
-                $newV = $dateVal;
-            }
-        }
-
-        if (empty($newV) && preg_match('/^\d+$/', $v)) {
-            $vstr = (string) $v;
-            if (strlen($vstr) == strlen("20170101")) {
-                try {
-                    $datestr = substr($vstr, 4, 2) . "/" . substr($vstr, 6, 2) . "/" . substr($vstr, 0, 4);
-                    $dateVal = strtotime($datestr, $now = time());
-                    if (!($dateVal === false)) {
-                        $newV = $dateVal;
-                    }
-                } catch (Exception $ex) {
-                    try {
-                        $datestr = substr($vstr, 2, 2) . "/" . substr($vstr, 0, 2) . "/" . substr($vstr, 4, 4);
-                        $dateVal = strtotime($datestr, $now = time());
-                        if (!($dateVal === false)) {
-                            $newV = $dateVal;
-                        }
-                    } catch (Exception $ex) {
-                    }
-                }
-            }
-        }
-
-        if (empty($newV) && !empty($v)) {
-            $info = date_parse($v);
-            $date = "";
-            foreach (array("month", "day", "year") as $dateval) {
-                if ($info[$dateval] !== false) {
-                    $date .= (string) $info[$dateval];
-                } else {
-                    $date .= (string) getdate()[$dateval];
-                }
-            }
-            $newV = $date;
-        }
-
-        if (empty($newV)) {
-            $newV = $v;
-        }
-
-        parent::setPostedAt($newV);
     }
 
     /**
