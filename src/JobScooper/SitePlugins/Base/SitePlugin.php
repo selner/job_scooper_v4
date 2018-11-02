@@ -1483,29 +1483,6 @@ JSCODE;
 
         $arrJobsToAdd = array_child_columns($arrJobList, null, 'JobSitePostId');
         $siteRunKey = $searchDetails->getUserSearchSiteRunKey();
-        $exportJobsFilename = getDefaultJobsOutputFileName("", "{$siteRunKey}_newjobs", $strExt = "json", $delim = "-",  $directoryKey ="debug");
-        writeJson($arrJobList, $exportJobsFilename);
-        try {
-            startLogSection("Importing jobs from {$exportJobsFilename} via Python...");
-
-            $runFile = 'pyJobNormalizer/cmd_import_newposts_json.py';
-            $params = [
-                '-c' => Settings::get_db_dsn(),
-                '--input' => $exportJobsFilename
-            ];
-
-            $resultcode = PythonRunner::execScript($runFile, $params);
-
-            $arrJobCols = array_child_columns($arrJobList, ['JobPostingId', 'JobSitePostId', 'FirstSeenAt'], 'JobSitePostId');
-
-            $this->arrSearchReturnedJobs[$siteRunKey] = array_merge($this->arrSearchReturnedJobs[$siteRunKey], $arrJobCols);
-
-            $nCountNewJobs = \count($arrJobsToAdd);
-        } catch (\Exception $ex) {
-            handleException($ex, "ERROR:  Failed to import job postings from file {$exportJobsFilename}:  %s");
-        }
-
-/****
         try {
             $nCountNewJobs = 0;
             if (!array_key_exists($siteRunKey, $this->arrSearchReturnedJobs)) {
@@ -1539,7 +1516,6 @@ JSCODE;
         } catch (Exception $ex) {
             $this->_handleException($ex, 'Unable to save job search results to database.', true);
         }
-****/
 
     }
 
