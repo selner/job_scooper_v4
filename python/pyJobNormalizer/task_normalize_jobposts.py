@@ -90,14 +90,20 @@ class TaskNormalizeJobPosts(DatabaseMixin):
                                 jobrecord[k] = newco.clean_name()
                         elif k_compare in ["first_seen_at", "last_updated_at", "job_posted_date"]:
                             import chronyk
-                            try:
-                                t = chronyk.Chronyk(jobrecord[k], allowfuture=False)
-                            except chronyk.DateRangeError:
-                                pass
-                            except ValueError:
-                                pass
+                            if jobrecord[k].lower() is "just posted":
+                                jobrecord[k] = chronyk.Chronyk("now")
                             else:
-                                jobrecord[k] = t.timestring("%Y%m%d")
+                                try:
+                                    import re
+                                    if isinstance(jobrecord[k], str):
+                                        jobrecord[k] = re.sub("(posted\s(date|at)?)?", "", jobrecord[k])
+                                    t = chronyk.Chronyk(jobrecord[k], allowfuture=False)
+                                except chronyk.DateRangeError:
+                                    pass
+                                except ValueError:
+                                    pass
+                                else:
+                                    jobrecord[k] = t.timestring("%Y%m%d")
 
                     normalized_jobs[jobkey] = jobrecord
 
