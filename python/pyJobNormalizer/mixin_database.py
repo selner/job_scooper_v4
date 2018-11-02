@@ -23,9 +23,8 @@ import pymysql
 from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
 
-ARRAY_JOIN_TOKEN = u"_||_"
 from logging import INFO, DEBUG, WARNING, ERROR, CRITICAL
-
+from helpers import xstr
 import structlog
 
 structlog.configure(
@@ -86,13 +85,16 @@ structlog.configure(
 class OrderedDictCursor(DictCursorMixin, Cursor):
     dict_type = OrderedDict
 
+ARRAY_JOIN_TOKEN = u"_||_"
 
 class DatabaseMixin:
     _debug = False
     _dbparams = {}
     _connection = None
     _logger = None
-    
+
+
+
     def __init__(self, **kwargs):
         self._logger = structlog.getLogger()
         self._logger.setLevel(DEBUG)
@@ -102,13 +104,16 @@ class DatabaseMixin:
 
     def log(self, msg, level=INFO):
         self._logger.log(level, msg)
+        print(msg)
 
-    def handle_error(self, err, msg=None):
+    def handle_error(self, err, msg=None, rethrow=True):
         if msg and len(msg) > 0:
             self._logger.error(msg, exc_info=1)
         else:
             self._logger.error("Exception occurred: {}".format(err), exc_info=1)
-        raise(err)
+
+        if rethrow:
+            raise err
 
     def _parse_arguments(self, **kwargs):
         """
@@ -263,7 +268,7 @@ class DatabaseMixin:
     def update_many(self, querysql, records):
 
         try:
-            self.log(u"...updating {} database rows".format(len(records)))
+            self.log(u"... updating {} database rows".format(len(records)))
 
             with self.new_cursor() as cursor:
                 return cursor.executemany(querysql, records)
@@ -308,7 +313,85 @@ class DatabaseMixin:
 
         return set(col['Field'] for col in column_data)
 
-    def add_row(self, tablename, primary_key_column, rowdict, tablecolumns=None):
+    def prepare_data_for_query(self, data):
+        if not data:
+            return
+
+        for field in data:
+            if data[field]:
+                if isinstance(data[field], str):
+                    data[field] = self.connection.escape_string(data[field])
+                elif isinstance(data[field], dict):
+                    data[field] = self.convert_array_to_column_value(data[field])
+                elif data[field] is None or data[field] is "None":
+                    data[field] = "NULL"
+                else:
+                    data[field] = xstr(data[field])
+        return data
+
+    def add_or_update_rows(self, tablename, primary_key_column, data, tablecolumns=None):
+        # XXX tablename not sanitized
+        # XXX test for allowed keys is case-sensitive
+
+        """
+        Args:
+            tablename:
+            primary_key_column:
+            data:
+            tablecolumns:
+        """
+        try:
+            if not tablecolumns:
+                allowed_keys = self.get_table_columns(tablename)
+            else:
+                allowed_keys = tablecolumns
+
+            rowkeys = list(data[list(data.keys())[0]].keys())
+
+            matched_keys = set(allowed_keys).intersection(rowkeys)
+
+            if len(rowkeys) > len(matched_keys):
+                unknown_keys = set(rowkeys) - allowed_keys
+                # print >> sys.stderr, "skipping keys:", ", ".join(unknown_keys)
+
+            insert_data = []
+            for d in data:
+                row_data = self.prepare_data_for_query(data[d])
+                values = tuple(row_data[key] for key in matched_keys)
+                insert_data.append(values)
+
+            with self.new_cursor() as cursor:
+                table = "`" + self.connection.escape_string(tablename) + "`"
+                fields = ["`" + self.connection.escape_string(field) + "`" for field in matched_keys]
+                placeholders = ["%s" for field in matched_keys]
+                assignments = ["`{x}` = VALUES(`{x}`)".format(
+                    x=self.connection.escape_string(x)
+                ) for x in matched_keys]
+
+                query_string = """
+                INSERT INTO
+                    {table}
+                    ({fields})
+                VALUES
+                    ({placeholders})
+                ON DUPLICATE KEY UPDATE {assignments}"""
+
+                cursor.executemany(query_string.format(
+                    table=table,
+                    fields=", ".join(fields),
+                    placeholders=", ".join(placeholders),
+                    assignments=", ".join(assignments)
+                ), insert_data)
+
+        except Exception as ex:
+            self.handle_error(ex)
+
+        finally:
+            self.connection.commit()
+            self.close_connection()
+
+
+    def add_or_update_row(self, tablename, primary_key_column, rowdict, tablecolumns=None):
         # XXX tablename not sanitized
         # XXX test for allowed keys is case-sensitive
 
@@ -325,19 +408,47 @@ class DatabaseMixin:
             else:
                 allowed_keys = tablecolumns
 
-            matched_keys = allowed_keys.intersection(rowdict)
+            rowkeys = list(data.keys())[0]
+
+            matched_keys = set(allowed_keys).intersection(rowdict)
 
             if len(rowdict) > len(matched_keys):
                 unknown_keys = set(rowdict) - allowed_keys
                 # print >> sys.stderr, "skipping keys:", ", ".join(unknown_keys)
 
-            columns = ", ".join(matched_keys)
-            values_template = ", ".join(["%s"] * len(matched_keys))
+            insert_data = self.prepare_data_for_query(rowdict)
+            values = tuple(insert_data[key] for key in matched_keys)
 
-            sql = u"insert into %s (%s) values (%s)" % (tablename, columns, values_template)
-            values = tuple(self.connection.escape_string(rowdict[key]) for key in matched_keys)
+            set_fields = []
+            for col in matched_keys:
+                if col in insert_data and insert_data[col]:
+                    set_fields.append("{} = '{}'".format(col, insert_data[col]))
+
+
+
             with self.new_cursor() as cursor:
-                cursor.execute(sql, values)
+                table = "`" + self.connection.escape_string(tablename) + "`"
+                fields = ["`" + self.connection.escape_string(field) + "`" for field in matched_keys]
+                placeholders = ["%s" for field in matched_keys]
+                assignments = ["`{x}` = VALUES(`{x}`)".format(
+                    x=self.connection.escape_string(x)
+                ) for x in matched_keys]
+
+                query_string = """
+                INSERT INTO
+                    {table}
+                    ({fields})
+                VALUES
+                    ({placeholders})
+                ON DUPLICATE KEY UPDATE {assignments}"""
+
+                cursor.execute(query_string.format(
+                    table=table,
+                    fields=", ".join(fields),
+                    placeholders=", ".join(placeholders),
+                    assignments=", ".join(assignments)
+                ), values)
+
                 inserted_id = cursor.lastrowid
                 if inserted_id:
                     query = u"SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id)
@@ -356,13 +467,50 @@ class DatabaseMixin:
             self.connection.commit()
             self.close_connection()
 
+    def update_row(self, tablename, query_filter, rowdict, tablecolumns=None):
+        # XXX tablename not sanitized
+        # XXX test for allowed keys is case-sensitive
+
+        """
+        Args:
+            tablename:
+            query_filter:
+            rowdict:
+            tablecolumns:
+        """
+        try:
+            if not tablecolumns:
+                allowed_keys = self.get_table_columns(tablename)
+            else:
+                allowed_keys = tablecolumns
+
+            matched_keys = set(allowed_keys).intersection(rowdict)
+
+            if len(rowdict) > len(matched_keys):
+                unknown_keys = set(rowdict) - allowed_keys
+                # print >> sys.stderr, "skipping keys:", ", ".join(unknown_keys)
+
+            update_data = self.prepare_data_for_query(rowdict)
+
+
+            sql = u"UPDATE %s SET %s WHERE %s" % (tablename, ", ".join(set_fields), query_filter)
+            with self.new_cursor() as cursor:
+                return cursor.execute(sql)
+
+        except Exception as ex:
+            self.handle_error(ex)
+
+        finally:
+            self.connection.commit()
+            self.close_connection()
+
     @staticmethod
     def convert_array_to_column_value(arr):
         if arr and len(arr) > 0:
             return ARRAY_JOIN_TOKEN.join(arr)
 
     @staticmethod
-    def convert_column_value_to_array(str):
-        if str and len(str) > 0:
-            return str.split(ARRAY_JOIN_TOKEN)
+    def convert_column_value_to_array(val):
+        if val and len(val) > 0:
+            return val.split(ARRAY_JOIN_TOKEN)
 

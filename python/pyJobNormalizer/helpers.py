@@ -46,6 +46,9 @@ def docopt_ext(doc, argv=None, help=True, version=None, options_first=False):
     return vals
 
 
+import datetime
+
+
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
         """
@@ -54,6 +57,8 @@ class SetEncoder(json.JSONEncoder):
         """
         if isinstance(obj, set):
             return list(obj)
+        elif isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
+            return obj.isoformat()
         return json.JSONEncoder.default(self, obj)
 
 
@@ -86,7 +91,6 @@ def load_json(filepath):
     result = json.load(f)
     f.close()
     return result
-
 
 def write_json(filepath, data):
     """

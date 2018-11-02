@@ -20,13 +20,13 @@
 
 from helpers import loadcsv
 import nltk
-import codecs
 import string
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 import os
 import re
 from collections import OrderedDict
+import unidecode
 
 states = {
     'AK': 'Alaska',
@@ -109,53 +109,24 @@ class Tokenizer:
         self.exclude = string.punctuation
         self.snowstemmer = SnowballStemmer("english")
         self.stopwrds = stopwords.words('english')
+        self.mktgterms = [
+            'new',
+            'apply now',
+            'apply',
+            'easy apply'
+            'send resume'
+        ]
 
-    def batch_tokenize_strings(self, list_data, field, field_tokenized="tokenized", ret_type="string"):
-        """
-        Args:
-            list_data:
-            field:
-            field_tokenized:
-            ret_type:
-        """
-
-        for k in list_data.keys():
-            if isinstance(k, str) and len(k) == 0:
-                print("String value for key was empty.  Skipping...")
-                continue
-
-            tokens = self.tokenize_string(list_data[k][field])
-            final_tokens = []
-
-            if ret_type == "list":
-                final_tokens = list(set(tokens))
-            elif ret_type == "set":
-                final_tokens = set(tokens)
-            elif ret_type == "dict":
-                final_tokens = OrderedDict(zip(tokens, tokens))
-            else:
-                # if ret_type == "string" or ret_type is None:
-                final_tokens = "|{}|".format("|".join(tokens))
-
-            list_data[k][field_tokenized] = final_tokens
-        return list_data
-
-    def tokenize_string(self, value):
-        """
-        Args:
-            value
-        """
-
-        if not value or len(value) == 0:
-            return ""
-
-        tokens = self.get_tokens_from_string(value)
-        tokens = list(set(tokens))
-        tokens.sort()
-
-        return tokens
 
     def remove_stop_words(self, listwords):
+        """
+        Args:
+            listwords:
+        """
+        retwords = [i for i in listwords if i not in self.stopwrds]
+        return retwords
+
+    def remove_marketing_only_terms(self, listwords):
         """
         Args:
             listwords:
@@ -180,6 +151,30 @@ class Tokenizer:
                 s += ch
         return s
 
+    def clean_string(self, value, remove_punct=True):
+        str_words = value
+        if not isinstance(str_words, str):
+            str_words = str(value)
+            if len(str_words) <= 0:
+                return str_words
+
+        str_words = unidecode.unidecode(str_words)
+        # for a given token, remove any unicode chars that
+        # can't translate to ascii.  This handles scrubbing out
+        # the myriad of dash variants, etc from the token
+        removeuni = str_words.encode('ascii', 'ignore')
+        str_words = removeuni.decode()
+
+        if remove_punct is True:
+            str_words = self.replace_punctuation(str_words, " ")
+
+        str_words = re.sub(r' {1,}', ' ', str_words)
+
+        str_words = str_words.strip()
+
+        return str_words
+
+
     @property
     def expandedwords(self):
         global expanded_words_list
@@ -193,14 +188,7 @@ class Tokenizer:
         """
         ret_words = []
 
-        if not isinstance(str_words, str):
-            str_words = str(str_words)
-        if len(str_words) <= 0:
-            return ret_words
-
-        s = self.replace_punctuation(str_words, " ")
-
-        words = nltk.word_tokenize(s)
+        words = nltk.word_tokenize(str_words)
         for i in words:
 
             # for a given token, remove any unicode chars that
@@ -232,4 +220,57 @@ class Tokenizer:
         stemmed_tokens = self.get_stemmed_words(nostop_tokens)
 
         return stemmed_tokens
+
+
+    def tokenize_string(self, value):
+        """
+        Args:
+            value
+        """
+
+        if not value or len(value) == 0:
+            return ""
+
+        tokens = self.get_tokens_from_string(value)
+        tokens = list(set(tokens))
+        tokens.sort()
+
+        return tokens
+
+    def batch_tokenize_strings(self, list_data, field, field_tokenized="tokenized", ret_type="string"):
+        """
+        Args:
+            list_data:
+            field:
+            field_tokenized:
+            ret_type:
+        """
+
+        for k in list_data.keys():
+            if isinstance(k, str) and len(k) == 0:
+                print("String value for key was empty.  Skipping...")
+                continue
+
+            fieldval = self.clean_string(list_data[k][field])
+            list_data[k][field] = fieldval
+            tokens = self.tokenize_string(fieldval)
+            final_tokens = []
+
+            if ret_type == "list":
+                final_tokens = list(set(tokens))
+            elif ret_type == "set":
+                final_tokens = set(tokens)
+            elif ret_type == "dict":
+                final_tokens = OrderedDict(zip(tokens, tokens))
+            else:
+                # if ret_type == "string" or ret_type is None:
+                final_tokens = "|{}|".format("|".join(tokens))
+
+            list_data[k][field_tokenized] = final_tokens
+        return list_data
+
+    def filter_to_alphanum(self, value):
+        if value and len(value) > 0:
+            return re.sub(r'\W+', '', str(value))
+        return ""
 

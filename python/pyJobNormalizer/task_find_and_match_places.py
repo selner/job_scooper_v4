@@ -198,7 +198,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                                                                                                              MAX_RETRIES - retries))
                 retries += 1
                 kwargs['retry_count'] = retries
-                return self.call_geocode_api(**kwargs)
+                try:
+                    return self.call_geocode_api(**kwargs)
+                except Exception as ex:
+                    self.handle_error(ex, None, False)
+                    return None
             else:
                 from logging import ERROR
                 msg = u"ERROR:  API request '{}' timed out and has exceeded max retry count.".format(url)
@@ -292,7 +296,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                             locfacts = {'GeoLocationId': existingGeo['GeoLocationId'],
                                         'DisplayName': existingGeo['DisplayName']}
                         else:
-                            ins_result = self.add_row("geolocation", "geolocation_id", geolocfacts, self._geoloc_columns)
+                            ins_result = self.add_or_update_row("geolocation", "geolocation_id", geolocfacts, self._geoloc_columns)
                             # print(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
 
                             total_loc_found += 1

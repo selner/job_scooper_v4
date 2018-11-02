@@ -13,3 +13,4 @@ future
 jinja2
 structlog
 
+chronyk
