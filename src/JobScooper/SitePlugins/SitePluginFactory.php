@@ -273,7 +273,8 @@ class SitePluginFactory
         }
 
 
-        if (array_key_exists('Collections', $arrConfigData) && null !== $arrConfigData['Collections'] && is_array($arrConfigData['Collections']) && \count($arrConfigData['Collections']) > 0 && array_key_exists('Fields', $arrConfigData['Collections'][0])) {
+        if (array_key_exists('Collections', $arrConfigData) && null !== $arrConfigData['Collections'] && is_array($arrConfigData['Collections']) &&
+            \count($arrConfigData['Collections']) > 0) {
             foreach ($arrConfigData['Collections'] as $coll) {
             	if(array_key_exists('Fields', $coll)) {
 					foreach ($coll['Fields'] as $field) {
