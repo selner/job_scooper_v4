@@ -182,10 +182,8 @@ function getDefaultJobsOutputFileName($strFilePrefix = '', $strBase = '', $strEx
     if (strlen($strFilePrefix) > 0) {
         $strFilename .= $strFilePrefix . '-';
     }
-    $date = date_create(null);
-    $fmt = 'Y' . $delim . 'm' . $delim . 'd' . 'Hi';
 
-    $strFilename .= date_format($date, $fmt);
+    $strFilename .= getNowAsString($delim);
 
     if (strlen($strBase) > 0) {
         $strFilename .= '-' . $strBase;
