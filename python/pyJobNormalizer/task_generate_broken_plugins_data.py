@@ -112,7 +112,7 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
             for site_error in broken_jobsites:
                 key = site_error['jobsite_key']
                 pluralize = ""
-                if site_error['count_search_pairs'] > NUMBER_DAYS_BACK:
+                if site_error['count_search_pairs'] > 1:
                     pluralize = "es"
                 broken_sites_by_key[key] = {
                     'jobsite_key': key,
