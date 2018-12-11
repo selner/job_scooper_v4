@@ -280,8 +280,13 @@ function file_put_text(&$strData, $filepath): string
  */
 function writeJson(&$data, $filepath): string
 {
-    $jsonData = encodeJson($data);
-    return file_put_text($jsonData, $filepath);
+    try {
+        $jsonData = encodeJson($data);
+        return file_put_text($jsonData, $filepath);
+    }
+    catch(Exception $ex) {
+        LogError("Unable to encode JSON to file '{$filepath}': %s", null, $ex);
+    }
 }
 
 /**
