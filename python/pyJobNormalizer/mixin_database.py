@@ -368,6 +368,9 @@ class DatabaseMixin:
             tablecolumns:
         """
         try:
+            if not data or len(data) == 0:
+                return
+
             if not tablecolumns:
                 allowed_keys = self.get_table_columns(tablename)
             else:
@@ -435,7 +438,7 @@ class DatabaseMixin:
             else:
                 allowed_keys = tablecolumns
 
-            rowkeys = list(data.keys())[0]
+            rowkeys = list(rowdict.keys())[0]
 
             matched_keys = set(allowed_keys).intersection(rowdict)
 
@@ -520,7 +523,7 @@ class DatabaseMixin:
             update_data = self.prepare_data_for_query(rowdict)
 
 
-            sql = u"UPDATE %s SET %s WHERE %s" % (tablename, ", ".join(set_fields), query_filter)
+            sql = u"UPDATE %s SET %s WHERE %s" % (tablename, ", ".join(matched_keys), query_filter)
             with self.new_cursor() as cursor:
                 return cursor.execute(sql)
 
