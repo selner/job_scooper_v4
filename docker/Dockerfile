@@ -99,10 +99,7 @@ RUN pecl install xdebug-2.6.0 \
 ## Install Composer
 ##
 #######################################################
-RUN wget https://getcomposer.org/download/1.1.1/composer.phar -O composer \
-    && mv composer /usr/bin/composer \
-    && chmod +x /usr/bin/composer \
-    && composer self-update
+COPY --from=composer:1.8 /usr/bin/composer /usr/bin/composer
 
 ## Display version information.
 RUN composer --version
