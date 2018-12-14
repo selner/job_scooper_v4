@@ -114,12 +114,13 @@ class Tokenizer:
         """
         Args:
             list_data:
-            field:
-            field_tokenized:
-            ret_type:
+            field: string
+            field_tokenized: string
+            ret_type: string
+            :type field_tokenized: object
         """
 
-        for k in list_data.keys():
+        for k in list(list_data.keys()):
             if isinstance(k, str) and len(k) == 0:
                 print("String value for key was empty.  Skipping...")
                 continue
@@ -146,7 +147,7 @@ class Tokenizer:
             value
         """
 
-        if not value or len(value) == 0:
+        if not value or not isinstance(value, str) or len(value) == 0:
             return ""
 
         tokens = self.get_tokens_from_string(value)
