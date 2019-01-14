@@ -25,6 +25,7 @@ use Facebook\WebDriver\Remote\WebDriverCapabilityType;
 use JobScooper\Utils\PropertyObject;
 
 use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Monolog\Logger;
 
 /**
  * Class SeleniumManager

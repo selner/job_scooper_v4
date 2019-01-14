@@ -215,6 +215,7 @@ class LoggingManager extends \Monolog\Logger
         if (is_array($context)) {
             $keys = array_keys($context);
         }
+        $keys = array_unique(array_merge($keys, array("memory_usage", "file", "line", "class", "function")));
         // Set up error logging to MySQL
         //Create MysqlHandler
         $mySQLHandler = new MySQLHandler($this->_mysqlConn, "jobscooper_log", $keys, \Monolog\Logger::DEBUG);
