@@ -225,7 +225,7 @@ class SeleniumManager extends PropertyObject
     private function create_remote_webdriver()
     {
         $hubUrl = $this->_settings['host_location'] . '/wd/hub';
-        LogMessage("Creating Selenium remote web driver to host {$hubUrl}...");
+        $this->log("Creating Selenium remote web driver to host {$hubUrl}...");
 
         try {
             $webdriver = $this->getWebDriverKind();
@@ -277,7 +277,7 @@ class SeleniumManager extends PropertyObject
             //	        $window = new WebDriverDimension(1024, 768);
             //	        $this->remoteWebDriver->manage()->window()->setSize($window);
 
-            LogMessage('Remote web driver instantiated.');
+            $this->log('Remote web driver instantiated.');
 
             return $this->remoteWebDriver;
         } catch (Exception $ex) {
@@ -285,4 +285,10 @@ class SeleniumManager extends PropertyObject
         }
         return null;
     }
+
+    private function log($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null)
+    {
+        LogMessage($msg, $logLevel, $extras, $ex, $log_topic='selenium');
+    }
+
 }
