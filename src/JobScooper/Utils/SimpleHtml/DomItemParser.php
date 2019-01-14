@@ -438,6 +438,6 @@ class DomItemParser
      */
     public function log($msg, $logLevel=\Monolog\Logger::INFO, $extras=array(), $ex=null)
     {
-        LogMessage($msg, $logLevel, $extras, $ex, $channel='DomElementParser');
+        LogMessage($msg, $logLevel, $extras, $ex, $log_topic='DomElementParser');
     }
 }

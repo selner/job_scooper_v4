@@ -236,7 +236,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
     public function toLoggedContext()
     {
         $arr = array_subset($this->toFlatArray(), array("UserSearchSiteRunKey", "JobSiteKey", "GeoLocationId", "SearchStartUrl"));
-        $arr['channel'] = 'plugins';
+        $arr['log_topic'] = 'plugins';
         $arr['searchResultsPageUrl'] = $this->searchResultsPageUrl;
         $userId = $this->getUserId();
         if(!is_empty_value($userId) && !is_empty_value($user = User::getUserObjById($userId)))  {

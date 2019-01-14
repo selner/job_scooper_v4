@@ -294,9 +294,9 @@ abstract class SitePlugin implements IJobSitePlugin
      * @throws Exception
      */
     private function _handleException($ex, $fmtLogMsg= null, $raise=true, $extraData=null) {
-        handleException($ex, $fmtLogMsg, $raise, $extraData, $channel = "plugin", $exceptClass = JobSitePluginException::class);
+        handleException($ex, $fmtLogMsg, $raise, $extraData, $log_topic = "plugin", $exceptClass = JobSitePluginException::class);
     }
-
+ 
 
     /**
      * @throws \Exception
@@ -307,7 +307,7 @@ abstract class SitePlugin implements IJobSitePlugin
         $boolSearchSuccess = null;
 
         if (count($this->arrSearchesToReturn) === 0) {
-            LogMessage("{$this->JobSiteName}: no searches set. Skipping...");
+            $this->log("{$this->JobSiteName}: no searches set. Skipping...");
 
             return;
         }
@@ -348,7 +348,7 @@ abstract class SitePlugin implements IJobSitePlugin
             	try {
             		$userFacts = User::getUserFactsById($search->getUserId());
 
-                    LogMessage("Checking for missing {$this->JobSiteKey} jobs for user {$userFacts['UserSlug']}.");
+                    $this->log("Checking for missing {$this->JobSiteKey} jobs for user {$userFacts['UserSlug']}.");
                     $dataExistingUserJobMatchIds = UserJobMatchQuery::create()
                         ->select('JobPostingId')
                         ->filterByUserId($userFacts['UserId'])
@@ -367,11 +367,11 @@ abstract class SitePlugin implements IJobSitePlugin
                     $jobIdsToAddToUser = array_diff($queryAllJobsFromJobSite, $dataExistingUserJobMatchIds);
 
                     if (null !== $jobIdsToAddToUser && \count($jobIdsToAddToUser) > 0) {
-                        LogMessage("Found " . \count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs not yet assigned to user {$userFacts['UserSlug']}.");
+                        $this->log("Found " . \count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs not yet assigned to user {$userFacts['UserSlug']}.");
                         $this->_addJobMatchIdsToUser($jobIdsToAddToUser, $search);
-                        LogMessage("Successfully added " . \count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs to user {$userFacts['UserSlug']}.");
+                        $this->log("Successfully added " . \count($jobIdsToAddToUser) . " {$this->JobSiteKey} jobs to user {$userFacts['UserSlug']}.");
                     } else {
-                        LogMessage("User {$userFacts['UserSlug']} had no missing previously loaded listings from {$this->JobSiteKey}.");
+                        $this->log("User {$userFacts['UserSlug']} had no missing previously loaded listings from {$this->JobSiteKey}.");
                     }
                 } catch (Exception $ex) {
                     $this->_handleException($ex);
@@ -574,7 +574,7 @@ JSCODE;
             $nSleepTimeToLoad = ($nTotalItems / $this->JobListingsPerPage) * $this->additionalLoadDelaySeconds;
         }
 
-        LogMessage("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results");
+        $this->log("Sleeping for " . $nSleepTimeToLoad . " seconds to allow browser to page down through all the results");
 
         $this->runJavaScriptSnippet($jsCode, false);
 
@@ -744,7 +744,7 @@ JSCODE;
             $nSleepTimeToLoad = ($nTotalItems / $this->JobListingsPerPage) * $this->additionalLoadDelaySeconds;
         }
 
-        LogMessage("Sleeping for {$nSleepTimeToLoad} seconds to allow browser to page down through all the results");
+        $this->log("Sleeping for {$nSleepTimeToLoad} seconds to allow browser to page down through all the results");
 
         $this->runJavaScriptSnippet($jsCode, false);
 
@@ -1725,7 +1725,11 @@ JSCODE;
      */
     public function log($msg, $logLevel=\Monolog\Logger::INFO, array $extras=[], $ex=null)
     {
-        LogMessage($msg, $logLevel, $extras, $ex, $channel='plugins');
+        if(is_null($extras) || !is_array($extras)) {
+            $extras = array();
+        }
+        $extras['jobsitekey'] = $this->JobSiteKey;
+        LogMessage($msg, $logLevel, $extras, $ex, $log_topic='plugins');
     }
 
 

@@ -256,7 +256,7 @@ class JobSiteManager
 	*/
     private function _syncDatabaseJobSitePluginClassList()
     {
-        LogMessage('Synchronizing database JobSite records with JobSite plugin installation status...', null, null, null, $channel='plugins');
+        LogMessage('Synchronizing database JobSite records with JobSite plugin installation status...', null, null, null, $log_topic='plugins');
         $declaredPluginsBySiteKey = SitePluginFactory::getInstalledPlugins();
 
         $allDBJobSitesByKey = JobSiteRecordQuery::create()

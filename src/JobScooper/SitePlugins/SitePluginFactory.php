@@ -110,9 +110,9 @@ class SitePluginFactory
     private function _initializeAllJsonPlugins()
     {
         $arrAddedPlugins = null;
-        LogMessage('Initializing all job site plugins...', null, null, null, $channel='plugins');
+        LogMessage('Initializing all job site plugins...', null, null, null, $log_topic='plugins');
 
-        LogMessage('Generating classes for ' . \count($this->_jsonPluginSetups) . ' JSON-loaded plugins...', null, null, null, $channel='plugins');
+        LogMessage('Generating classes for ' . \count($this->_jsonPluginSetups) . ' JSON-loaded plugins...', null, null, null, $log_topic='plugins');
         foreach (array('Abstract', 'Plugin') as $type) {
             $plugins = array_filter($this->_jsonPluginSetups, function ($val) use ($type) {
                 $matched = preg_match('/^' . $type . '/', $val['PhpClassName']);
@@ -120,7 +120,7 @@ class SitePluginFactory
             });
 
             foreach (array_keys($plugins) as $agentkey) {
-                LogDebug('Running eval statement for class ' . $plugins[$agentkey]['PhpClassName'], null, $channel='plugins');
+                LogDebug('Running eval statement for class ' . $plugins[$agentkey]['PhpClassName'], null, $log_topic='plugins');
                 try {
                     if ($type === 'Abstract' && array_key_exists('arrListingTagSetup', $plugins[$agentkey])) {
                         $plugins[$agentkey]['arrBaseListingTagSetup'] = $plugins[$agentkey]['arrListingTagSetup'];
@@ -141,7 +141,7 @@ class SitePluginFactory
             }
 
 
-            LogMessage(count($plugins) . ' ' . ($type === 'Abstract' ? $type : 'json') . ' plugin classes installed:  ' . implode(", ", array_keys($plugins)), null, null, null, $channel='plugins');
+            LogMessage(count($plugins) . ' ' . ($type === 'Abstract' ? $type : 'json') . ' plugin classes installed:  ' . implode(", ", array_keys($plugins)), null, null, null, $log_topic='plugins');
         }
     }
 
@@ -152,7 +152,7 @@ class SitePluginFactory
     private function _loadJsonPluginConfigFiles_()
     {
         $this->_configJsonFiles = glob($this->_dirJsonConfigs . DIRECTORY_SEPARATOR . '*.json');
-        LogMessage('Loading JSON-based, jobsite plugin configurations from ' . \count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...", null, null, null, $channel='plugins');
+        LogMessage('Loading JSON-based, jobsite plugin configurations from ' . \count($this->_configJsonFiles) . " files under {$this->_dirJsonConfigs}...", null, null, null, $log_topic='plugins');
 
         sort($this->_configJsonFiles);
 
@@ -285,7 +285,7 @@ class SitePluginFactory
             }
         }
 
-        LogDebug('Loaded JSON config for new plugin: ' . $pluginData['JobSiteName'], null, $channel='plugins');
+        LogDebug('Loaded JSON config for new plugin: ' . $pluginData['JobSiteName'], null, $log_topic='plugins');
 
         return $pluginData;
     }

@@ -28,6 +28,7 @@ use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\RavenHandler;
+use MySQLHandler\MySQLHandler;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
@@ -60,7 +61,9 @@ class LoggingManager extends \Monolog\Logger
 
     private $_shouldLogContext = false;
     private $_monologLevelForRun = self::ERROR;
-    
+    private $_mysqlConn = null;
+
+
     /**
      * LoggingManager constructor.
      *
@@ -70,7 +73,7 @@ class LoggingManager extends \Monolog\Logger
      *
      * @throws \Exception
      */
-    public function __construct($name=C__APPNAME__, array $handlers = array(), array $processors = array())
+    public function __construct($name = C__APPNAME__, array $handlers = array(), array $processors = array())
     {
         $GLOBALS['logger'] = $this;
 
@@ -88,16 +91,14 @@ class LoggingManager extends \Monolog\Logger
         parent::__construct($name, $handlers = $this->_handlersByType);
 
         $logOptions = Settings::getValue('logging', array());
-        $this->_shouldLogContext = filter_var($logOptions['always_log_context'], FILTER_VALIDATE_BOOLEAN);
-        if(isDebug()) {
+        if (isDebug()) {
             $this->_monologLevelForRun = self::DEBUG;
-        }
-        elseif (array_key_exists('log_level', $logOptions) and 
+        } elseif (array_key_exists('log_level', $logOptions) &&
             !empty($logOptions['log_level'])) {
-                if (strtoupper($logOptions['log_level']) === 'DEBUG') {
-                    Settings::setValue('debug', true);
-                }
-                $this->_monologLevelForRun = self::toMonologLevel($logOptions['log_level']);
+            if (strtoupper($logOptions['log_level']) === 'DEBUG') {
+                Settings::setValue('debug', true);
+            }
+            $this->_monologLevelForRun = self::toMonologLevel($logOptions['log_level']);
         } else {
             $this->_monologLevelForRun = self::INFO;
         }
@@ -124,7 +125,7 @@ class LoggingManager extends \Monolog\Logger
 //        $serviceContainer->setLogger('defaultLogger', $defaultLogger);
         $propelContainer = Propel::getServiceContainer();
 
-        $this->logRecord(LogLevel::INFO, 'Logging started for ' . __APP_VERSION__ .' at ' . $now->format('Y-m-d\TH:i:s'));
+        $this->logRecord(LogLevel::INFO, 'Logging started for ' . __APP_VERSION__ . ' at ' . $now->format('Y-m-d\TH:i:s'));
     }
 
     /**
@@ -147,11 +148,11 @@ class LoggingManager extends \Monolog\Logger
     }
 
     /**
-	* @param \Exception $e
-	* @param array $record
-	* @throws \Exception
-	*/
-    public function handleException(\Exception $e, array $record):void
+     * @param \Exception $e
+     * @param array $record
+     * @throws \Exception
+     */
+    public function handleException(\Exception $e, array $record): void
     {
         handleException($e);
         exit(255);
@@ -160,7 +161,7 @@ class LoggingManager extends \Monolog\Logger
     /**
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    public function updatePropelLogging():void
+    public function updatePropelLogging(): void
     {
         Propel::getServiceContainer()->setLogger($this->getName(), $this);
         if (isDebug()) {
@@ -173,7 +174,7 @@ class LoggingManager extends \Monolog\Logger
     /**
      *
      */
-    private function _addSentryHandler():void
+    private function _addSentryHandler(): void
     {
         $settings = Settings::getValue('logging.sentry.options');
         if (!empty($settings)) {
@@ -197,6 +198,31 @@ class LoggingManager extends \Monolog\Logger
         }
     }
 
+    private function _addMySQLHandler(): void
+    {
+        // Set error logging to MySQL
+        try {
+            $dbConfig = Settings::getValue("db_config");
+            $this->_mysqlConn = new \PDO($dbConfig['dsn'], $dbConfig['user'], $dbConfig['password']);
+            // set the PDO error mode to exception
+            $this->_mysqlConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        } catch (\PDOException $e) {
+            handleException($e);
+        }
+
+        $keys = array();
+        $context = $this->_getEmptyLogContext();
+        if (is_array($context)) {
+            $keys = array_keys($context);
+        }
+        // Set up error logging to MySQL
+        //Create MysqlHandler
+        $mySQLHandler = new MySQLHandler($this->_mysqlConn, "jobscooper_log", $keys, \Monolog\Logger::DEBUG);
+        $logger = getLogger();
+        $logger->pushHandler($mySQLHandler);
+
+    }
+
     /**
      * Pushes a handler on to the stack.
      *
@@ -204,14 +230,14 @@ class LoggingManager extends \Monolog\Logger
      * @param  HandlerInterface $handler
      * @return $this
      */
-    private function addHandler(string $logType, HandlerInterface $handler):self
+    private function addHandler(string $logType, HandlerInterface $handler): self
     {
         $this->_handlersByType[$logType] = $handler;
         return $this->pushHandler($handler);
     }
 
     /**
-    /**
+     * /**
      * @param $logPath
      *
      * @throws \Propel\Runtime\Exception\PropelException
@@ -220,62 +246,65 @@ class LoggingManager extends \Monolog\Logger
     public function addFileHandlers($logPath)
     {
 
-		//
-		// Define the various output log filenames
-		//
+        //
+        // Define the various output log filenames
+        //
         $now = getNowAsString('-');
         $today = getTodayAsString('-');
-        $pathLogBase = $logPath. DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}";
+        $pathLogBase = $logPath . DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}";
         $mainLog = "{$pathLogBase}.log";
         $errorLog = "{$pathLogBase}_errors_with_context.log";
         $csvlog = "{$pathLogBase}_run_errors_{$now}.csv";
 
-		//
-		// Configure and add the main output log handler
-		//
+        //
+        // Configure and add the main output log handler
+        //
         $mainHandler = new StreamHandler($mainLog, $this->_monologLevelForRun, $bubble = true);
         $fmter = $mainHandler->getFormatter();
-	        $fmter->allowInlineLineBreaks(true);
-            $fmter->includeStacktraces(true);
-            $fmter->ignoreEmptyContextAndExtra(true);
-		$mainHandler->setFormatter($fmter);
+        $fmter->allowInlineLineBreaks(true);
+        $fmter->includeStacktraces(true);
+        $fmter->ignoreEmptyContextAndExtra(true);
+        $mainHandler->setFormatter($fmter);
         $this->addHandler('logfile', $mainHandler);
         $this->logRecord(LogLevel::INFO, "Logging started to logfile at {$mainLog}");
 
-		//
-		// Configure the error log handler.  Error log includes the log context for the last
-		// few entries before an error as well as the error record itself.
-		//
+        //
+        // Configure the error log handler.  Error log includes the log context for the last
+        // few entries before an error as well as the error record itself.
+        //
         $errLogHandler = new StreamHandler($errorLog, self::DEBUG, $bubble = true);
-		$errLogHandler->setFormatter($fmter);
+        $errLogHandler->setFormatter($fmter);
         $fingersHandler = new FingersCrossedHandler(
-		    $errLogHandler,
-		    new ErrorLevelActivationStrategy(self::ERROR),
-		    10,
-		    true,
-		    false,
-		    Logger::WARNING
-		);
+            $errLogHandler,
+            new ErrorLevelActivationStrategy(self::ERROR),
+            10,
+            true,
+            false,
+            Logger::WARNING
+        );
         $this->addHandler('errorlog', $fingersHandler);
         $this->logRecord(LogLevel::INFO, "Logging errors only to file: {$errorLog}");
 
-		//
-		// Configure the CSV-format error log
-		//
+        //
+        // Configure the CSV-format error log
+        //
         $fpcsv = fopen($csvlog, 'wb');
         $csvErrHandler = new CSVLogHandler($fpcsv, self::ERROR, $bubble = true);
         $this->addHandler('csverrors', $csvErrHandler);
         $this->logRecord(LogLevel::INFO, "Error logging to CSV file: {$csvlog}");
 
-		//
-		// Configure the errors email log handler
-		//
+        //
+        // Configure the errors email log handler
+        //
         $emailHandler = new BufferHandler(
-        	    new ErrorEmailLogHandler(self::ERROR, true),
-                100);
+            new ErrorEmailLogHandler(self::ERROR, true),
+            100);
         $this->addHandler('email_errors', $emailHandler);
 
+        $this->_addMySQLHandler();
         $this->updatePropelLogging();
+
+
     }
 
     /**
@@ -284,6 +313,7 @@ class LoggingManager extends \Monolog\Logger
     public function __destruct()
     {
         $this->flushErrorNotifications();
+        $this->_mysqlConn = null;
     }
 
     /**
@@ -298,23 +328,19 @@ class LoggingManager extends \Monolog\Logger
      * @param       $level
      * @param       $message
      * @param array $extras
-     * @param null  $ex
+     * @param null $ex
      */
-    public function logRecord($level, $message, $extras=array(), $ex=null, $channel=null)
+    public function logRecord($level, $message, $extras = array(), $ex = null, $log_topic = null)
     {
         if (empty($level)) {
             $level = $this->_monologLevelForRun;
         }
 
-        $context = array();
         $monologLevel = Logger::toMonologLevel($level);
-        if ($this->_shouldLogContext === true || in_array($monologLevel, array(
-            Logger::WARNING, Logger::EMERGENCY, Logger::ERROR, Logger::DEBUG, Logger::CRITICAL))) {
-            $context = $this->getDebugContext($extras, $ex);
-        }
+        $context = $this->getDebugContext($extras, $ex, $log_topic);
 
         if ($this->log($monologLevel, $message, $context) === false) {
-            print($message .PHP_EOL . PHP_EOL);
+            print($message . PHP_EOL . PHP_EOL);
         }
     }
 
@@ -392,9 +418,19 @@ class LoggingManager extends \Monolog\Logger
      *
      * @return array
      */
-    public function getDebugContext($context=array(), \Exception $thrownExc = null)
+    public function getDebugContext($context = array(), \Exception $thrownExc = null, $log_topic=null)
     {
-    	$runtime_secs = 0;
+
+        $blankContext = $this->_getEmptyLogContext();
+        if(is_null($context)) {
+            $context = $blankContext;
+        }
+        else
+        {
+            $context = array_merge($blankContext, $context);
+        }
+
+        $runtime_secs = 0;
         $runStartTime = Settings::getValue('app_run_start_datetime');
         if (!empty($runStartTime)) {
             $runtime_interval = $runStartTime->diff(new \DateTime());
@@ -406,52 +442,47 @@ class LoggingManager extends \Monolog\Logger
             'memory_usage' => getPhpMemoryUsage()
         ];
 
+        if(!is_empty_value($log_topic)) {
+            $baseContext['log_topic'] = $log_topic;
+        }
+
         if (is_array($context)) {
             $context = array_merge($baseContext, $context);
         } else {
             $context = $baseContext;
         }
 
-        if(null !== $thrownExc)
-        {
-            $errContext = [
-            'class_call' => '',
-            'exception_message' => '',
-            'exception_file' => '',
-            'exception_line' => '',
-//		'exception_trace' => '',
-            'hostname' => gethostname(),
-            'channel' => '',
-            'jobsitekey' => '',
-            'search_user' => ''];
+        if (null !== $thrownExc) {
+            $errContext = $this->_getEmptyLogContext();
 
             $context = array_merge($errContext, $context);
 
+
             $jobsiteKey = null;
-            if(array_key_exists('user', $context)) {
+            if (array_key_exists('user', $context)) {
                 $context['search_user'] = $context['user'];
                 unset($context['user']);
             }
 
-            if(!is_empty_value($context['jobsitekey'])) {
+            if (!is_empty_value($context['jobsitekey'])) {
                 $jobsiteKey = $context['jobsitekey'];
             }
 
             //Debug backtrace called. Find next occurence of class after Logger, or return calling script:
-	        $dbg = debug_backtrace();
-	        $i = 0;
-	        $usersearch = null;
-	
-	        $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-	        while ($i < \count($dbg) - 1) {
-	            if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
-	                (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array('getDebugContent', 'handleException')))) {
-	                $class = $dbg[$i]['class'] . '->' . $dbg[$i]['function'] .'()';
-	                if (!empty($dbg[$i]['object'])) {
-	                    $objclass = get_class($dbg[$i]['object']);
-	                    if (strcasecmp($objclass, $dbg[$i]['class']) != 0) {
-	                        $class = "{$objclass} -> {$class}";
-	                        if(is_empty_value($jobsiteKey)) {
+            $dbg = debug_backtrace();
+            $i = 0;
+            $usersearch = null;
+
+            $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
+            while ($i < \count($dbg) - 1) {
+                if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
+                    (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array('getDebugContent', 'handleException')))) {
+                    $class = $dbg[$i]['class'] . '->' . $dbg[$i]['function'] . '()';
+                    if (!empty($dbg[$i]['object'])) {
+                        $objclass = get_class($dbg[$i]['object']);
+                        if (strcasecmp($objclass, $dbg[$i]['class']) != 0) {
+                            $class = "{$objclass} -> {$class}";
+                            if (is_empty_value($jobsiteKey)) {
                                 try {
                                     if (is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], 'getName')) {
                                         $jobsiteKey = $dbg[$i]['object']->getName();
@@ -471,23 +502,26 @@ class LoggingManager extends \Monolog\Logger
 //	                        } catch (Exception $ex) {
 //	                            $usersearch = '';
 //	                        }
-	                    }
-	                    break;
-	                }
-	            }
-	            $i++;
-	        }
-	
-	
-	        $context['class_call'] = $class;
-	        $context['channel'] = null === $jobsiteKey ? 'default' : 'plugins';
-	        $context['jobsitekey'] = $jobsiteKey;
+                        }
+                        break;
+                    }
+                }
+                $i++;
+            }
+
+
+            $context['class_call'] = $class;
+            if(!is_empty_value($jobsiteKey)) {
+                $context['log_topic'] = 'plugins';
+            }
+            $context['jobsitekey'] = $jobsiteKey;
 
             $context['exception_message'] = $thrownExc->getMessage();
             $context['exception_file'] = $thrownExc->getFile();
             $context['exception_line'] = $thrownExc->getLine();
             //		$context['exception_trace'] = join('|', preg_split('/$/', encodeJson($thrownExc->getTrace())));
         }
+
 
 
         // If we are also connected to Sentry, make sure we've set similar context
@@ -504,5 +538,22 @@ class LoggingManager extends \Monolog\Logger
         }
 
         return $context;
+    }
+
+
+    private function _getEmptyLogContext(){
+        return [
+            'class_call' => '',
+            'memory_usage' => '',
+            'exception_message' => '',
+            'exception_file' => '',
+            'exception_line' => '',
+    		'exception_trace' => '',
+            'hostname' => gethostname(),
+            'jobsitekey' => '',
+            'runtime' => '',
+            'log_topic' => 'default',
+            'search_user' => ''];
+
     }
 }

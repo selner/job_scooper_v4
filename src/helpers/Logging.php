@@ -24,6 +24,9 @@ use Monolog\Logger;
 /****         Logging                                                                                        ****/
 /****                                                                                                        ****/
 /****************************************************************************************************************/
+/**
+ * @return Logger
+ */
 
 function getLogger()
 {
@@ -69,7 +72,7 @@ function endLogSection($headerText)
  * @param \Psr\Log\LogLevel $level
  * @param array $context
  */
-function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $channel=null)
+function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $log_topic=null)
 {
     $logger = getLogger();
     if (empty($logger)) {
@@ -78,36 +81,35 @@ function LogMessage($msg, $logLevel= Logger::INFO, $extras=array(), $ex=null, $c
         if (empty($logLevel)) {
             $logLevel = Logger::INFO;
         }
-        $logger->logRecord($logLevel, $msg, $extras, $ex, $channel);
+        $logger->logRecord($logLevel, $msg, $extras, $ex, $log_topic);
     }
 }
 
-
 /**
  * @param $msg
  */
-function LogError($msg, $extras=array(), $ex=null, $channel=null)
+function LogError($msg, $extras=array(), $ex=null, $log_topic=null)
 {
-    LogMessage($msg, Logger::ERROR, $extras, $ex, $channel);
+    LogMessage($msg, Logger::ERROR, $extras, $ex, $log_topic);
 }
 
 
 /**
  * @param $msg
  */
-function LogWarning($msg, $extras=array(), $channel=null)
+function LogWarning($msg, $extras=array(), $log_topic=null)
 {
-    LogMessage($msg, Logger::WARNING, $extras, null, $channel);
+    LogMessage($msg, Logger::WARNING, $extras, null, $log_topic);
 }
 
 /**
  * @param     $msg
  * @param int $scooper_level
  */
-function LogDebug($msg, $extras=array(), $channel=null)
+function LogDebug($msg, $extras=array(), $log_topic=null)
 {
     if (isDebug()) {
-        LogMessage($msg, Logger::DEBUG, $extras, null, $channel);
+        LogMessage($msg, Logger::DEBUG, $extras, null, $log_topic);
     }
 }
 
@@ -115,14 +117,14 @@ function LogDebug($msg, $extras=array(), $channel=null)
  * @param       $msg
  * @param array $context
  */
-function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $channel=null)
+function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $log_topic=null)
 {
     $textParts = preg_split("/[\\r\\n|" . PHP_EOL . "]/", $msg);
     if (($textParts === false) || null === $textParts) {
         LogMessage($msg);
     } else {
         foreach ($textParts as $part) {
-            LogMessage($part, $logLevel, $extras, null, $channel);
+            LogMessage($part, $logLevel, $extras, null, $log_topic);
         }
     }
 }
@@ -134,13 +136,13 @@ function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $channel=
  *
  * @throws \Exception
  */
-function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null, $channel=null, $exceptClass = null)
+function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null, $log_topic=null, $exceptClass = null)
 {
     $logLevel = Logger::ERROR;
 
 
     if(!is_empty_value($extraData) && array_key_exists('JobSiteKey', $extraData)) {
-        $channel = 'plugins';
+        $log_topic = 'plugins';
     }
 
 
@@ -148,7 +150,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
 	{
 	    $conmgr = Propel\Runtime\Propel::getConnectionManager(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
 	    $conmgr->closeConnections();
-	    $channel = 'database';
+	    $log_topic = 'database';
 	}
 
     $msg = $fmtLogMsg;
@@ -179,7 +181,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
     }
 
 
-    LogMessage($msg, $logLevel, $extras=$extraData, $ex=$toThrow, $channel);
+    LogMessage($msg, $logLevel, $extras=$extraData, $ex=$toThrow, $log_topic);
 
     if ($raise == true) {
         throw $toThrow;
