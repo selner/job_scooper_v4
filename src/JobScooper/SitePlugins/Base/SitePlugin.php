@@ -1797,8 +1797,7 @@ JSCODE;
                     }
 
                     // First load the home page of the search site.  This allows us to get any cookies set we may need
-                    $searchStartUrl = $searchDetails->getSearchStartUrl();
-                    $parsed = parse_url($searchStartUrl);
+                    $parsed = parse_url($searchDetails->getSearchStartUrl());
                     $parsed['path'] = null;
                     $parsed['query'] = null;
                     $parsed['fragment'] = null;
@@ -1813,7 +1812,7 @@ JSCODE;
                         $html = $this->doFirstPageLoad($searchDetails);
                     }
                     if(is_empty_value($html)) {
-                        $this->getActiveWebdriver()->get($searchStartUrl);
+                        $this->getActiveWebdriver()->get($searchDetails->getSearchStartUrl());
                         $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
                     }
                 } catch (Exception $ex) {

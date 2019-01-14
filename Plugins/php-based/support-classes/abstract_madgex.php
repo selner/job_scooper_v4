@@ -120,7 +120,7 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
         'NoPostsFound'          => array('Selector' => 'h1', 'Attribute' => 'text', 'Callback' => 'matchesNoResultsPattern', 'CallbackParameter' => "Found 0 jobs"),
         'TotalPostCount'        => array('Selector' => 'h1', 'Attribute' => 'text', 'Pattern' =>  '/\b([,\d]+)\b/i'),
 //        'JobPostItem'           => array('Selector' => 'li.lister__item'),
-        'JobPostItem'           => array('Selector' => 'ul#listing li.cf'),
+        'JobPostItem'           => array('Selector' => 'ul#listing li[id]'),
         'Title'                 => array('Selector' => 'h3.lister__header a span', 'Attribute' => 'text', 'Index' =>0),
         'Url'                   => array('Selector' => 'h3.lister__header a', 'Attribute' => 'href', 'Index' =>0),
         'Company'               => array('Selector' => 'ul li.lister__meta-item--recruiter', 'Attribute' => 'text', 'Index' =>0),
