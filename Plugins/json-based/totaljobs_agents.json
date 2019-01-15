@@ -87,7 +87,8 @@
             ],
             "Pagination": {
                 "PageLimit": 20,
-                "Type": "PAGE-VIA-URL"
+                "Type": "NEXT-BUTTON",
+                "Selector": "a.next"
             }
         },
         {
