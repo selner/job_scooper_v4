@@ -2,7 +2,7 @@
   "jobsite_plugins": [
     {
       "JobSiteName": "TechnojobsUk",
-      "SourceURL": "https://www.technojobs.co.uk/search.phtml?page=***PAGE_NUMBER***&row_offset=10&keywords=***KEYWORDS***&salary=0&jobtype=all&postedwithin=3&location=***LOCATION:{Place}***&radius=10",
+      "SourceURL": "https://www.technojobs.co.uk/search.phtml?page=***PAGE_NUMBER***&row_offset=10&sortby=newest&keywords=***KEYWORDS***&salary=0&jobtype=all&postedwithin=1&location=***LOCATION:{Place}***&radius=10",
       "BaseURL": "https://www.technojobs.co.uk/",
       "LocationType": "location-city",
       "CountryCodes": [
@@ -87,7 +87,7 @@
         }
       ],
       "Pagination": {
-        "PageLimit": 20,
+        "PageLimit": 10,
         "Type": "PAGE-VIA-URL"
       }
     }
