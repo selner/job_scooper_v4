@@ -39,8 +39,7 @@
         "ext-zip": "^1.13",
         "ext-curl": "^7.1",
         "ext-iconv": "^7.2",
-        "ext-dom": "20031129",
-        "wazaari/monolog-mysql": "dev-master"
+        "ext-dom": "20031129"
     },
     "autoload": {
         "psr-4": {

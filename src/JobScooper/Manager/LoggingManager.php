@@ -198,32 +198,6 @@ class LoggingManager extends \Monolog\Logger
         }
     }
 
-    private function _addMySQLHandler(): void
-    {
-        // Set error logging to MySQL
-        try {
-            $dbConfig = Settings::getValue("db_config");
-            $this->_mysqlConn = new \PDO($dbConfig['dsn'], $dbConfig['user'], $dbConfig['password']);
-            // set the PDO error mode to exception
-            $this->_mysqlConn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        } catch (\PDOException $e) {
-            handleException($e);
-        }
-
-        $keys = array();
-        $context = $this->_getEmptyLogContext();
-        if (is_array($context)) {
-            $keys = array_keys($context);
-        }
-        $keys = array_unique(array_merge($keys, array("memory_usage", "file", "line", "class", "function")));
-        // Set up error logging to MySQL
-        //Create MysqlHandler
-        $mySQLHandler = new MySQLHandler($this->_mysqlConn, "jobscooper_log", $keys, \Monolog\Logger::DEBUG);
-        $logger = getLogger();
-        $logger->pushHandler($mySQLHandler);
-
-    }
-
     /**
      * Pushes a handler on to the stack.
      *
@@ -302,7 +276,6 @@ class LoggingManager extends \Monolog\Logger
             100);
         $this->addHandler('email_errors', $emailHandler);
 
-        $this->_addMySQLHandler();
         $this->updatePropelLogging();
 
 
