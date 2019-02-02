@@ -267,6 +267,13 @@ class SeleniumManager extends PropertyObject
             $capabilities->setCapability(WebDriverCapabilityType::DATABASE_ENABLED, true);
             $capabilities->setCapability(WebDriverCapabilityType::LOCATION_CONTEXT_ENABLED, true);
 
+            if(0 == strcasecmp( $webdriver, 'firefox')) {
+                $capabilities->setCapability(
+                    'moz:firefoxOptions',
+                    ['args' => ['-headless']]
+                );
+            }
+
             $this->remoteWebDriver = RemoteWebDriver::create(
                 $hubUrl,
                 $desired_capabilities = $capabilities,
