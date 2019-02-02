@@ -242,7 +242,7 @@ class StageManager
                     }
                     $user = null;
                     $searchRuns = null;
-                    endLogSection("Completed getting new job postings for {$jobsiteKey}.'");
+                    endLogSection("Completed getting new job postings for {$jobsiteKey}.");
                 }
             }
         } catch (\Exception $ex) {
