@@ -7,7 +7,8 @@ vendor/*
 *obsolete*
 *.pyc
 *.diff
-/scripts/personal/*
+**/personal
+**/experiments
 
 
 python/pyJobNormalizer/venv
@@ -19,4 +20,3 @@ docker-compose.override.yml
 **/.venv
 **/tools
 **/discover_jobsites
-
