@@ -228,7 +228,6 @@ class LoggingManager extends \Monolog\Logger
         $today = getTodayAsString('-');
         $pathLogBase = $logPath . DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$today}";
         $mainLog = "{$pathLogBase}.log";
-        $errorLog = "{$pathLogBase}_errors_with_context.log";
         $csvlog = "{$pathLogBase}_run_errors_{$now}.csv";
 
         //
@@ -244,27 +243,10 @@ class LoggingManager extends \Monolog\Logger
         $this->logRecord(LogLevel::INFO, "Logging started to logfile at {$mainLog}");
 
         //
-        // Configure the error log handler.  Error log includes the log context for the last
-        // few entries before an error as well as the error record itself.
-        //
-        $errLogHandler = new StreamHandler($errorLog, self::DEBUG, $bubble = true);
-        $errLogHandler->setFormatter($fmter);
-        $fingersHandler = new FingersCrossedHandler(
-            $errLogHandler,
-            new ErrorLevelActivationStrategy(self::ERROR),
-            10,
-            true,
-            false,
-            Logger::WARNING
-        );
-        $this->addHandler('errorlog', $fingersHandler);
-        $this->logRecord(LogLevel::INFO, "Logging errors only to file: {$errorLog}");
-
-        //
         // Configure the CSV-format error log
         //
         $fpcsv = fopen($csvlog, 'wb');
-        $csvErrHandler = new CSVLogHandler($fpcsv, self::ERROR, $bubble = true);
+        $csvErrHandler = new CSVLogHandler($fpcsv, self::WARNING, $bubble = true);
         $this->addHandler('csverrors', $csvErrHandler);
         $this->logRecord(LogLevel::INFO, "Error logging to CSV file: {$csvlog}");
 
