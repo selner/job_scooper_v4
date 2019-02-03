@@ -113,7 +113,8 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         $company_portion = strScrub($this->getCompany(), FOR_LOOKUP_VALUE_MATCHING);
         $company_portion = strtolower($company_portion);
 
-        $this->setKeyCompanyAndTitle("{$company_portion}~{$title_portion}");
+        $keyval = $this->_cleanupTextValue("{$company_portion}~{$title_portion}");
+        $this->setKeyCompanyAndTitle($keyval);
     }
     /**
      *
