@@ -1173,8 +1173,11 @@ JSCODE;
             }
             startLogSection('Starting data pull for ' . $this->JobSiteName . '[' . $searchDetails->getUserSearchSiteRunKey() . ']');
 
-            if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
-                $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
+            if ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_RESTSAPI__) {
+                $this->_getMyJobsForSearchFromRestAPI_($searchDetails);
+            }
+            elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
+                    $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
             } elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__) {
                 $this->_getMyJobsForSearchFromWebpage_($searchDetails);
             } else {
@@ -1313,6 +1316,28 @@ JSCODE;
         return null;
     }
 
+
+
+    /**
+     * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+     *
+     * @throws \Exception
+     */
+    protected function _getMyJobsForSearchFromRestAPI_(UserSearchSiteRun $searchDetails)
+    {
+        $this->log('Downloading jobs for search ' . $searchDetails->getUserSearchSiteRunKey());
+
+        $apiJobs = $this->getSearchJobsFromAPI($searchDetails);
+        if (null === $apiJobs) {
+            $this->log('Warning: ' . $this->JobSiteName . '[' . $searchDetails->getUserSearchSiteRunKey() . '] returned zero jobs from the API.' . PHP_EOL, \Monolog\Logger::WARNING);
+
+            return;
+        }
+
+        $this->saveSearchReturnedJobs($apiJobs, $searchDetails);
+
+        $this->log($this->JobSiteName . '[' . $searchDetails->getUserSearchSiteRunKey() . ']' . ': ' . count($apiJobs) . ' jobs found.' . PHP_EOL);
+    }
 
     /**
      * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails

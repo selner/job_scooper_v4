@@ -28,6 +28,8 @@
 //************************************************************************
 const C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__ = 'WEBPAGE';
 const C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__ = 'JOBAPI';
+const C__JOB_SEARCH_RESULTS_TYPE_RESTSAPI__ = 'RESTAPI';
+
 const C__JOB_SEARCH_RESULTS_TYPE_UNKNOWN__ = 'ERROR_UNKNOWN_TYPE';
 
 //************************************************************************

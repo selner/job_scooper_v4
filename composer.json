@@ -39,7 +39,8 @@
         "ext-zip": "^1.13",
         "ext-curl": "^7.1",
         "ext-iconv": "^7.2",
-        "ext-dom": "20031129"
+        "ext-dom": "20031129",
+        "nategood/httpful": "dev-master"
     },
     "autoload": {
         "psr-4": {
