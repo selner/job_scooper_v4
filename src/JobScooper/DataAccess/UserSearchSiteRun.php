@@ -319,7 +319,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                         break;
 
                     case "ITEM_NUMBER":
-                        $ret = $this->_callPluginMethodIfExists("getItemURLValue", $nPage);
+                        $ret = $this->_callPluginMethodIfExists("getItemURLValue", $nItem);
                         if ($ret !== false) {
                             $replaceVal = $ret;
                         }
