@@ -111,7 +111,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         $title_portion = strtolower($title_portion);
 
         $company_portion = strScrub($this->getCompany(), FOR_LOOKUP_VALUE_MATCHING);
-        $title_portion = strtolower($company_portion);
+        $company_portion = strtolower($company_portion);
 
         $this->setKeyCompanyAndTitle("{$company_portion}~{$title_portion}");
     }
@@ -228,7 +228,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         $fields = $this->getModifiedColumnsPhpNames();
         if (!is_empty_value($fields)) {
             foreach ($fields as $phpField) {
-            	if(in_array($phpField, ['JobSitePostId', 'Url', 'KeyCompanyAndTitle'])) {
+            	if(in_array($phpField, ['JobSitePostId', 'Url'])) {
             		continue;
             	}
                 $getFunc = "get{$phpField}";
