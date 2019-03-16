@@ -453,6 +453,17 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
             throw new \ErrorException($this->getJobSiteKey() . " does not support the ***LOCATION*** replacement value in a base URL.  Please review and change your base URL format to remove the location value.  Aborting all searches for " . $this->getJobSiteKey());
         }
 
+        $strLocationValue = $this->getGeoLocation($fmt);
+
+        if (!isValueURLEncoded($strLocationValue)) {
+            $strLocationValue = urlencode($strLocationValue);
+        }
+
+        return $strLocationValue;
+    }
+
+    public function getGeoLocation($fmt = null) {
+
         $searchpair = $this->getUserSearchPairFromUSSR();
         $loc = $searchpair->getGeoLocationFromUS();
         if (is_empty_value($loc)) {
@@ -485,10 +496,6 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
         if ($this->isBitFlagSet(C__JOB_LOCATION_REQUIRES_LOWERCASE)) {
             $strLocationValue = strtolower($strLocationValue);
-        }
-
-        if (!isValueURLEncoded($strLocationValue)) {
-            $strLocationValue = urlencode($strLocationValue);
         }
 
         return $strLocationValue;
