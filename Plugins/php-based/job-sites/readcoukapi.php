@@ -22,13 +22,21 @@ use Httpful\Request;
  *
  *       Used by dice.json plugin configuration to override single method
  */
-class PluginReed extends \JobScooper\SitePlugins\RestApiPlugin
+class PluginReed extends \JobScooper\SitePlugins\ApiPlugin
 {
     protected $SearchUrlFormat = "https://www.reed.co.uk/api/1.0/search?keywords=***KEYWORDS***&location=***LOCATION:{Place}***&distancefromlocation=15&***ITEM_NUMBER:&resultsToSkip={item_index}***";
     protected $JobSiteName = 'Reed';
     protected $CountryCodes = array("UK");
     protected $_apikey = null;
     protected $additionalBitFlags = array();
+
+    public function __construct($strBaseDir = null)
+    {
+        $this->additionalBitFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE;
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_RESTSAPI__;
+
+        parent::__construct();
+    }
 
     /**
      * @param $searchDetails
@@ -43,7 +51,7 @@ class PluginReed extends \JobScooper\SitePlugins\RestApiPlugin
         }
         else
         {
-            throw new \http\Exception\InvalidArgumentException("{$this->JobSiteName} requires the API key to be set in the configuration file.");
+            throw new \InvalidArgumentException("{$this->JobSiteName} requires the API key to be set in the configuration file.");
         }
 
         // Create the template

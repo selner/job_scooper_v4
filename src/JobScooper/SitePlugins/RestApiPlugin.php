@@ -17,6 +17,7 @@
 
 namespace JobScooper\SitePlugins;
 
+use JobScooper\DataAccess\UserSearchSiteRun;
 use JobScooper\SitePlugins\Base\SitePlugin;
 
 /**
@@ -38,4 +39,37 @@ class RestApiPlugin extends SitePlugin
 
         parent::__construct();
     }
+
+    /**
+     * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
+     *
+     * @throws \Exception
+     */
+    protected function _getMyJobsForSearchFromJobsAPI_(UserSearchSiteRun $searchDetails)
+    {
+        $nItemCount = 0;
+
+        $this->log('Downloading count of ' . $this->JobSiteName . ' jobs for search ' . $searchDetails->getUserSearchSiteRunKey());
+
+        $pageNumber = 1;
+        $noMoreJobs = false;
+        while ($noMoreJobs != true) {
+            $arrPageJobsList = [];
+            $apiJobs = $this->getSearchJobsFromAPI($searchDetails);
+            if (null === $apiJobs) {
+                $this->log('Warning: ' . $this->JobSiteName . '[' . $searchDetails->getUserSearchSiteRunKey() . '] returned zero jobs from the API.' . PHP_EOL, \Monolog\Logger::WARNING);
+
+                return;
+            }
+
+            $this->saveSearchReturnedJobs($arrPageJobsList, $searchDetails);
+            if (count($arrPageJobsList) < $this->JobListingsPerPage) {
+                $noMoreJobs = true;
+            }
+            $pageNumber++;
+        }
+
+        $this->log($this->JobSiteName . '[' . $searchDetails->getUserSearchSiteRunKey() . ']' . ': ' . $nItemCount . ' jobs found.' . PHP_EOL);
+    }
+
 }
