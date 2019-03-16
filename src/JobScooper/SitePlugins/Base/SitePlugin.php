@@ -1501,6 +1501,9 @@ JSCODE;
         if (is_empty_value($arrJobList)) {
             return;
         }
+        if (method_exists($this, 'remapJobItems') && !is_empty_value($arrJobList)) {
+            $arrJobList = $this->remapJobItems($arrJobList);
+        }
 
         foreach ($arrJobList as $k => $item) {
             $arrJobList[$k] = $this->cleanupJobItemFields($item);
