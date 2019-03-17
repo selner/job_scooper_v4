@@ -1,0 +1,92 @@
+{
+  "JobSiteName": "CareerBuilderUk",
+  "SourceURL": "https://www.careerbuilder.co.uk/jobsearch?loc=***LOCATION:{Place}***&pg=***PAGE_NUMBER***&q=***KEYWORDS***&sort=date",
+  "BaseURL": "https://www.careerbuilder.co.uk",
+  "AdditionalFlags" : [ "C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER", "C__JOB_KEYWORD_REQUIRES_LOWERCASE" ],
+  "CountryCodes" : ["UK"],
+  "Collections": [
+    {
+      "Name": "PageFields",
+      "Fields": [
+        {
+          "Name": "NoPostsFound",
+          "Selector": "div#jobs div.flash-message.warning span",
+          "Index" : 0,
+          "Callback" : "matchesNoResultsPattern",
+          "CallbackParameter": "no jobs",
+          "Attribute": "text",
+          "Type": "CSS"
+        },
+        {
+          "Name": "TotalPostCount",
+          "Selector": "div#jobs h1",
+          "Index" : 0,
+          "Pattern": "/.*?\\b([0-9,]+)\\b.*?/",
+          "Type": "CSS"
+        },
+        {
+          "Name": "JobPostItem",
+          "Selector": "div.job",
+          "Attribute": "collection",
+          "Type": "CSS"
+        }
+      ]
+    },
+    {
+      "Name": "ItemFields",
+      "Fields": [
+        {
+          "Name": "Title",
+          "Selector": "a.job-title span",
+          "Attribute": "text",
+          "Type": "CSS"
+        },
+        {
+          "Name": "Url",
+          "Selector": "a.job-title",
+          "Attribute": "href",
+          "Type": "CSS"
+        },
+        {
+          "Name": "Location",
+          "Selector": "div.col-2 div.col.col-mobile-full a span",
+          "Index": 0,
+          "Attribute": "text",
+          "Type": "CSS"
+        },
+        {
+          "Name": "Company",
+          "Selector": "div.col-2 div span a",
+          "Index": 0,
+          "Attribute": "text",
+          "Type": "CSS"
+        },
+        {
+          "Name": "CompanyLogo",
+          "Selector": "img.intl-company-logo",
+          "Index": 0,
+          "Attribute": "data-src",
+          "Type": "CSS"
+        },
+        {
+          "Name": "JobSitePostId",
+          "Pattern": "/.*?\\-(\\w+)$/",
+          "Type": "SOURCEFIELD",
+          "Field": "Url"
+        },
+
+        {
+          "Name": "PostedAt",
+          "Selector": "div.date a",
+          "Index": 0,
+          "Attribute": "text",
+          "Type": "CSS"
+        }
+      ]
+    }
+  ],
+  "Pagination": {
+    "Type": "PAGE-VIA-URL",
+    "PageLimit": 20
+  }
+}

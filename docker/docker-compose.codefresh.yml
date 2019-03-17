@@ -1,0 +1,5 @@
+version: "3.2"
+
+services:
+  app:
+     image: r.cfcr.io/bryanselner/selner/job-scooper-v4:$BRANCH_LC.latest

@@ -1,0 +1,436 @@
+{
+  "jobsite_plugins": [
+
+    {
+      "JobSiteName": "Vimeo",
+      "SiteReferenceKey": "vimeo",
+      "SourceURL": "https://vimeo.com/jobs#positions",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Docusign",
+      "SiteReferenceKey": "docusign",
+      "SourceURL": "https://www.docusign.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Pinterest",
+      "SiteReferenceKey": "pinterest",
+      "SourceURL": "https://www.pinterest.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "AirBnB",
+      "SiteReferenceKey": "airbnb",
+      "CountryCodes": [
+        "US",
+        "UK",
+        "CA",
+        "DE",
+        "CN",
+        "ES",
+        "IE",
+        "IT",
+        "FR",
+        "IN",
+        "JP",
+        "BR",
+        "KR",
+        "SG",
+        "AU"
+      ],
+      "SourceURL": "https://www.airbnb.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "cloudreach",
+      "SiteReferenceKey": "cloudreach",
+      "SourceURL": "https://www.cloudreach.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "redventures",
+      "SiteReferenceKey": "redventures",
+      "SourceURL": "https://www.redventures.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "thoughtworks",
+      "SiteReferenceKey": "thoughtworks",
+      "SourceURL": "https://www.thoughtworks.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "coursehero",
+      "SiteReferenceKey": "coursehero",
+      "SourceURL": "https://www.coursehero.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "dcprep",
+      "SiteReferenceKey": "dcprep",
+      "SourceURL": "https://www.dcprep.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "flatironschool",
+      "SiteReferenceKey": "flatironschool",
+      "SourceURL": "https://www.flatironschool.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "generalassembly",
+      "SiteReferenceKey": "generalassembly",
+      "SourceURL": "https://generalassemb.ly/careers#openings",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "magoosh",
+      "SiteReferenceKey": "magoosh",
+      "SourceURL": "https://www.magoosh.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "quartzy",
+      "SiteReferenceKey": "quartzy",
+      "SourceURL": "https://www.quartzy.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "hometeam",
+      "SiteReferenceKey": "hometeam",
+      "SourceURL": "https://www.hometeam.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "noom",
+      "SiteReferenceKey": "noom",
+      "SourceURL": "https://www.noom.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "practicefusion",
+      "SiteReferenceKey": "practicefusion",
+      "SourceURL": "https://www.practicefusion.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "squarespace",
+      "SiteReferenceKey": "squarespace",
+      "SourceURL": "https://www.squarespace.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "thumbtack",
+      "SiteReferenceKey": "thumbtack",
+      "SourceURL": "https://www.thumbtack.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "twilio",
+      "SiteReferenceKey": "twilio",
+      "SourceURL": "https://www.twilio.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "zenefits",
+      "SiteReferenceKey": "zenefits",
+      "SourceURL": "https://www.zenefits.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "tumblr",
+      "SiteReferenceKey": "tumblr",
+      "SourceURL": "https://www.tumblr.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "shazam",
+      "SiteReferenceKey": "shazam",
+      "SourceURL": "https://www.shazam.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "localytics",
+      "SiteReferenceKey": "localytics",
+      "SourceURL": "https://www.localytics.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "evernote",
+      "SiteReferenceKey": "evernote",
+      "SourceURL": "https://www.evernote.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "bigcommerce",
+      "SiteReferenceKey": "bigcommerce",
+      "SourceURL": "https://www.bigcommerce.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "reonomy",
+      "SiteReferenceKey": "reonomy",
+      "SourceURL": "https://www.reonomy.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "blockstream",
+      "SiteReferenceKey": "blockstream",
+      "SourceURL": "https://www.blockstream.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "prosper",
+      "SiteReferenceKey": "prosper",
+      "SourceURL": "https://www.prosper.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "coinbase",
+      "SiteReferenceKey": "coinbase",
+      "SourceURL": "https://www.coinbase.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "ondeck",
+      "SiteReferenceKey": "ondeck",
+      "SourceURL": "https://www.ondeck.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "betterment",
+      "SiteReferenceKey": "betterment",
+      "SourceURL": "https://www.betterment.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "nerdwallet",
+      "SiteReferenceKey": "nerdwallet",
+      "SourceURL": "https://www.nerdwallet.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "popsugar",
+      "SiteReferenceKey": "popsugar",
+      "SourceURL": "https://www.popsugar.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "thrillist",
+      "SiteReferenceKey": "thrillist",
+      "SourceURL": "https://www.thrillist.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "buzzfeed",
+      "SiteReferenceKey": "buzzfeed",
+      "SourceURL": "https://www.buzzfeed.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "trunkclub",
+      "SiteReferenceKey": "trunkclub",
+      "SourceURL": "https://www.trunkclub.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "birchbox",
+      "SiteReferenceKey": "birchbox",
+      "SourceURL": "https://www.birchbox.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "harrys",
+      "SiteReferenceKey": "harrys",
+      "SourceURL": "https://www.harrys.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "bonobos",
+      "SiteReferenceKey": "bonobos",
+      "SourceURL": "https://www.bonobos.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "casper",
+      "SiteReferenceKey": "casper",
+      "SourceURL": "https://www.casper.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "warbyparker",
+      "SiteReferenceKey": "warbyparker",
+      "SourceURL": "https://www.warbyparker.com/careers",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "AlphaSightsCampusRecruiting",
+      "SiteReferenceKey": "alphasightsresumedrop",
+      "SourceURL": "https://boards.greenhouse.io/alphasightsresumedrop",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Altisource",
+      "SiteReferenceKey": "Altisource",
+      "SourceURL": "https://boards.greenhouse.io/altisource",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Andela",
+      "SiteReferenceKey": "Andela",
+      "SourceURL": "https://boards.greenhouse.io/andela",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Away",
+      "SiteReferenceKey": "Away",
+      "SourceURL": "https://boards.greenhouse.io/away",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "CatapultSports",
+      "SiteReferenceKey": "Catapult Sports",
+      "SourceURL": "https://boards.greenhouse.io/catapultsports",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "ChewyFulfillment",
+      "SiteReferenceKey": "Chewy Fulfillment",
+      "SourceURL": "https://boards.greenhouse.io/fulfillment",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Classy",
+      "SiteReferenceKey": "Classy",
+      "SourceURL": "https://boards.greenhouse.io/classy",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Deliveroo",
+      "SiteReferenceKey": "Deliveroo",
+      "SourceURL": "https://boards.greenhouse.io/deliveroo",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Educate",
+      "SiteReferenceKey": "educate",
+      "SourceURL": "https://boards.greenhouse.io/educate",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "ElementAI",
+      "SiteReferenceKey": "ElementAI",
+      "SourceURL": "https://boards.greenhouse.io/elementai",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "HomeShare",
+      "SiteReferenceKey": "HomeShare",
+      "SourceURL": "https://boards.greenhouse.io/homeshare",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "MarketMuse",
+      "SiteReferenceKey": "marketmuse",
+      "SourceURL": "https://boards.greenhouse.io/marketmuse",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Common",
+      "SiteReferenceKey": "Common",
+      "SourceURL": "https://boards.greenhouse.io/common",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Careem",
+      "SiteReferenceKey": "careem",
+      "SourceURL": "https://boards.greenhouse.io/careem",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "TripAdvisor",
+      "SiteReferenceKey": "tripadvisor",
+      "SourceURL": "https://boards.greenhouse.io/tripadvisor",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "KivaRTP",
+      "SiteReferenceKey": "KivaRTP",
+      "SourceURL": "https://boards.greenhouse.io/rtp",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Medely",
+      "SiteReferenceKey": "Medely",
+      "SourceURL": "https://boards.greenhouse.io/medely",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "NewDevelopmentBank",
+      "SiteReferenceKey": "NewDevelopmentBank",
+      "SourceURL": "https://boards.greenhouse.io/ndb",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "nooncom",
+      "SiteReferenceKey": "nooncom",
+      "SourceURL": "https://boards.greenhouse.io/noon",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "PatientPop",
+      "SiteReferenceKey": "PatientPop",
+      "SourceURL": "https://boards.greenhouse.io/patientpop",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Robinhood",
+      "SiteReferenceKey": "Robinhood",
+      "SourceURL": "https://boards.greenhouse.io/robinhood",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "SonicWall",
+      "SiteReferenceKey": "SonicWall",
+      "SourceURL": "https://boards.greenhouse.io/sonicwall",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Specialized",
+      "SiteReferenceKey": "Specialized",
+      "SourceURL": "https://boards.greenhouse.io/specialized",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Strava",
+      "SiteReferenceKey": "Strava",
+      "SourceURL": "https://boards.greenhouse.io/strava",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "UncommonGoods",
+      "SiteReferenceKey": "UncommonGoods",
+      "SourceURL": "https://boards.greenhouse.io/uncommongoods",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "VICEUS",
+      "SiteReferenceKey": "vice",
+      "SourceURL": "https://boards.greenhouse.io/vice",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Voxy",
+      "SiteReferenceKey": "Voxy",
+      "SourceURL": "https://boards.greenhouse.io/voxy",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    },
+    {
+      "JobSiteName": "Zenly",
+      "SiteReferenceKey": "Zenly",
+      "SourceURL": "https://boards.greenhouse.io/zenly",
+      "PluginExtendsClassName": "AbstractGreenhouseATS"
+    }
+  ]
+}

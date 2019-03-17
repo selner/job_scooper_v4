@@ -1,0 +1,80 @@
+{
+  "JobSiteName": "Facebook",
+  "SourceURL": "https://www.facebook.com/careers/jobs?page=***PAGE_NUMBER***&results_per_page=100#search_result",
+  "LocationType": "location-city",
+  "CountryCodes" : ["UK", "CA", "US"],
+  "AdditionalFlags" : [ "C__JOB_USE_SITENAME_AS_COMPANY" ],
+  "PluginExtendsClassName" : "AbstractFacebook",
+  "Collections": {
+    "PageFields": {
+      "Name": "PageFields",
+      "Fields": {
+        "TotalPostCount" : {
+          "Name": "TotalPostCount",
+          "Selector": "._6v-m > div:nth-child(1)",
+          "Pattern": "/.*? of ([,\\d]+).*/",
+          "Attribute": "text",
+          "Type": "CSS"
+        },
+        "JobPostItem" : {
+          "Name": "JobPostItem",
+          "Selector": "div#search_result a._69jm",
+          "Attribute": "collection",
+          "Type": "CSS"
+        },
+        "MoreResults" : {
+        	"Name" : "MoreResults",
+        	"Selector" : "a[role='button'][href='#search_result']",
+	        "Type": "CSS",
+	        "Index" : 0
+        }
+      }
+    },
+    "ItemFields": {
+      "Name": "ItemFields",
+      "Fields": {
+        "Title" : {
+          "Name": "Title",
+          "Selector": "div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)",
+          "Attribute": "text",
+          "Index": 0,
+          "Type": "CSS"
+        },
+        "Url" : {
+          "Name": "Url",
+          "Selector": "a",
+          "Attribute": "href",
+          "Index": 0,
+          "Type": "CSS"
+        },
+        "Location" : {
+          "Name": "Location",
+          "Selector": "div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(3)",
+          "Attribute": "collection",
+          "Type": "CSS",
+          "Callback": "getLocations"
+        },
+        "Department" : {
+          "Name": "Department",
+          "Selector": "div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div > div:nth-child(1)",
+          "Index": 0,
+          "Attribute": "text",
+          "Type": "CSS",
+          "JoinResult": true
+        },
+        "JobSitePostId" : {
+          "Name": "JobSitePostId",
+          "Pattern": "/careers\\/jobs\\/(\\w+)\\/.*/",
+          "Selector": "a",
+          "Attribute": "href",
+          "Index": 0,
+          "Type": "CSS"
+        }
+      }
+    }
+  },
+  "Pagination": {
+    "Type": "PAGE-URL",
+    "PageLimit" : 100
+  }
+}

@@ -1,0 +1,120 @@
+{
+    "jobsite_plugins": [
+        {
+            "PhpClassName": "AbstractTotalJobsSites",
+            "SourceURL": "https://www.totaljobs.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
+            "CountryCodes": [
+                "UK"
+            ],
+            "AdditionalFlags": [
+                "C__JOB_KEYWORD_PARAMETER_SPACES_AS_DASHES", "C__JOB_LOCATION_REQUIRES_LOWERCASE", "C__JOB_PAGECOUNT_OMIT_ON_FIRST_PAGE"
+            ],
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name": "TotalPostCount",
+                            "Selector": "div.page-title span",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "JobPostItem",
+                            "Selector": "div.job",
+                            "Attribute": "collection",
+                            "Type": "CSS"
+                        }
+                    ]
+                },
+                {
+                    "Name": "ItemFields",
+                    "Fields": [
+                        {
+                            "Name": "Title",
+                            "Selector": "div.job-title a h2",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "Url",
+                            "Selector": "div.job-title a",
+                            "Attribute": "href",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "JobSitePostId",
+                            "Selector": "button[data-job-id]",
+                            "Attribute": "data-job-id"
+                        },
+                        {
+                            "Name": "Location",
+                            "Selector": "li.location span",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "Company",
+                            "Selector": "li.company h3",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "PayRange",
+                            "Selector": "li.salary",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "EmploymentType",
+                            "Selector": "li.job-type span",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "PostedAt",
+                            "Selector": "li.date-posted span",
+                            "Attribute": "text",
+                            "Type": "CSS"
+                        }
+                    ]
+                }
+            ],
+            "Pagination": {
+                "PageLimit": 20,
+                "Type": "NEXT-BUTTON",
+                "Selector": "a.next"
+            }
+        },
+        {
+            "JobSiteName": "TotalJobs",
+            "SourceURL": "https://www.totaljobs.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
+            "PluginExtendsClassName": "AbstractTotalJobsSites"
+        },
+        {
+            "JobSiteName": "CWJobs",
+            "SourceURL": "https://www.cwjobs.co.uk/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
+            "PluginExtendsClassName": "AbstractTotalJobsSites"
+        },
+        {
+            "JobSiteName": "CatererCom",
+            "SourceURL": "https://www.caterer.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
+            "PluginExtendsClassName": "AbstractTotalJobsSites"
+        },
+        {
+            "JobSiteName": "MilkRound",
+            "SourceURL": "https://www.milkround.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
+            "PluginExtendsClassName": "AbstractTotalJobsSites"
+        },
+        {
+            "JobSiteName": "RetailChoice",
+            "SourceURL": "https://www.retailchoice.com/jobs/***KEYWORDS***/in-***LOCATION:{Place}***?radius=20&postedwithin=3&Sort=2***PAGE_NUMBER:&page={page_index}***",
+            "PluginExtendsClassName": "AbstractTotalJobsSites"
+        }
+    ]
+}

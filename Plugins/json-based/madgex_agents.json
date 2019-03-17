@@ -1,0 +1,141 @@
+{
+    "jobsite_plugins": [
+
+        {
+            "JobSiteName": "IndependentUK",
+            "SiteSearchBaseUrl" : "http://independentjobs.independent.co.uk",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "HotelJobs",
+            "SiteSearchBaseUrl" : "https://www.hoteljobs.co.uk/jobs/hotel-jobs/",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "SiteVariant": "JobCountInH2",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "FishFour",
+            "SiteSearchBaseUrl" : "https://www.fish4.co.uk/jobs",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ],
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name": "TotalPostCount",
+                            "Selector": "h1",
+                            "Index": 0,
+                            "Pattern": "/.*?([\\d,]+).*/",
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "JobPostItem",
+                            "Selector": "//li[contains(concat(' ', normalize-space(@class), ' '), ' cf ')] ",
+                            "Attribute": "collection",
+                            "Type": "XPATH"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "JobSiteName": "OnlyDigitalJobs",
+            "SiteSearchBaseUrl": "https://www.onlydigitaljobs.com/jobs",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "SiteVariant": "JobCountInH2",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "WileyJobNetwork",
+            "SiteReferenceKey": "www.wileyjobnetwork",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "JobsToday",
+            "SiteSearchBaseUrl": "https://www.jobstoday.co.uk/searchjobs",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "TheGuardian",
+            "SiteReferenceKey": "jobs.theguardian",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "UK"
+            ]
+        },
+        {
+            "JobSiteName": "LocalworkCA",
+            "SiteSearchBaseUrl": "http://www.localwork.ca/searchjobs",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "CA"
+            ]
+        },
+        {
+            "JobSiteName": "MediaBistro",
+            "SiteSearchBaseUrl": "http://www.mediabistro.com/jobs/search",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "US"
+            ]
+        },
+        {
+            "JobSiteName": "WashingtonPost",
+            "SiteReferenceKey": "jobs.washingtonpost",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "US"
+            ]
+        },
+        {
+            "JobSiteName": "JobfinderUSA",
+            "SearchUrlFormat": "https://www.jobfinderusa.com/jobs/?kw=***KEYWORDS***",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "SiteVariant": "JobCountInH1",
+            "LocationCallback" : "setLocationFromJobTaxonomy",
+            "CountryCodes": [
+                "US"
+            ]
+        },
+        {
+            "JobSiteName": "GreatJobSpot",
+            "SiteReferenceKey": "www.greatjobspot",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "US"
+            ]
+        },
+        {
+            "JobSiteName": "ExecAppointments",
+            "BaseURL": "https://www.exec-appointments.com/searchjobs",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "GB"
+            ]
+        },
+        {
+            "JobSiteName": "StarTribune",
+            "SiteReferenceKey": "jobs.startribune",
+            "PluginExtendsClassName": "AbstractMadgexATS",
+            "CountryCodes": [
+                "US"
+            ]
+        }
+    ]
+}
