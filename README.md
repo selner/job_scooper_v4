@@ -1,7 +1,7 @@
 # Job Scooper v4
 ## Get automatic email alerts for all new job postings from 70+ job boards and career websites based on your keywords and location.
 
-![Example: Job Scooper Email Notification on Mobile](http://www.bryanselner.com/www-root-wpblog/wp-content/uploads/2014/07/JobScooperResultEmailMobile-250pxw.png "Example: Job Scooper Email Notification on Mobile")
+![Example: Job Scooper Email Notification on Mobile](/include/static/JobScooperWiki-ExampleEmail_med.png "Example: Job Scooper Email Notification")
 
 Jobs Scooper currently **supports [over 70 different sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper)**, such Monster, Indeed, Facebook & ZipRecruiter.  [view all supported sites](../../wiki/Job-Sites-Supported-by-Jobs-Scooper) to see the full list.
 
