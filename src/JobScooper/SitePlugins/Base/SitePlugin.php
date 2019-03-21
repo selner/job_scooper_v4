@@ -1905,7 +1905,7 @@ JSCODE;
 
                 $nJobsFound = 0;
 
-                $this->log("Querying {$this->JobSiteName} for {$totalPagesCount}  pages with " . ($nTotalListings === C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of jobs" : "{$nTotalListings} jobs:  ") . $searchDetails->getSearchStartUrl());
+                $this->log("Querying {$this->JobSiteName} for {$totalPagesCount}  pages with " . ($nTotalListings === C__TOTAL_ITEMS_UNKNOWN__ ? "an unknown number of jobs: " : "{$nTotalListings} jobs:  ") . $searchDetails->getSearchStartUrl());
 
                 $strURL = $searchDetails->getSearchStartUrl();
                 $searchDetails->searchResultsPageUrl = $strURL;
