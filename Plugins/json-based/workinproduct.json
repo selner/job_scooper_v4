@@ -1,0 +1,80 @@
+{
+  "JobSiteName": "WorkInProduct",
+  "BaseURL": "https://workinproduct.co/",
+  "SourceURL": "https://workinproduct.co/",
+  "LocationType": "location-city",
+  "CountryCodes": [
+    "GB"
+  ],
+  "AdditionalFlags": [
+    "C__JOB_PAGECOUNT_NOTAPPLICABLE",
+    "C__JOB_ITEMCOUNT_NOTAPPLICABLE"
+  ],
+  "Collections": [
+    {
+      "Name": "PageFields",
+      "Fields": [
+        {
+          "Name": "JobPostItem",
+          "Selector": "div.job-meta",
+          "Attribute": "collection",
+          "Type": "CSS"
+        }
+      ]
+    },
+    {
+      "Name": "ItemFields",
+      "Fields": [
+        {
+          "Name": "Title",
+          "Selector": "div.feature",
+          "Attribute": "data-name",
+          "Type": "CSS"
+        },
+        {
+          "Name": "Url",
+          "Selector": "div.job-title a",
+          "Attribute": "href",
+          "Index": 0,
+          "Type": "CSS"
+        },
+        {
+          "Name": "Company",
+          "Selector": "div.feature",
+          "Attribute": "data-company",
+          "Index": 0,
+          "Type": "CSS"
+        },
+        {
+          "Name": "Description",
+          "Selector": "div.description div",
+          "Index": 0,
+          "Attribute": "text",
+          "Type": "CSS"
+        },
+        {
+          "Name": "JobSitePostId",
+          "Selector": "div.feature",
+          "Attribute": "name",
+          "Type": "CSS",
+          "Index": 0
+        },
+        {
+          "Name" : "Location",
+          "Type" : "STATIC",
+          "Value" : "London, UK"
+        },
+        {
+          "Name": "PostedAt",
+          "Selector": "span.job-date-text",
+          "Index": 0,
+          "Attribute": "text",
+          "Type": "CSS"
+        }
+      ]
+    }
+  ],
+  "Pagination": {
+    "Type": "INFINITE-SCROLL-PAGE-DOWN"
+  }
+}
