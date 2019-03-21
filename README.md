@@ -138,44 +138,14 @@ You can define the full configuration for a job site plugin in a single JSON fil
 ```
 
 ### Job Scooper now Supports Running under Docker 🖥 
-Setting up and running job scooper anywhere is now made easier through Docker.  With just a few tweaks to the Dockerfile and associated run scripts, you can have Job Scooper quickly up and running in a container quickly.
+Setting up and running job scooper anywhere is now made easier through Docker & Docker Compose.  With just a few tweaks to the Dockerfile and associated scripts, you can have JobScooper up and running in a container quickly.
 
 Check out the Dockerfile and build_and_run_docker.* files in the repo for a set of base files that should get you 90% of the way there for your system.
-
-Job Scooper also now supports running Selenium for AJAX job sites in a Docker container. 
-
-
-### Plugins Are Even Now Easier to Author in PHP ✏️ 
-Using the new Simple Job Site base plugin classes, developers can now add an entire new plugin for a job site in fewer than 40 lines of code!  Here's a fully-featured job site plugin example of how to do it:
-
- ```php
-class PluginCyberJobs extends AjaxSitePlugin
-{
-    protected $JobSiteName = 'CyberJobs';
-    protected $JobPostingBaseUrl = "https://cyber.jobs";
-    protected $SearchUrlFormat = "https://cyber.jobs/search/?page=***PAGE_NUMBER***&searchterms=***KEYWORDS***&searchlocation=***LOCATION***&newsearch=true&originalsearch=true&sorttype=date";
-
-    protected $PaginationType = C__PAGINATION_PAGE_VIA_URL;
-    protected $LocationType = 'location-city-comma-statecode';
-
-    protected $arrListingTagSetup = array(
-        'TotalPostCount' =>  array('tag' => 'span', 'attribute' => 'id', 'attribute_value' =>'total-result-count', 'return_attribute' => 'text', 'return_value_regex' => '/.*?(\d+).*?/'),
-        'JobPostItem' => array('selector' => '.job-details-container'),
-        'title' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'text'),
-        'link' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href'),
-        'job_id' =>  array(array('selector' => 'div.job-title'), array('tag' => 'a'), 'return_attribute' => 'href', 'return_value_regex' =>'/.*?(\d+)$/'),
-        'employment_type' =>  array(array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'wage'), array('tag' => 'span')),
-        'location' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'location'),
-        'job_posting_date' =>  array('tag' => 'div', 'attribute' => 'class', 'attribute_value' =>'posted')
-    );
-
-}
-```
 
 **Get the full set of feature additions and updates in the [release notes](../../releases).**
 
 ## Other Stuff
-* Version:  v4.0.beta1 [release notes](../../releases)
+* Version:  v4.0 [release notes](../../releases)
 * Author:  Bryan Selner (dev at recoilvelocity dot com)
-* Tested mainly in Linux under Docker (see Dockerfile) and macOS 12.12.  Your mileage might vary on other platforms.
+* Tested mainly in Alpine Linux under Docker for Windows and macOS 10.13.  Your mileage might vary on other platforms.
 * Issues/Bugs:  [Please report them!](../../issues)
