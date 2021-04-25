@@ -1,42 +1,18 @@
 <?php
 
-/**
- * Copyright 2014-17 Bryan Selner
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may obtain
- * a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
-require_once dirname(dirname(__FILE__))."/bootstrap.php";
+namespace Jobscooper\BasePlugin;
 
-abstract class ClassClientHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
-{
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_CLIENTSIDE_WEBPAGE__;
+use function countJobRecords;
+use function getArrayValuesAsString;
+use function handleException;
+use function noJobStringMatch;
+use const C__JOB_ITEMCOUNT_NOTAPPLICABLE;
+use const C__JOB_PAGECOUNT_NOTAPPLICABLE;
+use const C__PAGINATION_INFSCROLLPAGE_VIALOADMORE;
+use const C__PAGINATION_PAGE_VIA_NEXTBUTTON;
+use const C__TOTAL_ITEMS_UNKNOWN__;
 
-    function __construct($strBaseDir = null)
-    {
-        $this->additionalFlags[] = C__JOB_USE_SELENIUM;
-        parent::__construct($strBaseDir);
-
-    }
-}
-
-
-
-abstract class ClassHTMLJobSitePlugin extends ClassBaseHTMLJobSitePlugin
-{
-    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
-}
-
-abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
+abstract class HTMLJobSitePlugin extends AbstractBaseJobsPlugin
 {
     protected $siteName = '';
     protected $siteBaseURL = '';
@@ -50,7 +26,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
     function __construct($strBaseDir = null)
     {
         if (is_null($this->arrListingTagSetup))
-            $this->arrListingTagSetup = ClassBaseHTMLJobSitePlugin::getEmptyListingTagSetup();
+            $this->arrListingTagSetup = JobSitePlugin::getEmptyListingTagSetup();
 
         if (strlen($this->siteBaseURL) == 0)
             $this->siteBaseURL = $this->childSiteURLBase;
@@ -66,14 +42,12 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             $this->selectorMoreListings = $this->getTagSelector($this->arrListingTagSetup['tag_load_more']);
         }
 
-        if (!array_key_exists('tag_listings_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE__, $this->additionalFlags))
-        {
-            $this->additionalFlags[]  = C__JOB_ITEMCOUNT_NOTAPPLICABLE__;
+        if (!array_key_exists('tag_listings_count', $this->arrListingTagSetup) && !in_array(C__JOB_ITEMCOUNT_NOTAPPLICABLE, $this->additionalFlags)) {
+            $this->additionalFlags[] = C__JOB_ITEMCOUNT_NOTAPPLICABLE;
         }
 
-        if (!array_key_exists('tag_pages_count', $this->arrListingTagSetup) &&  !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE__, $this->additionalFlags))
-        {
-            $this->additionalFlags[]  = C__JOB_PAGECOUNT_NOTAPPLICABLE__;
+        if (!array_key_exists('tag_pages_count', $this->arrListingTagSetup) && !in_array(C__JOB_PAGECOUNT_NOTAPPLICABLE, $this->additionalFlags)) {
+            $this->additionalFlags[] = C__JOB_PAGECOUNT_NOTAPPLICABLE;
         }
 
         parent::__construct($strBaseDir);
@@ -107,8 +81,8 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         $val = $var[0];
         $match_value = $var[1];
 
-        if(is_null($match_value))
-            throw new Exception("Plugin " . $this->siteName  . " definition missing pattern match value for isNoJobResults callback.");
+        if (is_null($match_value))
+            throw new Exception("Plugin " . $this->siteName . " definition missing pattern match value for isNoJobResults callback.");
         return noJobStringMatch($val, $match_value);
     }
 
@@ -116,7 +90,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
      * parseTotalResultsCount
      *
      * If the site does not show the total number of results
-     * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE__
+     * then set the plugin flag to C__JOB_PAGECOUNT_NOTAPPLICABLE
      * in the PluginOptions.php file and just comment out this function.
      *
      * parseTotalResultsCount returns the total number of listings that
@@ -128,8 +102,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
     function parseTotalResultsCount($objSimpHTML)
     {
         if (array_key_exists('tag_listings_noresults', $this->arrListingTagSetup) && !is_null($this->arrListingTagSetup['tag_listings_noresults'])) {
-            try
-            {
+            try {
                 $noResultsVal = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_noresults'], $propertyName = 'plaintext');
                 if (!is_null($noResultsVal)) {
                     $GLOBALS['logger']->logLine("Search returned " . $noResultsVal . " and matched expected 'No results' tag for " . $this->siteName, \Scooper\C__DISPLAY_ITEM_DETAIL__);
@@ -151,10 +124,10 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_pages_count']));
 
             $retJobCount = $retPageCount * $this->nJobListingsPerPage;
-        } elseif ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE__))
+        } elseif ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE))
             $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
         else
-            throw new Exception("Error: plugin is missing either C__JOB_ITEMCOUNT_NOTAPPLICABLE__ flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.");
+            throw new Exception("Error: plugin is missing either C__JOB_ITEMCOUNT_NOTAPPLICABLE flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.");
 
         return $retJobCount;
 
@@ -175,8 +148,8 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 continue;
             if (array_key_exists("selector", $arrTag)) {
                 $strMatch = $strMatch . $arrTag['selector'];
-            } elseif(array_key_exists("tag", $arrTag)) {
-               if (strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
+            } elseif (array_key_exists("tag", $arrTag)) {
+                if (strlen($strMatch) > 0) $strMatch = $strMatch . ' ';
                 {
                     $strMatch = $strMatch . $arrTag['tag'];
                     if (array_key_exists('attribute', $arrTag) && strlen($arrTag['attribute']) > 0) {
@@ -196,8 +169,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
     protected function _getTagMatchValue_($node, $arrTag, $returnAttribute = 'plaintext', $item = null)
     {
         if (array_key_exists("type", $arrTag) && !is_null($arrTag['type'])) {
-            switch(strtoupper($arrTag['type']))
-            {
+            switch (strtoupper($arrTag['type'])) {
                 case 'CSS':
                     return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
                     break;
@@ -209,9 +181,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 default:
                     throw new Exception("Unknown field definition type of " . $arrTag['type']);
             }
-        }
-        else
-        {
+        } else {
             return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
 
         }
@@ -226,22 +196,19 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             $value = "";
             if (array_key_exists("selector", $arrTag) && !is_null($arrTag['selector'])) {
                 $value = $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
-            }
-            elseif (array_key_exists("field", $arrTag) && !is_null($arrTag['field'])) {
+            } elseif (array_key_exists("field", $arrTag) && !is_null($arrTag['field'])) {
                 if (in_array($arrTag['field'], array_keys($item))) {
                     $value = $item[$arrTag['field']];
                 }
             }
 
-            if(is_null($value) || strlen($value) == 0)
+            if (is_null($value) || strlen($value) == 0)
                 $ret = null;
-            else
-            {
+            else {
                 $newPattern = str_replace("\\\\", "\\", $pattern);
 
                 if (preg_match($newPattern, $value, $matches) > 0) {
-                    switch($arrTag['index'])
-                    {
+                    switch ($arrTag['index']) {
                         case null:
                             $ret = $matches[1];
                             break;
@@ -261,7 +228,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         return $ret;
     }
 
-        protected function _getTagMatchValueCSS_($node, $arrTag, $returnAttribute = 'plaintext')
+    protected function _getTagMatchValueCSS_($node, $arrTag, $returnAttribute = 'plaintext')
     {
         $ret = null;
         $fReturnNodeObject = false;
@@ -270,8 +237,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         if (array_key_exists("return_attribute", $arrTag) && !is_null($arrTag['return_attribute'])) {
             $returnAttribute = $arrTag['return_attribute'];
         }
-        if(strtolower($returnAttribute) == 'collection' || strtolower($returnAttribute) == 'node')
-        {
+        if (strtolower($returnAttribute) == 'collection' || strtolower($returnAttribute) == 'node') {
             $returnAttribute = null;
             $fReturnNodeObject = true;
         }
@@ -286,7 +252,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
         }
 
         $nodeMatches = $node->find($strMatch);
-        if (isset($nodeMatches) && !is_null($nodeMatches) && count($nodeMatches) >=1) {
+        if (isset($nodeMatches) && !is_null($nodeMatches) && count($nodeMatches) >= 1) {
             $ret = $nodeMatches;
         }
 
@@ -307,7 +273,6 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
             }
             $ret = $ret[0];
         }
-
 
 
         if ($fReturnNodeObject === false && !is_null($ret)) {
@@ -404,9 +369,7 @@ abstract class ClassBaseHTMLJobSitePlugin extends AbstractClassBaseJobsPlugin
                 $ret[] = $this->normalizeJobItem($item);
 
             }
-        }
-        else
-        {
+        } else {
             $this->_writeDebugFiles_($this->currentSearchBeingRun, 'failed-find-listings', null, $objSimpHTML->root);
             handleException(new Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->siteName), null, true);
         }

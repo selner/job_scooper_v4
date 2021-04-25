@@ -1,4 +1,6 @@
 <?php
+namespace Jobscooper\Plugins\JobSiteBase;
+
 /**
  * Copyright 2014-17 Bryan Selner
  *
@@ -14,14 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const C__APPNAME__ = "jobs_scooper";
-
-define('__ROOT__', dirname(__FILE__));
-require 'vendor/autoload.php';
-
-$classRunJobs = new Jobscooper\StageManager();
-$classRunJobs->runAll();
-//$classRunJobs->doStage1();
-//$classRunJobs->doStage4();
 
 
+
+/**
+ * Class AbstractDice
+ *
+ *       Used by dice.json plugin configuration to override single method
+ */
+abstract class Dice extends \Jobscooper\BasePlugin\ClientSideHTMLJobSitePlugin
+{
+    function takeNextPageAction($nItem=null, $nPage=null)
+    {
+
+        $js = "
+            nextPagingData(" . $nPage . ");
+        ";
+
+        $this->runJavaScriptSnippet($js, false);
+        sleep($this->additionalLoadDelaySeconds+2);
+   }
+}

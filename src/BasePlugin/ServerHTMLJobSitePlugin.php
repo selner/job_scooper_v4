@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2014-17 Bryan Selner
  *
@@ -14,14 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-const C__APPNAME__ = "jobs_scooper";
-
-define('__ROOT__', dirname(__FILE__));
-require 'vendor/autoload.php';
-
-$classRunJobs = new Jobscooper\StageManager();
-$classRunJobs->runAll();
-//$classRunJobs->doStage1();
-//$classRunJobs->doStage4();
+namespace Jobscooper\BasePlugin;
 
 
+
+abstract class ServerHTMLJobSitePlugin extends HTMLJobSitePlugin
+{
+    protected $pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_SERVERSIDE_WEBPAGE__;
+}
