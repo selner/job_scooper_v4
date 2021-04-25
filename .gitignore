@@ -23,5 +23,6 @@ geckodriver
 uncommitted-patches
 *.diff
 sshkeys
-include/static/source_files
+src/static/source_files
 python/pyJobNormalizerVirtualEnv
+/configs/
