@@ -7,7 +7,7 @@ Jobs Scooper currently **supports [over 70 different sites](../../wiki/Job-Sites
 
 ## Configuring Search Terms for a User
 Make a copy of the [example_config.ini](examples/example_config.ini) and edit it's settings to match the search keywords and locations that you want for that user:
-```INI
+```
 [search_keyword_set]
 [search_keyword_set.analytics]
 keywords=["analytics manager", "Digital market", "director"]   ;# will pick up analytics manager and senior/sr analytics manager
@@ -61,9 +61,9 @@ Required Parameters:
 Non-developers can now author plugins using [Data Scraping Studio](https://www.agenty.com/data-extraction-software.aspx) or the [Advanced Web Scraper Chrome extension](https://chrome.google.com/webstore/detail/agenty-advanced-web-scrap/gpolcofcjjiooogejfbaamdgmgfehgff?hl=en-US) from (http://www.agenty.com)[Agenty].  
 
 Just tag the specific job results page fields for the site and set the Agenty field names to match the corresponding Job Scooper field: 
-```php
+```
 (
-        'tag_pages_count',
+    'tag_pages_count',
 	'tag_listings_noresults',
 	'tag_listings_count',
 	'tag_listings_section',
@@ -83,7 +83,7 @@ Just tag the specific job results page fields for the site and set the Agenty fi
 
 Once you've tagged the fields that are available, export the Agenty data scraping agent configuration you authored out to a JSON file.  In that JSON file, add a key/value under Pagination called "Type" with a value equal to the corresponding Job Scooper value for the job sites pagination and load more results style.
 
-```javascript
+```
 "Pagination": {
     "Type": "INFINITE-SCROLL-NO-CONTROL"
   }
@@ -96,7 +96,7 @@ Save your updated Agenty JSON config file to the plugins/json_plugins directory 
 ### 🆕 Don't Know PHP?  Add a plugin solely via JSON instead!  ✏️ 
 You can define the full configuration for a job site plugin in a single JSON file.  Just drop the new file into the plugins/json_plugins folder and let it rip.  
 
-```javascript
+```
 {
   "AgentName": "Startjobs",
   "SourceURL": "https://start.jobs/search",
@@ -157,8 +157,8 @@ Job Scooper also now supports running Selenium for AJAX job sites in a Docker co
 ### Plugins Are Even Now Easier to Author in PHP ✏️ 
 Using the new Simple Job Site base plugin classes, developers can now add an entire new plugin for a job site in fewer than 40 lines of code!  Here's a fully-featured job site plugin example of how to do it:
 
- ```php
-class PluginCyberJobs extends ClassClientHTMLJobSitePlugin
+ ```
+class JobSiteCyberJobs extends Class\Jobscooper\BasePlugin\ClientSideHTMLJobSitePlugin
 {
     protected $siteName = 'CyberJobs';
     protected $siteBaseURL = "https://cyber.jobs";
