@@ -41,7 +41,7 @@ class ErrorManager {
 
         if(strlen($errs['htmlbody']) > 0) {
 
-            $renderer = loadTemplate(dirname(__FILE__).'/templates/html_email_error_alerts.tmpl');
+            $renderer = loadTemplate(getSourceDir('/src/resources/templates/html_email_error_alerts.tmpl'));
 
             $data = Array(
                 "email_content" =>  $errs['htmlbody']
@@ -73,7 +73,7 @@ class ErrorManager {
         }
 
 //        $renderer = loadTemplate(dirname(__FILE__).'/templates/mc_html_email_base_boxed_basic_query.mustache');
-        $renderer = loadTemplate(dirname(__FILE__).'/templates/html_email_body_include_plugin_errors.tmpl');
+        $renderer = loadTemplate(getSourceDir('/src/resources/templates/html_email_body_include_plugin_errors.tmpl'));
 
         $data = Array(
             "subject" => "SUBJECT", 
@@ -91,7 +91,8 @@ class ErrorManager {
 
     function _appendConfigSetupContent_(&$htmlBody, &$txtBody, &$attachments)
     {
-        $renderer = loadTemplate(dirname(__FILE__).'/templates/partials/html_email_body_search_config_details.tmpl');
+        $path = getSourceDir('/src/resources/templates/partials/html_email_body_search_config_details.tmpl');
+        $renderer = loadTemplate($path);
 
         $htmlBody = $renderer($GLOBALS['USERDATA']['configuration_settings']);
 

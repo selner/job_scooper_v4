@@ -21,6 +21,25 @@ const C__STR_TAG_BAD_TITLE_POST__ = "No (Bad Title & Role)";
 const C__STR_TAG_NOT_A_KEYWORD_TITLE_MATCH__ = "No (Not a Keyword Title Match)";
 const C__STR_TAG_NOT_EXACT_TITLE_MATCH__ = "No (Not an Exact Title Match)";
 
+function getSourceRootDir() {
+    $path = dirname(dirname(__FILE__));
+    if (array_key_exists('PATH_TRANSLATED', $GLOBALS['_SERVER']) && !is_null( $GLOBALS['_SERVER']['PATH_TRANSLATED'])) {
+        $path = dirname( $GLOBALS['_SERVER']['PATH_TRANSLATED']);
+    }
+    return $path;
+}
+
+function getSourceDir($relpath) {
+    if ($relpath[0] == "/") {
+        $relpath = substr($relpath, 1);
+    }
+    $path = getSourceRootDir() . "/" . $relpath;
+    $path = realpath($path);
+    if ($path)
+        return $path;
+
+    return null;
+}
 function is_empty_key($obj, $key)
 {
     $ret = ((array_key_exists($key, $obj) && !is_null($obj[$key])));
@@ -320,6 +339,14 @@ function getArrayKeyValueForJob($job)
 
 }
 
+function getPythonPath()
+{
+    if (array_key_exists('configuration_settings', $GLOBALS['USERDATA']) && array_key_exists('python_runtime', $GLOBALS['USERDATA']['configuration_settings'])) {
+        return $GLOBALS['USERDATA']['configuration_settings']['python_runtime'];
+    }
+    return 'python';
+}
+
 function doExec($cmd)
 {
     $cmdOutput = array();
@@ -606,8 +633,8 @@ function callTokenizer($inputfile, $outputFile, $keyname, $indexKeyName = null)
     $GLOBALS['logger']->logLine("Tokenizing title exclusion matches from " . $inputfile . ".", \Scooper\C__DISPLAY_ITEM_DETAIL__);
     if (!$outputFile)
         $outputFile = $GLOBALS['USERDATA']['directories']['debug'] . "/tempCallTokenizer.csv";
-    $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/");
-    $cmd = "python " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
+    $PYTHONPATH = getSourceDir("python/pyJobNormalizer");
+    $cmd = getPythonPath() . " " . $PYTHONPATH . "/normalizeStrings.py -i " . $inputfile . " -o " . $outputFile . " -k " . $keyname;
     if ($indexKeyName != null)
         $cmd .= " --index " . $indexKeyName;
     $GLOBALS['logger']->logLine("Running command: " . $cmd, \Scooper\C__DISPLAY_ITEM_DETAIL__);

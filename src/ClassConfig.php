@@ -24,6 +24,8 @@ const BASE_URL_TAG_KEYWORDS = "***KEYWORDS***";
 
 class ClassConfig extends \Jobscooper\BasePlugin\AbstractBaseJobsPlugin
 {
+    // You need to use the trait here
+    use \ByJG\DesignPattern\Singleton;
 
     function __construct($strOutputDirectory = null, $attributes = null)
     {
@@ -584,27 +586,27 @@ class ClassConfig extends \Jobscooper\BasePlugin\AbstractBaseJobsPlugin
 
                         $arrNewLocationSet['key'] = $strSetName;
 
-                        if(array_key_exists("city", $iniSettings) && array_key_exists("state", $iniSettings) && array_key_exists("statecode", $iniSettings) && array_key_exists("country", $iniSettings) && array_key_exists("countrycode", $iniSettings))
+                        if(array_key_exists("location-city", $iniSettings) && array_key_exists("location-state", $iniSettings) && array_key_exists("location-statecode", $iniSettings) && array_key_exists("location-country", $iniSettings) && array_key_exists("location-countrycode", $iniSettings))
                         {
                             $computedLocValues = array(
-                                'location-city' => $iniSettings['city'],
-                                'location-city-comma-statecode' => $iniSettings['city'] . ", " . $iniSettings['statecode'],
-                                'location-city-comma-nospace-statecode' => $iniSettings['city'] . "," . $iniSettings['statecode'],
-                                'location-city-dash-statecode' => $iniSettings['city'] . "-" . $iniSettings['statecode'],
-                                'location-city-comma-statecode-underscores-and-dashes' => $iniSettings['city'] . "__2c-" . $iniSettings['statecode'],
-                                'location-city-comma-state' => $iniSettings['city'] . ", " . $iniSettings['state'],
-                                'location-city-comma-state-country' => $iniSettings['city'] . ", " . $iniSettings['state'] . " " . $iniSettings['country'],
-                                'location-city-comma-state-comma-country' => $iniSettings['city'] . ", " . $iniSettings['state'] . ", " . $iniSettings['country'],
-                                'location-city-comma-state-comma-countrycode' => $iniSettings['city'] . ", " . $iniSettings['state'] . ", " . $iniSettings['countrycode'],
-                                'location-city-comma-statecode-comma-countrycode' => $iniSettings['city'] . ", " . $iniSettings['statecode'] . ", " . $iniSettings['countrycode'],
-                                'location-city-comma-statecode-comma-country' => $iniSettings['city'] . ", " . $iniSettings['statecode'] . ", " . $iniSettings['country'],
-                                'location-city-comma-countrycode' => $iniSettings['city'] . ", " . $iniSettings['countrycode'],
-                                'location-city-comma-country' => $iniSettings['city'] . ", " . $iniSettings['country'],
-                                'location-city-state-country-no-commas'=> $iniSettings['city'] . " " . $iniSettings['state'] . " " . $iniSettings['country'],
-                                'location-city-country-no-commas'=> $iniSettings['city'] . " " . $iniSettings['country'],
-                                'location-state' => $iniSettings['state'],
-                                'location-statecode' => $iniSettings['statecode'],
-                                'location-countrycode' => $iniSettings['countrycode']
+                                'location-city' => $iniSettings['location-city'],
+                                'location-city-comma-statecode' => $iniSettings['location-city'] . ", " . $iniSettings['location-statecode'],
+                                'location-city-comma-nospace-statecode' => $iniSettings['location-city'] . "," . $iniSettings['location-statecode'],
+                                'location-city-dash-statecode' => $iniSettings['location-city'] . "-" . $iniSettings['location-statecode'],
+                                'location-city-comma-statecode-underscores-and-dashes' => $iniSettings['location-city'] . "__2c-" . $iniSettings['location-statecode'],
+                                'location-city-comma-state' => $iniSettings['location-city'] . ", " . $iniSettings['location-state'],
+                                'location-city-comma-state-country' => $iniSettings['location-city'] . ", " . $iniSettings['location-state'] . " " . $iniSettings['location-country'],
+                                'location-city-comma-state-comma-country' => $iniSettings['location-city'] . ", " . $iniSettings['location-state'] . ", " . $iniSettings['location-country'],
+                                'location-city-comma-state-comma-countrycode' => $iniSettings['location-city'] . ", " . $iniSettings['location-state'] . ", " . $iniSettings['location-countrycode'],
+                                'location-city-comma-statecode-comma-countrycode' => $iniSettings['location-city'] . ", " . $iniSettings['location-statecode'] . ", " . $iniSettings['location-countrycode'],
+                                'location-city-comma-statecode-comma-country' => $iniSettings['location-city'] . ", " . $iniSettings['location-statecode'] . ", " . $iniSettings['location-country'],
+                                'location-city-comma-countrycode' => $iniSettings['location-city'] . ", " . $iniSettings['location-countrycode'],
+                                'location-city-comma-country' => $iniSettings['location-city'] . ", " . $iniSettings['location-country'],
+                                'location-city-state-country-no-commas'=> $iniSettings['location-city'] . " " . $iniSettings['location-state'] . " " . $iniSettings['location-country'],
+                                'location-city-country-no-commas'=> $iniSettings['location-city'] . " " . $iniSettings['location-country'],
+                                'location-state' => $iniSettings['location-state'],
+                                'location-statecode' => $iniSettings['location-statecode'],
+                                'location-countrycode' => $iniSettings['location-countrycode']
                             );
 
                             $iniSettings = array_merge($computedLocValues, $iniSettings);
@@ -690,7 +692,9 @@ class ClassConfig extends \Jobscooper\BasePlugin\AbstractBaseJobsPlugin
             //
             if(!array_key_exists('user_setting_flags', $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]) || $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]['user_setting_flags'] == null || $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]['user_setting_flags'] == 0)
             {
-                $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
+                if(array_key_exists('keyword_match_type', $keywordSet)) {
+                    $GLOBALS['USERDATA']['configuration_settings']['searches'][$c]['user_setting_flags'] = $keywordSet['keyword_match_type'];
+                }
             }
         }
     }
@@ -722,7 +726,7 @@ class ClassConfig extends \Jobscooper\BasePlugin\AbstractBaseJobsPlugin
                             $thisSearch = $this->getEmptySearchDetailsRecord();
                             $thisSearch ['key'] = $keyPrefix;
                             $thisSearch ['site_name']  = $siteToSearch;
-                            $thisSearch ['user_setting_flags'] = $keywordSet['keyword_match_type_flag'];
+                            $thisSearch ['user_setting_flags'] = $keywordSet['source_config_file_settings']['keyword_match_type'];
 
                             if($classPlug->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED))
                             {
@@ -755,7 +759,7 @@ class ClassConfig extends \Jobscooper\BasePlugin\AbstractBaseJobsPlugin
                         if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("No searches were set for keyword set " . $keywordSet['name'] , \Scooper\C__DISPLAY_ITEM_DETAIL__);
                     }
                 }
-                if(count($arrSkippedPlugins) > 0)
+                if(!is_null($arrSkippedPlugins) && count($arrSkippedPlugins) > 0)
                     if(isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Keyword set " . $keywordSet['name'] . " did not generate searches for " . count($arrSkippedPlugins) ." Plugins because they do not support keyword search: " . getArrayValuesAsString($arrSkippedPlugins, ", ", null, false). "." , \Scooper\C__DISPLAY_ITEM_DETAIL__);
             }
         }
@@ -826,7 +830,7 @@ class ClassConfig extends \Jobscooper\BasePlugin\AbstractBaseJobsPlugin
                         $GLOBALS['USERDATA']['configuration_settings']['searches'][$searchKey]['location_search_value'] = $primaryLocationSet[$locTypeNeeded];
                     else {
                         $err = "Error:  unable to add search '" . $searchKey . "' because the required location type '" . $locTypeNeeded ."' was not found in the location set '" . $primaryLocationSet['key'] . "'. Excluding searches for " . $curSiteName .".";
-                        handleException(new IndexOutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded)), $err, $raise=false);
+                        handleException(new \OutOfBoundsException(sprintf("Requested location type setting of '%s' is not valid.", $locTypeNeeded)), $err, $raise=false);
                         $GLOBALS['USERDATA']['configuration_settings']['excluded_sites'][$curSiteName] = $curSiteName;
 
                         $arrNewSearchList = array_filter($GLOBALS['USERDATA']['configuration_settings']['searches'], function ($var) use ($curSiteName) {

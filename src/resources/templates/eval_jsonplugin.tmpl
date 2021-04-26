@@ -1,0 +1,24 @@
+
+class {{PhpClassName}} {{#if PluginExtendsClassName}} extends {{PluginExtendsClassName}} {{/if}}
+{
+    {{#each string_properties}}
+        protected ${{@key}} = "{{{.}}}";
+    {{/each}}
+
+    {{#each numeric_properties}}
+        protected ${{@key}} = {{.}};
+    {{/each}}
+
+    {{#each array_properties}}
+        protected ${{@key}} = {{{.}}};
+    {{/each}}
+
+    {{#each other_properties}}
+        protected ${{@key}} = {{{.}}};
+    {{/each}}
+}
+
+$ob = new {{PhpClassName}}();
+$ob = null;
+
+

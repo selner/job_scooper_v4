@@ -34,8 +34,7 @@ class StageManager extends \Jobscooper\BasePlugin\JobsSiteCommon
     function __construct()
     {
         try {
-            $this->classConfig = new ClassConfig();
-            $this->classConfig->initialize();
+            $this->classConfig = ClassConfig::getInstance();
             $logger = $this->classConfig->getLogger();
 
             if ($logger)
@@ -228,7 +227,7 @@ class StageManager extends \Jobscooper\BasePlugin\JobsSiteCommon
                 $this->logger->logLine(PHP_EOL . "    ~~~~~~ Tokenizing job titles ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
                 $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/normalizeJobListingFile.py");
 
-                $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($jfilefullpath) . " --outfile " . escapeshellarg($outjfilefullpath) ." --column job_title --index key_jobsite_siteid";
+                $cmd = getPythonPath() . " " . $PYTHONPATH . " --infile " . escapeshellarg($jfilefullpath) . " --outfile " . escapeshellarg($outjfilefullpath) ." --column job_title --index key_jobsite_siteid";
                 $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 
                 doExec($cmd);
@@ -360,7 +359,7 @@ class StageManager extends \Jobscooper\BasePlugin\JobsSiteCommon
 //                $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($jobset[1]), 'jobslist' => $jobset[1], 'search' => null);
 //                writeJSON($data, $jobset[0].".json");
 //                $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
-//                $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($jobset[0].".json") . " -o " . escapeshellarg($jobset[0].".csv");
+//                $cmd = getPythonPath() . " " . $PYTHONPATH . " -i " . escapeshellarg($jobset[0].".json") . " -o " . escapeshellarg($jobset[0].".csv");
 //                $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 //                doExec($cmd);
 //            }
@@ -368,7 +367,7 @@ class StageManager extends \Jobscooper\BasePlugin\JobsSiteCommon
             $data = array('key' => null, 'listtype' => JOBLIST_TYPE_MARKED, 'jobs_count' => countJobRecords($arrFullJobList), 'jobslist' => $arrFullJobList, 'search' => null);
             writeJSON($data, $this->pathAllJobs.".json");
             $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
-            $cmd = "python " . $PYTHONPATH . " -i " . escapeshellarg($this->pathAllJobs.".json") . " -o " . escapeshellarg($this->pathAllJobs.".csv");
+            $cmd = getPythonPath() . " " . $PYTHONPATH . " -i " . escapeshellarg($this->pathAllJobs.".json") . " -o " . escapeshellarg($this->pathAllJobs.".csv");
             $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd . "  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
             doExec($cmd);
 
@@ -387,7 +386,7 @@ class StageManager extends \Jobscooper\BasePlugin\JobsSiteCommon
 //
 //            $PYTHONPATH = realpath(__DIR__ . "/../python/pyJobNormalizer/jobsjson_to_csv.py");
 //            $csvPath = join(DIRECTORY_SEPARATOR, array(dirname($this->pathAllMatchedJobs), (basename($this->pathAllMatchedJobs) . ".csv")))
-//            $cmd = "python " . $PYTHONPATH . " --infile " . escapeshellarg($this->pathAllMatchedJobs) . " --outfile " . escapeshellarg($csvPath) ." --column job_title --index key_jobsite_siteid";
+//            $cmd = getPythonPath() . " " . $PYTHONPATH . " --infile " . escapeshellarg($this->pathAllMatchedJobs) . " --outfile " . escapeshellarg($csvPath) ." --column job_title --index key_jobsite_siteid";
 //            $this->logger->logLine(PHP_EOL . "    ~~~~~~ Running command: " . $cmd ."  ~~~~~~~" . PHP_EOL, \Scooper\C__DISPLAY_NORMAL__);
 //            doExec($cmd);
 //

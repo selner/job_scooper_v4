@@ -37,7 +37,9 @@
     "zordius/lightncandy": "1.2.5.x-dev",
     "ext-iconv": "^8.0",
     "khartnett/address-normalization": "dev-master",
-    "haydenpierce/class-finder": "dev-master"
+    "haydenpierce/class-finder": "dev-master",
+    "ext-json": "^8.0",
+    "byjg/singleton-pattern": "dev-master"
   },
   "autoload": {
     "files": [

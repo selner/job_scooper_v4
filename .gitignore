@@ -26,3 +26,4 @@ sshkeys
 src/static/source_files
 python/pyJobNormalizerVirtualEnv
 /configs/
+python/venv

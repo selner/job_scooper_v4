@@ -136,23 +136,6 @@ const C_JOB_MAX_RESULTS_PER_SEARCH = C__TOTAL_ITEMS_UNKNOWN__;
 //
 //************************************************************************
 
-//
-// Load all Plugins files found in /Plugins/
-//
-$files = glob(__ROOT__.'/Plugins/' . '*.php');
-foreach ($files as $file) {
-    require_once($file);
-}
-
-//
-// Load all ATS system Plugins files found in /Plugins/ats_platforms/
-//
-$files = glob(__ROOT__.'/Plugins/ats_platforms/' . '*.php');
-foreach ($files as $file) {
-    require_once($file);
-}
-
-
 function setupPlugins()
 {
     $jsPlugins = new Jobscooper\JSONPlugins();
