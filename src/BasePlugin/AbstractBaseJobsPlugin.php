@@ -16,6 +16,11 @@
  */
 namespace Jobscooper\BasePlugin;
 
+use Jobscooper\SeleniumSession;
+use const Jobscooper\BASE_URL_TAG_KEYWORDS;
+use const Jobscooper\BASE_URL_TAG_LOCATION;
+use const Jobscooper\VALUE_NOT_SUPPORTED;
+
 abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCommon
 {
 
@@ -156,20 +161,23 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
                 }
 
                 if ($this->isBitFlagSet(C__JOB_USE_SELENIUM)) {
+                    if (!array_key_exists('selenium', $GLOBALS['USERDATA']))
+                        throw new \InvalidArgumentException("Selenium required for JobSite, but no Selenium settings found in config file.");
+
                     try
                     {
-                        if ($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
+                        if($GLOBALS['USERDATA']['selenium']['autostart'] == True) {
                             SeleniumSession::startSeleniumServer();
                         }
                         $this->selenium = new SeleniumSession();
-                    } catch (Exception $ex) {
+                    } catch (\Exception $ex) {
                         handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->siteName ."'", true);
                     }
                 }
 
                 $this->_updateJobsDataForSearch_($search);
             }
-            catch (Exception $ex)
+            catch (\Exception $ex)
             {
                 throw $ex;
             }
@@ -224,7 +232,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
             return $this->selenium->get_driver();
         }
         else
-            throw new Exception("Error:  active webdriver for Selenium not found as expected.");
+            throw new \Exception("Error:  active webdriver for Selenium not found as expected.");
     }
 
     protected function _exportObjectToJSON_()
@@ -879,7 +887,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
             if($this->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED) && !$this->isBitFlagSet(C__JOB_SETTINGS_URL_VALUE_REQUIRED) && countJobRecords($arrSearchJobList) == 0)
             {
                 $strError = "The search " . $searchDetails['key'] . " on " . $this->siteName . " downloaded 0 jobs yet we did not have any keyword filter is use.  Logging as a potential error since we should have had something returned. [URL=" . $searchDetails['search_start_url'] . "].  ";
-                handleException(new Exception($strError), null, true);
+                handleException(new \Exception($strError), null, true);
             }
 
         } catch (Exception $ex) {
@@ -904,13 +912,13 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
             else
             {
                 //
-                // Not the known issue case, so log the error and re-throw the exception
+                // Not the known issue case, so log the error and re-throw the \Exception
                 // if we should have thrown one
                 //
                 $strError = "Failed to download jobs from " . $this->siteName . " jobs for search '" . $searchDetails['key'] . "[URL=" . $searchDetails['search_start_url'] . "].  " . $ex->getMessage() . PHP_EOL . "Exception Details: " . $ex;
                 $this->_setSearchResultError_($searchDetails, $strError, $ex, $arrSearchJobList, null);
                 $this->_setJobsToFileStoreForSearch_($searchDetails, $arrSearchJobList);
-                $retLastEx = new Exception($strError);
+                $retLastEx = new \Exception($strError);
                 handleException($retLastEx, null, false);
             }
         }
@@ -943,7 +951,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting error for search '" . $searchDetails['key'] . "' with error '" . $err . "'.", \Scooper\C__DISPLAY_ERROR__);
 
         if (!array_key_exists($searchDetails['key'], $GLOBALS['USERDATA']['search_results'])){
-            throw new Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
+            throw new \Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
         }
 
         $this->_writeDebugFiles_($searchDetails, "ERROR", $arrSearchedJobs, $objSimpleHTMLResults);
@@ -1007,7 +1015,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
         if (isset($GLOBALS['logger'])) $GLOBALS['logger']->logLine("Setting result value for search '" . $searchDetails['key'] . "' equal to " . ($success == 1 ? "true" : "false"). " with details '" . $details . "'.", \Scooper\C__DISPLAY_ITEM_DETAIL__);
 
         if (!array_key_exists($searchDetails['key'], $GLOBALS['USERDATA']['search_results']))
-            throw new Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
+            throw new \Exception("Error - Cannot Set Search Result for key " . $searchDetails['key'] . ".  Key does not exist in search results array.");
         $errFiles = $searchDetails['search_run_result']['error_files'];
         if(is_null($errFiles)) $errFiles = array();
         if(count($files) > 0) {
@@ -1127,7 +1135,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
             $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
         } catch (Exception $ex) {
             $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
-            handleException(new Exception($strError), null, true);
+            handleException(new \Exception($strError), null, true);
         }
         return $objSimpleHTML;
     }
@@ -1160,7 +1168,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
                     $objSimpleHTML = new SimpleHtmlDom\simple_html_dom($html, null, true, null, null, null, null);
                 } catch (Exception $ex) {
                     $strError = "Failed to get dynamic HTML via Selenium due to error:  " . $ex->getMessage();
-                    handleException(new Exception($strError), null, true);
+                    handleException(new \Exception($strError), null, true);
                 }
             }
             else
@@ -1320,7 +1328,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
                                 case C__PAGINATION_INFSCROLLPAGE_VIA_JS:    
                                     if(is_null($this->nextPageScript))
                                     {
-                                        handleException(new Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
+                                        handleException(new \Exception("Plugin " . $this->siteName . " is missing nextPageScript settings for the defined pagination type."), "", true);
     
                                     }
                                     $this->selenium->loadPage($strURL);
@@ -1334,7 +1342,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
                                 case C__PAGINATION_PAGE_VIA_NEXTBUTTON:
                                     if(is_null($this->selectorMoreListings))
                                     {
-                                        throw(new Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
+                                        throw(new \Exception("Plugin " . $this->siteName . " is missing selectorMoreListings setting for the defined pagination type."));
     
                                     }
                                     $this->selenium->loadPage($strURL);
@@ -1348,7 +1356,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
                                 
                                 case C__PAGINATION_PAGE_VIA_CALLBACK:
                                     if (!method_exists($this, 'takeNextPageAction')) {
-                                        handleException(new Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
+                                        handleException(new \Exception("Plugin " . $this->siteName . " is missing takeNextPageAction method definiton required for its pagination type."), "", true);
                                     }
     
                                     if($nPageCount > 1 && $nPageCount <= $totalPagesCount) {
@@ -1466,7 +1474,7 @@ abstract class AbstractBaseJobsPlugin extends \Jobscooper\BasePlugin\JobsSiteCom
                         else {
                             $err = "Error: " . $err . "  Aborting job site plugin to prevent further errors.";
                             $GLOBALS['logger']->logLine($err, \Scooper\C__DISPLAY_ERROR__);
-                            handleException(new Exception($err), null, true);
+                            handleException(new \Exception($err), null, true);
                         }
                     }
 

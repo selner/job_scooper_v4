@@ -17,9 +17,7 @@
  */
 namespace Jobscooper;
 
-require "PropertyObject.php";
-
-class SeleniumSession extends PropertyObject
+class SeleniumSession extends \PropertyObject
 {
     private $remoteWebDriver = null;
     private $additionalLoadDelaySeconds = null;

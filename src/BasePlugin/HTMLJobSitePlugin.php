@@ -82,7 +82,7 @@ abstract class HTMLJobSitePlugin extends AbstractBaseJobsPlugin
         $match_value = $var[1];
 
         if (is_null($match_value))
-            throw new Exception("Plugin " . $this->siteName . " definition missing pattern match value for isNoJobResults callback.");
+            throw new \Exception("Plugin " . $this->siteName . " definition missing pattern match value for isNoJobResults callback.");
         return noJobStringMatch($val, $match_value);
     }
 
@@ -117,17 +117,17 @@ abstract class HTMLJobSitePlugin extends AbstractBaseJobsPlugin
         if (array_key_exists('tag_listings_count', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_listings_count']) && count($this->arrListingTagSetup['tag_listings_count']) > 0) {
             $retJobCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_listings_count'], $propertyName = 'plaintext');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
-                throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_listings_count']));
+                throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_listings_count']));
         } else if (array_key_exists('tag_pages_count', $this->arrListingTagSetup) && is_array($this->arrListingTagSetup['tag_pages_count']) && count($this->arrListingTagSetup['tag_pages_count']) > 0) {
             $retPageCount = $this->_getTagMatchValue_($objSimpHTML, $this->arrListingTagSetup['tag_pages_count'], $propertyName = 'plaintext');
             if (is_null($retJobCount) || (is_string($retJobCount) && strlen($retJobCount) == 0))
-                throw new Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_pages_count']));
+                throw new \Exception("Unable to determine number of listings for the defined tag:  " . getArrayValuesAsString($this->arrListingTagSetup['tag_pages_count']));
 
             $retJobCount = $retPageCount * $this->nJobListingsPerPage;
         } elseif ($this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE))
             $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
         else
-            throw new Exception("Error: plugin is missing either C__JOB_ITEMCOUNT_NOTAPPLICABLE flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.");
+            throw new \Exception("Error: plugin is missing either C__JOB_ITEMCOUNT_NOTAPPLICABLE flag or an implementation of parseTotalResultsCount for that job site. Cannot complete search.");
 
         return $retJobCount;
 
@@ -179,7 +179,7 @@ abstract class HTMLJobSitePlugin extends AbstractBaseJobsPlugin
                     break;
 
                 default:
-                    throw new Exception("Unknown field definition type of " . $arrTag['type']);
+                    throw new \Exception("Unknown field definition type of " . $arrTag['type']);
             }
         } else {
             return $this->_getTagMatchValueCSS_($node, $arrTag, $returnAttribute);
@@ -263,7 +263,7 @@ abstract class HTMLJobSitePlugin extends AbstractBaseJobsPlugin
             if (count($nodeMatches) <= $index) {
                 $strError = sprintf("%s plugin failed to find index #%d in the %d nodes matching '%s'. ", $this->siteName, $index, count($nodeMatches), $strMatch);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                throw new Exception($strError);
+                throw new \Exception($strError);
             }
             $ret = $nodeMatches[$index];
         } elseif (!is_null($ret) && is_array($ret)) {
@@ -284,7 +284,7 @@ abstract class HTMLJobSitePlugin extends AbstractBaseJobsPlugin
                 if (preg_match($propertyRegEx, $ret, $match) !== false && count($match) >= 1)
                     $ret = $match[1];
                 else {
-                    handleException(new Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
+                    handleException(new \Exception(sprintf("%s plugin failed to find match for regex '%s' for tag '%s' with value '%s' as expected.", $this->siteName, $propertyRegEx, getArrayValuesAsString($arrTag), $ret)), "", true);
                 }
             }
         }
@@ -294,7 +294,7 @@ abstract class HTMLJobSitePlugin extends AbstractBaseJobsPlugin
             if (!method_exists($this, $arrTag['return_value_callback'])) {
                 $strError = sprintf("%s plugin failed could not call the tag callback method '%s' for attribute name '%s'.", $this->siteName, $callback, $returnAttribute);
                 $GLOBALS['logger']->logLine($strError, \Scooper\C__DISPLAY_ERROR__);
-                throw new Exception($strError);
+                throw new \Exception($strError);
             }
 
             if (array_key_exists("callback_parameter", $arrTag) && (strlen($arrTag['callback_parameter']) > 0))
@@ -371,7 +371,7 @@ abstract class HTMLJobSitePlugin extends AbstractBaseJobsPlugin
             }
         } else {
             $this->_writeDebugFiles_($this->currentSearchBeingRun, 'failed-find-listings', null, $objSimpHTML->root);
-            handleException(new Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->siteName), null, true);
+            handleException(new \Exception("Could not find matching job elements in HTML for " . $strNodeMatch . " in plugin " . $this->siteName), null, true);
         }
 
         $GLOBALS['logger']->logLine($this->siteName . " returned " . countJobRecords($ret) . " jobs from page.", \Scooper\C__DISPLAY_ITEM_DETAIL__);

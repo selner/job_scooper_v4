@@ -25,6 +25,7 @@ define('REXPR_PARTIAL_MATCH_URL_DOMAIN', '^https*.{3}[^\/]*');
 define('REXPR_MATCH_URL_DOMAIN', '/^https*.{3}[^\/]*/');
 
 use Khartnett\Normalization as Normalize;
+use const Jobscooper\VALUE_NOT_SUPPORTED;
 
 class JobsSiteCommon
 {
@@ -72,7 +73,8 @@ class JobsSiteCommon
             'location_search_value' => VALUE_NOT_SUPPORTED,
             'keyword_search_override' => null,
             'keywords_array' => null,
-            'search_run_result' => array('success' => null, 'details' => 'Search result is unknown; it is likely the search was not attempted.', 'error_files' => array())
+            'search_run_result' => array('success' => null, 'details' => 'Search result has not yet been attempted.',
+            'error_files' => array())
         );
     }
 
