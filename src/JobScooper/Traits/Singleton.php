@@ -40,7 +40,7 @@ trait Singleton
 		return static::$_instance = new static;
 	}
 	
-    final private function __construct()
+    private function __construct()
 	{
 		static::init();
     }
@@ -49,5 +49,5 @@ trait Singleton
 	
     final public function __wakeup() {}
 	
-    final private function __clone() {}
+    private function __clone() {}
 }

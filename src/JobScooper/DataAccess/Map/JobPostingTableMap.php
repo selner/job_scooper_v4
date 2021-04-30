@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class JobPostingTableMap extends TableMap
 {
@@ -203,6 +202,175 @@ class JobPostingTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('jobposting_id' => 0, 'jobsite_key' => 1, 'jobsite_post_id' => 2, 'title' => 3, 'url' => 4, 'employment_type' => 5, 'pay_range' => 6, 'location' => 7, 'company' => 8, 'department' => 9, 'category' => 10, 'last_updated_at' => 11, 'job_posted_date' => 12, 'first_seen_at' => 13, 'location_display_value' => 14, 'geolocation_id' => 15, 'duplicates_posting_id' => 16, 'title_tokens' => 17, 'job_reference_key' => 18, 'key_company_and_title' => 19, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'JobPostingId' => 'JOBPOSTING_ID',
+        'JobPosting.JobPostingId' => 'JOBPOSTING_ID',
+        'jobPostingId' => 'JOBPOSTING_ID',
+        'jobPosting.jobPostingId' => 'JOBPOSTING_ID',
+        'JobPostingTableMap::COL_JOBPOSTING_ID' => 'JOBPOSTING_ID',
+        'COL_JOBPOSTING_ID' => 'JOBPOSTING_ID',
+        'jobposting_id' => 'JOBPOSTING_ID',
+        'jobposting.jobposting_id' => 'JOBPOSTING_ID',
+        'JobSiteKey' => 'JOBSITE_KEY',
+        'JobPosting.JobSiteKey' => 'JOBSITE_KEY',
+        'jobSiteKey' => 'JOBSITE_KEY',
+        'jobPosting.jobSiteKey' => 'JOBSITE_KEY',
+        'JobPostingTableMap::COL_JOBSITE_KEY' => 'JOBSITE_KEY',
+        'COL_JOBSITE_KEY' => 'JOBSITE_KEY',
+        'jobsite_key' => 'JOBSITE_KEY',
+        'jobposting.jobsite_key' => 'JOBSITE_KEY',
+        'JobSitePostId' => 'JOBSITE_POST_ID',
+        'JobPosting.JobSitePostId' => 'JOBSITE_POST_ID',
+        'jobSitePostId' => 'JOBSITE_POST_ID',
+        'jobPosting.jobSitePostId' => 'JOBSITE_POST_ID',
+        'JobPostingTableMap::COL_JOBSITE_POST_ID' => 'JOBSITE_POST_ID',
+        'COL_JOBSITE_POST_ID' => 'JOBSITE_POST_ID',
+        'jobsite_post_id' => 'JOBSITE_POST_ID',
+        'jobposting.jobsite_post_id' => 'JOBSITE_POST_ID',
+        'Title' => 'TITLE',
+        'JobPosting.Title' => 'TITLE',
+        'title' => 'TITLE',
+        'jobPosting.title' => 'TITLE',
+        'JobPostingTableMap::COL_TITLE' => 'TITLE',
+        'COL_TITLE' => 'TITLE',
+        'title' => 'TITLE',
+        'jobposting.title' => 'TITLE',
+        'Url' => 'URL',
+        'JobPosting.Url' => 'URL',
+        'url' => 'URL',
+        'jobPosting.url' => 'URL',
+        'JobPostingTableMap::COL_URL' => 'URL',
+        'COL_URL' => 'URL',
+        'url' => 'URL',
+        'jobposting.url' => 'URL',
+        'EmploymentType' => 'EMPLOYMENT_TYPE',
+        'JobPosting.EmploymentType' => 'EMPLOYMENT_TYPE',
+        'employmentType' => 'EMPLOYMENT_TYPE',
+        'jobPosting.employmentType' => 'EMPLOYMENT_TYPE',
+        'JobPostingTableMap::COL_EMPLOYMENT_TYPE' => 'EMPLOYMENT_TYPE',
+        'COL_EMPLOYMENT_TYPE' => 'EMPLOYMENT_TYPE',
+        'employment_type' => 'EMPLOYMENT_TYPE',
+        'jobposting.employment_type' => 'EMPLOYMENT_TYPE',
+        'PayRange' => 'PAY_RANGE',
+        'JobPosting.PayRange' => 'PAY_RANGE',
+        'payRange' => 'PAY_RANGE',
+        'jobPosting.payRange' => 'PAY_RANGE',
+        'JobPostingTableMap::COL_PAY_RANGE' => 'PAY_RANGE',
+        'COL_PAY_RANGE' => 'PAY_RANGE',
+        'pay_range' => 'PAY_RANGE',
+        'jobposting.pay_range' => 'PAY_RANGE',
+        'Location' => 'LOCATION',
+        'JobPosting.Location' => 'LOCATION',
+        'location' => 'LOCATION',
+        'jobPosting.location' => 'LOCATION',
+        'JobPostingTableMap::COL_LOCATION' => 'LOCATION',
+        'COL_LOCATION' => 'LOCATION',
+        'location' => 'LOCATION',
+        'jobposting.location' => 'LOCATION',
+        'Company' => 'COMPANY',
+        'JobPosting.Company' => 'COMPANY',
+        'company' => 'COMPANY',
+        'jobPosting.company' => 'COMPANY',
+        'JobPostingTableMap::COL_COMPANY' => 'COMPANY',
+        'COL_COMPANY' => 'COMPANY',
+        'company' => 'COMPANY',
+        'jobposting.company' => 'COMPANY',
+        'Department' => 'DEPARTMENT',
+        'JobPosting.Department' => 'DEPARTMENT',
+        'department' => 'DEPARTMENT',
+        'jobPosting.department' => 'DEPARTMENT',
+        'JobPostingTableMap::COL_DEPARTMENT' => 'DEPARTMENT',
+        'COL_DEPARTMENT' => 'DEPARTMENT',
+        'department' => 'DEPARTMENT',
+        'jobposting.department' => 'DEPARTMENT',
+        'Category' => 'CATEGORY',
+        'JobPosting.Category' => 'CATEGORY',
+        'category' => 'CATEGORY',
+        'jobPosting.category' => 'CATEGORY',
+        'JobPostingTableMap::COL_CATEGORY' => 'CATEGORY',
+        'COL_CATEGORY' => 'CATEGORY',
+        'category' => 'CATEGORY',
+        'jobposting.category' => 'CATEGORY',
+        'UpdatedAt' => 'LAST_UPDATED_AT',
+        'JobPosting.UpdatedAt' => 'LAST_UPDATED_AT',
+        'updatedAt' => 'LAST_UPDATED_AT',
+        'jobPosting.updatedAt' => 'LAST_UPDATED_AT',
+        'JobPostingTableMap::COL_LAST_UPDATED_AT' => 'LAST_UPDATED_AT',
+        'COL_LAST_UPDATED_AT' => 'LAST_UPDATED_AT',
+        'last_updated_at' => 'LAST_UPDATED_AT',
+        'jobposting.last_updated_at' => 'LAST_UPDATED_AT',
+        'PostedAt' => 'JOB_POSTED_DATE',
+        'JobPosting.PostedAt' => 'JOB_POSTED_DATE',
+        'postedAt' => 'JOB_POSTED_DATE',
+        'jobPosting.postedAt' => 'JOB_POSTED_DATE',
+        'JobPostingTableMap::COL_JOB_POSTED_DATE' => 'JOB_POSTED_DATE',
+        'COL_JOB_POSTED_DATE' => 'JOB_POSTED_DATE',
+        'job_posted_date' => 'JOB_POSTED_DATE',
+        'jobposting.job_posted_date' => 'JOB_POSTED_DATE',
+        'FirstSeenAt' => 'FIRST_SEEN_AT',
+        'JobPosting.FirstSeenAt' => 'FIRST_SEEN_AT',
+        'firstSeenAt' => 'FIRST_SEEN_AT',
+        'jobPosting.firstSeenAt' => 'FIRST_SEEN_AT',
+        'JobPostingTableMap::COL_FIRST_SEEN_AT' => 'FIRST_SEEN_AT',
+        'COL_FIRST_SEEN_AT' => 'FIRST_SEEN_AT',
+        'first_seen_at' => 'FIRST_SEEN_AT',
+        'jobposting.first_seen_at' => 'FIRST_SEEN_AT',
+        'LocationDisplayValue' => 'LOCATION_DISPLAY_VALUE',
+        'JobPosting.LocationDisplayValue' => 'LOCATION_DISPLAY_VALUE',
+        'locationDisplayValue' => 'LOCATION_DISPLAY_VALUE',
+        'jobPosting.locationDisplayValue' => 'LOCATION_DISPLAY_VALUE',
+        'JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE' => 'LOCATION_DISPLAY_VALUE',
+        'COL_LOCATION_DISPLAY_VALUE' => 'LOCATION_DISPLAY_VALUE',
+        'location_display_value' => 'LOCATION_DISPLAY_VALUE',
+        'jobposting.location_display_value' => 'LOCATION_DISPLAY_VALUE',
+        'GeoLocationId' => 'GEOLOCATION_ID',
+        'JobPosting.GeoLocationId' => 'GEOLOCATION_ID',
+        'geoLocationId' => 'GEOLOCATION_ID',
+        'jobPosting.geoLocationId' => 'GEOLOCATION_ID',
+        'JobPostingTableMap::COL_GEOLOCATION_ID' => 'GEOLOCATION_ID',
+        'COL_GEOLOCATION_ID' => 'GEOLOCATION_ID',
+        'geolocation_id' => 'GEOLOCATION_ID',
+        'jobposting.geolocation_id' => 'GEOLOCATION_ID',
+        'DuplicatesJobPostingId' => 'DUPLICATES_POSTING_ID',
+        'JobPosting.DuplicatesJobPostingId' => 'DUPLICATES_POSTING_ID',
+        'duplicatesJobPostingId' => 'DUPLICATES_POSTING_ID',
+        'jobPosting.duplicatesJobPostingId' => 'DUPLICATES_POSTING_ID',
+        'JobPostingTableMap::COL_DUPLICATES_POSTING_ID' => 'DUPLICATES_POSTING_ID',
+        'COL_DUPLICATES_POSTING_ID' => 'DUPLICATES_POSTING_ID',
+        'duplicates_posting_id' => 'DUPLICATES_POSTING_ID',
+        'jobposting.duplicates_posting_id' => 'DUPLICATES_POSTING_ID',
+        'TitleTokens' => 'TITLE_TOKENS',
+        'JobPosting.TitleTokens' => 'TITLE_TOKENS',
+        'titleTokens' => 'TITLE_TOKENS',
+        'jobPosting.titleTokens' => 'TITLE_TOKENS',
+        'JobPostingTableMap::COL_TITLE_TOKENS' => 'TITLE_TOKENS',
+        'COL_TITLE_TOKENS' => 'TITLE_TOKENS',
+        'title_tokens' => 'TITLE_TOKENS',
+        'jobposting.title_tokens' => 'TITLE_TOKENS',
+        'JobReferenceKey' => 'JOB_REFERENCE_KEY',
+        'JobPosting.JobReferenceKey' => 'JOB_REFERENCE_KEY',
+        'jobReferenceKey' => 'JOB_REFERENCE_KEY',
+        'jobPosting.jobReferenceKey' => 'JOB_REFERENCE_KEY',
+        'JobPostingTableMap::COL_JOB_REFERENCE_KEY' => 'JOB_REFERENCE_KEY',
+        'COL_JOB_REFERENCE_KEY' => 'JOB_REFERENCE_KEY',
+        'job_reference_key' => 'JOB_REFERENCE_KEY',
+        'jobposting.job_reference_key' => 'JOB_REFERENCE_KEY',
+        'KeyCompanyAndTitle' => 'KEY_COMPANY_AND_TITLE',
+        'JobPosting.KeyCompanyAndTitle' => 'KEY_COMPANY_AND_TITLE',
+        'keyCompanyAndTitle' => 'KEY_COMPANY_AND_TITLE',
+        'jobPosting.keyCompanyAndTitle' => 'KEY_COMPANY_AND_TITLE',
+        'JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE' => 'KEY_COMPANY_AND_TITLE',
+        'COL_KEY_COMPANY_AND_TITLE' => 'KEY_COMPANY_AND_TITLE',
+        'key_company_and_title' => 'KEY_COMPANY_AND_TITLE',
+        'jobposting.key_company_and_title' => 'KEY_COMPANY_AND_TITLE',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -489,6 +657,64 @@ class JobPostingTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.title_tokens');
             $criteria->addSelectColumn($alias . '.job_reference_key');
             $criteria->addSelectColumn($alias . '.key_company_and_title');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_JOBPOSTING_ID);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_JOBSITE_KEY);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_JOBSITE_POST_ID);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_TITLE);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_URL);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_EMPLOYMENT_TYPE);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_PAY_RANGE);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_LOCATION);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_COMPANY);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_DEPARTMENT);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_CATEGORY);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_LAST_UPDATED_AT);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_JOB_POSTED_DATE);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_FIRST_SEEN_AT);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_LOCATION_DISPLAY_VALUE);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_GEOLOCATION_ID);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_DUPLICATES_POSTING_ID);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_TITLE_TOKENS);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_JOB_REFERENCE_KEY);
+            $criteria->removeSelectColumn(JobPostingTableMap::COL_KEY_COMPANY_AND_TITLE);
+        } else {
+            $criteria->removeSelectColumn($alias . '.jobposting_id');
+            $criteria->removeSelectColumn($alias . '.jobsite_key');
+            $criteria->removeSelectColumn($alias . '.jobsite_post_id');
+            $criteria->removeSelectColumn($alias . '.title');
+            $criteria->removeSelectColumn($alias . '.url');
+            $criteria->removeSelectColumn($alias . '.employment_type');
+            $criteria->removeSelectColumn($alias . '.pay_range');
+            $criteria->removeSelectColumn($alias . '.location');
+            $criteria->removeSelectColumn($alias . '.company');
+            $criteria->removeSelectColumn($alias . '.department');
+            $criteria->removeSelectColumn($alias . '.category');
+            $criteria->removeSelectColumn($alias . '.last_updated_at');
+            $criteria->removeSelectColumn($alias . '.job_posted_date');
+            $criteria->removeSelectColumn($alias . '.first_seen_at');
+            $criteria->removeSelectColumn($alias . '.location_display_value');
+            $criteria->removeSelectColumn($alias . '.geolocation_id');
+            $criteria->removeSelectColumn($alias . '.duplicates_posting_id');
+            $criteria->removeSelectColumn($alias . '.title_tokens');
+            $criteria->removeSelectColumn($alias . '.job_reference_key');
+            $criteria->removeSelectColumn($alias . '.key_company_and_title');
         }
     }
 

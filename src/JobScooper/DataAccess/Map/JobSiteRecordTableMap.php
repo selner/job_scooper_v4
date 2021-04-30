@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class JobSiteRecordTableMap extends TableMap
 {
@@ -134,6 +133,55 @@ class JobSiteRecordTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('jobsite_key' => 0, 'plugin_class_name' => 1, 'display_name' => 2, 'is_disabled' => 3, 'results_filter_type' => 4, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'JobSiteKey' => 'JOBSITE_KEY',
+        'JobSiteRecord.JobSiteKey' => 'JOBSITE_KEY',
+        'jobSiteKey' => 'JOBSITE_KEY',
+        'jobSiteRecord.jobSiteKey' => 'JOBSITE_KEY',
+        'JobSiteRecordTableMap::COL_JOBSITE_KEY' => 'JOBSITE_KEY',
+        'COL_JOBSITE_KEY' => 'JOBSITE_KEY',
+        'jobsite_key' => 'JOBSITE_KEY',
+        'job_site.jobsite_key' => 'JOBSITE_KEY',
+        'PluginClassName' => 'PLUGIN_CLASS_NAME',
+        'JobSiteRecord.PluginClassName' => 'PLUGIN_CLASS_NAME',
+        'pluginClassName' => 'PLUGIN_CLASS_NAME',
+        'jobSiteRecord.pluginClassName' => 'PLUGIN_CLASS_NAME',
+        'JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME' => 'PLUGIN_CLASS_NAME',
+        'COL_PLUGIN_CLASS_NAME' => 'PLUGIN_CLASS_NAME',
+        'plugin_class_name' => 'PLUGIN_CLASS_NAME',
+        'job_site.plugin_class_name' => 'PLUGIN_CLASS_NAME',
+        'DisplayName' => 'DISPLAY_NAME',
+        'JobSiteRecord.DisplayName' => 'DISPLAY_NAME',
+        'displayName' => 'DISPLAY_NAME',
+        'jobSiteRecord.displayName' => 'DISPLAY_NAME',
+        'JobSiteRecordTableMap::COL_DISPLAY_NAME' => 'DISPLAY_NAME',
+        'COL_DISPLAY_NAME' => 'DISPLAY_NAME',
+        'display_name' => 'DISPLAY_NAME',
+        'job_site.display_name' => 'DISPLAY_NAME',
+        'isDisabled' => 'IS_DISABLED',
+        'JobSiteRecord.isDisabled' => 'IS_DISABLED',
+        'isDisabled' => 'IS_DISABLED',
+        'jobSiteRecord.isDisabled' => 'IS_DISABLED',
+        'JobSiteRecordTableMap::COL_IS_DISABLED' => 'IS_DISABLED',
+        'COL_IS_DISABLED' => 'IS_DISABLED',
+        'is_disabled' => 'IS_DISABLED',
+        'job_site.is_disabled' => 'IS_DISABLED',
+        'ResultsFilterType' => 'RESULTS_FILTER_TYPE',
+        'JobSiteRecord.ResultsFilterType' => 'RESULTS_FILTER_TYPE',
+        'resultsFilterType' => 'RESULTS_FILTER_TYPE',
+        'jobSiteRecord.resultsFilterType' => 'RESULTS_FILTER_TYPE',
+        'JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE' => 'RESULTS_FILTER_TYPE',
+        'COL_RESULTS_FILTER_TYPE' => 'RESULTS_FILTER_TYPE',
+        'results_filter_type' => 'RESULTS_FILTER_TYPE',
+        'job_site.results_filter_type' => 'RESULTS_FILTER_TYPE',
+    ];
 
     /** The enumerated values for this table */
     protected static $enumValueSets = array(
@@ -379,6 +427,34 @@ class JobSiteRecordTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.display_name');
             $criteria->addSelectColumn($alias . '.is_disabled');
             $criteria->addSelectColumn($alias . '.results_filter_type');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(JobSiteRecordTableMap::COL_JOBSITE_KEY);
+            $criteria->removeSelectColumn(JobSiteRecordTableMap::COL_PLUGIN_CLASS_NAME);
+            $criteria->removeSelectColumn(JobSiteRecordTableMap::COL_DISPLAY_NAME);
+            $criteria->removeSelectColumn(JobSiteRecordTableMap::COL_IS_DISABLED);
+            $criteria->removeSelectColumn(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE);
+        } else {
+            $criteria->removeSelectColumn($alias . '.jobsite_key');
+            $criteria->removeSelectColumn($alias . '.plugin_class_name');
+            $criteria->removeSelectColumn($alias . '.display_name');
+            $criteria->removeSelectColumn($alias . '.is_disabled');
+            $criteria->removeSelectColumn($alias . '.results_filter_type');
         }
     }
 

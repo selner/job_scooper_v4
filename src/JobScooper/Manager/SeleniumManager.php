@@ -18,8 +18,6 @@
 namespace JobScooper\Manager;
 
 use Exception;
-use Facebook\WebDriver\Exception\WebDriverCurlException;
-use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\WebDriverCapabilityType;
 use JobScooper\Utils\PropertyObject;

@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class UserTableMap extends TableMap
 {
@@ -148,6 +147,87 @@ class UserTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('user_id' => 0, 'user_slug' => 1, 'email_address' => 2, 'name' => 3, 'search_keywords' => 4, 'search_locations' => 5, 'input_files_json' => 6, 'date_last_notified' => 7, 'notification_frequency' => 8, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'UserId' => 'USER_ID',
+        'User.UserId' => 'USER_ID',
+        'userId' => 'USER_ID',
+        'user.userId' => 'USER_ID',
+        'UserTableMap::COL_USER_ID' => 'USER_ID',
+        'COL_USER_ID' => 'USER_ID',
+        'user_id' => 'USER_ID',
+        'user.user_id' => 'USER_ID',
+        'UserSlug' => 'USER_SLUG',
+        'User.UserSlug' => 'USER_SLUG',
+        'userSlug' => 'USER_SLUG',
+        'user.userSlug' => 'USER_SLUG',
+        'UserTableMap::COL_USER_SLUG' => 'USER_SLUG',
+        'COL_USER_SLUG' => 'USER_SLUG',
+        'user_slug' => 'USER_SLUG',
+        'user.user_slug' => 'USER_SLUG',
+        'EmailAddress' => 'EMAIL_ADDRESS',
+        'User.EmailAddress' => 'EMAIL_ADDRESS',
+        'emailAddress' => 'EMAIL_ADDRESS',
+        'user.emailAddress' => 'EMAIL_ADDRESS',
+        'UserTableMap::COL_EMAIL_ADDRESS' => 'EMAIL_ADDRESS',
+        'COL_EMAIL_ADDRESS' => 'EMAIL_ADDRESS',
+        'email_address' => 'EMAIL_ADDRESS',
+        'user.email_address' => 'EMAIL_ADDRESS',
+        'Name' => 'NAME',
+        'User.Name' => 'NAME',
+        'name' => 'NAME',
+        'user.name' => 'NAME',
+        'UserTableMap::COL_NAME' => 'NAME',
+        'COL_NAME' => 'NAME',
+        'name' => 'NAME',
+        'user.name' => 'NAME',
+        'SearchKeywords' => 'SEARCH_KEYWORDS',
+        'User.SearchKeywords' => 'SEARCH_KEYWORDS',
+        'searchKeywords' => 'SEARCH_KEYWORDS',
+        'user.searchKeywords' => 'SEARCH_KEYWORDS',
+        'UserTableMap::COL_SEARCH_KEYWORDS' => 'SEARCH_KEYWORDS',
+        'COL_SEARCH_KEYWORDS' => 'SEARCH_KEYWORDS',
+        'search_keywords' => 'SEARCH_KEYWORDS',
+        'user.search_keywords' => 'SEARCH_KEYWORDS',
+        'SearchLocations' => 'SEARCH_LOCATIONS',
+        'User.SearchLocations' => 'SEARCH_LOCATIONS',
+        'searchLocations' => 'SEARCH_LOCATIONS',
+        'user.searchLocations' => 'SEARCH_LOCATIONS',
+        'UserTableMap::COL_SEARCH_LOCATIONS' => 'SEARCH_LOCATIONS',
+        'COL_SEARCH_LOCATIONS' => 'SEARCH_LOCATIONS',
+        'search_locations' => 'SEARCH_LOCATIONS',
+        'user.search_locations' => 'SEARCH_LOCATIONS',
+        'InputFilesJson' => 'INPUT_FILES_JSON',
+        'User.InputFilesJson' => 'INPUT_FILES_JSON',
+        'inputFilesJson' => 'INPUT_FILES_JSON',
+        'user.inputFilesJson' => 'INPUT_FILES_JSON',
+        'UserTableMap::COL_INPUT_FILES_JSON' => 'INPUT_FILES_JSON',
+        'COL_INPUT_FILES_JSON' => 'INPUT_FILES_JSON',
+        'input_files_json' => 'INPUT_FILES_JSON',
+        'user.input_files_json' => 'INPUT_FILES_JSON',
+        'LastNotifiedAt' => 'DATE_LAST_NOTIFIED',
+        'User.LastNotifiedAt' => 'DATE_LAST_NOTIFIED',
+        'lastNotifiedAt' => 'DATE_LAST_NOTIFIED',
+        'user.lastNotifiedAt' => 'DATE_LAST_NOTIFIED',
+        'UserTableMap::COL_DATE_LAST_NOTIFIED' => 'DATE_LAST_NOTIFIED',
+        'COL_DATE_LAST_NOTIFIED' => 'DATE_LAST_NOTIFIED',
+        'date_last_notified' => 'DATE_LAST_NOTIFIED',
+        'user.date_last_notified' => 'DATE_LAST_NOTIFIED',
+        'NotificationFrequency' => 'NOTIFICATION_FREQUENCY',
+        'User.NotificationFrequency' => 'NOTIFICATION_FREQUENCY',
+        'notificationFrequency' => 'NOTIFICATION_FREQUENCY',
+        'user.notificationFrequency' => 'NOTIFICATION_FREQUENCY',
+        'UserTableMap::COL_NOTIFICATION_FREQUENCY' => 'NOTIFICATION_FREQUENCY',
+        'COL_NOTIFICATION_FREQUENCY' => 'NOTIFICATION_FREQUENCY',
+        'notification_frequency' => 'NOTIFICATION_FREQUENCY',
+        'user.notification_frequency' => 'NOTIFICATION_FREQUENCY',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -382,6 +462,42 @@ class UserTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.input_files_json');
             $criteria->addSelectColumn($alias . '.date_last_notified');
             $criteria->addSelectColumn($alias . '.notification_frequency');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(UserTableMap::COL_USER_ID);
+            $criteria->removeSelectColumn(UserTableMap::COL_USER_SLUG);
+            $criteria->removeSelectColumn(UserTableMap::COL_EMAIL_ADDRESS);
+            $criteria->removeSelectColumn(UserTableMap::COL_NAME);
+            $criteria->removeSelectColumn(UserTableMap::COL_SEARCH_KEYWORDS);
+            $criteria->removeSelectColumn(UserTableMap::COL_SEARCH_LOCATIONS);
+            $criteria->removeSelectColumn(UserTableMap::COL_INPUT_FILES_JSON);
+            $criteria->removeSelectColumn(UserTableMap::COL_DATE_LAST_NOTIFIED);
+            $criteria->removeSelectColumn(UserTableMap::COL_NOTIFICATION_FREQUENCY);
+        } else {
+            $criteria->removeSelectColumn($alias . '.user_id');
+            $criteria->removeSelectColumn($alias . '.user_slug');
+            $criteria->removeSelectColumn($alias . '.email_address');
+            $criteria->removeSelectColumn($alias . '.name');
+            $criteria->removeSelectColumn($alias . '.search_keywords');
+            $criteria->removeSelectColumn($alias . '.search_locations');
+            $criteria->removeSelectColumn($alias . '.input_files_json');
+            $criteria->removeSelectColumn($alias . '.date_last_notified');
+            $criteria->removeSelectColumn($alias . '.notification_frequency');
         }
     }
 

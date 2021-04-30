@@ -187,3 +187,11 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
         throw $toThrow;
     }
 }
+
+function throwException($fmtLogMsg= null, Exception $ex=null, $raise=true, $extraData=null, $log_topic=null, $exceptClass = null)
+{
+    if (is_null($ex)) {
+        $ex = new Exception($fmtLogMsg);
+    }
+    handleException($ex, $fmtLogMsg, $raise, $extraData, $log_topic, $exceptClass);
+}

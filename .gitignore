@@ -20,3 +20,9 @@ docker-compose.override.yml
 **/.venv
 **/tools
 **/discover_jobsites
+configs
+Config/config.php
+Config/propel.ini
+Config/propel.ini.old
+config.php
+output

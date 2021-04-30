@@ -48,7 +48,7 @@ class ConfigInitializer
         }
 
         if (is_empty_value($iniFile)) {
-            throw new \InvalidArgumentException('Missing user configuration settings file definition.  You must specify the configuration file on the command line.  Aborting.');
+            throwException("", new \InvalidArgumentException('Missing user configuration settings file definition.  You must specify the configuration file on the command line.  Aborting.'));
         }
 
         $this->_iniFile = $iniFile;
@@ -56,6 +56,11 @@ class ConfigInitializer
         $envDirOut = getenv('JOBSCOOPER_OUTPUT');
         if (!is_empty_value($envDirOut)) {
             Settings::setValue('output_directories.root', $envDirOut);
+        }
+
+        $envGeocode = getenv('JOBSCOOPER_GEOCODEAPI_SERVER');
+        if (!is_empty_value($envGeocode)) {
+            Settings::setValue('geocodeapi_server', $envGeocode);
         }
 
         $configData = Settings::loadConfig($iniFile);
@@ -174,7 +179,13 @@ class ConfigInitializer
         // First load the user email information.  We set this first because it is used
         // to send error email if something goes wrong anywhere further along our run
         //
-        $this->parseUserConfigs();
+
+        try {
+            $this->parseUserConfigs();
+        } catch (\Exception $e) {
+            handleException($e, "Could not load user configurations: ");
+        }
+
         $this->parseAlertReceipients();
 
         LogMessage("Loaded all configuration settings from {$this->_iniFile}");
@@ -322,7 +333,7 @@ class ConfigInitializer
     {
         LogMessage('Loading plugin setup information from config file...');
 
-        Settings::setValue('plugin_settings', $this->getSetting('plugin_settings'));
+        Settings::setValue('plugins', $this->getSetting('plugins'));
     }
 
     /**
@@ -390,9 +401,9 @@ class ConfigInitializer
         $settings = $this->getSetting('selenium');
 
         if (!array_key_exists('server', $settings)) {
-            throw new \ErrorException('Configuration missing for [selenium] [server] in the config INI files.');
+            throwException('Configuration missing for [selenium] [server] in the config INI files.');
         } elseif (strcasecmp('localhost', $settings['server']) === 0) {
-            throw new \ErrorException('Invalid server value for [selenium] [server] in the config INI files. You must use named hosts, not localhost.');
+            throwException('Invalid server value for [selenium] [server] in the config INI files. You must use named hosts, not localhost.');
         }
 
         if (!array_key_exists('port', $settings)) {
@@ -458,10 +469,14 @@ class ConfigInitializer
         $currentUser = null;
         $cmd_line_user_to_run = Settings::getValue('command_line_args.user');
 
-        $config_users = $this->getConfigUsers();
+        try {
+            $config_users = $this->getConfigUsers();
+        } catch (\Exception $e) {
+            handleException($e, "Could not find user list in config settings.");
+        }
         $user_recs = array();
         if (is_empty_value($config_users)) {
-            throw new \Exception('No users found in configuration settings.  Aborting.');
+            throwException('No users found in configuration settings.  Aborting.');
         } else {
 
         	//
@@ -491,7 +506,7 @@ class ConfigInitializer
 	                    LogMessage("Updating user {$key_user} facts in database:  " . getArrayValuesAsString($userDiff));
     	                $updatedUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($key_user), $config_user, $overwriteFacts = true);
 		                if (null === $updatedUser) {
-		                    throw new \Exception('Failed to create or update user based on config section users.{$key_user}.');
+		                    throwException('Failed to create or update user based on config section users.{$key_user}.');
 		                }
 		                $user_recs[$key_user] = $updatedUser->toArray();
 		                $updatedUser = null;
@@ -530,11 +545,11 @@ class ConfigInitializer
 
             LogMessage("Limiting users run to single, specified user: {$cmd_line_user_to_run}");
         } elseif (!empty($cmd_line_user_to_run)) {
-            throw new \Exception("Unable to find user matching {$cmd_line_user_to_run} that was specified for the run.");
+            throwException("Unable to find user matching {$cmd_line_user_to_run} that was specified for the run.");
         }
 
         if (empty($user_recs)) {
-            throw new \Exception('No email address or user has been found to send results notifications.  Aborting.');
+            throwException('No email address or user has been found to send results notifications.  Aborting.');
         }
     }
 

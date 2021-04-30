@@ -122,29 +122,29 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \JobScooper\DataAccess\JobSiteRecordQuery|\JobScooper\DataAccess\GeoLocationQuery|\JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserJobMatchQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildJobPosting findOne(ConnectionInterface $con = null) Return the first ChildJobPosting matching the query
+ * @method     ChildJobPosting|null findOne(ConnectionInterface $con = null) Return the first ChildJobPosting matching the query
  * @method     ChildJobPosting findOneOrCreate(ConnectionInterface $con = null) Return the first ChildJobPosting matching the query, or a new ChildJobPosting object populated from the query conditions when no match is found
  *
- * @method     ChildJobPosting findOneByJobPostingId(int $jobposting_id) Return the first ChildJobPosting filtered by the jobposting_id column
- * @method     ChildJobPosting findOneByJobSiteKey(string $jobsite_key) Return the first ChildJobPosting filtered by the jobsite_key column
- * @method     ChildJobPosting findOneByJobSitePostId(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column
- * @method     ChildJobPosting findOneByTitle(string $title) Return the first ChildJobPosting filtered by the title column
- * @method     ChildJobPosting findOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column
- * @method     ChildJobPosting findOneByEmploymentType(string $employment_type) Return the first ChildJobPosting filtered by the employment_type column
- * @method     ChildJobPosting findOneByPayRange(string $pay_range) Return the first ChildJobPosting filtered by the pay_range column
- * @method     ChildJobPosting findOneByLocation(string $location) Return the first ChildJobPosting filtered by the location column
- * @method     ChildJobPosting findOneByCompany(string $company) Return the first ChildJobPosting filtered by the company column
- * @method     ChildJobPosting findOneByDepartment(string $department) Return the first ChildJobPosting filtered by the department column
- * @method     ChildJobPosting findOneByCategory(string $category) Return the first ChildJobPosting filtered by the category column
- * @method     ChildJobPosting findOneByUpdatedAt(string $last_updated_at) Return the first ChildJobPosting filtered by the last_updated_at column
- * @method     ChildJobPosting findOneByPostedAt(string $job_posted_date) Return the first ChildJobPosting filtered by the job_posted_date column
- * @method     ChildJobPosting findOneByFirstSeenAt(string $first_seen_at) Return the first ChildJobPosting filtered by the first_seen_at column
- * @method     ChildJobPosting findOneByLocationDisplayValue(string $location_display_value) Return the first ChildJobPosting filtered by the location_display_value column
- * @method     ChildJobPosting findOneByGeoLocationId(int $geolocation_id) Return the first ChildJobPosting filtered by the geolocation_id column
- * @method     ChildJobPosting findOneByDuplicatesJobPostingId(int $duplicates_posting_id) Return the first ChildJobPosting filtered by the duplicates_posting_id column
- * @method     ChildJobPosting findOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column
- * @method     ChildJobPosting findOneByJobReferenceKey(string $job_reference_key) Return the first ChildJobPosting filtered by the job_reference_key column
- * @method     ChildJobPosting findOneByKeyCompanyAndTitle(string $key_company_and_title) Return the first ChildJobPosting filtered by the key_company_and_title column *
+ * @method     ChildJobPosting|null findOneByJobPostingId(int $jobposting_id) Return the first ChildJobPosting filtered by the jobposting_id column
+ * @method     ChildJobPosting|null findOneByJobSiteKey(string $jobsite_key) Return the first ChildJobPosting filtered by the jobsite_key column
+ * @method     ChildJobPosting|null findOneByJobSitePostId(string $jobsite_post_id) Return the first ChildJobPosting filtered by the jobsite_post_id column
+ * @method     ChildJobPosting|null findOneByTitle(string $title) Return the first ChildJobPosting filtered by the title column
+ * @method     ChildJobPosting|null findOneByUrl(string $url) Return the first ChildJobPosting filtered by the url column
+ * @method     ChildJobPosting|null findOneByEmploymentType(string $employment_type) Return the first ChildJobPosting filtered by the employment_type column
+ * @method     ChildJobPosting|null findOneByPayRange(string $pay_range) Return the first ChildJobPosting filtered by the pay_range column
+ * @method     ChildJobPosting|null findOneByLocation(string $location) Return the first ChildJobPosting filtered by the location column
+ * @method     ChildJobPosting|null findOneByCompany(string $company) Return the first ChildJobPosting filtered by the company column
+ * @method     ChildJobPosting|null findOneByDepartment(string $department) Return the first ChildJobPosting filtered by the department column
+ * @method     ChildJobPosting|null findOneByCategory(string $category) Return the first ChildJobPosting filtered by the category column
+ * @method     ChildJobPosting|null findOneByUpdatedAt(string $last_updated_at) Return the first ChildJobPosting filtered by the last_updated_at column
+ * @method     ChildJobPosting|null findOneByPostedAt(string $job_posted_date) Return the first ChildJobPosting filtered by the job_posted_date column
+ * @method     ChildJobPosting|null findOneByFirstSeenAt(string $first_seen_at) Return the first ChildJobPosting filtered by the first_seen_at column
+ * @method     ChildJobPosting|null findOneByLocationDisplayValue(string $location_display_value) Return the first ChildJobPosting filtered by the location_display_value column
+ * @method     ChildJobPosting|null findOneByGeoLocationId(int $geolocation_id) Return the first ChildJobPosting filtered by the geolocation_id column
+ * @method     ChildJobPosting|null findOneByDuplicatesJobPostingId(int $duplicates_posting_id) Return the first ChildJobPosting filtered by the duplicates_posting_id column
+ * @method     ChildJobPosting|null findOneByTitleTokens(string $title_tokens) Return the first ChildJobPosting filtered by the title_tokens column
+ * @method     ChildJobPosting|null findOneByJobReferenceKey(string $job_reference_key) Return the first ChildJobPosting filtered by the job_reference_key column
+ * @method     ChildJobPosting|null findOneByKeyCompanyAndTitle(string $key_company_and_title) Return the first ChildJobPosting filtered by the key_company_and_title column *
 
  * @method     ChildJobPosting requirePk($key, ConnectionInterface $con = null) Return the ChildJobPosting by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobPosting requireOne(ConnectionInterface $con = null) Return the first ChildJobPosting matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -1063,6 +1063,32 @@ abstract class JobPostingQuery extends ModelCriteria
     }
 
     /**
+     * Use the JobSiteFromJP relation JobSiteRecord object
+     *
+     * @param callable(\JobScooper\DataAccess\JobSiteRecordQuery):\JobScooper\DataAccess\JobSiteRecordQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withJobSiteFromJPQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useJobSiteFromJPQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\GeoLocation object
      *
      * @param \JobScooper\DataAccess\GeoLocation|ObjectCollection $geoLocation The related object(s) to use as filter
@@ -1137,6 +1163,32 @@ abstract class JobPostingQuery extends ModelCriteria
         return $this
             ->joinGeoLocationFromJP($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'GeoLocationFromJP', '\JobScooper\DataAccess\GeoLocationQuery');
+    }
+
+    /**
+     * Use the GeoLocationFromJP relation GeoLocation object
+     *
+     * @param callable(\JobScooper\DataAccess\GeoLocationQuery):\JobScooper\DataAccess\GeoLocationQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withGeoLocationFromJPQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::LEFT_JOIN
+    ) {
+        $relatedQuery = $this->useGeoLocationFromJPQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
     }
 
     /**
@@ -1217,6 +1269,32 @@ abstract class JobPostingQuery extends ModelCriteria
     }
 
     /**
+     * Use the DuplicateJobPosting relation JobPosting object
+     *
+     * @param callable(\JobScooper\DataAccess\JobPostingQuery):\JobScooper\DataAccess\JobPostingQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withDuplicateJobPostingQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::LEFT_JOIN
+    ) {
+        $relatedQuery = $this->useDuplicateJobPostingQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\JobPosting object
      *
      * @param \JobScooper\DataAccess\JobPosting|ObjectCollection $jobPosting the related object to use as filter
@@ -1290,6 +1368,32 @@ abstract class JobPostingQuery extends ModelCriteria
     }
 
     /**
+     * Use the JobPostingRelatedByJobPostingId relation JobPosting object
+     *
+     * @param callable(\JobScooper\DataAccess\JobPostingQuery):\JobScooper\DataAccess\JobPostingQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withJobPostingRelatedByJobPostingIdQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::LEFT_JOIN
+    ) {
+        $relatedQuery = $this->useJobPostingRelatedByJobPostingIdQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\UserJobMatch object
      *
      * @param \JobScooper\DataAccess\UserJobMatch|ObjectCollection $userJobMatch the related object to use as filter
@@ -1360,6 +1464,32 @@ abstract class JobPostingQuery extends ModelCriteria
         return $this
             ->joinUserJobMatch($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserJobMatch', '\JobScooper\DataAccess\UserJobMatchQuery');
+    }
+
+    /**
+     * Use the UserJobMatch relation UserJobMatch object
+     *
+     * @param callable(\JobScooper\DataAccess\UserJobMatchQuery):\JobScooper\DataAccess\UserJobMatchQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withUserJobMatchQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useUserJobMatchQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
     }
 
     /**

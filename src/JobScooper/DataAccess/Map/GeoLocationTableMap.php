@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class GeoLocationTableMap extends TableMap
 {
@@ -175,6 +174,103 @@ class GeoLocationTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('geolocation_id' => 0, 'display_name' => 1, 'geolocation_key' => 2, 'place' => 3, 'county' => 4, 'region' => 5, 'regioncode' => 6, 'country' => 7, 'countrycode' => 8, 'latitude' => 9, 'longitude' => 10, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'GeoLocationId' => 'GEOLOCATION_ID',
+        'GeoLocation.GeoLocationId' => 'GEOLOCATION_ID',
+        'geoLocationId' => 'GEOLOCATION_ID',
+        'geoLocation.geoLocationId' => 'GEOLOCATION_ID',
+        'GeoLocationTableMap::COL_GEOLOCATION_ID' => 'GEOLOCATION_ID',
+        'COL_GEOLOCATION_ID' => 'GEOLOCATION_ID',
+        'geolocation_id' => 'GEOLOCATION_ID',
+        'geolocation.geolocation_id' => 'GEOLOCATION_ID',
+        'DisplayName' => 'DISPLAY_NAME',
+        'GeoLocation.DisplayName' => 'DISPLAY_NAME',
+        'displayName' => 'DISPLAY_NAME',
+        'geoLocation.displayName' => 'DISPLAY_NAME',
+        'GeoLocationTableMap::COL_DISPLAY_NAME' => 'DISPLAY_NAME',
+        'COL_DISPLAY_NAME' => 'DISPLAY_NAME',
+        'display_name' => 'DISPLAY_NAME',
+        'geolocation.display_name' => 'DISPLAY_NAME',
+        'GeoLocationKey' => 'GEOLOCATION_KEY',
+        'GeoLocation.GeoLocationKey' => 'GEOLOCATION_KEY',
+        'geoLocationKey' => 'GEOLOCATION_KEY',
+        'geoLocation.geoLocationKey' => 'GEOLOCATION_KEY',
+        'GeoLocationTableMap::COL_GEOLOCATION_KEY' => 'GEOLOCATION_KEY',
+        'COL_GEOLOCATION_KEY' => 'GEOLOCATION_KEY',
+        'geolocation_key' => 'GEOLOCATION_KEY',
+        'geolocation.geolocation_key' => 'GEOLOCATION_KEY',
+        'Place' => 'PLACE',
+        'GeoLocation.Place' => 'PLACE',
+        'place' => 'PLACE',
+        'geoLocation.place' => 'PLACE',
+        'GeoLocationTableMap::COL_PLACE' => 'PLACE',
+        'COL_PLACE' => 'PLACE',
+        'place' => 'PLACE',
+        'geolocation.place' => 'PLACE',
+        'County' => 'COUNTY',
+        'GeoLocation.County' => 'COUNTY',
+        'county' => 'COUNTY',
+        'geoLocation.county' => 'COUNTY',
+        'GeoLocationTableMap::COL_COUNTY' => 'COUNTY',
+        'COL_COUNTY' => 'COUNTY',
+        'county' => 'COUNTY',
+        'geolocation.county' => 'COUNTY',
+        'Region' => 'REGION',
+        'GeoLocation.Region' => 'REGION',
+        'region' => 'REGION',
+        'geoLocation.region' => 'REGION',
+        'GeoLocationTableMap::COL_REGION' => 'REGION',
+        'COL_REGION' => 'REGION',
+        'region' => 'REGION',
+        'geolocation.region' => 'REGION',
+        'RegionCode' => 'REGIONCODE',
+        'GeoLocation.RegionCode' => 'REGIONCODE',
+        'regionCode' => 'REGIONCODE',
+        'geoLocation.regionCode' => 'REGIONCODE',
+        'GeoLocationTableMap::COL_REGIONCODE' => 'REGIONCODE',
+        'COL_REGIONCODE' => 'REGIONCODE',
+        'regioncode' => 'REGIONCODE',
+        'geolocation.regioncode' => 'REGIONCODE',
+        'Country' => 'COUNTRY',
+        'GeoLocation.Country' => 'COUNTRY',
+        'country' => 'COUNTRY',
+        'geoLocation.country' => 'COUNTRY',
+        'GeoLocationTableMap::COL_COUNTRY' => 'COUNTRY',
+        'COL_COUNTRY' => 'COUNTRY',
+        'country' => 'COUNTRY',
+        'geolocation.country' => 'COUNTRY',
+        'CountryCode' => 'COUNTRYCODE',
+        'GeoLocation.CountryCode' => 'COUNTRYCODE',
+        'countryCode' => 'COUNTRYCODE',
+        'geoLocation.countryCode' => 'COUNTRYCODE',
+        'GeoLocationTableMap::COL_COUNTRYCODE' => 'COUNTRYCODE',
+        'COL_COUNTRYCODE' => 'COUNTRYCODE',
+        'countrycode' => 'COUNTRYCODE',
+        'geolocation.countrycode' => 'COUNTRYCODE',
+        'Latitude' => 'LATITUDE',
+        'GeoLocation.Latitude' => 'LATITUDE',
+        'latitude' => 'LATITUDE',
+        'geoLocation.latitude' => 'LATITUDE',
+        'GeoLocationTableMap::COL_LATITUDE' => 'LATITUDE',
+        'COL_LATITUDE' => 'LATITUDE',
+        'latitude' => 'LATITUDE',
+        'geolocation.latitude' => 'LATITUDE',
+        'Longitude' => 'LONGITUDE',
+        'GeoLocation.Longitude' => 'LONGITUDE',
+        'longitude' => 'LONGITUDE',
+        'geoLocation.longitude' => 'LONGITUDE',
+        'GeoLocationTableMap::COL_LONGITUDE' => 'LONGITUDE',
+        'COL_LONGITUDE' => 'LONGITUDE',
+        'longitude' => 'LONGITUDE',
+        'geolocation.longitude' => 'LONGITUDE',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -405,6 +501,46 @@ class GeoLocationTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.countrycode');
             $criteria->addSelectColumn($alias . '.latitude');
             $criteria->addSelectColumn($alias . '.longitude');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_GEOLOCATION_ID);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_DISPLAY_NAME);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_GEOLOCATION_KEY);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_PLACE);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_COUNTY);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_REGION);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_REGIONCODE);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_COUNTRY);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_COUNTRYCODE);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_LATITUDE);
+            $criteria->removeSelectColumn(GeoLocationTableMap::COL_LONGITUDE);
+        } else {
+            $criteria->removeSelectColumn($alias . '.geolocation_id');
+            $criteria->removeSelectColumn($alias . '.display_name');
+            $criteria->removeSelectColumn($alias . '.geolocation_key');
+            $criteria->removeSelectColumn($alias . '.place');
+            $criteria->removeSelectColumn($alias . '.county');
+            $criteria->removeSelectColumn($alias . '.region');
+            $criteria->removeSelectColumn($alias . '.regioncode');
+            $criteria->removeSelectColumn($alias . '.country');
+            $criteria->removeSelectColumn($alias . '.countrycode');
+            $criteria->removeSelectColumn($alias . '.latitude');
+            $criteria->removeSelectColumn($alias . '.longitude');
         }
     }
 

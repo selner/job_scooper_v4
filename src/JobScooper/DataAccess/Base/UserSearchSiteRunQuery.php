@@ -74,20 +74,20 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \JobScooper\DataAccess\JobSiteRecordQuery|\JobScooper\DataAccess\UserSearchPairQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildUserSearchSiteRun findOne(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query
+ * @method     ChildUserSearchSiteRun|null findOne(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query
  * @method     ChildUserSearchSiteRun findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query, or a new ChildUserSearchSiteRun object populated from the query conditions when no match is found
  *
- * @method     ChildUserSearchSiteRun findOneByUserSearchSiteRunId(int $user_search_site_run_id) Return the first ChildUserSearchSiteRun filtered by the user_search_site_run_id column
- * @method     ChildUserSearchSiteRun findOneByUserSearchPairId(int $user_search_pair_id) Return the first ChildUserSearchSiteRun filtered by the user_search_pair_id column
- * @method     ChildUserSearchSiteRun findOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchSiteRun filtered by the jobsite_key column
- * @method     ChildUserSearchSiteRun findOneByAppRunId(string $app_run_id) Return the first ChildUserSearchSiteRun filtered by the app_run_id column
- * @method     ChildUserSearchSiteRun findOneByUserSearchSiteRunKey(string $user_search_site_run_key) Return the first ChildUserSearchSiteRun filtered by the user_search_site_run_key column
- * @method     ChildUserSearchSiteRun findOneByStartedAt(string $date_started) Return the first ChildUserSearchSiteRun filtered by the date_started column
- * @method     ChildUserSearchSiteRun findOneByEndedAt(string $date_ended) Return the first ChildUserSearchSiteRun filtered by the date_ended column
- * @method     ChildUserSearchSiteRun findOneBySearchStartUrl(string $search_start_url) Return the first ChildUserSearchSiteRun filtered by the search_start_url column
- * @method     ChildUserSearchSiteRun findOneByRunResultCode(int $run_result_code) Return the first ChildUserSearchSiteRun filtered by the run_result_code column
- * @method     ChildUserSearchSiteRun findOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchSiteRun filtered by the run_error_details column
- * @method     ChildUserSearchSiteRun findOneByRunErrorPageHtml(string $run_error_page_html) Return the first ChildUserSearchSiteRun filtered by the run_error_page_html column *
+ * @method     ChildUserSearchSiteRun|null findOneByUserSearchSiteRunId(int $user_search_site_run_id) Return the first ChildUserSearchSiteRun filtered by the user_search_site_run_id column
+ * @method     ChildUserSearchSiteRun|null findOneByUserSearchPairId(int $user_search_pair_id) Return the first ChildUserSearchSiteRun filtered by the user_search_pair_id column
+ * @method     ChildUserSearchSiteRun|null findOneByJobSiteKey(string $jobsite_key) Return the first ChildUserSearchSiteRun filtered by the jobsite_key column
+ * @method     ChildUserSearchSiteRun|null findOneByAppRunId(string $app_run_id) Return the first ChildUserSearchSiteRun filtered by the app_run_id column
+ * @method     ChildUserSearchSiteRun|null findOneByUserSearchSiteRunKey(string $user_search_site_run_key) Return the first ChildUserSearchSiteRun filtered by the user_search_site_run_key column
+ * @method     ChildUserSearchSiteRun|null findOneByStartedAt(string $date_started) Return the first ChildUserSearchSiteRun filtered by the date_started column
+ * @method     ChildUserSearchSiteRun|null findOneByEndedAt(string $date_ended) Return the first ChildUserSearchSiteRun filtered by the date_ended column
+ * @method     ChildUserSearchSiteRun|null findOneBySearchStartUrl(string $search_start_url) Return the first ChildUserSearchSiteRun filtered by the search_start_url column
+ * @method     ChildUserSearchSiteRun|null findOneByRunResultCode(int $run_result_code) Return the first ChildUserSearchSiteRun filtered by the run_result_code column
+ * @method     ChildUserSearchSiteRun|null findOneByRunErrorDetails(array $run_error_details) Return the first ChildUserSearchSiteRun filtered by the run_error_details column
+ * @method     ChildUserSearchSiteRun|null findOneByRunErrorPageHtml(string $run_error_page_html) Return the first ChildUserSearchSiteRun filtered by the run_error_page_html column *
 
  * @method     ChildUserSearchSiteRun requirePk($key, ConnectionInterface $con = null) Return the ChildUserSearchSiteRun by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchSiteRun requireOne(ConnectionInterface $con = null) Return the first ChildUserSearchSiteRun matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -791,6 +791,32 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
     }
 
     /**
+     * Use the JobSiteFromUSSR relation JobSiteRecord object
+     *
+     * @param callable(\JobScooper\DataAccess\JobSiteRecordQuery):\JobScooper\DataAccess\JobSiteRecordQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withJobSiteFromUSSRQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useJobSiteFromUSSRQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\UserSearchPair object
      *
      * @param \JobScooper\DataAccess\UserSearchPair|ObjectCollection $userSearchPair The related object(s) to use as filter
@@ -865,6 +891,32 @@ abstract class UserSearchSiteRunQuery extends ModelCriteria
         return $this
             ->joinUserSearchPairFromUSSR($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserSearchPairFromUSSR', '\JobScooper\DataAccess\UserSearchPairQuery');
+    }
+
+    /**
+     * Use the UserSearchPairFromUSSR relation UserSearchPair object
+     *
+     * @param callable(\JobScooper\DataAccess\UserSearchPairQuery):\JobScooper\DataAccess\UserSearchPairQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withUserSearchPairFromUSSRQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useUserSearchPairFromUSSRQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
     }
 
     /**

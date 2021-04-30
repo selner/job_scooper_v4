@@ -74,20 +74,20 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserSearchPairQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildGeoLocation findOne(ConnectionInterface $con = null) Return the first ChildGeoLocation matching the query
+ * @method     ChildGeoLocation|null findOne(ConnectionInterface $con = null) Return the first ChildGeoLocation matching the query
  * @method     ChildGeoLocation findOneOrCreate(ConnectionInterface $con = null) Return the first ChildGeoLocation matching the query, or a new ChildGeoLocation object populated from the query conditions when no match is found
  *
- * @method     ChildGeoLocation findOneByGeoLocationId(int $geolocation_id) Return the first ChildGeoLocation filtered by the geolocation_id column
- * @method     ChildGeoLocation findOneByDisplayName(string $display_name) Return the first ChildGeoLocation filtered by the display_name column
- * @method     ChildGeoLocation findOneByGeoLocationKey(string $geolocation_key) Return the first ChildGeoLocation filtered by the geolocation_key column
- * @method     ChildGeoLocation findOneByPlace(string $place) Return the first ChildGeoLocation filtered by the place column
- * @method     ChildGeoLocation findOneByCounty(string $county) Return the first ChildGeoLocation filtered by the county column
- * @method     ChildGeoLocation findOneByRegion(string $region) Return the first ChildGeoLocation filtered by the region column
- * @method     ChildGeoLocation findOneByRegionCode(string $regioncode) Return the first ChildGeoLocation filtered by the regioncode column
- * @method     ChildGeoLocation findOneByCountry(string $country) Return the first ChildGeoLocation filtered by the country column
- * @method     ChildGeoLocation findOneByCountryCode(string $countrycode) Return the first ChildGeoLocation filtered by the countrycode column
- * @method     ChildGeoLocation findOneByLatitude(double $latitude) Return the first ChildGeoLocation filtered by the latitude column
- * @method     ChildGeoLocation findOneByLongitude(double $longitude) Return the first ChildGeoLocation filtered by the longitude column *
+ * @method     ChildGeoLocation|null findOneByGeoLocationId(int $geolocation_id) Return the first ChildGeoLocation filtered by the geolocation_id column
+ * @method     ChildGeoLocation|null findOneByDisplayName(string $display_name) Return the first ChildGeoLocation filtered by the display_name column
+ * @method     ChildGeoLocation|null findOneByGeoLocationKey(string $geolocation_key) Return the first ChildGeoLocation filtered by the geolocation_key column
+ * @method     ChildGeoLocation|null findOneByPlace(string $place) Return the first ChildGeoLocation filtered by the place column
+ * @method     ChildGeoLocation|null findOneByCounty(string $county) Return the first ChildGeoLocation filtered by the county column
+ * @method     ChildGeoLocation|null findOneByRegion(string $region) Return the first ChildGeoLocation filtered by the region column
+ * @method     ChildGeoLocation|null findOneByRegionCode(string $regioncode) Return the first ChildGeoLocation filtered by the regioncode column
+ * @method     ChildGeoLocation|null findOneByCountry(string $country) Return the first ChildGeoLocation filtered by the country column
+ * @method     ChildGeoLocation|null findOneByCountryCode(string $countrycode) Return the first ChildGeoLocation filtered by the countrycode column
+ * @method     ChildGeoLocation|null findOneByLatitude(double $latitude) Return the first ChildGeoLocation filtered by the latitude column
+ * @method     ChildGeoLocation|null findOneByLongitude(double $longitude) Return the first ChildGeoLocation filtered by the longitude column *
 
  * @method     ChildGeoLocation requirePk($key, ConnectionInterface $con = null) Return the ChildGeoLocation by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildGeoLocation requireOne(ConnectionInterface $con = null) Return the first ChildGeoLocation matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -701,6 +701,32 @@ abstract class GeoLocationQuery extends ModelCriteria
     }
 
     /**
+     * Use the JobPosting relation JobPosting object
+     *
+     * @param callable(\JobScooper\DataAccess\JobPostingQuery):\JobScooper\DataAccess\JobPostingQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withJobPostingQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::LEFT_JOIN
+    ) {
+        $relatedQuery = $this->useJobPostingQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\UserSearchPair object
      *
      * @param \JobScooper\DataAccess\UserSearchPair|ObjectCollection $userSearchPair the related object to use as filter
@@ -771,6 +797,32 @@ abstract class GeoLocationQuery extends ModelCriteria
         return $this
             ->joinUserSearchPair($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserSearchPair', '\JobScooper\DataAccess\UserSearchPairQuery');
+    }
+
+    /**
+     * Use the UserSearchPair relation UserSearchPair object
+     *
+     * @param callable(\JobScooper\DataAccess\UserSearchPairQuery):\JobScooper\DataAccess\UserSearchPairQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withUserSearchPairQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useUserSearchPairQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
     }
 
     /**

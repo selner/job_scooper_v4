@@ -41,6 +41,10 @@ class LocationLookup {
 
 	    $this->_geoapi_srvr = Settings::getValue('geocodeapi_server');
 
+	    if(is_null($this->_geoapi_srvr)) {
+	        throwException("No geocodeapi_server specified in settings.  Aborting.");
+        }
+
 	}
 
     /**
@@ -58,6 +62,8 @@ class LocationLookup {
         $logger->pushHandler($csvHandler);
 
         $logger->addNotice("Initialized log", array_fill_keys($this->getLogContextKeys(), ""));
+
+        $logger->info("Initialized log", array_fill_keys($this->getLogContextKeys(), ""));
 		
         LogMessage("Geocode API logging started to CSV file at {$csvlog}");
 

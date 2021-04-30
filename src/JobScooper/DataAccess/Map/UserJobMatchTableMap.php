@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class UserJobMatchTableMap extends TableMap
 {
@@ -170,6 +169,111 @@ class UserJobMatchTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('user_job_match_id' => 0, 'user_id' => 1, 'jobposting_id' => 2, 'is_job_match' => 3, 'good_job_title_keyword_matches' => 4, 'is_excluded' => 5, 'out_of_user_area' => 6, 'bad_job_title_keyword_matches' => 7, 'bad_company_name_keyword_matches' => 8, 'user_notification_state' => 9, 'last_updated_at' => 10, 'first_matched_at' => 11, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'UserJobMatchId' => 'USER_JOB_MATCH_ID',
+        'UserJobMatch.UserJobMatchId' => 'USER_JOB_MATCH_ID',
+        'userJobMatchId' => 'USER_JOB_MATCH_ID',
+        'userJobMatch.userJobMatchId' => 'USER_JOB_MATCH_ID',
+        'UserJobMatchTableMap::COL_USER_JOB_MATCH_ID' => 'USER_JOB_MATCH_ID',
+        'COL_USER_JOB_MATCH_ID' => 'USER_JOB_MATCH_ID',
+        'user_job_match_id' => 'USER_JOB_MATCH_ID',
+        'user_job_match.user_job_match_id' => 'USER_JOB_MATCH_ID',
+        'UserId' => 'USER_ID',
+        'UserJobMatch.UserId' => 'USER_ID',
+        'userId' => 'USER_ID',
+        'userJobMatch.userId' => 'USER_ID',
+        'UserJobMatchTableMap::COL_USER_ID' => 'USER_ID',
+        'COL_USER_ID' => 'USER_ID',
+        'user_id' => 'USER_ID',
+        'user_job_match.user_id' => 'USER_ID',
+        'JobPostingId' => 'JOBPOSTING_ID',
+        'UserJobMatch.JobPostingId' => 'JOBPOSTING_ID',
+        'jobPostingId' => 'JOBPOSTING_ID',
+        'userJobMatch.jobPostingId' => 'JOBPOSTING_ID',
+        'UserJobMatchTableMap::COL_JOBPOSTING_ID' => 'JOBPOSTING_ID',
+        'COL_JOBPOSTING_ID' => 'JOBPOSTING_ID',
+        'jobposting_id' => 'JOBPOSTING_ID',
+        'user_job_match.jobposting_id' => 'JOBPOSTING_ID',
+        'IsJobMatch' => 'IS_JOB_MATCH',
+        'UserJobMatch.IsJobMatch' => 'IS_JOB_MATCH',
+        'isJobMatch' => 'IS_JOB_MATCH',
+        'userJobMatch.isJobMatch' => 'IS_JOB_MATCH',
+        'UserJobMatchTableMap::COL_IS_JOB_MATCH' => 'IS_JOB_MATCH',
+        'COL_IS_JOB_MATCH' => 'IS_JOB_MATCH',
+        'is_job_match' => 'IS_JOB_MATCH',
+        'user_job_match.is_job_match' => 'IS_JOB_MATCH',
+        'GoodJobTitleKeywordMatches' => 'GOOD_JOB_TITLE_KEYWORD_MATCHES',
+        'UserJobMatch.GoodJobTitleKeywordMatches' => 'GOOD_JOB_TITLE_KEYWORD_MATCHES',
+        'goodJobTitleKeywordMatches' => 'GOOD_JOB_TITLE_KEYWORD_MATCHES',
+        'userJobMatch.goodJobTitleKeywordMatches' => 'GOOD_JOB_TITLE_KEYWORD_MATCHES',
+        'UserJobMatchTableMap::COL_GOOD_JOB_TITLE_KEYWORD_MATCHES' => 'GOOD_JOB_TITLE_KEYWORD_MATCHES',
+        'COL_GOOD_JOB_TITLE_KEYWORD_MATCHES' => 'GOOD_JOB_TITLE_KEYWORD_MATCHES',
+        'good_job_title_keyword_matches' => 'GOOD_JOB_TITLE_KEYWORD_MATCHES',
+        'user_job_match.good_job_title_keyword_matches' => 'GOOD_JOB_TITLE_KEYWORD_MATCHES',
+        'IsExcluded' => 'IS_EXCLUDED',
+        'UserJobMatch.IsExcluded' => 'IS_EXCLUDED',
+        'isExcluded' => 'IS_EXCLUDED',
+        'userJobMatch.isExcluded' => 'IS_EXCLUDED',
+        'UserJobMatchTableMap::COL_IS_EXCLUDED' => 'IS_EXCLUDED',
+        'COL_IS_EXCLUDED' => 'IS_EXCLUDED',
+        'is_excluded' => 'IS_EXCLUDED',
+        'user_job_match.is_excluded' => 'IS_EXCLUDED',
+        'OutOfUserArea' => 'OUT_OF_USER_AREA',
+        'UserJobMatch.OutOfUserArea' => 'OUT_OF_USER_AREA',
+        'outOfUserArea' => 'OUT_OF_USER_AREA',
+        'userJobMatch.outOfUserArea' => 'OUT_OF_USER_AREA',
+        'UserJobMatchTableMap::COL_OUT_OF_USER_AREA' => 'OUT_OF_USER_AREA',
+        'COL_OUT_OF_USER_AREA' => 'OUT_OF_USER_AREA',
+        'out_of_user_area' => 'OUT_OF_USER_AREA',
+        'user_job_match.out_of_user_area' => 'OUT_OF_USER_AREA',
+        'BadJobTitleKeywordMatches' => 'BAD_JOB_TITLE_KEYWORD_MATCHES',
+        'UserJobMatch.BadJobTitleKeywordMatches' => 'BAD_JOB_TITLE_KEYWORD_MATCHES',
+        'badJobTitleKeywordMatches' => 'BAD_JOB_TITLE_KEYWORD_MATCHES',
+        'userJobMatch.badJobTitleKeywordMatches' => 'BAD_JOB_TITLE_KEYWORD_MATCHES',
+        'UserJobMatchTableMap::COL_BAD_JOB_TITLE_KEYWORD_MATCHES' => 'BAD_JOB_TITLE_KEYWORD_MATCHES',
+        'COL_BAD_JOB_TITLE_KEYWORD_MATCHES' => 'BAD_JOB_TITLE_KEYWORD_MATCHES',
+        'bad_job_title_keyword_matches' => 'BAD_JOB_TITLE_KEYWORD_MATCHES',
+        'user_job_match.bad_job_title_keyword_matches' => 'BAD_JOB_TITLE_KEYWORD_MATCHES',
+        'BadCompanyNameKeywordMatches' => 'BAD_COMPANY_NAME_KEYWORD_MATCHES',
+        'UserJobMatch.BadCompanyNameKeywordMatches' => 'BAD_COMPANY_NAME_KEYWORD_MATCHES',
+        'badCompanyNameKeywordMatches' => 'BAD_COMPANY_NAME_KEYWORD_MATCHES',
+        'userJobMatch.badCompanyNameKeywordMatches' => 'BAD_COMPANY_NAME_KEYWORD_MATCHES',
+        'UserJobMatchTableMap::COL_BAD_COMPANY_NAME_KEYWORD_MATCHES' => 'BAD_COMPANY_NAME_KEYWORD_MATCHES',
+        'COL_BAD_COMPANY_NAME_KEYWORD_MATCHES' => 'BAD_COMPANY_NAME_KEYWORD_MATCHES',
+        'bad_company_name_keyword_matches' => 'BAD_COMPANY_NAME_KEYWORD_MATCHES',
+        'user_job_match.bad_company_name_keyword_matches' => 'BAD_COMPANY_NAME_KEYWORD_MATCHES',
+        'UserNotificationState' => 'USER_NOTIFICATION_STATE',
+        'UserJobMatch.UserNotificationState' => 'USER_NOTIFICATION_STATE',
+        'userNotificationState' => 'USER_NOTIFICATION_STATE',
+        'userJobMatch.userNotificationState' => 'USER_NOTIFICATION_STATE',
+        'UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE' => 'USER_NOTIFICATION_STATE',
+        'COL_USER_NOTIFICATION_STATE' => 'USER_NOTIFICATION_STATE',
+        'user_notification_state' => 'USER_NOTIFICATION_STATE',
+        'user_job_match.user_notification_state' => 'USER_NOTIFICATION_STATE',
+        'UpdatedAt' => 'LAST_UPDATED_AT',
+        'UserJobMatch.UpdatedAt' => 'LAST_UPDATED_AT',
+        'updatedAt' => 'LAST_UPDATED_AT',
+        'userJobMatch.updatedAt' => 'LAST_UPDATED_AT',
+        'UserJobMatchTableMap::COL_LAST_UPDATED_AT' => 'LAST_UPDATED_AT',
+        'COL_LAST_UPDATED_AT' => 'LAST_UPDATED_AT',
+        'last_updated_at' => 'LAST_UPDATED_AT',
+        'user_job_match.last_updated_at' => 'LAST_UPDATED_AT',
+        'FirstMatchedAt' => 'FIRST_MATCHED_AT',
+        'UserJobMatch.FirstMatchedAt' => 'FIRST_MATCHED_AT',
+        'firstMatchedAt' => 'FIRST_MATCHED_AT',
+        'userJobMatch.firstMatchedAt' => 'FIRST_MATCHED_AT',
+        'UserJobMatchTableMap::COL_FIRST_MATCHED_AT' => 'FIRST_MATCHED_AT',
+        'COL_FIRST_MATCHED_AT' => 'FIRST_MATCHED_AT',
+        'first_matched_at' => 'FIRST_MATCHED_AT',
+        'user_job_match.first_matched_at' => 'FIRST_MATCHED_AT',
+    ];
 
     /** The enumerated values for this table */
     protected static $enumValueSets = array(
@@ -442,6 +546,48 @@ class UserJobMatchTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.user_notification_state');
             $criteria->addSelectColumn($alias . '.last_updated_at');
             $criteria->addSelectColumn($alias . '.first_matched_at');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_USER_JOB_MATCH_ID);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_USER_ID);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_JOBPOSTING_ID);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_IS_JOB_MATCH);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_GOOD_JOB_TITLE_KEYWORD_MATCHES);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_IS_EXCLUDED);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_OUT_OF_USER_AREA);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_BAD_JOB_TITLE_KEYWORD_MATCHES);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_BAD_COMPANY_NAME_KEYWORD_MATCHES);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_LAST_UPDATED_AT);
+            $criteria->removeSelectColumn(UserJobMatchTableMap::COL_FIRST_MATCHED_AT);
+        } else {
+            $criteria->removeSelectColumn($alias . '.user_job_match_id');
+            $criteria->removeSelectColumn($alias . '.user_id');
+            $criteria->removeSelectColumn($alias . '.jobposting_id');
+            $criteria->removeSelectColumn($alias . '.is_job_match');
+            $criteria->removeSelectColumn($alias . '.good_job_title_keyword_matches');
+            $criteria->removeSelectColumn($alias . '.is_excluded');
+            $criteria->removeSelectColumn($alias . '.out_of_user_area');
+            $criteria->removeSelectColumn($alias . '.bad_job_title_keyword_matches');
+            $criteria->removeSelectColumn($alias . '.bad_company_name_keyword_matches');
+            $criteria->removeSelectColumn($alias . '.user_notification_state');
+            $criteria->removeSelectColumn($alias . '.last_updated_at');
+            $criteria->removeSelectColumn($alias . '.first_matched_at');
         }
     }
 

@@ -32,7 +32,7 @@ class ErrorEmailLogHandler extends MailHandler
      * {@inheritdoc}
      * @throws \Exception
     */
-    protected function send($content, array $records)
+    protected function send(string $content, array $records): void
     {
         $newErrContent = self::getEmailErrorLogContent() . PHP_EOL . $content;
         Settings::setValue("email_error_log_content", $newErrContent);
@@ -54,16 +54,16 @@ class ErrorEmailLogHandler extends MailHandler
         $htmlBody = call_user_func($renderer, $data);
 
         $mailer = new NotifierDevAlerts();
-        return $mailer->sendEmail("", $htmlBody, null, $subject, "errors");
+        $mailer->sendEmail("", $htmlBody, null, $subject, "errors");
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function getDefaultFormatter()
-    {
-        return new HtmlFormatter();
-    }
+//    protected function getDefaultFormatter()
+//    {
+//        return new HtmlFormatter();
+//    }
 
     /**
      * @return mixed

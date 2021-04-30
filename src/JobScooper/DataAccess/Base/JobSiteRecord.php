@@ -77,14 +77,14 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * The value for the plugin_class_name field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $plugin_class_name;
 
     /**
      * The value for the display_name field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $display_name;
 
@@ -92,7 +92,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      * The value for the is_disabled field.
      *
      * Note: this column has a database default value of: false
-     * @var        boolean
+     * @var        boolean|null
      */
     protected $is_disabled;
 
@@ -100,7 +100,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      * The value for the results_filter_type field.
      *
      * Note: this column has a database default value of: 0
-     * @var        int
+     * @var        int|null
      */
     protected $results_filter_type;
 
@@ -314,7 +314,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|JobSiteRecord The current object, for fluid interface
+     * @return $this The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -328,11 +328,11 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      *
      * @param  string  $msg
      * @param  int     $priority One of the Propel::LOG_* logging levels
-     * @return boolean
+     * @return void
      */
     protected function log($msg, $priority = Propel::LOG_INFO)
     {
-        return Propel::log(get_class($this) . ': ' . $msg, $priority);
+        Propel::log(get_class($this) . ': ' . $msg, $priority);
     }
 
     /**
@@ -345,15 +345,16 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      *
      * @param  mixed   $parser                 A AbstractParser instance, or a format name ('XML', 'YAML', 'JSON', 'CSV')
      * @param  boolean $includeLazyLoadColumns (optional) Whether to include lazy load(ed) columns. Defaults to TRUE.
+     * @param  string  $keyType                (optional) One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME, TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM. Defaults to TableMap::TYPE_PHPNAME.
      * @return string  The exported data
      */
-    public function exportTo($parser, $includeLazyLoadColumns = true)
+    public function exportTo($parser, $includeLazyLoadColumns = true, $keyType = TableMap::TYPE_PHPNAME)
     {
         if (!$parser instanceof AbstractParser) {
             $parser = AbstractParser::getParser($parser);
         }
 
-        return $parser->fromArray($this->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns, array(), true));
+        return $parser->fromArray($this->toArray($keyType, $includeLazyLoadColumns, array(), true));
     }
 
     /**
@@ -388,7 +389,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * Get the [plugin_class_name] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getPluginClassName()
     {
@@ -398,7 +399,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * Get the [display_name] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getDisplayName()
     {
@@ -408,7 +409,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * Get the [is_disabled] column value.
      *
-     * @return boolean
+     * @return boolean|null
      */
     public function getisDisabled()
     {
@@ -418,7 +419,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * Get the [is_disabled] column value.
      *
-     * @return boolean
+     * @return boolean|null
      */
     public function isDisabled()
     {
@@ -428,7 +429,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * Get the [results_filter_type] column value.
      *
-     * @return string
+     * @return string|null
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function getResultsFilterType()
@@ -447,7 +448,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * Set the value of [jobsite_key] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\JobSiteRecord The current object (for fluent API support)
      */
     public function setJobSiteKey($v)
@@ -467,7 +468,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * Set the value of [plugin_class_name] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobSiteRecord The current object (for fluent API support)
      */
     public function setPluginClassName($v)
@@ -487,7 +488,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * Set the value of [display_name] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobSiteRecord The current object (for fluent API support)
      */
     public function setDisplayName($v)
@@ -511,7 +512,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      *   * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
-     * @param  boolean|integer|string $v The new value
+     * @param  boolean|integer|string|null $v The new value
      * @return $this|\JobScooper\DataAccess\JobSiteRecord The current object (for fluent API support)
      */
     public function setisDisabled($v)
@@ -535,7 +536,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     /**
      * Set the value of [results_filter_type] column.
      *
-     * @param  string $v new value
+     * @param  string|null $v new value
      * @return $this|\JobScooper\DataAccess\JobSiteRecord The current object (for fluent API support)
      * @throws \Propel\Runtime\Exception\PropelException
      */
@@ -1114,7 +1115,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      *
      * @param      array  $arr     An array to populate the object from.
      * @param      string $keyType The type of keys the array uses.
-     * @return void
+     * @return     $this|\JobScooper\DataAccess\JobSiteRecord
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1135,6 +1136,8 @@ abstract class JobSiteRecord implements ActiveRecordInterface
         if (array_key_exists($keys[4], $arr)) {
             $this->setResultsFilterType($arr[$keys[4]]);
         }
+
+        return $this;
     }
 
      /**
@@ -1340,11 +1343,11 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('JobPosting' == $relationName) {
+        if ('JobPosting' === $relationName) {
             $this->initJobPostings();
             return;
         }
-        if ('UserSearchSiteRun' == $relationName) {
+        if ('UserSearchSiteRun' === $relationName) {
             $this->initUserSearchSiteRuns();
             return;
         }
@@ -1413,10 +1416,19 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     public function getJobPostings(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collJobPostingsPartial && !$this->isNew();
-        if (null === $this->collJobPostings || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collJobPostings) {
+        if (null === $this->collJobPostings || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initJobPostings();
+                if (null === $this->collJobPostings) {
+                    $this->initJobPostings();
+                } else {
+                    $collectionClassName = JobPostingTableMap::getTableMap()->getCollectionClassName();
+
+                    $collJobPostings = new $collectionClassName;
+                    $collJobPostings->setModel('\JobScooper\DataAccess\JobPosting');
+
+                    return $collJobPostings;
+                }
             } else {
                 $collJobPostings = ChildJobPostingQuery::create(null, $criteria)
                     ->filterByJobSiteFromJP($this)
@@ -1688,10 +1700,19 @@ abstract class JobSiteRecord implements ActiveRecordInterface
     public function getUserSearchSiteRuns(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collUserSearchSiteRunsPartial && !$this->isNew();
-        if (null === $this->collUserSearchSiteRuns || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchSiteRuns) {
+        if (null === $this->collUserSearchSiteRuns || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initUserSearchSiteRuns();
+                if (null === $this->collUserSearchSiteRuns) {
+                    $this->initUserSearchSiteRuns();
+                } else {
+                    $collectionClassName = UserSearchSiteRunTableMap::getTableMap()->getCollectionClassName();
+
+                    $collUserSearchSiteRuns = new $collectionClassName;
+                    $collUserSearchSiteRuns->setModel('\JobScooper\DataAccess\UserSearchSiteRun');
+
+                    return $collUserSearchSiteRuns;
+                }
             } else {
                 $collUserSearchSiteRuns = ChildUserSearchSiteRunQuery::create(null, $criteria)
                     ->filterByJobSiteFromUSSR($this)
@@ -1939,10 +1960,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      */
     public function preSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preSave')) {
-            return parent::preSave($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -1951,10 +1969,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      */
     public function postSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postSave')) {
-            parent::postSave($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before inserting to database
@@ -1963,10 +1978,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      */
     public function preInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preInsert')) {
-            return parent::preInsert($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -1975,10 +1987,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      */
     public function postInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postInsert')) {
-            parent::postInsert($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before updating the object in database
@@ -1987,10 +1996,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      */
     public function preUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preUpdate')) {
-            return parent::preUpdate($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -1999,10 +2005,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      */
     public function postUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postUpdate')) {
-            parent::postUpdate($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before deleting the object in database
@@ -2011,10 +2014,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      */
     public function preDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preDelete')) {
-            return parent::preDelete($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2023,10 +2023,7 @@ abstract class JobSiteRecord implements ActiveRecordInterface
      */
     public function postDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postDelete')) {
-            parent::postDelete($con);
-        }
-    }
+            }
 
 
     /**
@@ -2056,15 +2053,18 @@ abstract class JobSiteRecord implements ActiveRecordInterface
 
         if (0 === strpos($name, 'from')) {
             $format = substr($name, 4);
+            $inputData = $params[0];
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->importFrom($format, reset($params));
+            return $this->importFrom($format, $inputData, $keyType);
         }
 
         if (0 === strpos($name, 'to')) {
             $format = substr($name, 2);
-            $includeLazyLoadColumns = isset($params[0]) ? $params[0] : true;
+            $includeLazyLoadColumns = $params[0] ?? true;
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->exportTo($format, $includeLazyLoadColumns);
+            return $this->exportTo($format, $includeLazyLoadColumns, $keyType);
         }
 
         throw new BadMethodCallException(sprintf('Call to undefined method: %s.', $name));

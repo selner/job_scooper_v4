@@ -70,18 +70,18 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \JobScooper\DataAccess\UserSearchPairQuery|\JobScooper\DataAccess\UserJobMatchQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildUser findOne(ConnectionInterface $con = null) Return the first ChildUser matching the query
+ * @method     ChildUser|null findOne(ConnectionInterface $con = null) Return the first ChildUser matching the query
  * @method     ChildUser findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUser matching the query, or a new ChildUser object populated from the query conditions when no match is found
  *
- * @method     ChildUser findOneByUserId(int $user_id) Return the first ChildUser filtered by the user_id column
- * @method     ChildUser findOneByUserSlug(string $user_slug) Return the first ChildUser filtered by the user_slug column
- * @method     ChildUser findOneByEmailAddress(string $email_address) Return the first ChildUser filtered by the email_address column
- * @method     ChildUser findOneByName(string $name) Return the first ChildUser filtered by the name column
- * @method     ChildUser findOneBySearchKeywords(array $search_keywords) Return the first ChildUser filtered by the search_keywords column
- * @method     ChildUser findOneBySearchLocations(array $search_locations) Return the first ChildUser filtered by the search_locations column
- * @method     ChildUser findOneByInputFilesJson(string $input_files_json) Return the first ChildUser filtered by the input_files_json column
- * @method     ChildUser findOneByLastNotifiedAt(string $date_last_notified) Return the first ChildUser filtered by the date_last_notified column
- * @method     ChildUser findOneByNotificationFrequency(int $notification_frequency) Return the first ChildUser filtered by the notification_frequency column *
+ * @method     ChildUser|null findOneByUserId(int $user_id) Return the first ChildUser filtered by the user_id column
+ * @method     ChildUser|null findOneByUserSlug(string $user_slug) Return the first ChildUser filtered by the user_slug column
+ * @method     ChildUser|null findOneByEmailAddress(string $email_address) Return the first ChildUser filtered by the email_address column
+ * @method     ChildUser|null findOneByName(string $name) Return the first ChildUser filtered by the name column
+ * @method     ChildUser|null findOneBySearchKeywords(array $search_keywords) Return the first ChildUser filtered by the search_keywords column
+ * @method     ChildUser|null findOneBySearchLocations(array $search_locations) Return the first ChildUser filtered by the search_locations column
+ * @method     ChildUser|null findOneByInputFilesJson(string $input_files_json) Return the first ChildUser filtered by the input_files_json column
+ * @method     ChildUser|null findOneByLastNotifiedAt(string $date_last_notified) Return the first ChildUser filtered by the date_last_notified column
+ * @method     ChildUser|null findOneByNotificationFrequency(int $notification_frequency) Return the first ChildUser filtered by the notification_frequency column *
 
  * @method     ChildUser requirePk($key, ConnectionInterface $con = null) Return the ChildUser by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOne(ConnectionInterface $con = null) Return the first ChildUser matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -755,6 +755,32 @@ abstract class UserQuery extends ModelCriteria
     }
 
     /**
+     * Use the UserSearchPair relation UserSearchPair object
+     *
+     * @param callable(\JobScooper\DataAccess\UserSearchPairQuery):\JobScooper\DataAccess\UserSearchPairQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withUserSearchPairQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useUserSearchPairQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\UserJobMatch object
      *
      * @param \JobScooper\DataAccess\UserJobMatch|ObjectCollection $userJobMatch the related object to use as filter
@@ -825,6 +851,32 @@ abstract class UserQuery extends ModelCriteria
         return $this
             ->joinUserJobMatch($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserJobMatch', '\JobScooper\DataAccess\UserJobMatchQuery');
+    }
+
+    /**
+     * Use the UserJobMatch relation UserJobMatch object
+     *
+     * @param callable(\JobScooper\DataAccess\UserJobMatchQuery):\JobScooper\DataAccess\UserJobMatchQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withUserJobMatchQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useUserJobMatchQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
     }
 
     /**

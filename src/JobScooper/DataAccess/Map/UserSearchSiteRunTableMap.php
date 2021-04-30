@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class UserSearchSiteRunTableMap extends TableMap
 {
@@ -165,6 +164,103 @@ class UserSearchSiteRunTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('user_search_site_run_id' => 0, 'user_search_pair_id' => 1, 'jobsite_key' => 2, 'app_run_id' => 3, 'user_search_site_run_key' => 4, 'date_started' => 5, 'date_ended' => 6, 'search_start_url' => 7, 'run_result_code' => 8, 'run_error_details' => 9, 'run_error_page_html' => 10, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'UserSearchSiteRunId' => 'USER_SEARCH_SITE_RUN_ID',
+        'UserSearchSiteRun.UserSearchSiteRunId' => 'USER_SEARCH_SITE_RUN_ID',
+        'userSearchSiteRunId' => 'USER_SEARCH_SITE_RUN_ID',
+        'userSearchSiteRun.userSearchSiteRunId' => 'USER_SEARCH_SITE_RUN_ID',
+        'UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID' => 'USER_SEARCH_SITE_RUN_ID',
+        'COL_USER_SEARCH_SITE_RUN_ID' => 'USER_SEARCH_SITE_RUN_ID',
+        'user_search_site_run_id' => 'USER_SEARCH_SITE_RUN_ID',
+        'user_search_site_run.user_search_site_run_id' => 'USER_SEARCH_SITE_RUN_ID',
+        'UserSearchPairId' => 'USER_SEARCH_PAIR_ID',
+        'UserSearchSiteRun.UserSearchPairId' => 'USER_SEARCH_PAIR_ID',
+        'userSearchPairId' => 'USER_SEARCH_PAIR_ID',
+        'userSearchSiteRun.userSearchPairId' => 'USER_SEARCH_PAIR_ID',
+        'UserSearchSiteRunTableMap::COL_USER_SEARCH_PAIR_ID' => 'USER_SEARCH_PAIR_ID',
+        'COL_USER_SEARCH_PAIR_ID' => 'USER_SEARCH_PAIR_ID',
+        'user_search_pair_id' => 'USER_SEARCH_PAIR_ID',
+        'user_search_site_run.user_search_pair_id' => 'USER_SEARCH_PAIR_ID',
+        'JobSiteKey' => 'JOBSITE_KEY',
+        'UserSearchSiteRun.JobSiteKey' => 'JOBSITE_KEY',
+        'jobSiteKey' => 'JOBSITE_KEY',
+        'userSearchSiteRun.jobSiteKey' => 'JOBSITE_KEY',
+        'UserSearchSiteRunTableMap::COL_JOBSITE_KEY' => 'JOBSITE_KEY',
+        'COL_JOBSITE_KEY' => 'JOBSITE_KEY',
+        'jobsite_key' => 'JOBSITE_KEY',
+        'user_search_site_run.jobsite_key' => 'JOBSITE_KEY',
+        'AppRunId' => 'APP_RUN_ID',
+        'UserSearchSiteRun.AppRunId' => 'APP_RUN_ID',
+        'appRunId' => 'APP_RUN_ID',
+        'userSearchSiteRun.appRunId' => 'APP_RUN_ID',
+        'UserSearchSiteRunTableMap::COL_APP_RUN_ID' => 'APP_RUN_ID',
+        'COL_APP_RUN_ID' => 'APP_RUN_ID',
+        'app_run_id' => 'APP_RUN_ID',
+        'user_search_site_run.app_run_id' => 'APP_RUN_ID',
+        'UserSearchSiteRunKey' => 'USER_SEARCH_SITE_RUN_KEY',
+        'UserSearchSiteRun.UserSearchSiteRunKey' => 'USER_SEARCH_SITE_RUN_KEY',
+        'userSearchSiteRunKey' => 'USER_SEARCH_SITE_RUN_KEY',
+        'userSearchSiteRun.userSearchSiteRunKey' => 'USER_SEARCH_SITE_RUN_KEY',
+        'UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY' => 'USER_SEARCH_SITE_RUN_KEY',
+        'COL_USER_SEARCH_SITE_RUN_KEY' => 'USER_SEARCH_SITE_RUN_KEY',
+        'user_search_site_run_key' => 'USER_SEARCH_SITE_RUN_KEY',
+        'user_search_site_run.user_search_site_run_key' => 'USER_SEARCH_SITE_RUN_KEY',
+        'StartedAt' => 'DATE_STARTED',
+        'UserSearchSiteRun.StartedAt' => 'DATE_STARTED',
+        'startedAt' => 'DATE_STARTED',
+        'userSearchSiteRun.startedAt' => 'DATE_STARTED',
+        'UserSearchSiteRunTableMap::COL_DATE_STARTED' => 'DATE_STARTED',
+        'COL_DATE_STARTED' => 'DATE_STARTED',
+        'date_started' => 'DATE_STARTED',
+        'user_search_site_run.date_started' => 'DATE_STARTED',
+        'EndedAt' => 'DATE_ENDED',
+        'UserSearchSiteRun.EndedAt' => 'DATE_ENDED',
+        'endedAt' => 'DATE_ENDED',
+        'userSearchSiteRun.endedAt' => 'DATE_ENDED',
+        'UserSearchSiteRunTableMap::COL_DATE_ENDED' => 'DATE_ENDED',
+        'COL_DATE_ENDED' => 'DATE_ENDED',
+        'date_ended' => 'DATE_ENDED',
+        'user_search_site_run.date_ended' => 'DATE_ENDED',
+        'SearchStartUrl' => 'SEARCH_START_URL',
+        'UserSearchSiteRun.SearchStartUrl' => 'SEARCH_START_URL',
+        'searchStartUrl' => 'SEARCH_START_URL',
+        'userSearchSiteRun.searchStartUrl' => 'SEARCH_START_URL',
+        'UserSearchSiteRunTableMap::COL_SEARCH_START_URL' => 'SEARCH_START_URL',
+        'COL_SEARCH_START_URL' => 'SEARCH_START_URL',
+        'search_start_url' => 'SEARCH_START_URL',
+        'user_search_site_run.search_start_url' => 'SEARCH_START_URL',
+        'RunResultCode' => 'RUN_RESULT_CODE',
+        'UserSearchSiteRun.RunResultCode' => 'RUN_RESULT_CODE',
+        'runResultCode' => 'RUN_RESULT_CODE',
+        'userSearchSiteRun.runResultCode' => 'RUN_RESULT_CODE',
+        'UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE' => 'RUN_RESULT_CODE',
+        'COL_RUN_RESULT_CODE' => 'RUN_RESULT_CODE',
+        'run_result_code' => 'RUN_RESULT_CODE',
+        'user_search_site_run.run_result_code' => 'RUN_RESULT_CODE',
+        'RunErrorDetails' => 'RUN_ERROR_DETAILS',
+        'UserSearchSiteRun.RunErrorDetails' => 'RUN_ERROR_DETAILS',
+        'runErrorDetails' => 'RUN_ERROR_DETAILS',
+        'userSearchSiteRun.runErrorDetails' => 'RUN_ERROR_DETAILS',
+        'UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS' => 'RUN_ERROR_DETAILS',
+        'COL_RUN_ERROR_DETAILS' => 'RUN_ERROR_DETAILS',
+        'run_error_details' => 'RUN_ERROR_DETAILS',
+        'user_search_site_run.run_error_details' => 'RUN_ERROR_DETAILS',
+        'RunErrorPageHtml' => 'RUN_ERROR_PAGE_HTML',
+        'UserSearchSiteRun.RunErrorPageHtml' => 'RUN_ERROR_PAGE_HTML',
+        'runErrorPageHtml' => 'RUN_ERROR_PAGE_HTML',
+        'userSearchSiteRun.runErrorPageHtml' => 'RUN_ERROR_PAGE_HTML',
+        'UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML' => 'RUN_ERROR_PAGE_HTML',
+        'COL_RUN_ERROR_PAGE_HTML' => 'RUN_ERROR_PAGE_HTML',
+        'run_error_page_html' => 'RUN_ERROR_PAGE_HTML',
+        'user_search_site_run.run_error_page_html' => 'RUN_ERROR_PAGE_HTML',
+    ];
 
     /** The enumerated values for this table */
     protected static $enumValueSets = array(
@@ -435,6 +531,46 @@ class UserSearchSiteRunTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.run_result_code');
             $criteria->addSelectColumn($alias . '.run_error_details');
             $criteria->addSelectColumn($alias . '.run_error_page_html');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_ID);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_USER_SEARCH_PAIR_ID);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_JOBSITE_KEY);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_APP_RUN_ID);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_USER_SEARCH_SITE_RUN_KEY);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_DATE_STARTED);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_DATE_ENDED);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_SEARCH_START_URL);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_RUN_ERROR_DETAILS);
+            $criteria->removeSelectColumn(UserSearchSiteRunTableMap::COL_RUN_ERROR_PAGE_HTML);
+        } else {
+            $criteria->removeSelectColumn($alias . '.user_search_site_run_id');
+            $criteria->removeSelectColumn($alias . '.user_search_pair_id');
+            $criteria->removeSelectColumn($alias . '.jobsite_key');
+            $criteria->removeSelectColumn($alias . '.app_run_id');
+            $criteria->removeSelectColumn($alias . '.user_search_site_run_key');
+            $criteria->removeSelectColumn($alias . '.date_started');
+            $criteria->removeSelectColumn($alias . '.date_ended');
+            $criteria->removeSelectColumn($alias . '.search_start_url');
+            $criteria->removeSelectColumn($alias . '.run_result_code');
+            $criteria->removeSelectColumn($alias . '.run_error_details');
+            $criteria->removeSelectColumn($alias . '.run_error_page_html');
         }
     }
 

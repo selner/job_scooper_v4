@@ -91,14 +91,14 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * The value for the is_job_match field.
      *
      * Note: this column has a database default value of: false
-     * @var        boolean
+     * @var        boolean|null
      */
     protected $is_job_match;
 
     /**
      * The value for the good_job_title_keyword_matches field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $good_job_title_keyword_matches;
 
@@ -106,7 +106,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * The value for the is_excluded field.
      *
      * Note: this column has a database default value of: false
-     * @var        boolean
+     * @var        boolean|null
      */
     protected $is_excluded;
 
@@ -114,21 +114,21 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * The value for the out_of_user_area field.
      *
      * Note: this column has a database default value of: false
-     * @var        boolean
+     * @var        boolean|null
      */
     protected $out_of_user_area;
 
     /**
      * The value for the bad_job_title_keyword_matches field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $bad_job_title_keyword_matches;
 
     /**
      * The value for the bad_company_name_keyword_matches field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $bad_company_name_keyword_matches;
 
@@ -136,7 +136,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * The value for the user_notification_state field.
      *
      * Note: this column has a database default value of: 0
-     * @var        int
+     * @var        int|null
      */
     protected $user_notification_state;
 
@@ -352,7 +352,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|UserJobMatch The current object, for fluid interface
+     * @return $this The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -366,11 +366,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
      *
      * @param  string  $msg
      * @param  int     $priority One of the Propel::LOG_* logging levels
-     * @return boolean
+     * @return void
      */
     protected function log($msg, $priority = Propel::LOG_INFO)
     {
-        return Propel::log(get_class($this) . ': ' . $msg, $priority);
+        Propel::log(get_class($this) . ': ' . $msg, $priority);
     }
 
     /**
@@ -383,15 +383,16 @@ abstract class UserJobMatch implements ActiveRecordInterface
      *
      * @param  mixed   $parser                 A AbstractParser instance, or a format name ('XML', 'YAML', 'JSON', 'CSV')
      * @param  boolean $includeLazyLoadColumns (optional) Whether to include lazy load(ed) columns. Defaults to TRUE.
+     * @param  string  $keyType                (optional) One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME, TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM. Defaults to TableMap::TYPE_PHPNAME.
      * @return string  The exported data
      */
-    public function exportTo($parser, $includeLazyLoadColumns = true)
+    public function exportTo($parser, $includeLazyLoadColumns = true, $keyType = TableMap::TYPE_PHPNAME)
     {
         if (!$parser instanceof AbstractParser) {
             $parser = AbstractParser::getParser($parser);
         }
 
-        return $parser->fromArray($this->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns, array(), true));
+        return $parser->fromArray($this->toArray($keyType, $includeLazyLoadColumns, array(), true));
     }
 
     /**
@@ -446,7 +447,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [is_job_match] column value.
      *
-     * @return boolean
+     * @return boolean|null
      */
     public function getIsJobMatch()
     {
@@ -456,7 +457,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [is_job_match] column value.
      *
-     * @return boolean
+     * @return boolean|null
      */
     public function isJobMatch()
     {
@@ -466,7 +467,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [good_job_title_keyword_matches] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getGoodJobTitleKeywordMatches()
     {
@@ -476,7 +477,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [is_excluded] column value.
      *
-     * @return boolean
+     * @return boolean|null
      */
     public function getIsExcluded()
     {
@@ -486,7 +487,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [is_excluded] column value.
      *
-     * @return boolean
+     * @return boolean|null
      */
     public function isExcluded()
     {
@@ -496,7 +497,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [out_of_user_area] column value.
      *
-     * @return boolean
+     * @return boolean|null
      */
     public function getOutOfUserArea()
     {
@@ -506,7 +507,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [out_of_user_area] column value.
      *
-     * @return boolean
+     * @return boolean|null
      */
     public function isOutOfUserArea()
     {
@@ -516,7 +517,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [bad_job_title_keyword_matches] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getBadJobTitleKeywordMatches()
     {
@@ -526,7 +527,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [bad_company_name_keyword_matches] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getBadCompanyNameKeywordMatches()
     {
@@ -536,7 +537,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Get the [user_notification_state] column value.
      *
-     * @return string
+     * @return string|null
      * @throws \Propel\Runtime\Exception\PropelException
      */
     public function getUserNotificationState()
@@ -556,14 +557,16 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [last_updated_at] column value.
      *
      *
-     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
+     * @param string|null $format The date/time format string (either date()-style or strftime()-style).
+     *   If format is NULL, then the raw DateTime object will be returned.
      *
      * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
+     *
+     * @psalm-return ($format is null ? DateTime : string)
      */
-    public function getUpdatedAt($format = NULL)
+    public function getUpdatedAt($format = null)
     {
         if ($format === null) {
             return $this->last_updated_at;
@@ -576,14 +579,16 @@ abstract class UserJobMatch implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [first_matched_at] column value.
      *
      *
-     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
+     * @param string|null $format The date/time format string (either date()-style or strftime()-style).
+     *   If format is NULL, then the raw DateTime object will be returned.
      *
      * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
+     *
+     * @psalm-return ($format is null ? DateTime : string)
      */
-    public function getFirstMatchedAt($format = NULL)
+    public function getFirstMatchedAt($format = null)
     {
         if ($format === null) {
             return $this->first_matched_at;
@@ -595,7 +600,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Set the value of [user_job_match_id] column.
      *
-     * @param int $v new value
+     * @param int $v New value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setUserJobMatchId($v)
@@ -615,7 +620,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Set the value of [user_id] column.
      *
-     * @param int $v new value
+     * @param int $v New value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setUserId($v)
@@ -639,7 +644,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Set the value of [jobposting_id] column.
      *
-     * @param int $v new value
+     * @param int $v New value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setJobPostingId($v)
@@ -667,7 +672,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      *   * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
-     * @param  boolean|integer|string $v The new value
+     * @param  boolean|integer|string|null $v The new value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setIsJobMatch($v)
@@ -691,7 +696,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Set the value of [good_job_title_keyword_matches] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setGoodJobTitleKeywordMatches($v)
@@ -715,7 +720,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      *   * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
-     * @param  boolean|integer|string $v The new value
+     * @param  boolean|integer|string|null $v The new value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setIsExcluded($v)
@@ -743,7 +748,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      *   * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
      * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
      *
-     * @param  boolean|integer|string $v The new value
+     * @param  boolean|integer|string|null $v The new value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setOutOfUserArea($v)
@@ -767,7 +772,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Set the value of [bad_job_title_keyword_matches] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setBadJobTitleKeywordMatches($v)
@@ -787,7 +792,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Set the value of [bad_company_name_keyword_matches] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
     public function setBadCompanyNameKeywordMatches($v)
@@ -807,7 +812,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Set the value of [user_notification_state] column.
      *
-     * @param  string $v new value
+     * @param  string|null $v new value
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      * @throws \Propel\Runtime\Exception\PropelException
      */
@@ -832,7 +837,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Sets the value of [last_updated_at] column to a normalized version of the date/time value specified.
      *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     * @param  string|integer|\DateTimeInterface $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
@@ -852,7 +857,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
     /**
      * Sets the value of [first_matched_at] column to a normalized version of the date/time value specified.
      *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     * @param  string|integer|\DateTimeInterface $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
      * @return $this|\JobScooper\DataAccess\UserJobMatch The current object (for fluent API support)
      */
@@ -1436,11 +1441,11 @@ abstract class UserJobMatch implements ActiveRecordInterface
             $keys[11] => $this->getFirstMatchedAt(),
         );
         if ($result[$keys[10]] instanceof \DateTimeInterface) {
-            $result[$keys[10]] = $result[$keys[10]]->format('c');
+            $result[$keys[10]] = $result[$keys[10]]->format('Y-m-d');
         }
 
         if ($result[$keys[11]] instanceof \DateTimeInterface) {
-            $result[$keys[11]] = $result[$keys[11]]->format('c');
+            $result[$keys[11]] = $result[$keys[11]]->format('Y-m-d');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1573,7 +1578,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      *
      * @param      array  $arr     An array to populate the object from.
      * @param      string $keyType The type of keys the array uses.
-     * @return void
+     * @return     $this|\JobScooper\DataAccess\UserJobMatch
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1615,6 +1620,8 @@ abstract class UserJobMatch implements ActiveRecordInterface
         if (array_key_exists($keys[11], $arr)) {
             $this->setFirstMatchedAt($arr[$keys[11]]);
         }
+
+        return $this;
     }
 
      /**
@@ -2000,10 +2007,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function preSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preSave')) {
-            return parent::preSave($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2012,10 +2016,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function postSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postSave')) {
-            parent::postSave($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before inserting to database
@@ -2024,10 +2025,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function preInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preInsert')) {
-            return parent::preInsert($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2036,10 +2034,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function postInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postInsert')) {
-            parent::postInsert($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before updating the object in database
@@ -2048,10 +2043,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function preUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preUpdate')) {
-            return parent::preUpdate($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2060,10 +2052,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function postUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postUpdate')) {
-            parent::postUpdate($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before deleting the object in database
@@ -2072,10 +2061,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function preDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preDelete')) {
-            return parent::preDelete($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2084,10 +2070,7 @@ abstract class UserJobMatch implements ActiveRecordInterface
      */
     public function postDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postDelete')) {
-            parent::postDelete($con);
-        }
-    }
+            }
 
 
     /**
@@ -2117,15 +2100,18 @@ abstract class UserJobMatch implements ActiveRecordInterface
 
         if (0 === strpos($name, 'from')) {
             $format = substr($name, 4);
+            $inputData = $params[0];
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->importFrom($format, reset($params));
+            return $this->importFrom($format, $inputData, $keyType);
         }
 
         if (0 === strpos($name, 'to')) {
             $format = substr($name, 2);
-            $includeLazyLoadColumns = isset($params[0]) ? $params[0] : true;
+            $includeLazyLoadColumns = $params[0] ?? true;
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->exportTo($format, $includeLazyLoadColumns);
+            return $this->exportTo($format, $includeLazyLoadColumns, $keyType);
         }
 
         throw new BadMethodCallException(sprintf('Call to undefined method: %s.', $name));

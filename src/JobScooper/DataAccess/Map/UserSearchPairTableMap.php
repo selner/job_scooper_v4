@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class UserSearchPairTableMap extends TableMap
 {
@@ -128,6 +127,55 @@ class UserSearchPairTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('user_search_pair_id' => 0, 'user_id' => 1, 'user_keyword' => 2, 'geolocation_id' => 3, 'is_active' => 4, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'UserSearchPairId' => 'USER_SEARCH_PAIR_ID',
+        'UserSearchPair.UserSearchPairId' => 'USER_SEARCH_PAIR_ID',
+        'userSearchPairId' => 'USER_SEARCH_PAIR_ID',
+        'userSearchPair.userSearchPairId' => 'USER_SEARCH_PAIR_ID',
+        'UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID' => 'USER_SEARCH_PAIR_ID',
+        'COL_USER_SEARCH_PAIR_ID' => 'USER_SEARCH_PAIR_ID',
+        'user_search_pair_id' => 'USER_SEARCH_PAIR_ID',
+        'user_search_pair.user_search_pair_id' => 'USER_SEARCH_PAIR_ID',
+        'UserId' => 'USER_ID',
+        'UserSearchPair.UserId' => 'USER_ID',
+        'userId' => 'USER_ID',
+        'userSearchPair.userId' => 'USER_ID',
+        'UserSearchPairTableMap::COL_USER_ID' => 'USER_ID',
+        'COL_USER_ID' => 'USER_ID',
+        'user_id' => 'USER_ID',
+        'user_search_pair.user_id' => 'USER_ID',
+        'UserKeyword' => 'USER_KEYWORD',
+        'UserSearchPair.UserKeyword' => 'USER_KEYWORD',
+        'userKeyword' => 'USER_KEYWORD',
+        'userSearchPair.userKeyword' => 'USER_KEYWORD',
+        'UserSearchPairTableMap::COL_USER_KEYWORD' => 'USER_KEYWORD',
+        'COL_USER_KEYWORD' => 'USER_KEYWORD',
+        'user_keyword' => 'USER_KEYWORD',
+        'user_search_pair.user_keyword' => 'USER_KEYWORD',
+        'GeoLocationId' => 'GEOLOCATION_ID',
+        'UserSearchPair.GeoLocationId' => 'GEOLOCATION_ID',
+        'geoLocationId' => 'GEOLOCATION_ID',
+        'userSearchPair.geoLocationId' => 'GEOLOCATION_ID',
+        'UserSearchPairTableMap::COL_GEOLOCATION_ID' => 'GEOLOCATION_ID',
+        'COL_GEOLOCATION_ID' => 'GEOLOCATION_ID',
+        'geolocation_id' => 'GEOLOCATION_ID',
+        'user_search_pair.geolocation_id' => 'GEOLOCATION_ID',
+        'IsActive' => 'IS_ACTIVE',
+        'UserSearchPair.IsActive' => 'IS_ACTIVE',
+        'isActive' => 'IS_ACTIVE',
+        'userSearchPair.isActive' => 'IS_ACTIVE',
+        'UserSearchPairTableMap::COL_IS_ACTIVE' => 'IS_ACTIVE',
+        'COL_IS_ACTIVE' => 'IS_ACTIVE',
+        'is_active' => 'IS_ACTIVE',
+        'user_search_pair.is_active' => 'IS_ACTIVE',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -343,6 +391,34 @@ class UserSearchPairTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.user_keyword');
             $criteria->addSelectColumn($alias . '.geolocation_id');
             $criteria->addSelectColumn($alias . '.is_active');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(UserSearchPairTableMap::COL_USER_SEARCH_PAIR_ID);
+            $criteria->removeSelectColumn(UserSearchPairTableMap::COL_USER_ID);
+            $criteria->removeSelectColumn(UserSearchPairTableMap::COL_USER_KEYWORD);
+            $criteria->removeSelectColumn(UserSearchPairTableMap::COL_GEOLOCATION_ID);
+            $criteria->removeSelectColumn(UserSearchPairTableMap::COL_IS_ACTIVE);
+        } else {
+            $criteria->removeSelectColumn($alias . '.user_search_pair_id');
+            $criteria->removeSelectColumn($alias . '.user_id');
+            $criteria->removeSelectColumn($alias . '.user_keyword');
+            $criteria->removeSelectColumn($alias . '.geolocation_id');
+            $criteria->removeSelectColumn($alias . '.is_active');
         }
     }
 

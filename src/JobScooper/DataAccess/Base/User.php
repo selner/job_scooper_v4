@@ -101,7 +101,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * The value for the search_keywords field.
      *
-     * @var        array
+     * @var        array|null
      */
     protected $search_keywords;
 
@@ -115,7 +115,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * The value for the search_locations field.
      *
-     * @var        array
+     * @var        array|null
      */
     protected $search_locations;
 
@@ -129,14 +129,14 @@ abstract class User implements ActiveRecordInterface
     /**
      * The value for the input_files_json field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $input_files_json;
 
     /**
      * The value for the date_last_notified field.
      *
-     * @var        DateTime
+     * @var        DateTime|null
      */
     protected $date_last_notified;
 
@@ -144,7 +144,7 @@ abstract class User implements ActiveRecordInterface
      * The value for the notification_frequency field.
      *
      * Note: this column has a database default value of: 2
-     * @var        int
+     * @var        int|null
      */
     protected $notification_frequency;
 
@@ -358,7 +358,7 @@ abstract class User implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|User The current object, for fluid interface
+     * @return $this The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -372,11 +372,11 @@ abstract class User implements ActiveRecordInterface
      *
      * @param  string  $msg
      * @param  int     $priority One of the Propel::LOG_* logging levels
-     * @return boolean
+     * @return void
      */
     protected function log($msg, $priority = Propel::LOG_INFO)
     {
-        return Propel::log(get_class($this) . ': ' . $msg, $priority);
+        Propel::log(get_class($this) . ': ' . $msg, $priority);
     }
 
     /**
@@ -389,15 +389,16 @@ abstract class User implements ActiveRecordInterface
      *
      * @param  mixed   $parser                 A AbstractParser instance, or a format name ('XML', 'YAML', 'JSON', 'CSV')
      * @param  boolean $includeLazyLoadColumns (optional) Whether to include lazy load(ed) columns. Defaults to TRUE.
+     * @param  string  $keyType                (optional) One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME, TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM. Defaults to TableMap::TYPE_PHPNAME.
      * @return string  The exported data
      */
-    public function exportTo($parser, $includeLazyLoadColumns = true)
+    public function exportTo($parser, $includeLazyLoadColumns = true, $keyType = TableMap::TYPE_PHPNAME)
     {
         if (!$parser instanceof AbstractParser) {
             $parser = AbstractParser::getParser($parser);
         }
 
-        return $parser->fromArray($this->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns, array(), true));
+        return $parser->fromArray($this->toArray($keyType, $includeLazyLoadColumns, array(), true));
     }
 
     /**
@@ -462,7 +463,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Get the [search_keywords] column value.
      *
-     * @return array
+     * @return array|null
      */
     public function getSearchKeywords()
     {
@@ -491,7 +492,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Get the [search_locations] column value.
      *
-     * @return array
+     * @return array|null
      */
     public function getSearchLocations()
     {
@@ -520,7 +521,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Get the [input_files_json] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getInputFilesJson()
     {
@@ -531,14 +532,16 @@ abstract class User implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [date_last_notified] column value.
      *
      *
-     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
+     * @param string|null $format The date/time format string (either date()-style or strftime()-style).
+     *   If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
+     * @return string|DateTime|null Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00 00:00:00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
+     *
+     * @psalm-return ($format is null ? DateTime|null : string|null)
      */
-    public function getLastNotifiedAt($format = NULL)
+    public function getLastNotifiedAt($format = null)
     {
         if ($format === null) {
             return $this->date_last_notified;
@@ -550,7 +553,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Get the [notification_frequency] column value.
      *
-     * @return int
+     * @return int|null
      */
     public function getNotificationFrequency()
     {
@@ -560,7 +563,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Set the value of [user_id] column.
      *
-     * @param int $v new value
+     * @param int $v New value
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setUserId($v)
@@ -580,7 +583,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Set the value of [user_slug] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setUserSlug($v)
@@ -600,7 +603,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Set the value of [email_address] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setEmailAddress($v)
@@ -620,7 +623,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Set the value of [name] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setName($v)
@@ -640,7 +643,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Set the value of [search_keywords] column.
      *
-     * @param array $v new value
+     * @param array|null $v New value
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setSearchKeywords($v)
@@ -691,7 +694,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Set the value of [search_locations] column.
      *
-     * @param array $v new value
+     * @param array|null $v New value
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setSearchLocations($v)
@@ -742,7 +745,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Set the value of [input_files_json] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setInputFilesJson($v)
@@ -762,7 +765,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Sets the value of [date_last_notified] column to a normalized version of the date/time value specified.
      *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     * @param  string|integer|\DateTimeInterface|null $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
@@ -782,7 +785,7 @@ abstract class User implements ActiveRecordInterface
     /**
      * Set the value of [notification_frequency] column.
      *
-     * @param int $v new value
+     * @param int|null $v New value
      * @return $this|\JobScooper\DataAccess\User The current object (for fluent API support)
      */
     public function setNotificationFrequency($v)
@@ -1322,7 +1325,7 @@ abstract class User implements ActiveRecordInterface
             $keys[8] => $this->getNotificationFrequency(),
         );
         if ($result[$keys[7]] instanceof \DateTimeInterface) {
-            $result[$keys[7]] = $result[$keys[7]]->format('c');
+            $result[$keys[7]] = $result[$keys[7]]->format('Y-m-d H:i:s.u');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1450,7 +1453,7 @@ abstract class User implements ActiveRecordInterface
      *
      * @param      array  $arr     An array to populate the object from.
      * @param      string $keyType The type of keys the array uses.
-     * @return void
+     * @return     $this|\JobScooper\DataAccess\User
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1483,6 +1486,8 @@ abstract class User implements ActiveRecordInterface
         if (array_key_exists($keys[8], $arr)) {
             $this->setNotificationFrequency($arr[$keys[8]]);
         }
+
+        return $this;
     }
 
      /**
@@ -1704,11 +1709,11 @@ abstract class User implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('UserSearchPair' == $relationName) {
+        if ('UserSearchPair' === $relationName) {
             $this->initUserSearchPairs();
             return;
         }
-        if ('UserJobMatch' == $relationName) {
+        if ('UserJobMatch' === $relationName) {
             $this->initUserJobMatches();
             return;
         }
@@ -1777,10 +1782,19 @@ abstract class User implements ActiveRecordInterface
     public function getUserSearchPairs(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collUserSearchPairsPartial && !$this->isNew();
-        if (null === $this->collUserSearchPairs || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchPairs) {
+        if (null === $this->collUserSearchPairs || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initUserSearchPairs();
+                if (null === $this->collUserSearchPairs) {
+                    $this->initUserSearchPairs();
+                } else {
+                    $collectionClassName = UserSearchPairTableMap::getTableMap()->getCollectionClassName();
+
+                    $collUserSearchPairs = new $collectionClassName;
+                    $collUserSearchPairs->setModel('\JobScooper\DataAccess\UserSearchPair');
+
+                    return $collUserSearchPairs;
+                }
             } else {
                 $collUserSearchPairs = ChildUserSearchPairQuery::create(null, $criteria)
                     ->filterByUserFromUS($this)
@@ -2027,10 +2041,19 @@ abstract class User implements ActiveRecordInterface
     public function getUserJobMatches(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collUserJobMatchesPartial && !$this->isNew();
-        if (null === $this->collUserJobMatches || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserJobMatches) {
+        if (null === $this->collUserJobMatches || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initUserJobMatches();
+                if (null === $this->collUserJobMatches) {
+                    $this->initUserJobMatches();
+                } else {
+                    $collectionClassName = UserJobMatchTableMap::getTableMap()->getCollectionClassName();
+
+                    $collUserJobMatches = new $collectionClassName;
+                    $collUserJobMatches->setModel('\JobScooper\DataAccess\UserJobMatch');
+
+                    return $collUserJobMatches;
+                }
             } else {
                 $collUserJobMatches = ChildUserJobMatchQuery::create(null, $criteria)
                     ->filterByUserFromUJM($this)
@@ -2334,6 +2357,10 @@ abstract class User implements ActiveRecordInterface
      */
     protected static function cleanupSlugPart($slug, $replacement = '')
     {
+        // set locale explicitly
+        $localeOrigin = setlocale(LC_CTYPE, 0);
+        setlocale(LC_CTYPE, 'C.UTF-8');
+
         // transliterate
         if (function_exists('iconv')) {
             $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
@@ -2354,6 +2381,8 @@ abstract class User implements ActiveRecordInterface
 
         // trim
         $slug = trim($slug, $replacement);
+
+        setlocale(LC_CTYPE, $localeOrigin);
 
         if (empty($slug)) {
             return 'n-a';
@@ -2442,10 +2471,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function preSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preSave')) {
-            return parent::preSave($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2454,10 +2480,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function postSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postSave')) {
-            parent::postSave($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before inserting to database
@@ -2466,10 +2489,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function preInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preInsert')) {
-            return parent::preInsert($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2478,10 +2498,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function postInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postInsert')) {
-            parent::postInsert($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before updating the object in database
@@ -2490,10 +2507,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function preUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preUpdate')) {
-            return parent::preUpdate($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2502,10 +2516,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function postUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postUpdate')) {
-            parent::postUpdate($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before deleting the object in database
@@ -2514,10 +2525,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function preDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preDelete')) {
-            return parent::preDelete($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2526,10 +2534,7 @@ abstract class User implements ActiveRecordInterface
      */
     public function postDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postDelete')) {
-            parent::postDelete($con);
-        }
-    }
+            }
 
 
     /**
@@ -2559,15 +2564,18 @@ abstract class User implements ActiveRecordInterface
 
         if (0 === strpos($name, 'from')) {
             $format = substr($name, 4);
+            $inputData = $params[0];
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->importFrom($format, reset($params));
+            return $this->importFrom($format, $inputData, $keyType);
         }
 
         if (0 === strpos($name, 'to')) {
             $format = substr($name, 2);
-            $includeLazyLoadColumns = isset($params[0]) ? $params[0] : true;
+            $includeLazyLoadColumns = $params[0] ?? true;
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->exportTo($format, $includeLazyLoadColumns);
+            return $this->exportTo($format, $includeLazyLoadColumns, $keyType);
         }
 
         throw new BadMethodCallException(sprintf('Call to undefined method: %s.', $name));

@@ -91,56 +91,56 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * The value for the place field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $place;
 
     /**
      * The value for the county field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $county;
 
     /**
      * The value for the region field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $region;
 
     /**
      * The value for the regioncode field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $regioncode;
 
     /**
      * The value for the country field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $country;
 
     /**
      * The value for the countrycode field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $countrycode;
 
     /**
      * The value for the latitude field.
      *
-     * @var        double
+     * @var        double|null
      */
     protected $latitude;
 
     /**
      * The value for the longitude field.
      *
-     * @var        double
+     * @var        double|null
      */
     protected $longitude;
 
@@ -340,7 +340,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|GeoLocation The current object, for fluid interface
+     * @return $this The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -354,11 +354,11 @@ abstract class GeoLocation implements ActiveRecordInterface
      *
      * @param  string  $msg
      * @param  int     $priority One of the Propel::LOG_* logging levels
-     * @return boolean
+     * @return void
      */
     protected function log($msg, $priority = Propel::LOG_INFO)
     {
-        return Propel::log(get_class($this) . ': ' . $msg, $priority);
+        Propel::log(get_class($this) . ': ' . $msg, $priority);
     }
 
     /**
@@ -371,15 +371,16 @@ abstract class GeoLocation implements ActiveRecordInterface
      *
      * @param  mixed   $parser                 A AbstractParser instance, or a format name ('XML', 'YAML', 'JSON', 'CSV')
      * @param  boolean $includeLazyLoadColumns (optional) Whether to include lazy load(ed) columns. Defaults to TRUE.
+     * @param  string  $keyType                (optional) One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME, TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM. Defaults to TableMap::TYPE_PHPNAME.
      * @return string  The exported data
      */
-    public function exportTo($parser, $includeLazyLoadColumns = true)
+    public function exportTo($parser, $includeLazyLoadColumns = true, $keyType = TableMap::TYPE_PHPNAME)
     {
         if (!$parser instanceof AbstractParser) {
             $parser = AbstractParser::getParser($parser);
         }
 
-        return $parser->fromArray($this->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns, array(), true));
+        return $parser->fromArray($this->toArray($keyType, $includeLazyLoadColumns, array(), true));
     }
 
     /**
@@ -434,7 +435,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Get the [place] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getPlace()
     {
@@ -444,7 +445,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Get the [county] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getCounty()
     {
@@ -454,7 +455,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Get the [region] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getRegion()
     {
@@ -464,7 +465,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Get the [regioncode] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getRegionCode()
     {
@@ -474,7 +475,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Get the [country] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getCountry()
     {
@@ -484,7 +485,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Get the [countrycode] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getCountryCode()
     {
@@ -494,7 +495,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Get the [latitude] column value.
      *
-     * @return double
+     * @return double|null
      */
     public function getLatitude()
     {
@@ -504,7 +505,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Get the [longitude] column value.
      *
-     * @return double
+     * @return double|null
      */
     public function getLongitude()
     {
@@ -514,7 +515,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [geolocation_id] column.
      *
-     * @param int $v new value
+     * @param int $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setGeoLocationId($v)
@@ -534,7 +535,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [display_name] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setDisplayName($v)
@@ -554,7 +555,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [geolocation_key] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setGeoLocationKey($v)
@@ -574,7 +575,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [place] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setPlace($v)
@@ -594,7 +595,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [county] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setCounty($v)
@@ -614,7 +615,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [region] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setRegion($v)
@@ -634,7 +635,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [regioncode] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setRegionCode($v)
@@ -654,7 +655,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [country] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setCountry($v)
@@ -674,7 +675,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [countrycode] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setCountryCode($v)
@@ -694,7 +695,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [latitude] column.
      *
-     * @param double $v new value
+     * @param double|null $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setLatitude($v)
@@ -714,7 +715,7 @@ abstract class GeoLocation implements ActiveRecordInterface
     /**
      * Set the value of [longitude] column.
      *
-     * @param double $v new value
+     * @param double|null $v New value
      * @return $this|\JobScooper\DataAccess\GeoLocation The current object (for fluent API support)
      */
     public function setLongitude($v)
@@ -1383,7 +1384,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      *
      * @param      array  $arr     An array to populate the object from.
      * @param      string $keyType The type of keys the array uses.
-     * @return void
+     * @return     $this|\JobScooper\DataAccess\GeoLocation
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -1422,6 +1423,8 @@ abstract class GeoLocation implements ActiveRecordInterface
         if (array_key_exists($keys[10], $arr)) {
             $this->setLongitude($arr[$keys[10]]);
         }
+
+        return $this;
     }
 
      /**
@@ -1651,11 +1654,11 @@ abstract class GeoLocation implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('JobPosting' == $relationName) {
+        if ('JobPosting' === $relationName) {
             $this->initJobPostings();
             return;
         }
-        if ('UserSearchPair' == $relationName) {
+        if ('UserSearchPair' === $relationName) {
             $this->initUserSearchPairs();
             return;
         }
@@ -1724,10 +1727,19 @@ abstract class GeoLocation implements ActiveRecordInterface
     public function getJobPostings(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collJobPostingsPartial && !$this->isNew();
-        if (null === $this->collJobPostings || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collJobPostings) {
+        if (null === $this->collJobPostings || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initJobPostings();
+                if (null === $this->collJobPostings) {
+                    $this->initJobPostings();
+                } else {
+                    $collectionClassName = JobPostingTableMap::getTableMap()->getCollectionClassName();
+
+                    $collJobPostings = new $collectionClassName;
+                    $collJobPostings->setModel('\JobScooper\DataAccess\JobPosting');
+
+                    return $collJobPostings;
+                }
             } else {
                 $collJobPostings = ChildJobPostingQuery::create(null, $criteria)
                     ->filterByGeoLocationFromJP($this)
@@ -1999,10 +2011,19 @@ abstract class GeoLocation implements ActiveRecordInterface
     public function getUserSearchPairs(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collUserSearchPairsPartial && !$this->isNew();
-        if (null === $this->collUserSearchPairs || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserSearchPairs) {
+        if (null === $this->collUserSearchPairs || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initUserSearchPairs();
+                if (null === $this->collUserSearchPairs) {
+                    $this->initUserSearchPairs();
+                } else {
+                    $collectionClassName = UserSearchPairTableMap::getTableMap()->getCollectionClassName();
+
+                    $collUserSearchPairs = new $collectionClassName;
+                    $collUserSearchPairs->setModel('\JobScooper\DataAccess\UserSearchPair');
+
+                    return $collUserSearchPairs;
+                }
             } else {
                 $collUserSearchPairs = ChildUserSearchPairQuery::create(null, $criteria)
                     ->filterByGeoLocationFromUS($this)
@@ -2339,10 +2360,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      */
     public function preSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preSave')) {
-            return parent::preSave($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2351,10 +2369,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      */
     public function postSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postSave')) {
-            parent::postSave($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before inserting to database
@@ -2363,10 +2378,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      */
     public function preInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preInsert')) {
-            return parent::preInsert($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2375,10 +2387,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      */
     public function postInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postInsert')) {
-            parent::postInsert($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before updating the object in database
@@ -2387,10 +2396,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      */
     public function preUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preUpdate')) {
-            return parent::preUpdate($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2399,10 +2405,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      */
     public function postUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postUpdate')) {
-            parent::postUpdate($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before deleting the object in database
@@ -2411,10 +2414,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      */
     public function preDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preDelete')) {
-            return parent::preDelete($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -2423,10 +2423,7 @@ abstract class GeoLocation implements ActiveRecordInterface
      */
     public function postDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postDelete')) {
-            parent::postDelete($con);
-        }
-    }
+            }
 
 
     /**
@@ -2456,15 +2453,18 @@ abstract class GeoLocation implements ActiveRecordInterface
 
         if (0 === strpos($name, 'from')) {
             $format = substr($name, 4);
+            $inputData = $params[0];
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->importFrom($format, reset($params));
+            return $this->importFrom($format, $inputData, $keyType);
         }
 
         if (0 === strpos($name, 'to')) {
             $format = substr($name, 2);
-            $includeLazyLoadColumns = isset($params[0]) ? $params[0] : true;
+            $includeLazyLoadColumns = $params[0] ?? true;
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->exportTo($format, $includeLazyLoadColumns);
+            return $this->exportTo($format, $includeLazyLoadColumns, $keyType);
         }
 
         throw new BadMethodCallException(sprintf('Call to undefined method: %s.', $name));

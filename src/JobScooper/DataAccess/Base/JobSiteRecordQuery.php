@@ -62,14 +62,14 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \JobScooper\DataAccess\JobPostingQuery|\JobScooper\DataAccess\UserSearchSiteRunQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildJobSiteRecord findOne(ConnectionInterface $con = null) Return the first ChildJobSiteRecord matching the query
+ * @method     ChildJobSiteRecord|null findOne(ConnectionInterface $con = null) Return the first ChildJobSiteRecord matching the query
  * @method     ChildJobSiteRecord findOneOrCreate(ConnectionInterface $con = null) Return the first ChildJobSiteRecord matching the query, or a new ChildJobSiteRecord object populated from the query conditions when no match is found
  *
- * @method     ChildJobSiteRecord findOneByJobSiteKey(string $jobsite_key) Return the first ChildJobSiteRecord filtered by the jobsite_key column
- * @method     ChildJobSiteRecord findOneByPluginClassName(string $plugin_class_name) Return the first ChildJobSiteRecord filtered by the plugin_class_name column
- * @method     ChildJobSiteRecord findOneByDisplayName(string $display_name) Return the first ChildJobSiteRecord filtered by the display_name column
- * @method     ChildJobSiteRecord findOneByisDisabled(boolean $is_disabled) Return the first ChildJobSiteRecord filtered by the is_disabled column
- * @method     ChildJobSiteRecord findOneByResultsFilterType(int $results_filter_type) Return the first ChildJobSiteRecord filtered by the results_filter_type column *
+ * @method     ChildJobSiteRecord|null findOneByJobSiteKey(string $jobsite_key) Return the first ChildJobSiteRecord filtered by the jobsite_key column
+ * @method     ChildJobSiteRecord|null findOneByPluginClassName(string $plugin_class_name) Return the first ChildJobSiteRecord filtered by the plugin_class_name column
+ * @method     ChildJobSiteRecord|null findOneByDisplayName(string $display_name) Return the first ChildJobSiteRecord filtered by the display_name column
+ * @method     ChildJobSiteRecord|null findOneByisDisabled(boolean $is_disabled) Return the first ChildJobSiteRecord filtered by the is_disabled column
+ * @method     ChildJobSiteRecord|null findOneByResultsFilterType(int $results_filter_type) Return the first ChildJobSiteRecord filtered by the results_filter_type column *
 
  * @method     ChildJobSiteRecord requirePk($key, ConnectionInterface $con = null) Return the ChildJobSiteRecord by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildJobSiteRecord requireOne(ConnectionInterface $con = null) Return the first ChildJobSiteRecord matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -483,6 +483,32 @@ abstract class JobSiteRecordQuery extends ModelCriteria
     }
 
     /**
+     * Use the JobPosting relation JobPosting object
+     *
+     * @param callable(\JobScooper\DataAccess\JobPostingQuery):\JobScooper\DataAccess\JobPostingQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withJobPostingQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useJobPostingQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\UserSearchSiteRun object
      *
      * @param \JobScooper\DataAccess\UserSearchSiteRun|ObjectCollection $userSearchSiteRun the related object to use as filter
@@ -553,6 +579,32 @@ abstract class JobSiteRecordQuery extends ModelCriteria
         return $this
             ->joinUserSearchSiteRun($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserSearchSiteRun', '\JobScooper\DataAccess\UserSearchSiteRunQuery');
+    }
+
+    /**
+     * Use the UserSearchSiteRun relation UserSearchSiteRun object
+     *
+     * @param callable(\JobScooper\DataAccess\UserSearchSiteRunQuery):\JobScooper\DataAccess\UserSearchSiteRunQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withUserSearchSiteRunQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useUserSearchSiteRunQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
     }
 
     /**

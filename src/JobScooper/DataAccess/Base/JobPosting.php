@@ -108,42 +108,42 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * The value for the employment_type field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $employment_type;
 
     /**
      * The value for the pay_range field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $pay_range;
 
     /**
      * The value for the location field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $location;
 
     /**
      * The value for the company field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $company;
 
     /**
      * The value for the department field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $department;
 
     /**
      * The value for the category field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $category;
 
@@ -157,7 +157,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * The value for the job_posted_date field.
      *
-     * @var        DateTime
+     * @var        DateTime|null
      */
     protected $job_posted_date;
 
@@ -171,35 +171,35 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * The value for the location_display_value field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $location_display_value;
 
     /**
      * The value for the geolocation_id field.
      *
-     * @var        int
+     * @var        int|null
      */
     protected $geolocation_id;
 
     /**
      * The value for the duplicates_posting_id field.
      *
-     * @var        int
+     * @var        int|null
      */
     protected $duplicates_posting_id;
 
     /**
      * The value for the title_tokens field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $title_tokens;
 
     /**
      * The value for the job_reference_key field.
      *
-     * @var        string
+     * @var        string|null
      */
     protected $job_reference_key;
 
@@ -421,7 +421,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|JobPosting The current object, for fluid interface
+     * @return $this The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -435,11 +435,11 @@ abstract class JobPosting implements ActiveRecordInterface
      *
      * @param  string  $msg
      * @param  int     $priority One of the Propel::LOG_* logging levels
-     * @return boolean
+     * @return void
      */
     protected function log($msg, $priority = Propel::LOG_INFO)
     {
-        return Propel::log(get_class($this) . ': ' . $msg, $priority);
+        Propel::log(get_class($this) . ': ' . $msg, $priority);
     }
 
     /**
@@ -452,15 +452,16 @@ abstract class JobPosting implements ActiveRecordInterface
      *
      * @param  mixed   $parser                 A AbstractParser instance, or a format name ('XML', 'YAML', 'JSON', 'CSV')
      * @param  boolean $includeLazyLoadColumns (optional) Whether to include lazy load(ed) columns. Defaults to TRUE.
+     * @param  string  $keyType                (optional) One of the class type constants TableMap::TYPE_PHPNAME, TableMap::TYPE_CAMELNAME, TableMap::TYPE_COLNAME, TableMap::TYPE_FIELDNAME, TableMap::TYPE_NUM. Defaults to TableMap::TYPE_PHPNAME.
      * @return string  The exported data
      */
-    public function exportTo($parser, $includeLazyLoadColumns = true)
+    public function exportTo($parser, $includeLazyLoadColumns = true, $keyType = TableMap::TYPE_PHPNAME)
     {
         if (!$parser instanceof AbstractParser) {
             $parser = AbstractParser::getParser($parser);
         }
 
-        return $parser->fromArray($this->toArray(TableMap::TYPE_PHPNAME, $includeLazyLoadColumns, array(), true));
+        return $parser->fromArray($this->toArray($keyType, $includeLazyLoadColumns, array(), true));
     }
 
     /**
@@ -535,7 +536,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [employment_type] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getEmploymentType()
     {
@@ -545,7 +546,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [pay_range] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getPayRange()
     {
@@ -555,7 +556,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [location] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getLocation()
     {
@@ -565,7 +566,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [company] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getCompany()
     {
@@ -575,7 +576,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [department] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getDepartment()
     {
@@ -585,7 +586,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [category] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getCategory()
     {
@@ -596,14 +597,16 @@ abstract class JobPosting implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [last_updated_at] column value.
      *
      *
-     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
+     * @param string|null $format The date/time format string (either date()-style or strftime()-style).
+     *   If format is NULL, then the raw DateTime object will be returned.
      *
      * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
+     *
+     * @psalm-return ($format is null ? DateTime : string)
      */
-    public function getUpdatedAt($format = NULL)
+    public function getUpdatedAt($format = null)
     {
         if ($format === null) {
             return $this->last_updated_at;
@@ -616,14 +619,16 @@ abstract class JobPosting implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [job_posted_date] column value.
      *
      *
-     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
+     * @param string|null $format The date/time format string (either date()-style or strftime()-style).
+     *   If format is NULL, then the raw DateTime object will be returned.
      *
-     * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
+     * @return string|DateTime|null Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
+     *
+     * @psalm-return ($format is null ? DateTime|null : string|null)
      */
-    public function getPostedAt($format = NULL)
+    public function getPostedAt($format = null)
     {
         if ($format === null) {
             return $this->job_posted_date;
@@ -636,14 +641,16 @@ abstract class JobPosting implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [first_seen_at] column value.
      *
      *
-     * @param      string|null $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
+     * @param string|null $format The date/time format string (either date()-style or strftime()-style).
+     *   If format is NULL, then the raw DateTime object will be returned.
      *
      * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL, and 0 if column value is 0000-00-00
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
+     *
+     * @psalm-return ($format is null ? DateTime : string)
      */
-    public function getFirstSeenAt($format = NULL)
+    public function getFirstSeenAt($format = null)
     {
         if ($format === null) {
             return $this->first_seen_at;
@@ -655,7 +662,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [location_display_value] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getLocationDisplayValue()
     {
@@ -665,7 +672,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [geolocation_id] column value.
      *
-     * @return int
+     * @return int|null
      */
     public function getGeoLocationId()
     {
@@ -675,7 +682,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [duplicates_posting_id] column value.
      *
-     * @return int
+     * @return int|null
      */
     public function getDuplicatesJobPostingId()
     {
@@ -685,7 +692,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [title_tokens] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getTitleTokens()
     {
@@ -695,7 +702,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Get the [job_reference_key] column value.
      *
-     * @return string
+     * @return string|null
      */
     public function getJobReferenceKey()
     {
@@ -715,7 +722,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [jobposting_id] column.
      *
-     * @param int $v new value
+     * @param int $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setJobPostingId($v)
@@ -735,7 +742,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [jobsite_key] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setJobSiteKey($v)
@@ -759,7 +766,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [jobsite_post_id] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setJobSitePostId($v)
@@ -779,7 +786,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [title] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setTitle($v)
@@ -799,7 +806,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [url] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setUrl($v)
@@ -819,7 +826,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [employment_type] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setEmploymentType($v)
@@ -839,7 +846,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [pay_range] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setPayRange($v)
@@ -859,7 +866,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [location] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setLocation($v)
@@ -879,7 +886,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [company] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setCompany($v)
@@ -899,7 +906,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [department] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setDepartment($v)
@@ -919,7 +926,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [category] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setCategory($v)
@@ -939,7 +946,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Sets the value of [last_updated_at] column to a normalized version of the date/time value specified.
      *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     * @param  string|integer|\DateTimeInterface $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
@@ -959,7 +966,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Sets the value of [job_posted_date] column to a normalized version of the date/time value specified.
      *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     * @param  string|integer|\DateTimeInterface|null $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
@@ -979,7 +986,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Sets the value of [first_seen_at] column to a normalized version of the date/time value specified.
      *
-     * @param  mixed $v string, integer (timestamp), or \DateTimeInterface value.
+     * @param  string|integer|\DateTimeInterface $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
@@ -999,7 +1006,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [location_display_value] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setLocationDisplayValue($v)
@@ -1019,7 +1026,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [geolocation_id] column.
      *
-     * @param int $v new value
+     * @param int|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setGeoLocationId($v)
@@ -1043,7 +1050,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [duplicates_posting_id] column.
      *
-     * @param int $v new value
+     * @param int|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setDuplicatesJobPostingId($v)
@@ -1067,7 +1074,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [title_tokens] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setTitleTokens($v)
@@ -1087,7 +1094,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [job_reference_key] column.
      *
-     * @param string $v new value
+     * @param string|null $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setJobReferenceKey($v)
@@ -1107,7 +1114,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Set the value of [key_company_and_title] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      */
     public function setKeyCompanyAndTitle($v)
@@ -1831,15 +1838,15 @@ abstract class JobPosting implements ActiveRecordInterface
             $keys[19] => $this->getKeyCompanyAndTitle(),
         );
         if ($result[$keys[11]] instanceof \DateTimeInterface) {
-            $result[$keys[11]] = $result[$keys[11]]->format('c');
+            $result[$keys[11]] = $result[$keys[11]]->format('Y-m-d');
         }
 
         if ($result[$keys[12]] instanceof \DateTimeInterface) {
-            $result[$keys[12]] = $result[$keys[12]]->format('c');
+            $result[$keys[12]] = $result[$keys[12]]->format('Y-m-d');
         }
 
         if ($result[$keys[13]] instanceof \DateTimeInterface) {
-            $result[$keys[13]] = $result[$keys[13]]->format('c');
+            $result[$keys[13]] = $result[$keys[13]]->format('Y-m-d');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -2037,7 +2044,7 @@ abstract class JobPosting implements ActiveRecordInterface
      *
      * @param      array  $arr     An array to populate the object from.
      * @param      string $keyType The type of keys the array uses.
-     * @return void
+     * @return     $this|\JobScooper\DataAccess\JobPosting
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
@@ -2103,6 +2110,8 @@ abstract class JobPosting implements ActiveRecordInterface
         if (array_key_exists($keys[19], $arr)) {
             $this->setKeyCompanyAndTitle($arr[$keys[19]]);
         }
+
+        return $this;
     }
 
      /**
@@ -2411,7 +2420,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Declares an association between this object and a ChildGeoLocation object.
      *
-     * @param  ChildGeoLocation $v
+     * @param  ChildGeoLocation|null $v
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      * @throws PropelException
      */
@@ -2440,7 +2449,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * Get the associated ChildGeoLocation object
      *
      * @param  ConnectionInterface $con Optional Connection object.
-     * @return ChildGeoLocation The associated ChildGeoLocation object.
+     * @return ChildGeoLocation|null The associated ChildGeoLocation object.
      * @throws PropelException
      */
     public function getGeoLocationFromJP(ConnectionInterface $con = null)
@@ -2462,7 +2471,7 @@ abstract class JobPosting implements ActiveRecordInterface
     /**
      * Declares an association between this object and a ChildJobPosting object.
      *
-     * @param  ChildJobPosting $v
+     * @param  ChildJobPosting|null $v
      * @return $this|\JobScooper\DataAccess\JobPosting The current object (for fluent API support)
      * @throws PropelException
      */
@@ -2491,7 +2500,7 @@ abstract class JobPosting implements ActiveRecordInterface
      * Get the associated ChildJobPosting object
      *
      * @param  ConnectionInterface $con Optional Connection object.
-     * @return ChildJobPosting The associated ChildJobPosting object.
+     * @return ChildJobPosting|null The associated ChildJobPosting object.
      * @throws PropelException
      */
     public function getDuplicateJobPosting(ConnectionInterface $con = null)
@@ -2521,11 +2530,11 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('JobPostingRelatedByJobPostingId' == $relationName) {
+        if ('JobPostingRelatedByJobPostingId' === $relationName) {
             $this->initJobPostingsRelatedByJobPostingId();
             return;
         }
-        if ('UserJobMatch' == $relationName) {
+        if ('UserJobMatch' === $relationName) {
             $this->initUserJobMatches();
             return;
         }
@@ -2594,10 +2603,19 @@ abstract class JobPosting implements ActiveRecordInterface
     public function getJobPostingsRelatedByJobPostingId(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collJobPostingsRelatedByJobPostingIdPartial && !$this->isNew();
-        if (null === $this->collJobPostingsRelatedByJobPostingId || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collJobPostingsRelatedByJobPostingId) {
+        if (null === $this->collJobPostingsRelatedByJobPostingId || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initJobPostingsRelatedByJobPostingId();
+                if (null === $this->collJobPostingsRelatedByJobPostingId) {
+                    $this->initJobPostingsRelatedByJobPostingId();
+                } else {
+                    $collectionClassName = JobPostingTableMap::getTableMap()->getCollectionClassName();
+
+                    $collJobPostingsRelatedByJobPostingId = new $collectionClassName;
+                    $collJobPostingsRelatedByJobPostingId->setModel('\JobScooper\DataAccess\JobPosting');
+
+                    return $collJobPostingsRelatedByJobPostingId;
+                }
             } else {
                 $collJobPostingsRelatedByJobPostingId = ChildJobPostingQuery::create(null, $criteria)
                     ->filterByDuplicateJobPosting($this)
@@ -2869,10 +2887,19 @@ abstract class JobPosting implements ActiveRecordInterface
     public function getUserJobMatches(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collUserJobMatchesPartial && !$this->isNew();
-        if (null === $this->collUserJobMatches || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collUserJobMatches) {
+        if (null === $this->collUserJobMatches || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initUserJobMatches();
+                if (null === $this->collUserJobMatches) {
+                    $this->initUserJobMatches();
+                } else {
+                    $collectionClassName = UserJobMatchTableMap::getTableMap()->getCollectionClassName();
+
+                    $collUserJobMatches = new $collectionClassName;
+                    $collUserJobMatches->setModel('\JobScooper\DataAccess\UserJobMatch');
+
+                    return $collUserJobMatches;
+                }
             } else {
                 $collUserJobMatches = ChildUserJobMatchQuery::create(null, $criteria)
                     ->filterByJobPostingFromUJM($this)
@@ -3160,10 +3187,7 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function preSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preSave')) {
-            return parent::preSave($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -3172,10 +3196,7 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function postSave(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postSave')) {
-            parent::postSave($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before inserting to database
@@ -3184,10 +3205,7 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function preInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preInsert')) {
-            return parent::preInsert($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -3196,10 +3214,7 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function postInsert(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postInsert')) {
-            parent::postInsert($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before updating the object in database
@@ -3208,10 +3223,7 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function preUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preUpdate')) {
-            return parent::preUpdate($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -3220,10 +3232,7 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function postUpdate(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postUpdate')) {
-            parent::postUpdate($con);
-        }
-    }
+            }
 
     /**
      * Code to be run before deleting the object in database
@@ -3232,10 +3241,7 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function preDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::preDelete')) {
-            return parent::preDelete($con);
-        }
-        return true;
+                return true;
     }
 
     /**
@@ -3244,10 +3250,7 @@ abstract class JobPosting implements ActiveRecordInterface
      */
     public function postDelete(ConnectionInterface $con = null)
     {
-        if (is_callable('parent::postDelete')) {
-            parent::postDelete($con);
-        }
-    }
+            }
 
 
     /**
@@ -3277,15 +3280,18 @@ abstract class JobPosting implements ActiveRecordInterface
 
         if (0 === strpos($name, 'from')) {
             $format = substr($name, 4);
+            $inputData = $params[0];
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->importFrom($format, reset($params));
+            return $this->importFrom($format, $inputData, $keyType);
         }
 
         if (0 === strpos($name, 'to')) {
             $format = substr($name, 2);
-            $includeLazyLoadColumns = isset($params[0]) ? $params[0] : true;
+            $includeLazyLoadColumns = $params[0] ?? true;
+            $keyType = $params[1] ?? TableMap::TYPE_PHPNAME;
 
-            return $this->exportTo($format, $includeLazyLoadColumns);
+            return $this->exportTo($format, $includeLazyLoadColumns, $keyType);
         }
 
         throw new BadMethodCallException(sprintf('Call to undefined method: %s.', $name));

@@ -88,7 +88,7 @@ class LoggingManager extends \Monolog\Logger
 //            'stderr' => new StreamHandler('php://stderr', isDebug() ? Logger::DEBUG : Logger::INFO)
         );
 
-        parent::__construct($name, $handlers = $this->_handlersByType);
+        parent::__construct($name, $this->_handlersByType);
 
         $logOptions = Settings::getValue('logging', array());
         if (isDebug()) {
@@ -145,17 +145,6 @@ class LoggingManager extends \Monolog\Logger
         }
 
         return null;
-    }
-
-    /**
-     * @param \Exception $e
-     * @param array $record
-     * @throws \Exception
-     */
-    public function handleException(\Exception $e, array $record): void
-    {
-        handleException($e);
-        exit(255);
     }
 
     /**
@@ -362,11 +351,6 @@ class LoggingManager extends \Monolog\Logger
         $lineContent = sprintf($fmt, '', $intro, $headerText);
 
         $this->log(LogLevel::INFO, $lineContent);
-    }
-
-    public function getName()
-    {
-        return $this->_loggerName;
     }
 
     /**

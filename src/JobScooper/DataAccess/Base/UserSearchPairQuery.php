@@ -72,14 +72,14 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\GeoLocationQuery|\JobScooper\DataAccess\UserSearchSiteRunQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildUserSearchPair findOne(ConnectionInterface $con = null) Return the first ChildUserSearchPair matching the query
+ * @method     ChildUserSearchPair|null findOne(ConnectionInterface $con = null) Return the first ChildUserSearchPair matching the query
  * @method     ChildUserSearchPair findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserSearchPair matching the query, or a new ChildUserSearchPair object populated from the query conditions when no match is found
  *
- * @method     ChildUserSearchPair findOneByUserSearchPairId(int $user_search_pair_id) Return the first ChildUserSearchPair filtered by the user_search_pair_id column
- * @method     ChildUserSearchPair findOneByUserId(int $user_id) Return the first ChildUserSearchPair filtered by the user_id column
- * @method     ChildUserSearchPair findOneByUserKeyword(string $user_keyword) Return the first ChildUserSearchPair filtered by the user_keyword column
- * @method     ChildUserSearchPair findOneByGeoLocationId(int $geolocation_id) Return the first ChildUserSearchPair filtered by the geolocation_id column
- * @method     ChildUserSearchPair findOneByIsActive(boolean $is_active) Return the first ChildUserSearchPair filtered by the is_active column *
+ * @method     ChildUserSearchPair|null findOneByUserSearchPairId(int $user_search_pair_id) Return the first ChildUserSearchPair filtered by the user_search_pair_id column
+ * @method     ChildUserSearchPair|null findOneByUserId(int $user_id) Return the first ChildUserSearchPair filtered by the user_id column
+ * @method     ChildUserSearchPair|null findOneByUserKeyword(string $user_keyword) Return the first ChildUserSearchPair filtered by the user_keyword column
+ * @method     ChildUserSearchPair|null findOneByGeoLocationId(int $geolocation_id) Return the first ChildUserSearchPair filtered by the geolocation_id column
+ * @method     ChildUserSearchPair|null findOneByIsActive(boolean $is_active) Return the first ChildUserSearchPair filtered by the is_active column *
 
  * @method     ChildUserSearchPair requirePk($key, ConnectionInterface $con = null) Return the ChildUserSearchPair by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserSearchPair requireOne(ConnectionInterface $con = null) Return the first ChildUserSearchPair matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -541,6 +541,32 @@ abstract class UserSearchPairQuery extends ModelCriteria
     }
 
     /**
+     * Use the UserFromUS relation User object
+     *
+     * @param callable(\JobScooper\DataAccess\UserQuery):\JobScooper\DataAccess\UserQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withUserFromUSQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useUserFromUSQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\GeoLocation object
      *
      * @param \JobScooper\DataAccess\GeoLocation|ObjectCollection $geoLocation The related object(s) to use as filter
@@ -618,6 +644,32 @@ abstract class UserSearchPairQuery extends ModelCriteria
     }
 
     /**
+     * Use the GeoLocationFromUS relation GeoLocation object
+     *
+     * @param callable(\JobScooper\DataAccess\GeoLocationQuery):\JobScooper\DataAccess\GeoLocationQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withGeoLocationFromUSQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useGeoLocationFromUSQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\UserSearchSiteRun object
      *
      * @param \JobScooper\DataAccess\UserSearchSiteRun|ObjectCollection $userSearchSiteRun the related object to use as filter
@@ -688,6 +740,32 @@ abstract class UserSearchPairQuery extends ModelCriteria
         return $this
             ->joinUserSearchSiteRun($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserSearchSiteRun', '\JobScooper\DataAccess\UserSearchSiteRunQuery');
+    }
+
+    /**
+     * Use the UserSearchSiteRun relation UserSearchSiteRun object
+     *
+     * @param callable(\JobScooper\DataAccess\UserSearchSiteRunQuery):\JobScooper\DataAccess\UserSearchSiteRunQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withUserSearchSiteRunQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useUserSearchSiteRunQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
     }
 
     /**

@@ -76,21 +76,21 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \JobScooper\DataAccess\UserQuery|\JobScooper\DataAccess\JobPostingQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildUserJobMatch findOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query
+ * @method     ChildUserJobMatch|null findOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query
  * @method     ChildUserJobMatch findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query, or a new ChildUserJobMatch object populated from the query conditions when no match is found
  *
- * @method     ChildUserJobMatch findOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column
- * @method     ChildUserJobMatch findOneByUserId(int $user_id) Return the first ChildUserJobMatch filtered by the user_id column
- * @method     ChildUserJobMatch findOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column
- * @method     ChildUserJobMatch findOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column
- * @method     ChildUserJobMatch findOneByGoodJobTitleKeywordMatches(string $good_job_title_keyword_matches) Return the first ChildUserJobMatch filtered by the good_job_title_keyword_matches column
- * @method     ChildUserJobMatch findOneByIsExcluded(boolean $is_excluded) Return the first ChildUserJobMatch filtered by the is_excluded column
- * @method     ChildUserJobMatch findOneByOutOfUserArea(boolean $out_of_user_area) Return the first ChildUserJobMatch filtered by the out_of_user_area column
- * @method     ChildUserJobMatch findOneByBadJobTitleKeywordMatches(string $bad_job_title_keyword_matches) Return the first ChildUserJobMatch filtered by the bad_job_title_keyword_matches column
- * @method     ChildUserJobMatch findOneByBadCompanyNameKeywordMatches(string $bad_company_name_keyword_matches) Return the first ChildUserJobMatch filtered by the bad_company_name_keyword_matches column
- * @method     ChildUserJobMatch findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
- * @method     ChildUserJobMatch findOneByUpdatedAt(string $last_updated_at) Return the first ChildUserJobMatch filtered by the last_updated_at column
- * @method     ChildUserJobMatch findOneByFirstMatchedAt(string $first_matched_at) Return the first ChildUserJobMatch filtered by the first_matched_at column *
+ * @method     ChildUserJobMatch|null findOneByUserJobMatchId(int $user_job_match_id) Return the first ChildUserJobMatch filtered by the user_job_match_id column
+ * @method     ChildUserJobMatch|null findOneByUserId(int $user_id) Return the first ChildUserJobMatch filtered by the user_id column
+ * @method     ChildUserJobMatch|null findOneByJobPostingId(int $jobposting_id) Return the first ChildUserJobMatch filtered by the jobposting_id column
+ * @method     ChildUserJobMatch|null findOneByIsJobMatch(boolean $is_job_match) Return the first ChildUserJobMatch filtered by the is_job_match column
+ * @method     ChildUserJobMatch|null findOneByGoodJobTitleKeywordMatches(string $good_job_title_keyword_matches) Return the first ChildUserJobMatch filtered by the good_job_title_keyword_matches column
+ * @method     ChildUserJobMatch|null findOneByIsExcluded(boolean $is_excluded) Return the first ChildUserJobMatch filtered by the is_excluded column
+ * @method     ChildUserJobMatch|null findOneByOutOfUserArea(boolean $out_of_user_area) Return the first ChildUserJobMatch filtered by the out_of_user_area column
+ * @method     ChildUserJobMatch|null findOneByBadJobTitleKeywordMatches(string $bad_job_title_keyword_matches) Return the first ChildUserJobMatch filtered by the bad_job_title_keyword_matches column
+ * @method     ChildUserJobMatch|null findOneByBadCompanyNameKeywordMatches(string $bad_company_name_keyword_matches) Return the first ChildUserJobMatch filtered by the bad_company_name_keyword_matches column
+ * @method     ChildUserJobMatch|null findOneByUserNotificationState(int $user_notification_state) Return the first ChildUserJobMatch filtered by the user_notification_state column
+ * @method     ChildUserJobMatch|null findOneByUpdatedAt(string $last_updated_at) Return the first ChildUserJobMatch filtered by the last_updated_at column
+ * @method     ChildUserJobMatch|null findOneByFirstMatchedAt(string $first_matched_at) Return the first ChildUserJobMatch filtered by the first_matched_at column *
 
  * @method     ChildUserJobMatch requirePk($key, ConnectionInterface $con = null) Return the ChildUserJobMatch by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUserJobMatch requireOne(ConnectionInterface $con = null) Return the first ChildUserJobMatch matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -789,6 +789,32 @@ abstract class UserJobMatchQuery extends ModelCriteria
     }
 
     /**
+     * Use the UserFromUJM relation User object
+     *
+     * @param callable(\JobScooper\DataAccess\UserQuery):\JobScooper\DataAccess\UserQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withUserFromUJMQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useUserFromUJMQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
+    }
+
+    /**
      * Filter the query by a related \JobScooper\DataAccess\JobPosting object
      *
      * @param \JobScooper\DataAccess\JobPosting|ObjectCollection $jobPosting The related object(s) to use as filter
@@ -863,6 +889,32 @@ abstract class UserJobMatchQuery extends ModelCriteria
         return $this
             ->joinJobPostingFromUJM($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'JobPostingFromUJM', '\JobScooper\DataAccess\JobPostingQuery');
+    }
+
+    /**
+     * Use the JobPostingFromUJM relation JobPosting object
+     *
+     * @param callable(\JobScooper\DataAccess\JobPostingQuery):\JobScooper\DataAccess\JobPostingQuery $callable A function working on the related query
+     *
+     * @param string|null $relationAlias optional alias for the relation
+     *
+     * @param string|null $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this
+     */
+    public function withJobPostingFromUJMQuery(
+        callable $callable,
+        string $relationAlias = null,
+        ?string $joinType = Criteria::INNER_JOIN
+    ) {
+        $relatedQuery = $this->useJobPostingFromUJMQuery(
+            $relationAlias,
+            $joinType
+        );
+        $callable($relatedQuery);
+        $relatedQuery->endUse();
+
+        return $this;
     }
 
     /**
