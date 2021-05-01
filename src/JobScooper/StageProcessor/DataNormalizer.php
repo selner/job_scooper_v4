@@ -79,7 +79,7 @@ class DataNormalizer
             startLogSection('Calling python to set the title tokens for new job postings...');
             $runFile = 'pyJobNormalizer/cmd_set_title_tokens.py';
             $params = [
-                '-c' => Settings::get_db_dsn()
+                '--dsn' => Settings::get_db_dsn()
             ];
 
             $resultcode = PythonRunner::execScript($runFile, $params);
@@ -100,7 +100,7 @@ class DataNormalizer
             startLogSection('Calling python to dedupe new job postings...');
             $runFile = 'pyJobNormalizer/cmd_mark_duplicates.py';
             $params = [
-                '-c' => Settings::get_db_dsn()
+                '--dsn' => Settings::get_db_dsn()
             ];
 
             $resultcode = PythonRunner::execScript($runFile, $params);
@@ -125,7 +125,7 @@ class DataNormalizer
             startLogSection('Calling python to find & map missing locations...');
             $runFile = 'pyJobNormalizer/cmd_set_geolocations.py';
             $params = [
-                '-c' => Settings::get_db_dsn(),
+                '--dsn' => Settings::get_db_dsn(),
                 '--server' => Settings::getValue('geocodeapi_server'),
             ];
 

@@ -115,8 +115,13 @@ class DatabaseMixin:
         Args:
             **kwargs:
         """
-
-        if 'connecturi' in kwargs:
+        import re
+        values = None
+        if 'dsn' in kwargs:
+            driver, rest = kwargs['dsn'].split(':', 1)
+            values = dict(re.findall('([\w\.]+)=([\w\.]+)', rest), driver=driver)
+            self._dbparams.update(values)
+        elif 'connecturi' in kwargs:
             parsed = urllib.parse.urlparse(kwargs['connecturi'])
 
             if parsed.hostname:

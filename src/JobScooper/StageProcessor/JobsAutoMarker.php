@@ -183,7 +183,7 @@ class JobsAutoMarker
 
         try {
             $runFile = "pyJobNormalizer" . DIRECTORY_SEPARATOR . "{$filename}";
-            $params = array_merge(array( '-c' => Settings::get_db_dsn()), $extraParams);
+            $params = array_merge(array( '--dsn' => Settings::get_db_dsn()), $extraParams);
 
             $resultcode = PythonRunner::execScript($runFile, $params);
 

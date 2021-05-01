@@ -73,7 +73,7 @@ class TaskDedupeJobPosting(DatabaseMixin):
                     job_posted_date >= CURDATE() - 14
                 GROUP BY title_tokens , `company_or_jobsite_value` , `location_value`
                         HAVING COUNT(jobposting_id) > 1
-                ORDER BY title_tokens , `company_or_jobsite_value` ,  `location_value`, jobposting_id;
+                ORDER BY title_tokens , `company_or_jobsite_value` ,  `location_value`;
             """
 
         self._dupe_job_groups = self.fetch_all_from_query(querysql)

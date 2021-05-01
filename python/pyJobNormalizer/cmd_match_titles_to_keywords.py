@@ -23,7 +23,7 @@ from task_match_titles import TaskMatchJobsToKeywords
 
 cli_usage = """
 Usage:
-  cmd_match_titles_to_keywords.py -i <file> -o <file> -c <dbstring> 
+  cmd_match_titles_to_keywords.py -i <file> -o <file> (-c <dbstring> | --dsn <dbstring>) 
   cmd_match_titles_to_keywords.py --version
 
 Options:
@@ -32,11 +32,16 @@ Options:
   -v --verbose  print status messages
   -o <file>, --output <file> output file with job match results 
   -i <file>, --input <file> input JSON data file with jobs and keywords
+  --dsn <dbstring>                          DSN connection string for database     
   -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
 """
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
 
-    matcher = TaskMatchJobsToKeywords(**args)
-    matcher.export_results()
+    try:
+        matcher = TaskMatchJobsToKeywords(**args)
+        matcher.export_results()
+    except Exception as ex:
+        print(f'Unable to match title keywords: {ex}')
+        raise ex

@@ -182,7 +182,7 @@ class NotifierDevAlerts extends JobsMailSender
                 $outputReportFile = generateOutputFileName('broken_plugins_report', 'html', false, 'debug');
                 $runFile = 'pyJobNormalizer/cmd_generate_plugins_report.py';
                 $params = [
-                    '-c' => Settings::get_db_dsn(),
+                    '--dsn' => Settings::get_db_dsn(),
                     '--output' => $outputReportFile
                 ];
 

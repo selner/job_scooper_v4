@@ -144,7 +144,7 @@ from docopt import docopt
 
 cli_usage = """
 Usage:
-  task_tokenize_jobtitles.py -c <dbstring> -u user
+  task_tokenize_jobtitles.py (-c <dbstring> | --dsn <dbstring>) -u user
   task_tokenize_jobtitles.py --version
 
 Options:
@@ -152,16 +152,17 @@ Options:
   --version     show version and exit
   -v --verbose      print status messages
   -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
+  --dsn <dbstring>                          DSN connection string for database     
 """
 
 if __name__ == '__main__':
     arguments = docopt(cli_usage, version='0.1.1rc')
     args = {k.replace("--", ""): arguments[k] for k in arguments.keys()}
 
-    if "connecturi" in args and args["connecturi"]:
+    try:
         jobtok = TaskAddTitleTokens(**args)
         jobtok.update_jobs_without_tokens()
-
-    else:
-        print(u"Unable to set tokens for updated job titles.  Missing script arguments.")
+    except Exception as ex:
+        print(f'Unable to update job title tokes: {ex}')
+        raise ex
 

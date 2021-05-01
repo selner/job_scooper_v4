@@ -131,7 +131,7 @@ class StageManager
         $usersForRun = Settings::getValue('users_for_run');
         $didRunSearches = false;
 
-        startLogSection("Stage 1:  Downloading new jobs for " . \count($jobsiteKeys) . ' job sites and' . \count($usersForRun) . ' users.');
+        startLogSection("Stage 1:  Downloading new jobs for " . \count($jobsiteKeys) . ' job sites and ' . \count($usersForRun) . ' users.');
 
         try {
             if (is_empty_value($jobsiteKeys)) {
@@ -206,7 +206,7 @@ class StageManager
 
                                     $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
                                     $params = [
-                                        '-c' => Settings::get_db_dsn(),
+                                        '--dsn' => Settings::get_db_dsn(),
                                         '--userid' => $userFacts['UserId'],
                                         '--jobsite' => $jobsiteKey
                                     ];

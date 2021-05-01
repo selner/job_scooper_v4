@@ -23,7 +23,7 @@ from helpers import docopt_ext
 
 cli_usage = """
 Usage:
-  cmd_mark_duplicates.py -c <dbstring>
+  cmd_mark_duplicates.py (-c <dbstring> | --dsn <dbstring>)
   cmd_mark_duplicates.py --version
   
 Options:
@@ -32,6 +32,7 @@ Options:
   -v --verbose      print status messages
   -o <file>, --output <file>    output JSON file with ID pairs of duplicate listings 
   -i <file>, --input <file>     input JSON data file with job postings
+  --dsn <dbstring>                          DSN connection string for database     
   -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
 """
 
@@ -39,8 +40,9 @@ Options:
 if __name__ == '__main__':
     arguments = docopt_ext(cli_usage, version='0.1.1rc')
 
-    if 'connecturi' in arguments and arguments['connecturi']:
+    try:
         matcher = TaskDedupeJobPosting(**arguments)
         matcher.dedupe_jobs()
-    else:
-        print(u"Unable to deduplicate job postings.  Missing script arguments.")
+    except Exception as ex:
+        print(f'Unable to deduplicate job postings: {ex}')
+        raise ex

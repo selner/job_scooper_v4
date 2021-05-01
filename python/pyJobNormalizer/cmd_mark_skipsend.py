@@ -22,20 +22,21 @@ from helpers import docopt_ext
 
 cli_usage = """
 Usage:
-  cmd_mark_skipsend.py -c <dbstring>
+  cmd_mark_skipsend.py (-c <dbstring> | --dsn <dbstring>)
   cmd_mark_skipsend.py --version
   
 Options:
   -h --help     show this help message and exit
   --version     show version and exit
   -v --verbose      print status messages
+  --dsn <dbstring>                          DSN connection string for database     
   -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
 """
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
 
-    if "connecturi" in args and args["connecturi"]:
+    try:
         matcher = TaskMarkNonMatchesAsSkipSend(**args)
-    else:
-        print(u"Unable to update user job matches that should be skipped.  Missing script arguments.")
+    except Exception as ex:
+        print(f'Unable to update user job matches that should be skipped:  {ex}')

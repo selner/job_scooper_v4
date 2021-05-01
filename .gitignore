@@ -26,3 +26,4 @@ Config/propel.ini
 Config/propel.ini.old
 config.php
 output
+python/venv

@@ -22,22 +22,27 @@ from helpers import docopt_ext
 
 cli_usage = """
 Usage:
-  cmd_set_out_of_area.py -c <dbstring> -u user
+  cmd_set_out_of_area.py (-c <dbstring> | --dsn <dbstring>) -u user
   cmd_set_out_of_area.py --version
   
 Options:
   -h --help     show this help message and exit
   --version     show version and exit
   -v --verbose      print status messages
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
+  -c <dbstring>, --connecturi <dbstring>    connection string uri for database    
+  --dsn <dbstring>                          DSN connection string for database     
   -u <userkey>, --user <userkey>    slug key for user to update matches on
 """
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
 
-    if "connecturi" in args and args["connecturi"] and "user" in args and args["user"]:
+    try:
+        if not ("user" in args and args["user"]):
+            raise Exception("Missing user parameter.")
+
         matcher = TaskMarkOutOfAreaMatches(**args)
         matcher.mark_out_area()
-    else:
-        print(u"Unable to mark job matches as out of area.  Missing script arguments.")
+    except Exception as ex:
+        print(f'Unable to deduplicate job postings: {ex}')
+        raise ex

@@ -22,7 +22,7 @@ from helpers import docopt_ext
 
 cli_usage = """
 Usage:
-  cmd_set_geolocations.py -c <dbstring> -s <server>
+  cmd_set_geolocations.py  (-c <dbstring> | --dsn <dbstring>)  -s <server>
   cmd_set_geolocations.py --version
   
 Options:
@@ -30,14 +30,16 @@ Options:
   --version     show version and exit
   -v --verbose      print status messages
   -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-  -s <server>, --server <server>    hostname for geocode api server [default: http://0.0.0.0:5000]
+  --dsn <dbstring>                          DSN connection string for database     
+-s <server>, --server <server>    hostname for geocode api server [default: http://0.0.0.0:5000]
 """
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
 
-    if "connecturi" in args and args["connecturi"] and "server" in args and args["server"]:
+    try:
         matcher = FindPlacesFromDBLocationsTask(**args)
         matcher.update_all_locations(**args)
-    else:
-        print(u"Unable to update locations for job postings.  Missing script arguments.")
+    except Exception as ex:
+        print(f'Unable to set geolocations: {ex}')
+        raise ex

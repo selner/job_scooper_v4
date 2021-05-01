@@ -22,7 +22,7 @@ from helpers import docopt_ext
 
 cli_usage = """
 Usage:
-  cmd_add_newpostings_to_user.py -c <dbstring> -u <userid> -j <jobsite>
+  cmd_add_newpostings_to_user.py (-c <dbstring> | --dsn <dbstring>) -u <userid> -j <jobsite>
   cmd_add_newpostings_to_user.py --version
   
 Options:
@@ -31,14 +31,16 @@ Options:
   -v --verbose      print status messages
   -u <userid> --userid <userid>     user_id for user to add new matches
   -j <jobsite> --jobsite <jobsite>   jobsitekey for site to add listings from
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
+  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use 
+  --dsn <dbstring>                          DSN connection string for database     
+   
 """
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
 
-    if "connecturi" in args and args["connecturi"] and "jobsite" in args and args["jobsite"] and "userid" in args and args["userid"]:
-
+    try:
         matcher = TaskAddNewMatchesToUser(**args)
-    else:
-        print(u"Unable to add new job matches to user.  Missing script arguments.")
+    except Exception as ex:
+        print(f'Unable to add job matches to user: {ex}')
+        raise ex

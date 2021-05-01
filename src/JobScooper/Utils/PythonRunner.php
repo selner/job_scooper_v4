@@ -30,8 +30,12 @@ class PythonRunner {
         $venvDir = __ROOT__ . '/python/.venv/bin';
         if(is_dir($venvDir)) {
             $pythonExec = preg_replace("/python /", "source {$venvDir}/activate; python ", $pythonExec);
+        } else {
+            $venvDir = __ROOT__ . '/python/venv/bin';
+            if (is_dir($venvDir)) {
+                $pythonExec = preg_replace("/python /", "source {$venvDir}/activate; python ", $pythonExec);
+            }
         }
-
         return $pythonExec;
     }
 

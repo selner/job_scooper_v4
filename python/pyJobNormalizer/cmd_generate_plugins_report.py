@@ -23,7 +23,7 @@ from task_generate_broken_plugins_data import TaskGenerateBrokenPluginReportData
 
 cli_usage = """
 Usage:
-  {} -c <dbstring> -o <outputfile>
+  {} (-c <dbstring> | --dsn <dbstring>) -o <outputfile>
   {} --version
 
 Options:
@@ -31,14 +31,18 @@ Options:
   --version     show version and exit
   -v --verbose      print status messages
   -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
+  --dsn <dbstring>                          DSN connection string for database     
   -o <file>, --output <file> output file with job match results 
 """
 if __name__ == '__main__':
 
     args = docopt_ext(cli_usage.format(__file__, __file__), version='0.1.1rc')
 
-    if "output" in args and args["output"] and 'connecturi' in args \
-            and args['connecturi']:
-        reporter = TaskGenerateBrokenPluginReportData(**args)
-    else:
-        print(u"Unable to generate broken plugin report data.  Missing script arguments.")
+    try:
+        if "output" in args and args["output"] :
+            reporter = TaskGenerateBrokenPluginReportData(**args)
+        else:
+            raise Exception("Missing output parameter.")
+    except Exception as ex:
+        print(f'Unable to generate broken plugin report data:  {ex}')
+        raise ex
