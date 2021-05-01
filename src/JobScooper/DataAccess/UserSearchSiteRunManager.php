@@ -163,7 +163,7 @@ class UserSearchSiteRunManager {
      */
     public static function filterRecentlyRunUserSearchRuns(&$searchRuns)
     {
-    	$ignoreRecent = Settings::getValue('command_line_args.ignore_recent');
+    	$ignoreRecent = boolval(Settings::getValue('command_line_args.ignore_recent'));
     	if(null !== $ignoreRecent && $ignoreRecent === true) {
     		LogMessage('--ignore_recent set.  Not filtering out recently run searches.');
 			return;
