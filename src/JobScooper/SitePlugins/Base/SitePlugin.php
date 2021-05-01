@@ -110,7 +110,7 @@ abstract class SitePlugin implements IJobSitePlugin
             }
         }
 
-        $this->_otherPluginSettings = Settings::getValue('plugin_settings.' . $this->JobSiteKey);
+        $this->_otherPluginSettings = Settings::getValue('plugins.' . $this->JobSiteKey);
 
         //
         // Set all the flag defaults to be not supported

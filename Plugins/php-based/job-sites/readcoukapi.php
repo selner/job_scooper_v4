@@ -45,7 +45,7 @@ class PluginReed extends \JobScooper\SitePlugins\ApiPlugin
     {
         $uri = $searchDetails->getSearchStartUrl();
 
-        $settings = \JobScooper\Utils\Settings::getValue('plugin_settings.' . $this->JobSiteKey);
+        $settings = \JobScooper\Utils\Settings::getValue('plugins.' . strtolower($this->JobSiteKey));
         if(!is_empty_value($settings) && array_key_exists("apikey", $settings)) {
             $key = $settings['apikey'];
         }

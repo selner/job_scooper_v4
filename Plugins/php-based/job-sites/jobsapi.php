@@ -25,8 +25,17 @@ class PluginUSAJobs extends ApiPlugin
     protected $JobPostingBaseUrl = 'http://search.digitalgov.gov/developer/jobs.html';
     protected $SearchUrlFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';
     protected $JobSiteName = 'USAJobs';
-    protected $JobListingsPerPage = 25;
+    protected $JobListingsPerPage = 500;
     protected $LocationType = 'location-city-comma-state';
+    protected $JobMapping = Array(
+        'sourceId' => 'JobSitePostId',
+        'company' => 'Company',
+        'title' => 'Title',
+        'posted-date' => 'PostedAt',
+        'PositionURI' => 'Url',
+        'locationName' => 'Location'
+    );
+
 
     /**
      * @param     $searchDetails
@@ -41,12 +50,40 @@ class PluginUSAJobs extends ApiPlugin
         $options = [
             'AuthorizationKey' => $this->_otherPluginSettings['authorization_key'],
             'LocationName' => $searchDetails->getGeoLocationURLValue("{Place} {Region}"),
-            'Page' => $pageNumber
+            'SortField' => 'opendate',
+            'ResultsPerPage' => $this->JobListingsPerPage
         ];
-        $query = new UsajobsQuery($options);
-        $client = new UsajobsProvider($query);
-        LogMessage("Getting jobs from " . $query->getUrl() . "[". $searchDetails->getUserSearchSiteRunKey());
-        $apiJobs = $client->getJobs();
-        return $apiJobs->all();
+
+        $firstRun = TRUE;
+        $nPage = 1;
+        $apiJobs = ['items' => null ];
+
+        $jobresults = [];
+        $retJobs = [];
+        $nReturnJobsInPage = 0;
+        while ($firstRun || $this->JobListingsPerPage <= $nReturnJobsInPage) {
+            $firstRun = FALSE;
+
+            $qopts = array_copy($options);
+            $qopts['Page'] = $nPage;
+
+            $query = new UsajobsQuery($options);
+
+            $client = new UsajobsProvider($query);
+            LogMessage("Getting jobs from " . $query->getUrl() . "[". $searchDetails->getUserSearchSiteRunKey());
+            $apiJobs = $client->getJobs();
+
+            try {
+                $nReturnJobsInPage = count($apiJobs->all());
+                $retJobs = array_replace($retJobs, $apiJobs->all());
+
+            } catch (Exception $ex) {
+                handleException($ex);
+            }
+
+            $nPage += 1;
+        }
+
+        return $retJobs;
     }
 }
