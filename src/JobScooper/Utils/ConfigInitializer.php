@@ -83,6 +83,18 @@ class ConfigInitializer
      */
     public function initialize()
     {
+        if(empty($_SERVER['REMOTE_HOST'])) {
+            $_SERVER['REMOTE_HOST'] = 'localhost';
+        }
+
+        if(empty($_SERVER['REMOTE_ADDR'])) {
+            $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        }
+
+        if(empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $_SERVER['HTTP_CLIENT_IP'] = '127.0.0.1';
+        }
+
         Settings::moveValue('command_line_args.debug', 'debug');
         
         LogMessage('Setting up configuration... ');
