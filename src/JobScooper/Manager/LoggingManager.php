@@ -17,7 +17,7 @@
 namespace JobScooper\Manager;
 
 use Bramus\Monolog\Formatter\ColorSchemes\DefaultScheme;
-use JobScooper\Logging\CSVLogHandler;
+use FemtoPixel\Monolog\Handler\CsvHandler;
 use JobScooper\Logging\ErrorEmailLogHandler;
 use JobScooper\Utils\JobsExceptionHandler;
 use JobScooper\Utils\Settings;
@@ -234,8 +234,7 @@ class LoggingManager extends \Monolog\Logger
         //
         // Configure the CSV-format error log
         //
-        $fpcsv = fopen($csvlog, 'wb');
-        $csvErrHandler = new CSVLogHandler($fpcsv, self::WARNING, $bubble = true);
+        $csvErrHandler = new CsvHandler($csvlog, self::WARNING, $bubble = true);
         $this->addHandler('csverrors', $csvErrHandler);
         $this->logRecord(LogLevel::INFO, "Error logging to CSV file: {$csvlog}");
 

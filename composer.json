@@ -40,7 +40,8 @@
         "ext-dom": ">=20031129",
         "nategood/httpful": "dev-master",
         "jbzoo/data": "4.x-dev",
-        "php-webdriver/webdriver": "^1.10"
+        "php-webdriver/webdriver": "^1.10",
+        "femtopixel/monolog-csvhandler": "dev-master"
     },
     "autoload": {
         "psr-4": {

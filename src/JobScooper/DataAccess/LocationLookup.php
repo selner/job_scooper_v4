@@ -17,8 +17,7 @@
 
 namespace JobScooper\DataAccess;
 
-use JobScooper\Logging\CSVLogFormatter;
-use JobScooper\Logging\CSVLogHandler;
+use FemtoPixel\Monolog\Handler\CsvHandler;
 use JobScooper\Traits\Singleton;
 use JobScooper\Utils\CurlWrapper;
 use JobScooper\Utils\Settings;
@@ -55,13 +54,8 @@ class LocationLookup {
         $logger = new Logger('geocode_api_cache');
         $now = getNowAsString('-');
         $csvlog = getOutputDirectory('logs') . DIRECTORY_SEPARATOR . "{$this->_loggerName}-{$now}.csv";
-        $fpcsv = fopen($csvlog, 'w');
-        $csvHandler = new CSVLogHandler($fpcsv, LOG_INFO, $bubble = false, $this->getLogContextKeys());
-        $fmtr = new CSVLogFormatter();
-        $csvHandler->setFormatter($fmtr);
+        $csvHandler = new CsvHandler($csvlog, LOG_INFO, $bubble = false);
         $logger->pushHandler($csvHandler);
-
-        $logger->addNotice("Initialized log", array_fill_keys($this->getLogContextKeys(), ""));
 
         $logger->info("Initialized log", array_fill_keys($this->getLogContextKeys(), ""));
 		
