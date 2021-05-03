@@ -226,6 +226,8 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
      */
     public function normalizeJobRecord()
     {
+        $this->setJobSiteKey(cleanupSlugPart($this->getJobSiteKey()));
+
         $fields = $this->getModifiedColumnsPhpNames();
         if (!is_empty_value($fields)) {
             foreach ($fields as $phpField) {
@@ -234,7 +236,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
             	}
                 $getFunc = "get{$phpField}";
                 $setFunc = "set{$phpField}";
-                $val = $this->$getFunc;
+                $val = call_user_func(array($this, $getFunc), []);
                 if (!is_empty_value($val) && is_string($val)) {
                     $cleanVal = $this->_cleanupTextValue($val);
                     call_user_func(array($this, $setFunc), $cleanVal);
@@ -242,7 +244,6 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
             }
 
             $this->updateAutoColumns();
-            $this->setJobSiteKey(cleanupSlugPart($this->getJobSiteKey()));
         }
     }
 

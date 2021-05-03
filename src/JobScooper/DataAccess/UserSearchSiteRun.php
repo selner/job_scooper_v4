@@ -315,7 +315,10 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                         else {
                             $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], $values);
                         }
+                        break;
 
+                    case "JOBSITEKEY":
+                        $replaceVal = $this->jobsite_key;
                         break;
 
                     case "ITEM_NUMBER":
