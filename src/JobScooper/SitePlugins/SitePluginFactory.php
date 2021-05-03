@@ -172,10 +172,24 @@ class SitePluginFactory
 
             foreach ($plugsToInit as $config) {
                 $jsonPlugin = $this->_parsePluginConfig_($config);
-                // replace non letter or digits with separator
-
                 $this->_jsonPluginSetups[$jsonPlugin['PhpClassName']] = $jsonPlugin;
+
+                if(array_key_exists('child_jobsites', $jsonPlugin) && $jsonPlugin['child_jobsites'] != null &&
+                    count($jsonPlugin['child_jobsites']) > 0) {
+                    LogDebug(sprintf("Loading %s child jobsite plugin configurations for %s...", \count($jsonPlugin['child_jobsites']), $jsonPlugin['PhpClassName']), null, $log_topic='plugins');
+
+                    foreach($jsonPlugin['child_jobsites'] as $childsitekey) {
+                        $childConfig = array(
+                            "JobSiteName" => $childsitekey,
+                            "PluginExtendsClassName" => $jsonPlugin["PhpClassName"]
+                        );
+
+                        $jsonPlugin = $this->_parsePluginConfig_($childConfig);
+                        $this->_jsonPluginSetups[$jsonPlugin['PhpClassName']] = $jsonPlugin;
+                    }
+                }
             }
+
         }
     }
 
@@ -285,7 +299,12 @@ class SitePluginFactory
             }
         }
 
-        LogDebug('Loaded JSON config for new plugin: ' . $pluginData['JobSiteName'], null, $log_topic='plugins');
+        if (array_key_exists('ChildJobSites', $arrConfigData)) {
+            $pluginData['child_jobsites'] = $arrConfigData['ChildJobSites'];
+        }
+
+
+            LogDebug('Loaded JSON config for new plugin: ' . $pluginData['JobSiteName'], null, $log_topic='plugins');
 
         return $pluginData;
     }
