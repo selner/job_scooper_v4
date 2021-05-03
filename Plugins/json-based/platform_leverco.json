@@ -82,35 +82,35 @@
                 "Type": "NONE"
             },
             "ChildJobSites" : [
-                "windfalldata",
-                "yelp",
+                "beyondmeat",
+                "buildzoom",
                 "convoy",
-                "refractionai",
-                "streetlightdata",
-                "stardog",
-               /* dashes in jobsitekeys not yet supported
-                optiv-2",
-               */
                 "criteo",
                 "done",
-                "zoom",
-                "kraken",
-                "buildzoom",
-                "pachyderm",
-                "palantir",
-                "imperfectfoods",
-                "impossiblefoods",
-                "territoryfoods",
-                "missionbarns",
-                "petiq",
-                "localfoodgroup",
-                "beyondmeat",
                 "foth",
                 "homechef",
+                "honestfoodcompany",
                 "hypebeast",
-                "vow",
+                "imperfectfoods",
+                "impossiblefoods",
+                "kraken",
+                "localfoodgroup",
+                "missionbarns",
                 "oatly",
-                "honestfoodcompany"
+                /* dashes in jobsitekeys not yet supported
+                 optiv-2",
+                */
+                "pachyderm",
+                "palantir",
+                "petiq",
+                "refractionai",
+                "stardog",
+                "streetlightdata",
+                "territoryfoods",
+                "vow",
+                "windfalldata",
+                "yelp",
+                "zoom"
             ]
         }
     ]
