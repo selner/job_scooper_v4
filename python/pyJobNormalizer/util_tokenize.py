@@ -27,6 +27,7 @@ from nltk.corpus import stopwords
 import os
 import re
 from collections import OrderedDict
+from util_log import logmsg
 
 states = {
     'AK': 'Alaska',
@@ -122,7 +123,7 @@ class Tokenizer:
 
         for k in list(list_data.keys()):
             if isinstance(k, str) and len(k) == 0:
-                print("String value for key was empty.  Skipping...")
+                logmsg("String value for key was empty.  Skipping...")
                 continue
 
             tokens = self.tokenize_string(list_data[k][field])

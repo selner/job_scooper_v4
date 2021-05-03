@@ -18,7 +18,8 @@
 #  under the License.
 ###########################################################################
 from task_dedupe_jobs import TaskDedupeJobPosting
-from helpers import docopt_ext
+from helpers import docopt_ext, common_options
+from util_log import logmsg
 
 
 cli_usage = """
@@ -32,9 +33,8 @@ Options:
   -v --verbose      print status messages
   -o <file>, --output <file>    output JSON file with ID pairs of duplicate listings 
   -i <file>, --input <file>     input JSON data file with job postings
-  --dsn <dbstring>                          DSN connection string for database     
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-"""
+""" + common_options
+
 
 
 if __name__ == '__main__':
@@ -44,5 +44,5 @@ if __name__ == '__main__':
         matcher = TaskDedupeJobPosting(**arguments)
         matcher.update_jobmatch_exclusions()
     except Exception as ex:
-        print(f'Unable to deduplicate job postings: {ex}')
+        logmsg(f'Unable to deduplicate job postings: {ex}')
         raise ex

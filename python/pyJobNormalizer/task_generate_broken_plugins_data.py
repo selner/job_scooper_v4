@@ -142,7 +142,7 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
         return template.render(data=data)
 
     def export_html_to_file(self, filepath, html):
-        print("Exporting rendered HTML to {}".format(filepath))
+        self.log("Exporting rendered HTML to {}".format(filepath))
 
         with open(filepath, 'w') as html_fp:
             html_fp.writelines(html)

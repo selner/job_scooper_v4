@@ -18,7 +18,8 @@
 #  under the License.
 ###########################################################################
 from task_skip_nontitle_matches import TaskMarkNonMatchesAsSkipSend
-from helpers import docopt_ext
+from helpers import docopt_ext, COMMON_OPTIONS
+from util_log import logmsg
 
 cli_usage = """
 Usage:
@@ -26,12 +27,7 @@ Usage:
   cmd_mark_skipsend.py --version
   
 Options:
-  -h --help     show this help message and exit
-  --version     show version and exit
-  -v --verbose      print status messages
-  --dsn <dbstring>                          DSN connection string for database     
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-"""
+""" + COMMON_OPTIONS
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
@@ -39,4 +35,5 @@ if __name__ == '__main__':
     try:
         matcher = TaskMarkNonMatchesAsSkipSend(**args)
     except Exception as ex:
-        print(f'Unable to update user job matches that should be skipped:  {ex}')
+        logmsg(f'Unable to update user job matches that should be skipped:  {ex}')
+        raise ex

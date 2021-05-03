@@ -18,7 +18,8 @@
 #  under the License.
 ###########################################################################
 from task_dedupe_jobs import TaskDedupeJobPosting
-from helpers import docopt_ext
+from helpers import docopt_ext, COMMON_OPTIONS
+from util_log import logmsg
 
 
 cli_usage = """
@@ -27,14 +28,9 @@ Usage:
   cmd_mark_duplicates.py --version
   
 Options:
-  -h --help     show this help message and exit
-  --version     show version and exit
-  -v --verbose      print status messages
   -o <file>, --output <file>    output JSON file with ID pairs of duplicate listings 
   -i <file>, --input <file>     input JSON data file with job postings
-  --dsn <dbstring>                          DSN connection string for database     
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-"""
+""" + COMMON_OPTIONS
 
 
 if __name__ == '__main__':
@@ -44,5 +40,5 @@ if __name__ == '__main__':
         matcher = TaskDedupeJobPosting(**arguments)
         matcher.dedupe_jobs()
     except Exception as ex:
-        print(f'Unable to deduplicate job postings: {ex}')
+        logmsg(f'Unable to deduplicate job postings: {ex}')
         raise ex

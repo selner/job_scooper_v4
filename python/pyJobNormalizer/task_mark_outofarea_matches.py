@@ -120,5 +120,5 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         #
         #  print out a last summary line with the results for logging by the original calling process
         #
-        print(u"{} user job matches marked in {}'s search areas; {} matches marked out of area.".format(count_in_area, self._userkey, count_out_area))
+        self.log(u"{} user job matches marked in {}'s search areas; {} matches marked out of area.".format(count_in_area, self._userkey, count_out_area))
 

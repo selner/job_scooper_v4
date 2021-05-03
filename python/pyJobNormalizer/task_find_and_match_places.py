@@ -139,7 +139,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             """.format(locfacts['GeoLocationId'], self.connection.escape_string(locfacts['DisplayName']), self.connection.escape_string(loc))
 
         rows_updated = self.run_command(statement, close_connection=False)
-        self.log(u"Updated {} rows missing information for '{} ({})'".format(rows_updated, loc,
+        self.log("Updated {} rows missing information for '{} ({})'".format(rows_updated, loc,
                                                                           str(locfacts)))
         return rows_updated
 
@@ -222,7 +222,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             locs:
             geocode_server:
         """
-        print(u"Finding places for {} unknown locations ...".format(
+        self.log(u"Finding places for {} unknown locations ...".format(
             len(locs)))
         total_loc_found = 0
         total_loc_notfound = 0
@@ -238,11 +238,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 # Do place lookup
                 place_details = {}
 
-                payload = {'query': loc}
+                payload = {'query': loc, 'localities_only': 1}
                 # headers = {'content-type': 'application/json'}
                 headers = {}
 
-                print(u"Looking up place for location search value '{}'".format(loc))
+                self.log(u"Looking up place for location search value '{}'".format(loc))
                 kwargs = {
                     'url': u"{}/places/lookup".format(geocode_server),
                     'params': payload,
@@ -250,7 +250,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                     'timeout': 30
                 }
 
-                print(u"... calling API '{}?{}".format(kwargs['url'], urlencode(payload)))
+                self.log(u"... calling API '{}?{}".format(kwargs['url'], urlencode(payload)))
 
                 place_details = self.call_geocode_api(**kwargs)
                 if place_details and len(place_details) > 0:  # if found place:
@@ -259,7 +259,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                     if 'place_id' in place_details and place_details['place_id']:
                         msgPlaceMatch = " place_id={} ".format(place_details['place_id'])
 
-                    print(u"... place returned from API: {}, location={}".format(msgPlaceMatch,
+                    self.log(u"... place returned from API: {}, location={}".format(msgPlaceMatch,
                                                                                           place_details[
                                                                                               'formatted_address']))
 
@@ -269,7 +269,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                                    place_details[pkey] is not None
                                    }
                     if geolocfacts and len(geolocfacts) > 0:
-                        # print(u"... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
+                        # self.log(u"... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
 
                         if 'geolocation_key' in geolocfacts and len(geolocfacts['geolocation_key']) > 100:
                             geolocfacts['geolocation_key'] = geolocfacts['geolocation_key'][0:100]
@@ -288,12 +288,12 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
                         existingGeo = self.fetch_one_from_query(query)
                         if existingGeo is not None and len(existingGeo) > 0:
-                            print(u"... found existing geolocation_id {} for '{}'.  Using it instead." .format(existingGeo['GeoLocationId'], existingGeo['DisplayName']))
+                            self.log(u"... found existing geolocation_id {} for '{}'.  Using it instead." .format(existingGeo['GeoLocationId'], existingGeo['DisplayName']))
                             locfacts = {'GeoLocationId': existingGeo['GeoLocationId'],
                                         'DisplayName': existingGeo['DisplayName']}
                         else:
                             ins_result = self.add_row("geolocation", "geolocation_id", geolocfacts, self._geoloc_columns)
-                            # print(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
+                            # self.log(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
 
                             total_loc_found += 1
                             locfacts = {'GeoLocationId': ins_result['geolocation_id'],
@@ -306,13 +306,13 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                         rows_updated = self._update_mappings_for_loc(loc, locfacts)
                         total_jp_updated += rows_updated
                     else:
-                        print(u"... place_id {} found for {} but could not be geocoded.".format(place_details['place_id'], str(loc)))
+                        self.log(u"... place_id {} found for {} but could not be geocoded.".format(place_details['place_id'], str(loc)))
                         # print(u"... TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
                         total_loc_notfound += 1
                     # if not found place:
                     #   add to failed lookups dataset
                 else:
-                    print(u"... place for {} not found via API".format(str(loc)))
+                    self.log(u"... place for {} not found via API".format(str(loc)))
                     # print(u"... TODO -- store failed lookups like '{}' to skip future failures".format(loc))
                     total_loc_notfound += 1
 
@@ -321,7 +321,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         finally:
             self.close_connection()
-            print(
+            self.log(
                 u"Found places for {} / {} locations; could not find {} / {} locations.  Updated {} job postings based "
                 u"on new locations found.".format(
                     total_loc_found, len(locs), total_loc_notfound, len(locs), total_jp_updated))

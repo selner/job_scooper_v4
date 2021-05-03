@@ -18,7 +18,8 @@
 #  under the License.
 ###########################################################################
 from task_mark_outofarea_matches import TaskMarkOutOfAreaMatches
-from helpers import docopt_ext
+from helpers import docopt_ext, COMMON_OPTIONS
+from util_log import logmsg
 
 cli_usage = """
 Usage:
@@ -26,13 +27,8 @@ Usage:
   cmd_set_out_of_area.py --version
   
 Options:
-  -h --help     show this help message and exit
-  --version     show version and exit
-  -v --verbose      print status messages
-  -c <dbstring>, --connecturi <dbstring>    connection string uri for database    
-  --dsn <dbstring>                          DSN connection string for database     
   -u <userkey>, --user <userkey>    slug key for user to update matches on
-"""
+""" + COMMON_OPTIONS
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
@@ -44,5 +40,5 @@ if __name__ == '__main__':
         matcher = TaskMarkOutOfAreaMatches(**args)
         matcher.mark_out_area()
     except Exception as ex:
-        print(f'Unable to deduplicate job postings: {ex}')
+        logmsg(f'Unable to deduplicate job postings: {ex}')
         raise ex

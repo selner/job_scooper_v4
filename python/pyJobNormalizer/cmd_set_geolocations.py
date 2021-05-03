@@ -18,7 +18,8 @@
 #  under the License.
 ###########################################################################
 from task_find_and_match_places import FindPlacesFromDBLocationsTask
-from helpers import docopt_ext
+from helpers import docopt_ext, COMMON_OPTIONS
+from util_log import logmsg
 
 cli_usage = """
 Usage:
@@ -26,13 +27,8 @@ Usage:
   cmd_set_geolocations.py --version
   
 Options:
-  -h --help     show this help message and exit
-  --version     show version and exit
-  -v --verbose      print status messages
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-  --dsn <dbstring>                          DSN connection string for database     
--s <server>, --server <server>    hostname for geocode api server [default: http://0.0.0.0:5000]
-"""
+  -s <server>, --server <server>            hostname for geocode api server [default: http://0.0.0.0:5000]
+""" + COMMON_OPTIONS
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
@@ -41,5 +37,5 @@ if __name__ == '__main__':
         matcher = FindPlacesFromDBLocationsTask(**args)
         matcher.update_all_locations(**args)
     except Exception as ex:
-        print(f'Unable to set geolocations: {ex}')
+        logmsg(f'Unable to set geolocations: {ex}')
         raise ex

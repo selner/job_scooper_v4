@@ -46,7 +46,7 @@ class TaskDedupeJobPosting(DatabaseMixin):
 
     def dedupe_jobs(self):
 
-        print(u"Processing job postings for duplicates from database {}".format(self._dbparams))
+        self.log(u"Processing job postings for duplicates from database {}".format(self._dbparams))
 
         self.get_recent_duplicate_posts()
 
@@ -55,7 +55,7 @@ class TaskDedupeJobPosting(DatabaseMixin):
         self.update_jobmatch_exclusions()
 
     def get_recent_duplicate_posts(self):
-        print(u"Getting groups of duplicate job postings...")
+        self.log(u"Getting groups of duplicate job postings...")
 
         querysql = u"""
                 SELECT 
@@ -79,7 +79,7 @@ class TaskDedupeJobPosting(DatabaseMixin):
         self._dupe_job_groups = self.fetch_all_from_query(querysql)
 
     def update_database(self):
-        print(u"Updating {} duplicate job post groupings in the database...".format(
+        self.log(u"Updating {} duplicate job post groupings in the database...".format(
             len(self._dupe_job_groups)))
         nupdated = 0
         total_dupe_posts = 0
@@ -104,10 +104,10 @@ class TaskDedupeJobPosting(DatabaseMixin):
 
                     nupdated += self.run_command(statement, close_connection=False)
 
-            print(u"Processed {} duplicate job postings over the past 14 days; marked {} newly as duplicate.".format(total_dupe_posts, nupdated))
+            self.log(u"Processed {} duplicate job postings over the past 14 days; marked {} newly as duplicate.".format(total_dupe_posts, nupdated))
 
         except Exception as e:
-            print(u"Exception occurred:{}".format(e))
+            self.log(u"Exception occurred:{}".format(e))
             raise e
 
         finally:
@@ -118,7 +118,7 @@ class TaskDedupeJobPosting(DatabaseMixin):
         Args:
         """
         try:
-            print(u"Updating duplicate-related user_job_matches...")
+            self.log(u"Updating duplicate-related user_job_matches...")
 
             statement = u"""
                 UPDATE user_job_match 
@@ -136,7 +136,7 @@ class TaskDedupeJobPosting(DatabaseMixin):
                 """
 
             rows_updated = self.run_command(statement, close_connection=False)
-            print(u"Updated {} user_job_matches marked excluded because they map to duplicate job postings.".format(rows_updated))
+            self.log(u"Updated {} user_job_matches marked excluded because they map to duplicate job postings.".format(rows_updated))
             return rows_updated
 
         except Exception as e:

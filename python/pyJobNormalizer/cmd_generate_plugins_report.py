@@ -17,9 +17,10 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from helpers import docopt_ext
+from helpers import docopt_ext, COMMON_OPTIONS
 from task_generate_broken_plugins_data import TaskGenerateBrokenPluginReportData
 
+from util_log import logmsg
 
 cli_usage = """
 Usage:
@@ -27,13 +28,9 @@ Usage:
   {} --version
 
 Options:
-  -h --help     show this help message and exit
-  --version     show version and exit
-  -v --verbose      print status messages
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-  --dsn <dbstring>                          DSN connection string for database     
   -o <file>, --output <file> output file with job match results 
-"""
+""" + COMMON_OPTIONS
+
 if __name__ == '__main__':
 
     args = docopt_ext(cli_usage.format(__file__, __file__), version='0.1.1rc')
@@ -44,5 +41,5 @@ if __name__ == '__main__':
         else:
             raise Exception("Missing output parameter.")
     except Exception as ex:
-        print(f'Unable to generate broken plugin report data:  {ex}')
+        logmsg(f'Unable to generate broken plugin report data:  {ex}')
         raise ex

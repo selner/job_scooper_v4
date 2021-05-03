@@ -55,7 +55,7 @@ class TaskAddTitleTokens(DatabaseMixin):
                 title
         '''
         total_rows = self.fetch_many_with_callback(query, self.tokenize_job_rows)
-        print("Completed update of title tokens for {} jobposting rows.".format(total_rows))
+        self.log("Completed update of title tokens for {} jobposting rows.".format(total_rows))
 
     def tokenize_job_rows(self, dbrows):
         jobs_to_process = {}
@@ -82,7 +82,7 @@ class TaskAddTitleTokens(DatabaseMixin):
                 if not ('title_tokens' in updated_jobs[key] and
                         updated_jobs[key]['title_tokens'] and
                         len(updated_jobs[key]['title_tokens']) > 0):
-                    print("Warning:  job {} did not successfully generate the needed title tokens for title '{}'".format(key, updated_jobs[key]['title']))
+                    self.log("Warning:  job {} did not successfully generate the needed title tokens for title '{}'".format(key, updated_jobs[key]['title']))
                 else:
                     row_refkey_titleval = u"_".join(updated_jobs[key]['title_tokens'])
 
@@ -139,30 +139,4 @@ class TaskAddTitleTokens(DatabaseMixin):
     #
     #             self.run_command(upd_query)
 
-
-from docopt import docopt
-
-cli_usage = """
-Usage:
-  task_tokenize_jobtitles.py (-c <dbstring> | --dsn <dbstring>) -u user
-  task_tokenize_jobtitles.py --version
-
-Options:
-  -h --help     show this help message and exit
-  --version     show version and exit
-  -v --verbose      print status messages
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-  --dsn <dbstring>                          DSN connection string for database     
-"""
-
-if __name__ == '__main__':
-    arguments = docopt(cli_usage, version='0.1.1rc')
-    args = {k.replace("--", ""): arguments[k] for k in arguments.keys()}
-
-    try:
-        jobtok = TaskAddTitleTokens(**args)
-        jobtok.update_jobs_without_tokens()
-    except Exception as ex:
-        print(f'Unable to update job title tokes: {ex}')
-        raise ex
 

@@ -22,7 +22,18 @@ import json
 import csv
 
 import docopt
+from util_log import logmsg
+
 docopt_func = getattr(docopt, 'docopt')
+
+COMMON_OPTIONS = """
+  --dsn <dbstring>                          DSN connection string for database     
+  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
+  --log <logdir>                            output directory for logging
+  -h --help                                 show this help message and exit
+  --version                                 show version and exit
+  -v --verbose                              print status messages
+"""
 
 def docopt_ext(doc, argv=None, help=True, version=None, options_first=False):
 
@@ -163,7 +174,7 @@ def loadcsv(csvfilename, rowkeyname=None):
     import os
 
 
-    print(u"Loading {}...".format(csvfilename))
+    logmsg("Loading {}...".format(csvfilename))
     from io import open
     csv_fp = open(csvfilename, 'r')
     dict_records = {}
@@ -183,7 +194,7 @@ def loadcsv(csvfilename, rowkeyname=None):
         print(err)
         pass
 
-    print(u"Loaded {} rows from {}.".format(len(dict_records), csvfilename))
+    logmsg("Loaded {} rows from {}.".format(len(dict_records), csvfilename))
 
     return {'fieldnames': fields, 'dict': dict_records}
 

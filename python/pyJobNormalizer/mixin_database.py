@@ -22,64 +22,10 @@ import pymysql
 
 from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
+from util_log import getLogger
 
 ARRAY_JOIN_TOKEN = u"_||_"
 from logging import INFO, DEBUG, WARNING, ERROR, CRITICAL
-
-import structlog
-
-structlog.configure(
-    processors=[
-        # This performs the initial filtering, so we don't
-        # evaluate e.g. DEBUG when unnecessary
-        structlog.stdlib.filter_by_level,
-        # Adds logger=module_name (e.g __main__)
-        structlog.stdlib.add_logger_name,
-        # Adds level=info, debug, etc.
-        structlog.stdlib.add_log_level,
-        # Performs the % string interpolation as expected
-        structlog.stdlib.PositionalArgumentsFormatter(),
-        # Include the stack when stack_info=True
-        structlog.processors.StackInfoRenderer(),
-        # Include the exception when exc_info=True
-        # e.g log.exception() or log.warning(exc_info=True)'s behavior
-        structlog.processors.format_exc_info,
-        # Decodes the unicode values in any kv pairs
-        structlog.processors.UnicodeDecoder(),
-        # Creates the necessary args, kwargs for log()
-        structlog.stdlib.render_to_log_kwargs,
-    ],
-    # Our "event_dict" is explicitly a dict
-    # There's also structlog.threadlocal.wrap_dict(dict) in some examples
-    # which keeps global context as well as thread locals
-    context_class=dict,
-    # Provides the logging.Logger for the underlaying log call
-    logger_factory=structlog.stdlib.LoggerFactory(),
-    # Provides predefined methods - log.debug(), log.info(), etc.
-    wrapper_class=structlog.stdlib.BoundLogger,
-    # Caching of our logger
-    cache_logger_on_first_use=True,
-)
-#
-# structlog.configure(
-#     processors=[
-#         structlog.stdlib.filter_by_level,
-#         structlog.stdlib.add_logger_name,
-#         structlog.stdlib.add_log_level,
-#         structlog.stdlib.PositionalArgumentsFormatter(),
-#         structlog.processors.TimeStamper(fmt='iso'),
-#         structlog.processors.StackInfoRenderer(),
-#         structlog.processors.format_exc_info,
-#         structlog.processors.KeyValueRenderer(),
-#         # ,
-#         structlog.dev.ConsoleRenderer(colors=False)
-#         # structlog.processors.JSONRenderer(),
-#     ],
-#     context_class=dict,
-#     logger_factory=structlog.stdlib.LoggerFactory(),
-#     wrapper_class=structlog.stdlib.BoundLogger,
-#     cache_logger_on_first_use=True,
-# )
 
 
 
@@ -94,8 +40,7 @@ class DatabaseMixin:
     _logger = None
     
     def __init__(self, **kwargs):
-        self._logger = structlog.getLogger()
-        self._logger.setLevel(DEBUG)
+        self._logger = getLogger()
 
         self.log("Parsing commmand line parameters...")
         self._parse_arguments(**kwargs)
@@ -304,7 +249,7 @@ class DatabaseMixin:
                 self.close_connection()
 
     def get_table_columns(self, tablename):
-        # print("Running command: {}".format(querysql))
+        # self.log("Running command: {}".format(querysql))
         """
         Args:
             tablename:

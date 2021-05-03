@@ -11,5 +11,5 @@ nltk
 unidecode
 future
 jinja2
-structlog
-
+loguru
+cryptography

@@ -17,8 +17,9 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from helpers import docopt_ext
+from helpers import docopt_ext, COMMON_OPTIONS
 from task_match_titles import TaskMatchJobsToKeywords
+from util_log import logmsg
 
 
 cli_usage = """
@@ -27,14 +28,9 @@ Usage:
   cmd_match_titles_to_keywords.py --version
 
 Options:
-  -h --help  show this help message and exit
-  --version  show version and exit
-  -v --verbose  print status messages
   -o <file>, --output <file> output file with job match results 
   -i <file>, --input <file> input JSON data file with jobs and keywords
-  --dsn <dbstring>                          DSN connection string for database     
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-"""
+""" + COMMON_OPTIONS
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc')
@@ -43,5 +39,5 @@ if __name__ == '__main__':
         matcher = TaskMatchJobsToKeywords(**args)
         matcher.export_results()
     except Exception as ex:
-        print(f'Unable to match title keywords: {ex}')
+        logmsg(f'Unable to match title keywords: {ex}')
         raise ex

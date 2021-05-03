@@ -17,7 +17,8 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from helpers import docopt_ext
+from util_log import logmsg
+from helpers import docopt_ext, COMMON_OPTIONS
 from task_tokenize_jobtitles import TaskAddTitleTokens
 
 cli_usage = """
@@ -26,12 +27,7 @@ Usage:
   cmd_update_title_tokens.py --version
 
 Options:
-  -h --help  show this help message and exit
-  --version  show version and exit
-  -v --verbose  print status messages
-  --dsn <dbstring>                          DSN connection string for database     
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-"""
+""" + COMMON_OPTIONS
 
 if __name__ == '__main__':
     arguments = docopt_ext(cli_usage, version='0.1.1rc')
@@ -40,6 +36,6 @@ if __name__ == '__main__':
         toks = TaskAddTitleTokens(**arguments)
         toks.update_jobs_without_tokens()
     except Exception as ex:
-        print(f'Unable to update job title tokes: {ex}')
+        logmsg(f'Unable to update job title tokes: {ex}')
         raise ex
 
