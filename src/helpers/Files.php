@@ -317,9 +317,16 @@ function decodeJson($strJsonText, $options = null, $boolEscapeBackSlashes = fals
  */
 function loadJson($file, $options = null, $boolEscapeBackSlashes = false)
 {
+
+
+// You can pass args like in `json_decode`
+//    (new Comment)->decode($someJsonText, $assoc = true, $depth = 512, $options = JSON_BIGINT_AS_STRING);
+
     if (is_file($file)) {
         LogDebug("Reading json data from '{$file}'");
         $jsonText = file_get_contents($file, FILE_TEXT);
+        // Strip only!
+        $jsonText = (new \Ahc\Json\Comment())->strip($jsonText);
         return decodeJson($jsonText, $options, $boolEscapeBackSlashes);
     } else {
         LogError("Unable to load json data from '{$file}'");

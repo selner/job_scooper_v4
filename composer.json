@@ -41,7 +41,8 @@
         "nategood/httpful": "dev-master",
         "jbzoo/data": "4.x-dev",
         "php-webdriver/webdriver": "^1.10",
-        "femtopixel/monolog-csvhandler": "dev-master"
+        "femtopixel/monolog-csvhandler": "dev-master",
+        "adhocore/json-comment": "dev-main"
     },
     "autoload": {
         "psr-4": {
