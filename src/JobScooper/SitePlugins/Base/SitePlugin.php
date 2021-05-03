@@ -754,6 +754,30 @@ JSCODE;
     }
 
     /**
+     * parseNoJobsFoundTag
+     *
+     * @param $objSimpHTML
+     * @return string|null
+     * @throws \Exception
+     */
+    public function parseNoJobsFoundTag(SimpleHTMLHelper $objSimpHTML) {
+
+        if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && null !== $this->arrListingTagSetup['NoPostsFound'] && \count($this->arrListingTagSetup['NoPostsFound']) > 0) {
+            try {
+                $noResultsVal = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['NoPostsFound'], null, $this);
+                if (null !== $noResultsVal) {
+                    $this->log("Search returned { $noResultsVal } and matched expected 'No results' tag for { $this->JobSiteName }");
+                    return $noResultsVal;
+                }
+            } catch (\Exception $ex) {
+                $this->log("Warning: Did not find matched expected 'No results' tag for { $this->JobSiteName }.  Error:" . $ex->getMessage(), LogLevel::WARNING);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * parseTotalResultsCount
      *
      * If the site does not show the total number of results
@@ -771,19 +795,6 @@ JSCODE;
     {
         if (empty($this->arrListingTagSetup)) {
             throw new \BadMethodCallException(sprintf('Not implemented method  %s called on class %s', __METHOD__, __CLASS__));
-        }
-
-
-        if (array_key_exists('NoPostsFound', $this->arrListingTagSetup) && null !== $this->arrListingTagSetup['NoPostsFound'] && \count($this->arrListingTagSetup['NoPostsFound']) > 0) {
-            try {
-                $noResultsVal = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['NoPostsFound'], null, $this);
-                if (null !== $noResultsVal) {
-                    $this->log("Search returned { $noResultsVal } and matched expected 'No results' tag for { $this->JobSiteName }");
-                    return $noResultsVal;
-                }
-            } catch (\Exception $ex) {
-                $this->log("Warning: Did not find matched expected 'No results' tag for { $this->JobSiteName }.  Error:" . $ex->getMessage(), LogLevel::WARNING);
-            }
         }
 
         $retJobCount = C__TOTAL_ITEMS_UNKNOWN__;
@@ -1041,7 +1052,7 @@ JSCODE;
         	$match_string = "/{$match_string}/";
         }
 
-        $match = preg_match($match_string, $current_value);
+        $match = preg_match(strtolower($match_string), strtolower($current_value));
         if ($match === 1) {
 	        return 0;
 	    }
@@ -1461,8 +1472,8 @@ JSCODE;
         } catch (\Exception $ex) {
             $this->log($ex->getMessage(), \Monolog\Logger::WARNING);
         }
-        if (empty($arrItem['JobSitePostId'])) {
-            $urlparts = parse_url($arrItem['url']);
+        if (empty($arrItem['JobSitePostId']) && array_key_exists('Url', $arrItem)) {
+            $urlparts = parse_url($arrItem['Url']);
             $arrItem['JobSitePostId'] = $this->hashValue("{$urlparts['path']}?{$urlparts['query']}");
         }
 
@@ -1877,9 +1888,13 @@ JSCODE;
                 }
             }
 
-            $this->log('Getting count of ' . $this->JobSiteName . ' jobs for search ' . $searchDetails->getUserSearchSiteRunKey() . ': ' . $searchDetails->getSearchStartUrl());
-
-            if (!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE)) {
+            $nojobs = $this->parseNoJobsFoundTag($objSimpleHTML);
+            if ($nojobs != null) {
+                $this->log('Matched no jobs postings found tag on ' . $this->JobSiteName . ' jobs for search ' . $searchDetails->getUserSearchSiteRunKey() . ': ' . $searchDetails->getSearchStartUrl());
+                $nTotalListings = 0;
+            }
+            else if(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE)) {
+                $this->log('Getting count of ' . $this->JobSiteName . ' jobs for search ' . $searchDetails->getUserSearchSiteRunKey() . ': ' . $searchDetails->getSearchStartUrl());
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
                 $nTotalListings = (int) str_replace(',', '', $strTotalResults);
                 if ($nTotalListings == 0) {
@@ -1893,6 +1908,9 @@ JSCODE;
                     if ($totalPagesCount < 1) {
                         $totalPagesCount = 1;
                     }
+                }
+                else {
+                    LogDebug('Total job listing count not supported on ' . $this->JobSiteName . ' jobs for search ' . $searchDetails->getUserSearchSiteRunKey() . ': ' . $searchDetails->getSearchStartUrl());
                 }
             }
 
