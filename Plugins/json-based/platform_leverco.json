@@ -1,0 +1,117 @@
+{
+    "jobsite_plugins": [
+        {
+            "PhpClassName": "AbstractLeverCo",
+            /*
+               Lever does have a location parameter, but it is limited to an arbitrary set of location names
+               defined by the specific company, including items like "Remote" or "Remote--China".   This means
+               that adding the location parameter is likely to falsely filter out listings in a city if included,
+               so we err on the side of not missing potential matches by leaving out the location completely.
+
+               "SourceURL": "https://jobs.lever.co/***JOBSITEKEY***?location=***LOCATION:{Place}***",
+
+            */
+            "SourceURL": "https://jobs.lever.co/***JOBSITEKEY***",
+            "CountryCodes": [
+                "US"
+            ],
+            "AdditionalFlags": [
+                "C__JOB_PAGECOUNT_NOTAPPLICABLE",
+                "C__JOB_USE_SITENAME_AS_COMPANY"
+            ],
+            "Collections": [
+                {
+                    "Name": "PageFields",
+                    "Fields": [
+                        {
+                            "Name": "JobPostItem",
+                            "Selector": "div.posting",
+                            "Attribute": "collection",
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "NoPostsFound",
+                            "Selector": "div.postings-wrapper p",
+                            "Index" : 0,
+                            "Callback" : "matchesNoResultsPattern",
+                            "CallbackParameter": "no job",
+                            "Attribute": "text",
+                            "Type": "CSS"
+                        }
+                    ]
+                },
+                {
+                    "Name": "ItemFields",
+                    "Fields": [
+                        {
+                            "Name": "Title",
+                            "Selector": "a.posting-title h5",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "Url",
+                            "Selector": "div.posting-apply a",
+                            "Attribute": "href",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "JobSitePostId",
+                            "Selector": "div.posting",
+                            "Attribute": "data-qa-posting-id"
+                        },
+                        {
+                            "Name": "Location",
+                            "Selector": "div.posting-categories span",
+                            "Attribute": "text",
+                            "Index": 0,
+                            "Type": "CSS"
+                        },
+                        {
+                            "Name": "Category",
+                            "Selector": "div.posting-categories span",
+                            "Attribute": "text",
+                            "Index": 1,
+                            "Type": "CSS"
+                        }
+                    ]
+                }
+            ],
+            "Pagination": {
+                "Type": "NONE"
+            },
+            "ChildJobSites" : [
+                "windfalldata",
+                "yelp",
+                "convoy",
+                "refractionai",
+                "streetlightdata",
+                "stardog",
+               /* dashes in jobsitekeys not yet supported
+                optiv-2",
+               */
+                "criteo",
+                "done",
+                "zoom",
+                "kraken",
+                "buildzoom",
+                "pachyderm",
+                "palantir",
+                "imperfectfoods",
+                "impossiblefoods",
+                "territoryfoods",
+                "missionbarns",
+                "petiq",
+                "localfoodgroup",
+                "beyondmeat",
+                "foth",
+                "homechef",
+                "hypebeast",
+                "vow",
+                "oatly",
+                "honestfoodcompany"
+            ]
+        }
+    ]
+}
