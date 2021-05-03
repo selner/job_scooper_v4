@@ -44,6 +44,10 @@ use JobScooper\Traits\Singleton;
 /****                                                                                                        ****/
 /****************************************************************************************************************/
 
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+});
+
 /**
  * Class LoggingManager
  * @package JobScooper\Manager
@@ -80,7 +84,7 @@ class LoggingManager extends \Monolog\Logger
         $logger = new Logger($name);
 
         $handler = new JobsExceptionHandler($logger);
-        $handler->registerErrorHandler([], false);
+//        $handler->registerErrorHandler([], false);
         $handler->registerExceptionHandler();
         $handler->registerFatalHandler();
 
