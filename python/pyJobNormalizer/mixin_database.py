@@ -24,7 +24,7 @@ from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
 from util_log import getLogger
 
-ARRAY_JOIN_TOKEN = u"_||_"
+ARRAY_JOIN_TOKEN = "_||_"
 from logging import INFO, DEBUG, WARNING, ERROR, CRITICAL
 
 
@@ -103,7 +103,7 @@ class DatabaseMixin:
     def connection(self):
         if not self._connection:
             if not self._dbparams:
-                raise Exception(u"Connection must be initialized before it can be accessed.")
+                raise Exception("Connection must be initialized before it can be accessed.")
 
             if 'charset' not in self._dbparams:
                 self._dbparams['charset'] = 'utf8'
@@ -138,7 +138,7 @@ class DatabaseMixin:
         result = {}
 
         try:
-            self.log(u"Querying database: {}".format(querysql))
+            self.log("Querying database: {}".format(querysql))
 
             with self.new_cursor() as cursor:
                 cursor.execute(querysql)
@@ -161,7 +161,7 @@ class DatabaseMixin:
         results = []
 
         try:
-            self.log(u"Querying database: {}".format(querysql))
+            self.log("Querying database: {}".format(querysql))
 
             with self.new_cursor() as cursor:
                 total_rows = cursor.execute(querysql)
@@ -171,11 +171,11 @@ class DatabaseMixin:
                     total_num_batches += 1
                 batch_counter = 0
 
-                self.log(u"... matched {} DB records".format(total_rows))
+                self.log("... matched {} DB records".format(total_rows))
 
                 while batch_counter < total_num_batches:
                     curidx = batch_counter * batch_size
-                    self.log(u"... processing records {} - {} through callback {}".format(curidx, curidx+batch_size, str(callback)))
+                    self.log("... processing records {} - {} through callback {}".format(curidx, curidx+batch_size, str(callback)))
 
                     rows = cursor.fetchmany(batch_size)
                     if not rows or len(rows) == 0:
@@ -213,7 +213,7 @@ class DatabaseMixin:
     def update_many(self, querysql, records):
 
         try:
-            self.log(u"...updating {} database rows".format(len(records)))
+            self.log("...updating {} database rows".format(len(records)))
 
             with self.new_cursor() as cursor:
                 return cursor.executemany(querysql, records)
@@ -254,7 +254,7 @@ class DatabaseMixin:
         Args:
             tablename:
         """
-        column_data = self.fetch_all_from_query(u"SHOW columns from %s" % tablename)
+        column_data = self.fetch_all_from_query("SHOW columns from %s" % tablename)
 
         return set(col['Field'] for col in column_data)
 
@@ -284,13 +284,13 @@ class DatabaseMixin:
             columns = ", ".join(matched_keys)
             values_template = ", ".join(["%s"] * len(matched_keys))
 
-            sql = u"insert into %s (%s) values (%s)" % (tablename, columns, values_template)
+            sql = "insert into %s (%s) values (%s)" % (tablename, columns, values_template)
             values = tuple(self.connection.escape_string(rowdict[key]) for key in matched_keys)
             with self.new_cursor() as cursor:
                 cursor.execute(sql, values)
                 inserted_id = cursor.lastrowid
                 if inserted_id:
-                    query = u"SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id)
+                    query = "SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id)
                     result = self.fetch_all_from_query(query)
                     if result and len(result) > 0:
                         return result[0]
@@ -318,7 +318,7 @@ class DatabaseMixin:
             tablename:
         """
 
-        column_data = self.fetch_all_from_query(u"SHOW columns from %s" % tablename)
+        column_data = self.fetch_all_from_query("SHOW columns from %s" % tablename)
 
         column_info = {}
         for col in column_data:

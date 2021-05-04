@@ -194,8 +194,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 url = r.url
 
             if retries < MAX_RETRIES:
-                self.log(u"Warning:  API request '{}' timed out on retry #.   Retrying {} more times...".format(url,
-                                                                                                             MAX_RETRIES - retries))
+                self.log(f'Warning:  API request {url} timed out on retry #.   Retrying {MAX_RETRIES - retries} more times...')
                 retries += 1
                 kwargs['retry_count'] = retries
                 return self.call_geocode_api(**kwargs)
@@ -257,11 +256,11 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
                     msgPlaceMatch = " place_id=None "
                     if 'place_id' in place_details and place_details['place_id']:
-                        msgPlaceMatch = " place_id={} ".format(place_details['place_id'])
-
-                    self.log(u"... place returned from API: {}, location={}".format(msgPlaceMatch,
-                                                                                          place_details[
-                                                                                              'formatted_address']))
+                        self.log(
+                            f'... place matched: {place_details["place_id"]}, location={place_details["formatted_address"]}')
+                    else:
+                        self.log(
+                            f'... place matched: location={place_details["formatted_address"]}')
 
                     #   insert GeoLocation into DB
                     geolocfacts = {PLACE_DETAIL_GEOCODE_MAPPING[pkey]: str(place_details[pkey]) for pkey in
@@ -321,7 +320,4 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         finally:
             self.close_connection()
-            self.log(
-                u"Found places for {} / {} locations; could not find {} / {} locations.  Updated {} job postings based "
-                u"on new locations found.".format(
-                    total_loc_found, len(locs), total_loc_notfound, len(locs), total_jp_updated))
+            self.log(f'Found places for {total_loc_found} / {len(locs)} locations; could not find {len(locs)-total_loc_found} / {locs} locations.  Updated {total_jp_updated} job postings.')

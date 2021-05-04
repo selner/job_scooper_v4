@@ -69,32 +69,32 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
             **kwargs:
         """
 
-        # DatabaseMixin.__init__(self, **kwargs)
+        DatabaseMixin.__init__(self, **kwargs)
         if 'input' in kwargs:
             self._inputfile = kwargs['input']
         else:
-            raise Exception(u"No input file specified for processing.")
+            raise Exception("No input file specified for processing.")
 
         if 'output' in kwargs:
             self._outputfile = kwargs['output']
 
-        self.log(u"Loading job list to match...")
+        self.log("Loading job list to match...")
         self.load_jobs()
 
         self.mark_title_matches()
 
     def mark_title_matches(self):
 
-        self.log(u"Loading user keywords for matching...")
+        self.log("Loading user keywords for matching...")
         self.load_keywords()
 
-        self.log(u"Matching job list titles vs. user search keywords ...")
+        self.log("Matching job list titles vs. user search keywords ...")
         self.mark_positive_matches()
 
-        self.log(u"Matching job list titles vs. user negative keyword matches...")
+        self.log("Matching job list titles vs. user negative keyword matches...")
         self.mark_negative_matches()
 
-        self.log(u"Matching completed.")
+        self.log("Matching completed.")
 
     def get_output_data(self):
         return {
@@ -104,7 +104,7 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
         }
 
     def export_results(self):
-        self.log(u"Exporting final match results to {}".format(self.outputfile))
+        self.log("Exporting final match results to {}".format(self.outputfile))
         write_json(self.outputfile, self.get_output_data())
 
         return self.outputfile
@@ -188,16 +188,16 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
             else:
                 self.jobs[jobid][key_result] = None
                 nnotmatched += 1
-        self.log(u"{} match results:  {}/{} matched, {}/{} not matched".format(key_source, nmatched, len(self.jobs),
+        self.log("{} match results:  {}/{} matched, {}/{} not matched".format(key_source, nmatched, len(self.jobs),
                                                                             nnotmatched, len(self.jobs)))
 
     def mark_positive_matches(self):
-        self.log(u"Marking jobs that match {} positive title keywords...".format(len(self.keywords)))
+        self.log("Marking jobs that match {} positive title keywords...".format(len(self.keywords)))
 
         self.set_keyword_matches(self.keywords, "TitleTokens", "GoodJobTitleKeywordMatches")
 
     def mark_negative_matches(self):
-        self.log(u"Marking jobs that match {} negative title keywords...".format(len(self.negative_keywords)))
+        self.log("Marking jobs that match {} negative title keywords...".format(len(self.negative_keywords)))
         self.set_keyword_matches(self.negative_keywords, "TitleTokens", "BadJobTitleKeywordMatches")
 
     def load_keywords(self):
@@ -228,7 +228,7 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
             data = self.tokenizer.batch_tokenize_strings(self.negative_keywords, 'keyword', 'tokens')
             self.negative_keywords = data
 
-        self.log(u"Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords),
+        self.log("Loaded {} positive keywords and {} negative keywords for matching.".format(len(self.keywords),
                                                                                            len(self.negative_keywords)))
 
 # class TaskMatchJobTitlesFromDB(TaskMatchJobsToKeywords, DatabaseMixin)
