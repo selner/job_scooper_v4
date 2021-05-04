@@ -273,12 +273,13 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
 	        while($moreResults === true && $nResults <= $totalResults && $nCurrentPage <= $nTotalPages)
 	        {
 		            startLogSection("Processing user matches page {$nCurrentPage} (#{$resultsPager->getFirstIndex()} - {$resultsPager->getLastIndex()} ) via callback...");
-		            
+
+                    $results = $resultsPager->getResults();
 		            if(!is_empty_value($addlCallbackParams)) {
-			            $callback($resultsPager->getResults(), $addlCallbackParams);
+                        $callback($results, $addlCallbackParams);
 		            }
 		            else {
-		                $callback($resultsPager->getResults());
+		                $callback($results);
 		            }
 		            $nResults += $resultsPager->count();
 		            endLogSection("Callback complete for results page {$nCurrentPage} ");
