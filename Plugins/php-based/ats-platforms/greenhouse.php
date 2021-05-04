@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlugin
+abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     private $gh_api_fmt = "https://api.greenhouse.io/v1/boards/%s/embed/jobs";
     private $searchJsonUrlFmt = null;
@@ -40,7 +40,7 @@ abstract class AbstractGreenhouseATS extends \JobScooper\SitePlugins\AjaxSitePlu
         parent::__construct();
     }
 
-        /**
+    /**
      * @param $searchDetails
      *
      * @return mixed

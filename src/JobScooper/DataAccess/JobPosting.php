@@ -236,7 +236,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
             	}
                 $getFunc = "get{$phpField}";
                 $setFunc = "set{$phpField}";
-                $val = call_user_func(array($this, $getFunc), []);
+                $val = call_user_func(array($this, $getFunc), null);
                 if (!is_empty_value($val) && is_string($val)) {
                     $cleanVal = cleanupTextValue($val);
                     call_user_func(array($this, $setFunc), $cleanVal);
