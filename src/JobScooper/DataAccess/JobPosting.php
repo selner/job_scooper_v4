@@ -113,7 +113,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         $company_portion = strScrub($this->getCompany(), FOR_LOOKUP_VALUE_MATCHING);
         $company_portion = strtolower($company_portion);
 
-        $keyval = $this->_cleanupTextValue("{$company_portion}~{$title_portion}");
+        $keyval = cleanupTextValue("{$company_portion}~{$title_portion}");
         $this->setKeyCompanyAndTitle($keyval);
     }
     /**
@@ -238,7 +238,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
                 $setFunc = "set{$phpField}";
                 $val = call_user_func(array($this, $getFunc), []);
                 if (!is_empty_value($val) && is_string($val)) {
-                    $cleanVal = $this->_cleanupTextValue($val);
+                    $cleanVal = cleanupTextValue($val);
                     call_user_func(array($this, $setFunc), $cleanVal);
                 }
             }
@@ -265,22 +265,6 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
     }
 
     /**
-     * @param     $v
-     * @param int $maxLength
-     *
-     * @return bool|null|string|string[]
-     */
-    private function _cleanupTextValue($v, $maxLength=255, $prefix=null, $postfix=null)
-    {
-        $ret = cleanupTextValue($v, $prefix, $postfix);
-        if (!empty($ret) && is_string($ret)) {
-            $ret = substr($ret, 0, min($maxLength-1, strlen($ret)));
-        }
-
-        return $ret;
-    }
-
-    /**
      * @param string $v
      *
      * @return $this|\JobScooper\DataAccess\JobPosting|void
@@ -293,7 +277,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         $v = str_ireplace(" NEW!", "", $v);
         $v = str_ireplace("- new", "", $v);
         $v = str_ireplace("- easy apply", "", $v);
-        $v = $this->_cleanupTextValue($v);
+        $v = cleanupTextValue($v);
 
         if (is_empty_value($v)) {
             throw new \Exception($this->getJobSiteKey() . " posting's title string is empty.");
@@ -320,7 +304,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         $this->setGeoLocationFromJP(null);
         $this->setGeoLocationId(null);
 
-        $v = $this->_cleanupTextValue($v, 255, "(", ")");
+        $v = cleanupTextValue($v, "(", ")", 255);
 
         //
         // Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
@@ -334,7 +318,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
 
         $dv = null;
         if (!is_empty_value($v)) {
-            $dv = $this->_cleanupTextValue($v);
+            $dv = cleanupTextValue($v);
         }
 
         $this->setLocationDisplayValue($dv);
@@ -367,7 +351,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
      */
     public function setCompany($v)
     {
-        $v = $this->_cleanupTextValue($v, $maxLength=100);
+        $v = cleanupTextValue($v, $maxLength=100);
 
         if (empty($v)) {
             return;
@@ -425,7 +409,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
      */
     public function setDepartment($v)
     {
-        $v = $this->_cleanupTextValue($v);
+        $v = cleanupTextValue($v);
         parent::setDepartment($v);
     }
 
@@ -436,7 +420,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
      */
     public function setPayRange($v)
     {
-        $v = $this->_cleanupTextValue($v, $maxLength=100);
+        $v = cleanupTextValue($v, $maxLength=100);
         parent::setPayRange($v);
     }
 
@@ -447,7 +431,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
      */
     public function setEmploymentType($v)
     {
-        $v = $this->_cleanupTextValue($v, $maxLength=100);
+        $v = cleanupTextValue($v, $maxLength=100);
         parent::setEmploymentType($v);
     }
 
@@ -458,7 +442,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
      */
     public function setCategory($v)
     {
-        $v = $this->_cleanupTextValue($v, $maxLength=100);
+        $v = cleanupTextValue($v, $maxLength=100);
         parent::setCategory($v);
     }
 
@@ -480,7 +464,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         }
 
         $v = strtolower(str_ireplace(array("Posted Date", "posted", "posted at"), "", $v));
-        $v = $this->_cleanupTextValue($v);
+        $v = cleanupTextValue($v);
 
         if (empty($newV)) {
             $dateVal = strtotime($v, $now = time());

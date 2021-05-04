@@ -136,7 +136,8 @@ function strip_punctuation_from_html($text)
 * @param null $postfixRemove
  *
  * @return bool|null|string|string[]
-*/function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null)
+*/
+function cleanupTextValue($v, $prefixRemove=null, $postfixRemove=null, $maxlength=null)
 {
     if (empty($v)|| !is_string($v)) {
         return $v;
@@ -158,6 +159,10 @@ function strip_punctuation_from_html($text)
     $v = preg_replace(array('/\s{2,}/', '/[\t]/', '/[\n]/', '/\s{1,}/'), ' ', $v);
     $v = clean_utf8($v);
     $v = trim($v);
+
+    if($maxlength != null && $maxlength <= strlen($v)) {
+        $v = substr($v, 0, min($maxlength-1, strlen($v)));
+    }
 
     if (empty($v)) {
         $v = null;

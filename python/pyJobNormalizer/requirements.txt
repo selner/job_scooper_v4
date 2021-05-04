@@ -5,7 +5,6 @@ docopt
 pandas
 pymysql
 
-cleanco
 requests
 nltk
 unidecode
