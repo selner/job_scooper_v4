@@ -35,9 +35,9 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
 
     def update_job_nonmatches(self):
 
-        print(u"Marking user_job_matches that did not match job titles to skip-send...")
+        print("Marking user_job_matches that did not match job titles to skip-send...")
 
-        querysql = u"""
+        querysql = """
             UPDATE
                 user_job_match
             SET 
@@ -50,16 +50,16 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
 
         try:
             rows_updated = self.run_command(querysql)
-            print("Marked {} user job matches as skip-send because they failed to match a user's job title.".format(rows_updated))
+            self.log(f'Marked {rows_updated} user job matches as skip-send because they failed to match a user\'s job title.')
 
         except Exception as e:
             self.handle_error(e)
 
     def update_job_matches(self):
 
-        print(u"Marking user_job_matches that match job titles to ready-to-send...")
+        self.log("Marking user_job_matches that match job titles to ready-to-send...")
 
-        querysql = u"""
+        querysql = """
             UPDATE
                 user_job_match
             SET 
@@ -72,7 +72,7 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
 
         try:
             rows_updated = self.run_command(querysql)
-            print("Marked {} user job matches as ready-to-send because they matched a user's job title.".format(rows_updated))
+            self.log(f'Marked {rows_updated} user job matches as ready-to-send because they matched a user\'s job title.')
 
         except Exception as e:
             self.handle_error(e)

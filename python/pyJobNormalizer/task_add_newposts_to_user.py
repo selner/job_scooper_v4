@@ -35,9 +35,9 @@ class TaskAddNewMatchesToUser(DatabaseMixin):
 
     def add_new_posts_to_user(self, jobsitekey, user_id):
 
-        self.log(u"Adding all new jobpostings for {} to user_id={}...".format(jobsitekey, user_id))
+        self.log(f'Adding all new jobpostings for {jobsitekey} to user_id={user_id}...')
 
-        querysql = u"""
+        querysql = """
             INSERT IGNORE INTO user_job_match(
                 user_job_match.user_id,
                 user_job_match.jobposting_id, 
@@ -65,7 +65,7 @@ class TaskAddNewMatchesToUser(DatabaseMixin):
 
         try:
             rows_updated = self.run_command(querysql.format(user_id, jobsitekey, user_id))
-            self.log("Added {} jobpostings to user for jobsite {}".format(rows_updated, jobsitekey))
+            self.log(f'Added {rows_updated} jobpostings to user for jobsite {jobsitekey}')
 
         except Exception as e:
             self.handle_error(e)

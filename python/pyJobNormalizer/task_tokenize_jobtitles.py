@@ -55,7 +55,7 @@ class TaskAddTitleTokens(DatabaseMixin):
                 title
         '''
         total_rows = self.fetch_many_with_callback(query, self.tokenize_job_rows)
-        self.log("Completed update of title tokens for {} jobposting rows.".format(total_rows))
+        self.log(f'Completed update of title tokens for {total_rows} jobposting rows.')
 
     def tokenize_job_rows(self, dbrows):
         jobs_to_process = {}
@@ -82,9 +82,9 @@ class TaskAddTitleTokens(DatabaseMixin):
                 if not ('title_tokens' in updated_jobs[key] and
                         updated_jobs[key]['title_tokens'] and
                         len(updated_jobs[key]['title_tokens']) > 0):
-                    self.log("Warning:  job {} did not successfully generate the needed title tokens for title '{}'".format(key, updated_jobs[key]['title']))
+                    self.log(f'Warning:  job {key} did not successfully generate the needed title tokens for title {updated_jobs[key]["title"]}')
                 else:
-                    row_refkey_titleval = u"_".join(updated_jobs[key]['title_tokens'])
+                    row_refkey_titleval = "_".join(updated_jobs[key]['title_tokens'])
 
                     val_comptitle = "UNKNOWN_COMPANY"
                     if ('company' in updated_jobs[key] and
@@ -93,7 +93,7 @@ class TaskAddTitleTokens(DatabaseMixin):
                         company = updated_jobs[key]['company']
                         company = company.lower().replace(" ", "")
 
-                        val_comptitle = u"{}{}".format(company, u"".join(updated_jobs[key]['title_tokens']))
+                        val_comptitle = f'{company}{"".join(updated_jobs[key]["title_tokens"])}'
 
                     db_updates.append([
                         self.convert_array_to_column_value(updated_jobs[key]['title_tokens']),
@@ -103,7 +103,7 @@ class TaskAddTitleTokens(DatabaseMixin):
                     ])
 
             rowcount = self.update_many(upd_query, db_updates)
-            # print(u"Updated title tokens for {} jobposting records".format(rowcount))
+            # print("Updated title tokens for {} jobposting records".format(rowcount))
 
     #
     # def tokenize_job_rows(self, dbrows):
@@ -117,7 +117,7 @@ class TaskAddTitleTokens(DatabaseMixin):
     #     if len(jobs_to_process) > 0:
     #         updated_jobs = self._tokenizer.batch_tokenize_strings(jobs_to_process, u'title', u'title_tokens', u'dict')
     #         for key in updated_jobs.keys():
-    #             row_refkey_titleval = u"_".join(updated_jobs[key]['title_tokens'])
+    #             row_refkey_titleval = "_".join(updated_jobs[key]['title_tokens'])
     #             company = updated_jobs[key]['company']
     #             if len(company) > 0:
     #                 company = company.lower().replace(" ", "")
@@ -125,7 +125,7 @@ class TaskAddTitleTokens(DatabaseMixin):
     #                 'jobposting_id' : key,
     #                 'titletokens_val' : self.convert_array_to_column_value(updated_jobs[key]['title_tokens']),
     #                 'row_refkey_titleval' : row_refkey_titleval,
-    #                 'row_comptitle_keyval' : u"{}{}".format(company, u"".join(updated_jobs[key]['title_tokens']))
+    #                 'row_comptitle_keyval' : "{}{}".format(company, "".join(updated_jobs[key]['title_tokens']))
     #             }
     #
     #             upd_query = '''

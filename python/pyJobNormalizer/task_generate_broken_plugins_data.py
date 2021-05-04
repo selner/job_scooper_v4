@@ -79,7 +79,7 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
 
     def gather_report_data(self):
 
-        querysql = u"""
+        querysql = """
             SELECT 
                 js.jobsite_key,
 --                 run_result_code,
@@ -117,11 +117,11 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
                 broken_sites_by_key[key] = {
                     'jobsite_key': key,
                     'error_details': site_error['run_error_details'],
-                    'search_count': "{} search{}".format(site_error['count_search_pairs'], pluralize),
-                    'last_search': "last run attempt: {}".format(site_error['most_recent_start_date'])
+                    'search_count': f'{site_error["count_search_pairsf"]} search{pluralize}',
+                    'last_search': f'last run attempt: {site_error["most_recent_start_date"]}'
                 }
 
-            print("Found error reports for {} broken job sites.".format(len(broken_jobsites)))
+            self.log(f'Found error reports for {len(broken_jobsites)} broken job sites.')
 
             import os
             templpath = os.path.join(os.path.dirname(__file__), "templates", "layouts", "email_broken_plugins_section.html")
@@ -142,7 +142,7 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
         return template.render(data=data)
 
     def export_html_to_file(self, filepath, html):
-        self.log("Exporting rendered HTML to {}".format(filepath))
+        self.log(f'Exporting rendered HTML to {filepath}')
 
         with open(filepath, 'w') as html_fp:
             html_fp.writelines(html)

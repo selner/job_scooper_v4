@@ -52,7 +52,7 @@ class DatabaseMixin:
         if msg and len(msg) > 0:
             self._logger.error(msg, exc_info=1)
         else:
-            self._logger.error("Exception occurred: {}".format(err), exc_info=1)
+            self._logger.error(f'Exception occurred: {err}', exc_info=1)
         raise(err)
 
     def _parse_arguments(self, **kwargs):
@@ -138,7 +138,7 @@ class DatabaseMixin:
         result = {}
 
         try:
-            self.log("Querying database: {}".format(querysql))
+            self.log(f'Querying database: {querysql}')
 
             with self.new_cursor() as cursor:
                 cursor.execute(querysql)
@@ -156,12 +156,12 @@ class DatabaseMixin:
     def fetch_many_with_callback(self, querysql, callback, batch_size=1000, return_results=False):
 
         if not callable(callback):
-            raise Exception("Specified callback {} is not callable.".format(str(callback)))
+            raise Exception(f'Specified callback {str(callback)} is not callable.')
 
         results = []
 
         try:
-            self.log("Querying database: {}".format(querysql))
+            self.log(f'Querying database: {querysql}')
 
             with self.new_cursor() as cursor:
                 total_rows = cursor.execute(querysql)
@@ -171,11 +171,11 @@ class DatabaseMixin:
                     total_num_batches += 1
                 batch_counter = 0
 
-                self.log("... matched {} DB records".format(total_rows))
+                self.log(f'... matched {total_rows} DB records')
 
                 while batch_counter < total_num_batches:
                     curidx = batch_counter * batch_size
-                    self.log("... processing records {} - {} through callback {}".format(curidx, curidx+batch_size, str(callback)))
+                    self.log(f'... processing records {curidx} - {curidx+batch_size} through callback {str(callback)}')
 
                     rows = cursor.fetchmany(batch_size)
                     if not rows or len(rows) == 0:
@@ -213,7 +213,7 @@ class DatabaseMixin:
     def update_many(self, querysql, records):
 
         try:
-            self.log("...updating {} database rows".format(len(records)))
+            self.log(f'...updating {len(records)} database rows')
 
             with self.new_cursor() as cursor:
                 return cursor.executemany(querysql, records)
@@ -234,7 +234,7 @@ class DatabaseMixin:
             close_connection:
         """
         try:
-            self.log("executing SQL: {}".format(querysql), DEBUG)
+            self.log(f'executing SQL: {querysql}', DEBUG)
 
             with self.connection.cursor() as cursor:
                 return cursor.execute(querysql, values)
@@ -249,12 +249,11 @@ class DatabaseMixin:
                 self.close_connection()
 
     def get_table_columns(self, tablename):
-        # self.log("Running command: {}".format(querysql))
         """
         Args:
             tablename:
         """
-        column_data = self.fetch_all_from_query("SHOW columns from %s" % tablename)
+        column_data = self.fetch_all_from_query(f'SHOW columns from {tablename}')
 
         return set(col['Field'] for col in column_data)
 
@@ -284,13 +283,13 @@ class DatabaseMixin:
             columns = ", ".join(matched_keys)
             values_template = ", ".join(["%s"] * len(matched_keys))
 
-            sql = "insert into %s (%s) values (%s)" % (tablename, columns, values_template)
+            sql = f'insert into {tablename} ({columns}) values ({values_template})'
             values = tuple(self.connection.escape_string(rowdict[key]) for key in matched_keys)
             with self.new_cursor() as cursor:
                 cursor.execute(sql, values)
                 inserted_id = cursor.lastrowid
                 if inserted_id:
-                    query = "SELECT * FROM {} WHERE {} ={}".format(tablename, primary_key_column, inserted_id)
+                    query = f'SELECT * FROM {tablename} WHERE {primary_key_column} ={inserted_id}'
                     result = self.fetch_all_from_query(query)
                     if result and len(result) > 0:
                         return result[0]
@@ -312,13 +311,12 @@ class DatabaseMixin:
             return ARRAY_JOIN_TOKEN.join(arr)
 
     def get_table_column_info(self, tablename):
-        # print("Running command: {}".format(querysql))
         """
         Args:
             tablename:
         """
 
-        column_data = self.fetch_all_from_query("SHOW columns from %s" % tablename)
+        column_data = self.fetch_all_from_query(f'SHOW columns from {tablename}')
 
         column_info = {}
         for col in column_data:

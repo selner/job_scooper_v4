@@ -88,7 +88,7 @@ def simpleuni(val):
         unidecode(u'30 \U0001d5c4\U0001d5c6/\U0001d5c1')
         '30 km/h'
 
-        unidecode(u"\u5317\u4EB0")
+        unidecode("\u5317\u4EB0")
         'Bei Jing '
     """
     from unidecode import unidecode
@@ -151,7 +151,7 @@ def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield
         fieldnames = []
         ncount = 0
         for n in csv_reader.unicode_fieldnames:
-            fieldnames.append("Field_{}".format(ncount))
+            fieldnames.append(f'Field_{ncount}')
             ncount = ncount + 1
 
         csv_reader.unicode_fieldnames = fieldnames
@@ -180,7 +180,7 @@ def loadcsv(csvfilename, rowkeyname=None):
     import os
 
 
-    logmsg("Loading {}...".format(csvfilename))
+    logmsg(f'Loading {csvfilename}...')
     from io import open
     csv_fp = open(csvfilename, 'r')
     dict_records = {}
@@ -200,7 +200,7 @@ def loadcsv(csvfilename, rowkeyname=None):
         print(err)
         pass
 
-    logmsg("Loaded {} rows from {}.".format(len(dict_records), csvfilename))
+    logmsg(f'Loaded {len(dict_records)} rows from {csvfilename}')
 
     return {'fieldnames': fields, 'dict': dict_records}
 
@@ -212,7 +212,7 @@ def writedicttocsv(csvfilename, data, keys=None):
         data:
         keys:
     """
-    print(u"Writing {} rows to file {}...".format(len(data), csvfilename))
+    print(f'Writing {len(data)} rows to file {csvfilename}...')
 
     if keys is None:
         itemkey = list(data)[0]

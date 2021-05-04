@@ -20,7 +20,7 @@
 from mixin_database import DatabaseMixin
 from urllib.parse import urlencode
 import requests
-MAX_RETRIES = 1
+MAX_RETRIES = 0
 PLACE_DETAIL_GEOCODE_MAPPING = {
     "formatted_address": "display_name",
     "location_slug": "geolocation_key",
@@ -78,14 +78,14 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             ORDER BY location
             """
 
-        self.log(u"Getting known locations from DB...")
+        self.log("Getting known locations from DB...")
         result = self.fetch_all_from_query(querysql)
 
         for val in result:
             self._location_mapping[val['Location']] = {'GeoLocationId': val['GeoLocationId'],
                                                        'DisplayName': val['DisplayName']}
 
-        self.log(u"Loaded {} known location mappings from DB".format(len(self._location_mapping)))
+        self.log(f'Loaded {len(self._location_mapping)} known location mappings from DB')
 
     def update_job_posting_locations(self, geocode_server):
 
@@ -93,9 +93,9 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         Args:
             geocode_server:
         """
-        self.log(u"Getting locations needing lookup/update...")
+        self.log("Getting locations needing lookup/update...")
 
-        querysql = u"""
+        querysql = """
             SELECT 
                 location as `Location`
             FROM 
@@ -128,19 +128,18 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             loc:
             locfacts:
         """
-        statement = u"""
+        statement = """
             UPDATE jobposting
             SET 
-                geolocation_id={},
-                location_display_value='{}'
+                geolocation_id=%s,
+                location_display_value='%s'
             WHERE 
-                location='{}' AND 
+                location='%s' AND 
                 geolocation_id IS NULL
-            """.format(locfacts['GeoLocationId'], self.connection.escape_string(locfacts['DisplayName']), self.connection.escape_string(loc))
+            """ % (locfacts['GeoLocationId'], self.connection.escape_string(locfacts['DisplayName']), self.connection.escape_string(loc))
 
         rows_updated = self.run_command(statement, close_connection=False)
-        self.log("Updated {} rows missing information for '{} ({})'".format(rows_updated, loc,
-                                                                          str(locfacts)))
+        self.log(f'Updated {rows_updated} rows missing information for {loc} ({str(locfacts)})')
         return rows_updated
 
     def _update_missing_db_known_locs(self, locs):
@@ -148,7 +147,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         Args:
             locs:
         """
-        self.log(u"Updating {} known locations who are missing geolocation details in the database...".format(len(locs)))
+        self.log(f'Updating {len(locs)} known locations who are missing geolocation details in the database...')
         total_updated = 0
 
         try:
@@ -162,9 +161,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         finally:
             self.close_connection()
-            self.log(
-                u"Updated {} job postings in the database that were missing location details for {} known locations.".format(
-                    total_updated, len(locs)))
+            self.log(f'Updated {total_updated} job postings in the database that were missing location details for {len(locs)} known locations.')
 
     def call_geocode_api(self, **kwargs):
         """
@@ -200,7 +197,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 return self.call_geocode_api(**kwargs)
             else:
                 from logging import ERROR
-                msg = u"ERROR:  API request '{}' timed out and has exceeded max retry count.".format(url)
+                msg = f'ERROR:  API request "{url}" timed out and has exceeded max retry count.'
                 self.handle_error(Exception(msg))
 
             pass
@@ -209,7 +206,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             if hasattr(r, 'url', ):
                 url = r.url
 
-            msg = u"ERROR:  API request '{}' failed:  ".format(url), str(ex)
+            msg = f'ERROR:  API request "{url}" failed: {ex}'
             self.handle_error(ex, msg)
 
         finally:
@@ -221,8 +218,8 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             locs:
             geocode_server:
         """
-        self.log(u"Finding places for {} unknown locations ...".format(
-            len(locs)))
+        self.log(f'Finding places for {len(locs)} unknown locations ...')
+
         total_loc_found = 0
         total_loc_notfound = 0
         total_jp_updated = 0
@@ -241,15 +238,15 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 # headers = {'content-type': 'application/json'}
                 headers = {}
 
-                self.log(u"Looking up place for location search value '{}'".format(loc))
+                self.log(f'Looking up place for location search value "{loc}"')
                 kwargs = {
-                    'url': u"{}/places/lookup".format(geocode_server),
+                    'url': f'{geocode_server}/places/lookup',
                     'params': payload,
                     'headers': headers,
                     'timeout': 30
                 }
 
-                self.log(u"... calling API '{}?{}".format(kwargs['url'], urlencode(payload)))
+                self.log(f'... calling API {kwargs["url"]}?{payload}')
 
                 place_details = self.call_geocode_api(**kwargs)
                 if place_details and len(place_details) > 0:  # if found place:
@@ -268,7 +265,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                                    place_details[pkey] is not None
                                    }
                     if geolocfacts and len(geolocfacts) > 0:
-                        # self.log(u"... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
+                        # self.log("... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
 
                         if 'geolocation_key' in geolocfacts and len(geolocfacts['geolocation_key']) > 100:
                             geolocfacts['geolocation_key'] = geolocfacts['geolocation_key'][0:100]
@@ -281,18 +278,18 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                                 geolocation.geolocation_id as `GeoLocationId`,
                                 geolocation.display_name as `DisplayName`
                             FROM geolocation
-                            WHERE geolocation_key like '{}'
+                            WHERE geolocation_key like '%s'
                             ORDER by geolocation.geolocation_id
-                        """.format(geolocfacts['geolocation_key'])
+                        """ % (geolocfacts['geolocation_key'])
 
                         existingGeo = self.fetch_one_from_query(query)
                         if existingGeo is not None and len(existingGeo) > 0:
-                            self.log(u"... found existing geolocation_id {} for '{}'.  Using it instead." .format(existingGeo['GeoLocationId'], existingGeo['DisplayName']))
+                            self.log(f'... found existing geolocation_id {existingGeo["GeoLocationId"]} for {existingGeo["DisplayName"]}.  Using it instead.')
                             locfacts = {'GeoLocationId': existingGeo['GeoLocationId'],
                                         'DisplayName': existingGeo['DisplayName']}
                         else:
                             ins_result = self.add_row("geolocation", "geolocation_id", geolocfacts, self._geoloc_columns)
-                            # self.log(u"... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
+                            # self.log("... newly inserted geolocation record = {}".format(dump_var_to_json(ins_result)))
 
                             total_loc_found += 1
                             locfacts = {'GeoLocationId': ins_result['geolocation_id'],
@@ -305,14 +302,14 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                         rows_updated = self._update_mappings_for_loc(loc, locfacts)
                         total_jp_updated += rows_updated
                     else:
-                        self.log(u"... place_id {} found for {} but could not be geocoded.".format(place_details['place_id'], str(loc)))
-                        # print(u"... TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
+                        self.log(f'... place_id {place_details["place_id"]} found for {str(loc)} but could not be geocoded.')
+                        # print("... TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
                         total_loc_notfound += 1
                     # if not found place:
                     #   add to failed lookups dataset
                 else:
-                    self.log(u"... place for {} not found via API".format(str(loc)))
-                    # print(u"... TODO -- store failed lookups like '{}' to skip future failures".format(loc))
+                    self.log(f'... place for {str(loc)} not found via API')
+                    # print("... TODO -- store failed lookups like '{}' to skip future failures".format(loc))
                     total_loc_notfound += 1
 
         except Exception as e:

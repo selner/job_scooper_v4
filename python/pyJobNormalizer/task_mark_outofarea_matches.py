@@ -47,7 +47,7 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         Args:
             userkey:
         """
-        result = self.fetch_all_from_query(u"""
+        result = self.fetch_all_from_query("""
         SELECT 
             geolocation_id
         FROM 
@@ -57,7 +57,7 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
                 ON 
                     user_search_pair.user_id = `user`.user_id 
         WHERE 
-            `user`.user_slug = '{}'""".format(userkey))
+            `user`.user_slug = '%s'""" % userkey)
 
         ret = []
         for rec in result:
@@ -90,7 +90,7 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
                     where_clause += " UNION "
                 where_clause = "({})".format(subquery)
 
-        base_query_update_in_area = u"""
+        base_query_update_in_area = """
             UPDATE user_job_match 
             SET 
                 out_of_user_area = {}
@@ -120,5 +120,5 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         #
         #  print out a last summary line with the results for logging by the original calling process
         #
-        self.log(u"{} user job matches marked in {}'s search areas; {} matches marked out of area.".format(count_in_area, self._userkey, count_out_area))
+        self.log(f'{count_in_area} user job matches marked in {self._userkey}\'s search areas; {count_out_area} matches marked out of area.')
 

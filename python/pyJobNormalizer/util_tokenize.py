@@ -145,7 +145,7 @@ class Tokenizer:
                 final_tokens = OrderedDict(zip(tokens, tokens))
             else:
                 # if ret_type == "string" or ret_type is None:
-                final_tokens = "|{}|".format("|".join(tokens))
+                final_tokens = f'|{"|".join(tokens)}|'
 
 
             list_data[k][field_tokenized] = final_tokens

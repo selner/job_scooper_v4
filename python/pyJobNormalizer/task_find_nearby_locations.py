@@ -35,7 +35,7 @@ class TaskFindNearbyGeolocationsFromDb(DatabaseMixin):
         Args:
             geolocation_id:
         """
-        return self.fetch_one_from_query("SELECT * FROM geolocation WHERE geolocation_id = {}".format(geolocation_id))
+        return self.fetch_one_from_query(f'SELECT * FROM geolocation WHERE geolocation_id = {geolocation_id}')
 
     def find_nearby_locations(self, geolocation, radius):
 
@@ -47,7 +47,7 @@ class TaskFindNearbyGeolocationsFromDb(DatabaseMixin):
         query = self.get_nearby_locations_query(geolocation, radius)
         result = self.fetch_all_from_query(query)
 
-        print(u"Found {} geolocations within {} miles of the source geolocation.".format(len(result), radius))
+        print(f'Found {len(result)} geolocations within {radius} miles of the source geolocation.')
 
         return result
 
@@ -77,7 +77,7 @@ class TaskFindNearbyGeolocationsFromDb(DatabaseMixin):
         # @date January 28, 2015
         # @link https://clickherelabs.com/development-2/distance-searching-and-mysql/
 
-        querysql = u"""
+        querysql = """
             SELECT %(column_fields)s
             FROM (
               SELECT 
