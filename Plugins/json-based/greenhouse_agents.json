@@ -187,12 +187,6 @@
       "PluginExtendsClassName": "AbstractGreenhouseATS"
     },
     {
-      "JobSiteName": "coinbase",
-      "SiteReferenceKey": "coinbase",
-      "SourceURL": "https://www.coinbase.com/careers",
-      "PluginExtendsClassName": "AbstractGreenhouseATS"
-    },
-    {
       "JobSiteName": "ondeck",
       "SiteReferenceKey": "ondeck",
       "SourceURL": "https://www.ondeck.com/careers",

@@ -16,60 +16,6 @@
  * under the License.
  */
 
-class PluginBoeing extends AbstractTalentBrew
-{
-    protected $JobSiteName = 'Boeing';
-    protected $JobPostingBaseUrl = 'https://jobs.boeing.com';
-    protected $JobListingsPerPage = 20;
-    protected $SearchUrlFormat = "/search-jobs";
-    protected $arrListingTagSetup = [
-        'TotalPostCount' => ['Selector' => 'h1[role="status"]'],
-        'JobPostItem' => ['Selector' => 'section#search-results-list ul li'],
-        'Title' =>  ['Selector' => 'a h2'],
-        'Url' =>  ['Selector' => 'a', 'Attribute' => 'href'],
-        'JobSitePostId' =>  ['Selector' => 'a', 'Attribute' => 'data-job-id'],
-        'Location' => ['Selector' => 'li a'],
-        'PostedAt' => ['Selector' => 'li a span.job-date-posted'],
-        'NextButton' => ['Selector' => '#pagination-bottom a.next']
-    ];
-
-    public function __construct()
-    {
-        $this->arrListingTagSetup['TotalPostCount'] = array('Selector' => 'h1[role="status"]');
-        parent::__construct();
-    }
-
-     /**
-     * parseJobsListForPage
-     *
-     * This does the heavy lifting of parsing each job record from the
-     * page's HTML it was passed.
-     *
-     * @param \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML
-     *
-     * @return array|null
-     * @throws \Exception
-     */
-    public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
-    {
-		$ret = parent::parseJobsListForPage($objSimpHTML);
-	
-		if(!is_empty_value($ret))  {
-			foreach($ret as $k => $v) {
-				if(array_key_exists('Location', $v) && !is_empty_value($v['Location'])) {
-					$cleanedLoc = str_replace($v['Title'], '', $v['Location']);
-					if(!is_empty_value($cleanedLoc) && array_key_exists('PostedAt', $v) && !is_empty_value($v['PostedAt'])) {
-						$cleanedLoc = str_replace($v['PostedAt'], '', $cleanedLoc);
-					}
-					$ret[$k]['Location'] = $cleanedLoc;
-				}
-			}
-		}
-		
-		return $ret;
-	}
-}
-
 class PluginDisney extends AbstractTalentBrew
 {
     protected $JobSiteName = 'Disney';

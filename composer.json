@@ -21,7 +21,7 @@
         "jobapis/jobs-usajobs": ">=0.2.0",
         "zordius/lightncandy": ">=1.2",
         "monolog/monolog": ">=1.x-dev",
-        "jbzoo/utils": ">=1.0@dev",
+        "jbzoo/utils": "4.x-dev",
         "guzzlehttp/guzzle": ">=6.0",
         "willdurand/geocoder": ">=2",
         "nolazybits/propel2-geocodable-behavior": ">=1.2",
