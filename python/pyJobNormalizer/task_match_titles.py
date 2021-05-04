@@ -120,7 +120,7 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
                     self.log("Loaded {} jobs for matching.".format(len(self.input_data[JSON_KEY_JOBMATCHES])))
 
                     tokenizer = Tokenizer()
-                    self.jobs = tokenizer.batch_tokenize_strings(self.jobs, u'Title', u'TitleTokens', u'set')
+                    self.jobs = tokenizer.batch_tokenize_strings(self.jobs, u'Title', u'TitleTokens', u'set', maxlength=200)
 
     @staticmethod
     def get_unique_keywd_set(keywords):

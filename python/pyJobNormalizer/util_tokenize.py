@@ -111,7 +111,7 @@ class Tokenizer:
         self.snowstemmer = SnowballStemmer("english")
         self.stopwrds = stopwords.words('english')
 
-    def batch_tokenize_strings(self, list_data, field, field_tokenized="tokenized", ret_type="string"):
+    def batch_tokenize_strings(self, list_data, field, field_tokenized="tokenized", ret_type="string", maxlength=None):
         """
         Args:
             list_data:
@@ -129,6 +129,14 @@ class Tokenizer:
             tokens = self.tokenize_string(list_data[k][field])
             final_tokens = []
 
+            if maxlength and tokens:
+                fieldval = "|{}|".join(tokens)
+                while(len(fieldval) >= maxlength):
+                    tokens.reverse()
+                    tokens.pop()
+                    tokens.reverse()
+                    fieldval = "|{}|".join(tokens)
+
             if ret_type == "list":
                 final_tokens = list(set(tokens))
             elif ret_type == "set":
@@ -138,6 +146,7 @@ class Tokenizer:
             else:
                 # if ret_type == "string" or ret_type is None:
                 final_tokens = "|{}|".format("|".join(tokens))
+
 
             list_data[k][field_tokenized] = final_tokens
         return list_data

@@ -77,7 +77,7 @@ class TaskAddTitleTokens(DatabaseMixin):
         db_updates = []
 
         if len(jobs_to_process) > 0:
-            updated_jobs = self._tokenizer.batch_tokenize_strings(jobs_to_process, u'title', u'title_tokens', u'dict')
+            updated_jobs = self._tokenizer.batch_tokenize_strings(jobs_to_process, u'title', u'title_tokens', u'dict', maxlength=200)
             for key in updated_jobs.keys():
                 if not ('title_tokens' in updated_jobs[key] and
                         updated_jobs[key]['title_tokens'] and
