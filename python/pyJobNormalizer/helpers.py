@@ -35,7 +35,13 @@ COMMON_OPTIONS = """
   -v --verbose                              print status messages
 """
 
-def docopt_ext(doc, argv=None, help=True, version=None, options_first=False):
+def docopt_ext(doc, argv=None, help=True, version=None, options_first=False, filename=None):
+
+    if filename:
+        from util_log import logurulogger
+        import os
+        logfile = f'pyJobNormalizer-{os.path.basename(filename)[:-3]}'
+        logurulogger.add(f'/tmp/{logfile}.log', format="{time} {level} {message}", level="INFO")
 
     vals = docopt_func(doc, argv, help, version, options_first)
     if vals and len(vals) > 0:

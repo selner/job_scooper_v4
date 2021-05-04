@@ -31,7 +31,7 @@ Options:
 """ + COMMON_OPTIONS
 
 if __name__ == '__main__':
-    args = docopt_ext(cli_usage, version='0.1.1rc')
+    args = docopt_ext(cli_usage, version='0.1.1rc', filename=__file__)
 
     try:
         matcher = FindPlacesFromDBLocationsTask(**args)

@@ -36,8 +36,8 @@ from logging import Handler, getLogger as getBaseLogger
 import sys
 from loguru import logger as logurulogger
 
+
 logurulogger.add(sys.stderr, format="{time} {level} {message}", level="DEBUG")
-logurulogger.add("file.log", format="{time} {level} {message}", level="INFO")
 
 
 class PropagateHandler(Handler):

@@ -30,7 +30,7 @@ Options:
 """ + COMMON_OPTIONS
 
 if __name__ == '__main__':
-    arguments = docopt_ext(cli_usage, version='0.1.1rc')
+    arguments = docopt_ext(cli_usage, version='0.1.1rc', filename=__file__)
 
     try:
         toks = TaskAddTitleTokens(**arguments)
