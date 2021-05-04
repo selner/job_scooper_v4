@@ -117,7 +117,7 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
                 broken_sites_by_key[key] = {
                     'jobsite_key': key,
                     'error_details': site_error['run_error_details'],
-                    'search_count': f'{site_error["count_search_pairsf"]} search{pluralize}',
+                    'search_count': f'{site_error["count_search_pairs"]} search{pluralize}',
                     'last_search': f'last run attempt: {site_error["most_recent_start_date"]}'
                 }
 
