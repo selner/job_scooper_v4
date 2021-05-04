@@ -138,9 +138,6 @@ function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $log_topi
  */
 function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null, $log_topic=null, $exceptClass = null)
 {
-    $logLevel = Logger::ERROR;
-
-
     if(!is_empty_value($extraData) && array_key_exists('JobSiteKey', $extraData)) {
         $log_topic = 'plugins';
     }
@@ -162,7 +159,6 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
         }
     } elseif (null !== $ex) {
         $msg = $ex->getMessage();
-        $logLevel = Logger::DEBUG;
     }
 
     $toThrow = $ex;
@@ -181,7 +177,7 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
     }
 
 
-    LogMessage($msg, $logLevel, $extras=$extraData, $ex=$toThrow, $log_topic);
+    LogMessage($msg, Logger::ERROR, $extras=$extraData, $ex=$toThrow, $log_topic);
 
     if ($raise == true) {
         throw $toThrow;
