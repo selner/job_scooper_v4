@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 from task_dedupe_jobs import TaskDedupeJobPosting
-from helpers import docopt_ext, common_options
+from helpers import docopt_ext, COMMON_OPTIONS
 from util_log import logmsg
 
 
@@ -28,12 +28,9 @@ Usage:
   cmd_exclude_duplicate_matches.py --version
   
 Options:
-  -h --help     show this help message and exit
-  --version     show version and exit
-  -v --verbose      print status messages
   -o <file>, --output <file>    output JSON file with ID pairs of duplicate listings 
   -i <file>, --input <file>     input JSON data file with job postings
-""" + common_options
+""" + COMMON_OPTIONS
 
 
 

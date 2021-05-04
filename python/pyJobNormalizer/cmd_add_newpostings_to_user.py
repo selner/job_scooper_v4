@@ -18,7 +18,7 @@
 #  under the License.
 ###########################################################################
 from task_add_newposts_to_user import TaskAddNewMatchesToUser
-from helpers import docopt_ext, COMMON_OPTIONS, COMMON_OPTIONS
+from helpers import docopt_ext, COMMON_OPTIONS
 from util_log import logmsg
 
 cli_usage = """
