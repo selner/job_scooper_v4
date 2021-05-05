@@ -177,6 +177,14 @@ class CurlWrapper
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
         if ($cookies) {
+            if(is_array($cookies)) {
+                $strcookies = "";
+                foreach($cookies as $cookie) {
+                    $strcookies = $strcookies . sprintf("%s=%s", $cookie->getName(), $cookie->getValue());
+                }
+                $cookies = $strcookies;
+            }
+
             curl_setopt($ch, CURLOPT_COOKIE, $cookies);
         }
 

@@ -35,7 +35,7 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
 
     def update_job_nonmatches(self):
 
-        print("Marking user_job_matches that did not match job titles to skip-send...")
+        self.log("Marking user_job_matches that did not match job titles to skip-send...")
 
         querysql = """
             UPDATE
