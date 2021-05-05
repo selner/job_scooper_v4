@@ -128,7 +128,7 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
  *
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $userFacts=null, $orderByCols=[])
+function getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds=null, $userFacts=null, $orderByCols=[])
 {
     $results = null;
 
@@ -140,7 +140,7 @@ function getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocId
 
     $query->filterByUserNotificationStatus($userNotificationState);
     $query->filterByUserId($userFacts['UserId']);
-    $query->filterByDaysAgo($nNumDaysBack);
+//    $query->filterByDaysAgo($nNumDaysBack);
     $query->filterByGeoLocationIds($arrGeoLocIds);
 
     if(is_empty_value($orderByCols)) {
@@ -180,7 +180,7 @@ function getAllUserNotificationCounts($userNotificationState, $arrGeoLocIds=null
 {
     $results = null;
 
-    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds, $nNumDaysBack, $userFacts);
+    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocIds, $userFacts);
 
     $sitekeyColumnName = $query->getAliasedColName(\JobScooper\DataAccess\Map\JobPostingTableMap::COL_JOBSITE_KEY);
     $query->clearSelectColumns()
@@ -215,14 +215,13 @@ function getAllUserNotificationCounts($userNotificationState, $arrGeoLocIds=null
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $nNumDaysBack=null, $userFacts=null, $countsOnly=false)
+function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=null, $userFacts=null, $countsOnly=false)
 {
     $results = null;
 
     $query = getAllUserNotificationMatchesQuery(
         $userNotificationState,
         $arrGeoLocIds,
-        $nNumDaysBack,
         $userFacts,
         $orderByCols = [ 'is_job_match DESC', 'jobposting.key_company_and_title ASC']
     );
@@ -249,13 +248,21 @@ function getAllMatchesForUserNotification($userNotificationState, $arrGeoLocIds=
  * @throws \Exception
  * @throws \Propel\Runtime\Exception\PropelException
  */
-function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $nNumDaysBack=null, $userFacts=null, $addlCallbackParams=[], $orderByCols=[])
+function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=null, $addlCallbackParams=[])
 {
     $nResults = 0;
  
     LogMessage('Getting all user job matches results query...');
 
-    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoIds, $nNumDaysBack, $userFacts, $orderByCols);
+    $orderByCols = null;
+    if (array_key_exists('order_by_cols', $addlCallbackParams)) {
+        $orderByCols = $addlCallbackParams['order_by_cols'];
+    }
+    $userFacts = null;
+    if (array_key_exists('user_facts', $addlCallbackParams)) {
+        $userFacts = $addlCallbackParams['user_facts'];
+    }
+    $query = getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoIds, $userFacts, $orderByCols);
     $resultsPager = $query->paginate(1, $maxPerPage = MAX_RESULTS_PER_PAGE);
     
     $totalResults = $resultsPager->getNbResults();
@@ -276,10 +283,10 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
 
                     $results = $resultsPager->getResults();
 		            if(!is_empty_value($addlCallbackParams)) {
-                        $callback($results, $addlCallbackParams);
+                        call_user_func($callback, $results, $addlCallbackParams);
 		            }
 		            else {
-		                $callback($results);
+		                call_user_func($callback, $results);
 		            }
 		            $nResults += $resultsPager->count();
 		            endLogSection("Callback complete for results page {$nCurrentPage} ");

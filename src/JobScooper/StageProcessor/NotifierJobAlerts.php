@@ -185,18 +185,16 @@ class NotifierJobAlerts extends JobsMailSender
 	           
 	        $addlData = [
 	            'place' => $place,
-	            'userfacts' => $userFacts,
-	            'geolocationid' => $geoLocationId
+	            'user_facts' => $userFacts,
+	            'geolocationid' => $geoLocationId,
+                'order_by_cols' => [ 'is_job_match DESC', 'jobposting.key_company_and_title ASC']
 	        ];
 	        
 	        doCallbackForAllMatches(
 	        	array($this, 'sendUserResultsBatch'),
 	            [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_READY_TO_SEND, Criteria::EQUAL],
                 $arrNearbyIds,
-                null,
-                $userFacts,
-                $addlData,
-                [ 'is_job_match DESC', 'jobposting.key_company_and_title ASC']
+                $addlData
 	        );
             
             $arrNearbyIds = null;
@@ -214,11 +212,11 @@ class NotifierJobAlerts extends JobsMailSender
      *
 	* @throws \Exception
 	*/
-    function sendUserResultsBatch(&$dbMatches, array $addlFacts)
+    function sendUserResultsBatch($dbMatches, array $addlFacts)
     {
     	try
     	{
-	        $matches['all'] = $dbMatches->toArray('UserJobMatchId');
+	        $matches['all'] = $dbMatches->toArray('JobPostingId');
 	        // dump the full list of matches/excludes to JSON
 	        //
 			try {
@@ -256,8 +254,8 @@ class NotifierJobAlerts extends JobsMailSender
 	
 	        $userFacts = [];
 	        $geoLocationId = null;
-	        if(array_key_exists('userfacts', $addlFacts)) {
-	            $userFacts = $addlFacts['userfacts'];
+	        if(array_key_exists('user_facts', $addlFacts)) {
+	            $userFacts = $addlFacts['user_facts'];
 	        }
 	
 	        if(array_key_exists('geolocationid', $addlFacts)) {

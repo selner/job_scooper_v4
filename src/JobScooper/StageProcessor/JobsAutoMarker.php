@@ -93,12 +93,16 @@ class JobsAutoMarker
             //
             try {
                 startLogSection("{$userFacts['UserSlug']}:  Marking title matches / exclusions...");
+
+                $addlData = [
+                    'user_facts' => $userFacts
+                ];
+
                 doCallbackForAllMatches(
                     array($this, 'markJobsListSubset_KwdsComps'),
                     [UserJobMatchTableMap::COL_USER_NOTIFICATION_STATE_NOT_YET_MARKED, Criteria::EQUAL],
                     null,
-                    null,
-                    $userFacts
+                    $addlData
                 );
             } catch (PropelException $ex) {
                 handleException($ex, null, true);
