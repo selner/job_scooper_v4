@@ -171,31 +171,31 @@
     },
     {
       "JobSiteName": "Andela",
-      "SiteReferenceKey": "Andela",
+      "SiteReferenceKey": "andela",
       "SourceURL": "https://boards.greenhouse.io/andela",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "CatapultSports",
-      "SiteReferenceKey": "Catapult Sports",
+      "SiteReferenceKey": "catapultsports",
       "SourceURL": "https://boards.greenhouse.io/catapultsports",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "ChewyFulfillment",
-      "SiteReferenceKey": "Chewy Fulfillment",
+      "SiteReferenceKey": "chewyfulfillment",
       "SourceURL": "https://boards.greenhouse.io/fulfillment",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "Classy",
-      "SiteReferenceKey": "Classy",
+      "SiteReferenceKey": "classy",
       "SourceURL": "https://boards.greenhouse.io/classy",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "Deliveroo",
-      "SiteReferenceKey": "Deliveroo",
+      "SiteReferenceKey": "deliveroo",
       "SourceURL": "https://boards.greenhouse.io/deliveroo",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
@@ -207,7 +207,7 @@
     },
     {
       "JobSiteName": "ElementAI",
-      "SiteReferenceKey": "ElementAI",
+      "SiteReferenceKey": "elementai",
       "SourceURL": "https://boards.greenhouse.io/elementai",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
@@ -219,7 +219,7 @@
     },
     {
       "JobSiteName": "Common",
-      "SiteReferenceKey": "Common",
+      "SiteReferenceKey": "common",
       "SourceURL": "https://boards.greenhouse.io/common",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
@@ -237,13 +237,13 @@
     },
     {
       "JobSiteName": "KivaRTP",
-      "SiteReferenceKey": "KivaRTP",
+      "SiteReferenceKey": "rtp",
       "SourceURL": "https://boards.greenhouse.io/rtp",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "NewDevelopmentBank",
-      "SiteReferenceKey": "NewDevelopmentBank",
+      "SiteReferenceKey": "ndb",
       "SourceURL": "https://boards.greenhouse.io/ndb",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
@@ -261,31 +261,31 @@
     },
     {
       "JobSiteName": "SonicWall",
-      "SiteReferenceKey": "SonicWall",
+      "SiteReferenceKey": "sonicwall",
       "SourceURL": "https://boards.greenhouse.io/sonicwall",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "Specialized",
-      "SiteReferenceKey": "Specialized",
+      "SiteReferenceKey": "specialized",
       "SourceURL": "https://boards.greenhouse.io/specialized",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "Strava",
-      "SiteReferenceKey": "Strava",
+      "SiteReferenceKey": "strava",
       "SourceURL": "https://boards.greenhouse.io/strava",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "UncommonGoods",
-      "SiteReferenceKey": "UncommonGoods",
+      "SiteReferenceKey": "uncommongoods",
       "SourceURL": "https://boards.greenhouse.io/uncommongoods",
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "Voxy",
-      "SiteReferenceKey": "Voxy",
+      "SiteReferenceKey": "voxy",
       "SourceURL": "https://boards.greenhouse.io/voxy",
       "PluginExtendsClassName": "ATSGreenhouse"
     }
