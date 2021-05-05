@@ -67,7 +67,7 @@ JSCODE;
 
         $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $searchDetails->getSearchStartUrl());
         $jsonApi = "https://www.glassdoor.com/findPopularLocationAjax.htm?term={$searchDetails->getGeoLocationURLValue()}&LocationsToReturn=10";
-        $locations = $this->getJsonApiResult($jsonApi, $searchDetails, $searchDetails->getSearchStartUrl());
+        $locations = $this->getAjaxWebPageCallResult($jsonApi, $searchDetails, $searchDetails->getSearchStartUrl());
         if (empty($locations)) {
             throw new Exception("Could not find and set search location for Glassdoor search {$searchDetails->getUserSearchSiteRunKey()}.");
         }

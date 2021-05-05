@@ -1516,8 +1516,11 @@ JSCODE;
             $arrJobList = $this->remapJobItems($arrJobList);
         }
 
+
         foreach ($arrJobList as $k => $item) {
-            $arrJobList[$k] = $this->cleanupJobItemFields($item);
+            unset($arrJobList[$k]);
+            $cleanItem = $this->cleanupJobItemFields($item);
+            $arrJobList[$cleanItem['JobSitePostId']] = $cleanItem;
         }
 
         $arrJobsToAdd = array_child_columns($arrJobList, null, 'JobSitePostId');
@@ -1538,7 +1541,7 @@ JSCODE;
 
 					$jp->fromArray($v);
 					$jp->save();
-					$arrJobList[$k] = $jp->toArray();
+					$arrSavedJobList[$k] = $jp->toArray();
 				} catch (Exception $ex) {
 					$this->_handleException($ex, "Failed to save JobPosting: %s", false);
 					unset($arrJobList[$k]);
@@ -1547,13 +1550,13 @@ JSCODE;
 					$jp = null;
 				}
 		    }
-		    $arrJobCols = array_child_columns($arrJobList, ['JobPostingId', 'JobSitePostId', 'FirstSeenAt'], 'JobSitePostId');
+		    $arrSavedJobCols = array_child_columns($arrSavedJobList, ['JobPostingId', 'JobSitePostId', 'FirstSeenAt'], 'JobSitePostId');
 	        
-            $this->arrSearchReturnedJobs[$siteRunKey] = array_merge($this->arrSearchReturnedJobs[$siteRunKey], $arrJobCols);
+            $this->arrSearchReturnedJobs[$siteRunKey] = array_merge($this->arrSearchReturnedJobs[$siteRunKey], $arrSavedJobCols);
     
             $nCountNewJobs = \count($arrJobsToAdd);
         } catch (Exception $ex) {
-            $this->_handleException($ex, 'Unable to save job search results to database.', true);
+            $this->_handleException($ex, 'Unable to save job search results to database.');
         }
 
     }
@@ -1634,7 +1637,7 @@ JSCODE;
      * @return mixed|null
      * @throws \Exception
      */
-    protected function getJsonApiResult($apiUri, $searchDetails, $hostPageUri=null, $useCurl = false)
+    protected function getAjaxWebPageCallResult($apiUri, $searchDetails, $hostPageUri=null, $useCurl = false)
     {
     	if($useCurl == true) {
 		    $this->log("Downloading JSON data from {$apiUri} using curl ...");
@@ -1672,14 +1675,23 @@ JSCODE;
 	
 	            $jsCode = /** @lang javascript */ <<<JSCODE
 				window.JSCOOP_API_RETURN = null;
-				var callback = arguments[arguments.length-1], // webdriver async script callback
+				var callback = null;
+
+				if(arguments != null && arguments.length >= 1) { 
+    				callback = arguments[arguments.length-1]; // webdriver async script callback
+    			}
 				
-				nIntervalId; // setInterval id to stop polling
+				nIntervalId = null; // setInterval id to stop polling
 	
 				function checkDone() {
 				  if( window.JSCOOP_API_RETURN ) {
 				    window.clearInterval(nIntervalId); // stop polling
-				    callback(window.JSCOOP_API_RETURN );
+				    if(callback != null) {
+    				    callback(window.JSCOOP_API_RETURN );
+    				}
+    				else {
+    				    return window.JSCOOP_API_RETURN;
+                    }
 				  }
 				}
 	
@@ -1727,7 +1739,7 @@ JSCODE;
 	
 	            $this->log("Executing JavaScript: ".PHP_EOL ." {$jsCode}");
 	            //			$driver->manage()->timeouts()->setScriptTimeout(30);
-	            $driver->executeAsyncScript($jsCode);
+	            $driver->executeScript($jsCode);
 	
 	            $response = $driver->executeScript('return window.JSCOOP_API_RETURN;');
 	            if (is_empty_value($response)) {
@@ -2004,7 +2016,8 @@ JSCODE;
                     try {
                         $arrJsonLDJobs = $this->parseJobsFromLdJson($objSimpleHTML);
 
-                        $arrPageJobsList = $this->parseJobsListForPage($objSimpleHTML);
+                        $arrPagePostings = $this->parseJobsListForPage($objSimpleHTML);
+                        $arrPageJobsList = array_column($arrPagePostings, null, 'JobSitePostId');
                         if (is_empty_value($arrPageJobsList)) {
                             // we likely hit a page where jobs started to be hidden.
                             // Go ahead and bail on the loop here
@@ -2016,7 +2029,6 @@ JSCODE;
                             $this->log($strWarnHiddenListings);
                             $nPageCount = $totalPagesCount;
                         } else {
-                        	$arrPageJobsList = array_column($arrPageJobsList, null, 'JobSitePostId');
                             if (!is_empty_value($arrJsonLDJobs)) {
                                 foreach ($arrPageJobsList as $k => $v) {
                                     if (!empty($v) && array_key_exists('JobSitePostId', $v) && array_key_exists($v['JobSitePostId'], $arrJsonLDJobs)) {

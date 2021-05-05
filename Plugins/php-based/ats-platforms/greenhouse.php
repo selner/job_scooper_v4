@@ -159,7 +159,7 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
         $hostPageUri = $this->currentJsonSearchDetails->getSearchStartUrl();
         
         $ret = array();
-        $respdata = $this->getJsonApiResult($this->searchJsonUrlFmt, $this->currentJsonSearchDetails, $hostPageUri);
+        $respdata = $this->getAjaxWebPageCallResult($this->searchJsonUrlFmt, $this->currentJsonSearchDetails, $hostPageUri);
         if (!empty($respdata)) {
             $this->lastResponseData = $respdata;
             try {

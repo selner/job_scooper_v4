@@ -147,7 +147,7 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
         //	    $locApi = "http://" . parse_url($this->JobPostingBaseUrl, PHP_URL_HOST) . "/location-lookup/?term={$locValParam}";
 
         LogMessage("Determining LocationId value for {$locValParam}... from {$locApi} ...");
-        $objLocChoices = $this->getJsonApiResult($locApi, $searchDetails, $searchDetails->getSearchStartUrl(), true);
+        $objLocChoices = $this->getAjaxWebPageCallResult($locApi, $searchDetails, $searchDetails->getSearchStartUrl(), true);
         if (empty($objLocChoices) || !is_array($objLocChoices)) {
             return null;
         }
@@ -164,7 +164,7 @@ abstract class AbstractMadgexATS extends \JobScooper\SitePlugins\AjaxSitePlugin
             $locApi = parse_url($searchDetails->getSearchStartUrl(), PHP_URL_SCHEME) . "://" . parse_url($searchDetails->getSearchStartUrl(), PHP_URL_HOST) . "/suggestions/JobTaxonomy/?q={$locValParam}";
 
             LogMessage("Determining LocationId value for {$locValParam}... from {$locApi} ...");
-            $data = $this->getJsonApiResult($locApi, $searchDetails, $searchDetails->getSearchStartUrl());
+            $data = $this->getAjaxWebPageCallResult($locApi, $searchDetails, $searchDetails->getSearchStartUrl());
             if (is_empty_value($data)) {
                 continue;
             }

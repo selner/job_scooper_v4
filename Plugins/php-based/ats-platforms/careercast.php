@@ -106,7 +106,7 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
         }
 
         $ret = array();
-        $respdata = $this->getJsonApiResult($apiUri, $this->currentJsonSearchDetails);
+        $respdata = $this->getAjaxWebPageCallResult($apiUri, $this->currentJsonSearchDetails, $hostPageUri, true);
         if (!is_empty_value($respdata)) {
             $this->lastResponseData = $respdata;
             try {
@@ -152,13 +152,11 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
      *
      * @return string
      */
-    private function _getJsonSearchUrl(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nOffset=null)
+    private function _getJsonSearchUrl(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails, $nPageCount=1)
     {
-        if (!is_empty_value($searchDetails->searchResultsPageUrl)) {
-            $jsonUrl = $searchDetails->searchResultsPageUrl. "&format=json";
-        } else {
-            $jsonUrl = $searchDetails->getSearchStartUrl() . "&format=json";
-        }
+        $pageUrl = $searchDetails->getPageURLfromBaseFmt($nPageCount);
+        $jsonUrl = $pageUrl. "&format=json";
+
         return $jsonUrl;
     }
     /**
@@ -195,6 +193,11 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
         if (is_empty_value($this->arrListingTagSetup)) {
             $this->setLayoutIfNeeded($searchDetails);
         }
+    }
+
+    public function getPageURLValue($nPage)
+    {
+        return (empty($nPage) || $nPage === 0) ? "1" : $nPage;
     }
 
     /**
@@ -245,6 +248,9 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
     public function parseJobsListForPage(\JobScooper\Utils\SimpleHtml\SimpleHTMLHelper $objSimpHTML)
     {
         $jobs = null;
+        $pageNumber = 1;
+        $totalPages = 1;
+
         if (!is_empty_value($this->lastResponseData) || !is_empty_value($this->currentJsonSearchDetails)) {
             try {
                 $ret = array();
@@ -253,22 +259,24 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
                     $jobs = $this->lastResponseData->Jobs;
                     unset($this->lastResponseData);
                 } else {
-                    $jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
+                    $jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $pageNumber);
                     LogMessage("Loading job results JSON data for {$this->JobSiteKey} from {$jsonUrl}");
                     $respData = $this->getJsonResultsPage($jsonUrl);
                     $jobs = $respData->Jobs;
                     $this->nTotalJobs = $respData->Total;
+                    $totalPages= ceil($this->nTotalJobs / $this->JobListingsPerPage);
                 }
                 //				return $this->_parseJsonJobs($jobs);
 //
-                while (!is_empty_value($jobs) && $nOffset < $this->nTotalJobs) {
+                while (!is_empty_value($jobs) && $pageNumber <= $totalPages) {
+                    $pageNumber = $pageNumber + 1;
                     $curPageJobs = $this->_parseJsonJobs($jobs);
                     unset($jobs);
                     $ret = array_merge($ret, $curPageJobs);
                     $nOffset = $nOffset + \count($curPageJobs);
                     if ($nOffset < $this->nTotalJobs) {
-                        $jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $nOffset);
-                        LogMessage("Loading next page of JSON data for {$this->JobSiteKey} from {$this->getActiveWebdriver()->getCurrentURL()}");
+                        $jsonUrl = $this->_getJsonSearchUrl($this->currentJsonSearchDetails, $pageNumber);
+                        LogMessage("Loading next page ({$pageNumber}) of JSON data for {$this->JobSiteKey} from {$this->getActiveWebdriver()->getCurrentURL()}");
                         $respData = $this->getJsonResultsPage($jsonUrl);
                         $jobs = $respData->Jobs;
                     }
@@ -276,7 +284,6 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
                         $jobs = null;
                     }
                 }
-                $this->arrSearchReturnedJobs = $ret;
 
                 return $ret;
             } catch (Exception $ex) {
