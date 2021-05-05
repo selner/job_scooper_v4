@@ -186,11 +186,11 @@ class StageManager
                                 $sitePlugin->downloadLatestJobsForAllSearches();
                             }
                             $didRunSearches = true;
-                        } catch (\Exception $classError) {
-                            handleException($classError, "{$jobsiteKey} failed to get latest job postings: %s", $raise = true);
-                            $didRunSearches = false;
-                        } finally {
                             endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
+                        } catch (\Exception $classError) {
+                            handleException($classError, "{$jobsiteKey} failed to get latest job postings: %s", $raise = false);
+                            $didRunSearches = false;
+                            endLogSection("Failed to get latest jobs from {$jobsiteKey} ");
                         }
 
 
@@ -226,7 +226,7 @@ class StageManager
                     }
 
                 } catch (\Exception $ex) {
-                    $msg = "Skipping all other {$jobsiteKey} searches due to plugin failure: %s";
+                    $msg = "Skipping remaining {$jobsiteKey} searches due to plugin failure: %s";
                     LogWarning($msg);
                 } finally {
                     $sitePlugin = null;
