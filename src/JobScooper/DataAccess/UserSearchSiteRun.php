@@ -332,7 +332,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                         break;
                 }
 
-                $strURL = str_ireplace($replaceStr, $replaceVal, $strURL);
+                $strURL = str_ireplace($replaceStr, urlencode($replaceVal), $strURL);
             }
         }
 
