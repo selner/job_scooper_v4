@@ -17,7 +17,6 @@
             "PluginExtendsClassName": "AbstractJobviteATS"
         },
         {
-        {
             "JobSiteName": "HTC",
             "SourceURL": "https://jobs.jobvite.com/htc/?nl=1",
             "PluginExtendsClassName": "AbstractJobviteATS"
