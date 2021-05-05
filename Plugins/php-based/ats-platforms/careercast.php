@@ -272,7 +272,12 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
                         $respData = $this->getJsonResultsPage($jsonUrl);
                         $jobs = $respData->Jobs;
                     }
+                    else {
+                        $jobs = null;
+                    }
                 }
+                $this->arrSearchReturnedJobs = $ret;
+
                 return $ret;
             } catch (Exception $ex) {
                 LogWarning("Failed to download " . $this->JobSiteKey . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());

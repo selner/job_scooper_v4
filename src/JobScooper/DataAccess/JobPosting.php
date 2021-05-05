@@ -23,6 +23,7 @@ use Exception;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Connection\ConnectionInterface;
 use \JobScooper\DataAccess\Base\JobPosting as BaseJobPosting;
+use Propel\Runtime\Propel;
 
 /**
  * Class JobPosting
@@ -236,9 +237,15 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
             	}
                 $getFunc = "get{$phpField}";
                 $setFunc = "set{$phpField}";
+                $max = null;
+                $tblmap = Propel::getServiceContainer()->getDatabaseMap(JobPostingTableMap::DATABASE_NAME)->getTable(JobPostingTableMap::TABLE_NAME);
+                $colinfo = $tblmap->findColumnByName($phpField);
+                if($colinfo != null) {
+                    $max = $colinfo->getSize();
+                }
                 $val = call_user_func(array($this, $getFunc), null);
                 if (!is_empty_value($val) && is_string($val)) {
-                    $cleanVal = cleanupTextValue($val);
+                    $cleanVal = cleanupTextValue($val, null, null, $maxlength=$max);
                     call_user_func(array($this, $setFunc), $cleanVal);
                 }
             }
