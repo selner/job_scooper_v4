@@ -1639,6 +1639,7 @@ JSCODE;
      */
     protected function getAjaxWebPageCallResult($apiUri, $searchDetails, $hostPageUri=null, $useCurl = false)
     {
+        $data = null;
     	if($useCurl == true) {
 		    $this->log("Downloading JSON data from {$apiUri} using curl ...");
 	        try {

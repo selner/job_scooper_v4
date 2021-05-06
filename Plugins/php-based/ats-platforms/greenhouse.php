@@ -18,6 +18,7 @@
 abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     private $gh_api_fmt = "https://api.greenhouse.io/v1/boards/%s/embed/jobs";
+    private $gh_hostpage_fmt = "https://boards.greenhouse.io/%s";
     private $searchJsonUrlFmt = null;
     private $currentJsonSearchDetails = null;
     private $lastResponseData = null;
@@ -53,6 +54,14 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
 
         $this->currentJsonSearchDetails = $searchDetails;
 
+    }
+
+    public function getHostPageUrl() {
+        return sprintf($this->gh_hostpage_fmt, strtolower($this->JobSiteKey));
+    }
+
+    public function getJsonSearchUrl() {
+        return sprintf($this->gh_api_fmt, strtolower($this->JobSiteKey));
     }
 
     /**
@@ -102,6 +111,9 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
     {
         try {
             $retData = $this->getJsonResultsPage('jobs', "meta->total");
+            if($retData == null or count($retData) == 0) {
+                throwException("Unable to find total results for {$this->JobSiteKey} search." );
+            }
             $this->nTotalJobs = $retData['count'];
             return $this->nTotalJobs;
         } catch (Exception $ex) {
@@ -155,11 +167,12 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     private function getJsonResultsPage($jobsKey='jobs', $countKey=null)
     {
-	    LogMessage("Downloading JSON listing data from {$this->searchJsonUrlFmt} for {$this->JobSiteKey}...");
-        $hostPageUri = $this->currentJsonSearchDetails->getSearchStartUrl();
-        
+	    LogMessage("Downloading JSON listing data from {$this->getJsonSearchUrl()} for {$this->JobSiteKey}...");
+        // $hostPageUri = $this->currentJsonSearchDetails->getSearchStartUrl();
+        $hostPageUri = $this->getHostPageUrl();
+
         $ret = array();
-        $respdata = $this->getAjaxWebPageCallResult($this->searchJsonUrlFmt, $this->currentJsonSearchDetails, $hostPageUri);
+        $respdata = $this->getAjaxWebPageCallResult($this->getJsonSearchUrl(), $this->currentJsonSearchDetails, $hostPageUri, true);
         if (!empty($respdata)) {
             $this->lastResponseData = $respdata;
             try {
