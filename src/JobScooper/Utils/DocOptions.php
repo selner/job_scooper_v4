@@ -37,9 +37,9 @@ Options:
   --config=<config_file_path>  Full path to the configuration setting file to load.  
   --user=<config_user_key>  Which set of user configuration settings should we run.  
   --stages=<stage_numbers>  Comma-separated list of stage numbers to run from 1 - 4. [default: 1,2,3,4]
-  --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey. [default: all]
+  --jobsite=<jobsitekey>    Comma-separated list of jobsites to run by JobSiteKey.
   --debug                   Show debug output [default: 0]
-  --ignore_recent           Run a search regardless of whether it was run recently. [default: 0]
+  --ignore_recent           Run a search regardless of whether it was run recently.
 ';
 
     public function __construct($commandfile, $input = array())
@@ -88,6 +88,11 @@ Options:
 
             $this->arguments[$argkey] = $argval;
         }
+
+        if (!array_key_exists("jobsite", $this->arguments) || is_empty_value($this->arguments['jobsite'])) {
+            $this->arguments['jobsite'] = "all";
+        }
+
     }
 
     public function getAll()
