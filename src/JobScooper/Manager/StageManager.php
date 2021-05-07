@@ -204,7 +204,7 @@ class StageManager
 
                                     $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
                                     $params = [
-                                        '--userid' => $userFacts['UserId'],
+                                        '--jobuserid' => $userFacts['UserId'],
                                         '--jobsite' => $jobsiteKey
                                     ];
 

@@ -23,7 +23,7 @@ from task_find_nearby_locations import TaskFindNearbyGeolocationsFromDb
 
 class TaskMarkOutOfAreaMatches(DatabaseMixin):
     _geolocation_id = None
-    _userkey = None
+    jobuserid = None
     _findtask = None
     _config = None
 
@@ -37,8 +37,8 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
 
         if 'geolocation_id' in kwargs:
             self._geolocation_id = kwargs['geolocation_id']
-        if 'user' in kwargs:
-            self._userkey = kwargs['user']
+        if 'jobuserid' in kwargs:
+            self._userid = kwargs['jobuserid']
 
         self._config = kwargs
 
@@ -52,12 +52,8 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
             geolocation_id
         FROM 
             user_search_pair 
-        JOIN 
-            `user` 
-                ON 
-                    user_search_pair.user_id = `user`.user_id 
         WHERE 
-            `user`.user_slug = '%s'""" % userkey)
+            user_id = '%s'""" % self._userid)
 
         ret = []
         for rec in result:
@@ -68,10 +64,10 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
 
     def mark_out_area(self):
         radius = 20
-        if not self._userkey:
-            raise Exception("Missing required userkey value.")
+        if not self.self._userid:
+            raise Exception("Missing required user_id value.")
 
-        geolocids = self.get_user_search_geolocation_ids(self._userkey)
+        geolocids = self.get_user_search_geolocation_ids(self._userid)
 
         where_clause = ""
 
@@ -120,5 +116,5 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         #
         #  print out a last summary line with the results for logging by the original calling process
         #
-        self.log(f'{count_in_area} user job matches marked in {self._userkey}\'s search areas; {count_out_area} matches marked out of area.')
+        self.log(f'{count_in_area} user job matches marked in {self._userid}\'s search areas; {count_out_area} matches marked out of area.')
 

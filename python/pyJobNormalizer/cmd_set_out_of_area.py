@@ -23,18 +23,18 @@ from util_log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_set_out_of_area.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>) -u user
+  cmd_set_out_of_area.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>) --jobuserid jobuser
   cmd_set_out_of_area.py --version
   
 Options:
-  -u <userkey>, --user <userkey>    slug key for user to update matches on
+  --jobuserid <userid>    slug key for user to update matches on
 """ + COMMON_OPTIONS
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc', filename=__file__)
 
     try:
-        if not ("user" in args and args["user"]):
+        if not ("jobuserid" in args and args["jobuserid"]):
             raise Exception("Missing user parameter.")
 
         matcher = TaskMarkOutOfAreaMatches(**args)

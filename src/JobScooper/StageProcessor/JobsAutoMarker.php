@@ -79,7 +79,7 @@ class JobsAutoMarker
                 $this->_callPythonCmd(
                     $filename = "cmd_set_out_of_area.py",
                     $descr = "{$userFacts['UserSlug']}:  Marking in/out of search areas...",
-                    $extraParams = array( '--user' => $userFacts['UserSlug'])
+                    $extraParams = array( '--jobuserid' => $userFacts['UserId'])
                 );
             }
             catch (Exception $ex)

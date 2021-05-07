@@ -50,6 +50,8 @@ class PythonRunner {
 	*/
 	static function execScript($scriptFile, $script_params=array(), $includeDBParams=false) {
 
+        startLogSection("Calling Python Script:  $scriptFile");
+
         try {
             $exec = PythonRunner::getPythonExec();
             $scriptPath = __ROOT__ . "/python/$scriptFile";
@@ -82,7 +84,9 @@ class PythonRunner {
             handleException($ex);
         }
         LogMessage(PHP_EOL . "    >>>>> command completed with result {$resultcode} >>>>>>" . PHP_EOL);
+        endLogSection(" Finished Python Script call:  $scriptFile");
         return $resultcode;
-        
-	}
+
+
+    }
 }

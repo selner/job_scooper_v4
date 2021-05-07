@@ -23,11 +23,11 @@ from util_log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_add_newpostings_to_user.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>) -u <userid> -j <jobsite>
+  cmd_add_newpostings_to_user.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>) --jobuserid <userid> --jobsite <jobsite>
   cmd_add_newpostings_to_user.py --version
   
 Options:
-  -u <userid> --userid <userid>     user_id for user to add new matches
+  --jobuserid <userid>     user_id for user to add new matches
   -j <jobsite> --jobsite <jobsite>   jobsitekey for site to add listings from
 """ + COMMON_OPTIONS
 

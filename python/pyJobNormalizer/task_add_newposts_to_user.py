@@ -29,8 +29,8 @@ class TaskAddNewMatchesToUser(DatabaseMixin):
 
         DatabaseMixin.__init__(self, **kwargs)
 
-        if 'jobsite' in kwargs and 'userid' in kwargs:
-            self.add_new_posts_to_user(jobsitekey=kwargs['jobsite'], user_id=kwargs['userid'])
+        if 'jobsite' in kwargs and 'jobuserid' in kwargs:
+            self.add_new_posts_to_user(jobsitekey=kwargs['jobsite'], user_id=kwargs['jobuserid'])
 
 
     def add_new_posts_to_user(self, jobsitekey, user_id):
