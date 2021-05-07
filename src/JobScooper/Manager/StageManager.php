@@ -126,8 +126,6 @@ class StageManager
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $jobsiteKeys = JobSiteManager::getJobSiteKeysIncludedInRun();
         $sitePlugin = null;
-        $siteRuns = null;
-        $user = null;
         $usersForRun = Settings::getValue('users_for_run');
         $didRunSearches = false;
 
@@ -167,9 +165,9 @@ class StageManager
                                 $sitePlugin->setSearches($searchRuns);
                             }
                         } catch (JobSitePluginException $classError) {
-                            handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = false);
+                            handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", false);
                         } catch (\Exception $classError) {
-                            handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", $raise = true);
+                            handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", true);
                         } finally {
                             $totalSearches = \count($searchRuns);
                             endLogSection(" {$totalSearches} {$jobsiteKey} searches were initialized.");
@@ -188,7 +186,7 @@ class StageManager
                             $didRunSearches = true;
                             endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
                         } catch (\Exception $classError) {
-                            handleException($classError, "{$jobsiteKey} failed to get latest job postings: %s", $raise = false);
+                            handleException($classError, "{$jobsiteKey} failed to get latest job postings: %s", false);
                             $didRunSearches = false;
                             endLogSection("Failed to get latest jobs from {$jobsiteKey} ");
                         }
@@ -211,6 +209,7 @@ class StageManager
                                     ];
 
                                     $resultcode = PythonRunner::execScript($runFile, $params, true);
+                                    LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
                                 }
 
                             } catch (\Exception $ex) {
@@ -225,7 +224,7 @@ class StageManager
                     }
 
                 } catch (\Exception $ex) {
-                    $msg = "Skipping remaining {$jobsiteKey} searches due to plugin failure: %s";
+                    $msg = "Skipping remaining $jobsiteKey searches due to plugin failure: $ex";
                     LogWarning($msg);
                 } finally {
                     $sitePlugin = null;
@@ -239,7 +238,6 @@ class StageManager
                             unset($searchRuns[$k]);
                         }
                     }
-                    $user = null;
                     $searchRuns = null;
                     endLogSection("Completed getting new job postings for {$jobsiteKey}.");
                 }
@@ -250,9 +248,12 @@ class StageManager
         } finally {
             endLogSection("End Stage 1: Finished downloading new jobs.");
             if($didRunSearches === true) {
-                $pluginAlerts = new NotifierDevAlerts();
-                $pluginAlerts->processPluginErrorAlert();
-
+                try {
+                    $pluginAlerts = new NotifierDevAlerts();
+                    $pluginAlerts->processPluginErrorAlert();
+                } catch (\Exception $ex) {
+                    handleException($ex, "Failed to send Plugin Errors email alert", false);
+                }
             }
         }
 
@@ -270,11 +271,12 @@ class StageManager
             startLogSection('Stage 2:  Normalizing job posting details for recent posts...');
             $normer = new DataNormalizer();
             $normer->normalizeJobs();
+            endLogSection('End of stage 2 (job posting normalization).');
         } catch (\Exception $ex) {
-            handleException($ex, null, true);
+            endLogSection('FAILED stage 2:  Failed to normalize job posting details due to an error.');
+            handleException($ex, "FAILED stage 2:  Failed to normalize job posting details due to an exception", true);
         } finally {
             $normer = null;
-            endLogSection('End of stage 2 (job posting normalization).');
         }
     }
 
@@ -295,13 +297,14 @@ class StageManager
                 throw new \InvalidArgumentException('No user information was set to be run.  Aborting.');
             }
 
-        $marker->markJobMatches($usersForRun);
+            $marker->markJobMatches($usersForRun);
+            endLogSection("Stage 3: Completed auto-marking job matches.");
         } catch (\Exception $ex) {
-            handleException($ex, null, true);
+            handleException($ex, "Failed to auto-marking job matches due to an exception", true);
+            endLogSection("FAILED Stage 3: failed to auto-marking job matches due to an error.");
         } finally {
             $marker = null;
             $usersForRun = null;
-        endLogSection("Stage 3: Completed auto-marking job matches.");
         }
     }
 
@@ -326,12 +329,13 @@ class StageManager
                 $notifier->processRunResultsNotifications($userFacts);
                 endLogSection("End of stage 4 (notifying {$userFacts['UserSlug']})");
             }
+            endLogSection('End of stage 4: user notifications');
         } catch (\Exception $ex) {
-            handleException($ex, null, true);
+            handleException($ex, "Failed to notify users due to an exception", true);
+            endLogSection("FAILED Stage 4: failed user results notification.");
         } finally {
             $notifier = null;
             $usersForRun = null;
-            endLogSection('End of stage 4: user notifications');
         }
     }
 
