@@ -269,23 +269,26 @@ class JobSiteManager
         ksort($allDBJobSitesByKey);
         foreach($allDBJobSitesByKey as $jobSiteKey => $jobSiteFacts) {
 			$objJobSite = self::getJobSiteByKey($jobSiteKey);
-			if(null === $objJobSite)
-			    throw new \Exception("{$jobSiteKey} database object could not be instantiated.");
+            if(null === $objJobSite)
+                throw new \Exception("{$jobSiteKey} database object could not be instantiated.");
 
-            if(!array_key_exists($jobSiteKey, $declaredPluginsBySiteKey)) {
-                if($objJobSite->getisDisabled() === false) {
-                    LogWarning("{$jobSiteKey}: plugin class was not found; disabling job site.");
-                }
-                $objJobSite->setisDisabled(true);
+            if($objJobSite->getisDisabled() === true) {
+                LogWarning("{$jobSiteKey}: is currently marked disabled in the database.  Skipping {$jobSiteKey}.");
             }
-            else if(!array_key_exists('PhpClassName', $jobSiteFacts) || is_empty_value($jobSiteFacts['PhpClassName'])) {
-                if($objJobSite->getisDisabled() === true) {
-                    LogMessage("{$jobSiteKey}: new site plugin class was detected; enabling job site.");
+            else {
+
+
+                if (!array_key_exists($jobSiteKey, $declaredPluginsBySiteKey)) {
+                    if ($objJobSite->getisDisabled() === false) {
+                        LogWarning("{$jobSiteKey}: plugin class was not found; disabling job site.");
+                    }
+                    $objJobSite->setisDisabled(true);
+                } else if (!array_key_exists('PhpClassName', $jobSiteFacts) || is_empty_value($jobSiteFacts['PhpClassName'])) {
+                    $objJobSite->setisDisabled(false);
+                    $objJobSite->setPluginClassName($declaredPluginsBySiteKey[$jobSiteKey]);
                 }
-                $objJobSite->setisDisabled(false);
-                $objJobSite->setPluginClassName($declaredPluginsBySiteKey[$jobSiteKey]);
+                $objJobSite->save();
             }
-            $objJobSite->save();
             $objJobSite = null;
         }
 
