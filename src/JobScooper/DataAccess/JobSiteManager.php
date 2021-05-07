@@ -217,7 +217,7 @@ class JobSiteManager
         }
 
         // can't call GetAllJobSiteKeys here because we will be in a recursion loop if we do
-        if (in_array('all', $cmdLineSites)) {
+        if ($cmdLineSites == "all" || in_array('all', $cmdLineSites)) {
             return Settings::getValue('all_jobsite_keys');
         }
 
