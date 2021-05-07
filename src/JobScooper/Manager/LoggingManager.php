@@ -24,11 +24,7 @@ use JobScooper\Utils\Settings;
 use Monolog\Formatter\LineFormatter;
 
 use Monolog\Handler\BufferHandler;
-use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
-use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\HandlerInterface;
-use Monolog\Handler\RavenHandler;
-use MySQLHandler\MySQLHandler;
 use Propel\Runtime\Propel;
 use Psr\Log\LogLevel as LogLevel;
 use \Monolog\Handler\StreamHandler;
@@ -61,7 +57,6 @@ class LoggingManager extends \Monolog\Logger
     private $_handlersByType = array();
     private $_loggerName = 'default';
     private $_loggers = array();
-    private $_sentryClient = null;
 
     private $_shouldLogContext = false;
     private $_monologLevelForRun = self::ERROR;
@@ -119,9 +114,6 @@ class LoggingManager extends \Monolog\Logger
         $this->addHandler('stderr', $stderrHandler);
 
 
-        $this->_addSentryHandler();
-
-
         $this->_loggers[$this->_loggerName] = $this;
 
         $this->logRecord(LogLevel::INFO, 'Logging started from STDIN');
@@ -161,33 +153,6 @@ class LoggingManager extends \Monolog\Logger
             $con = Propel::getWriteConnection(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
             $con->useDebug(true);
             LogMessage('Enabled debug logging for Propel.');
-        }
-    }
-
-    /**
-     *
-     */
-    private function _addSentryHandler(): void
-    {
-        $settings = Settings::getValue('logging.sentry.options');
-        if (!empty($settings)) {
-            if (array_key_exists('dsn', $settings)) {
-                $this->log(Logger::INFO, 'Found Sentry config properties; setting up Sentry logging...');
-                $settings = array_merge(array(
-                    'server' => gethostname(),
-                    'auto_log_stacks' => true
-                ), $settings);
-
-                $this->_sentryClient = new \Raven_Client($settings);
-
-                $handler = new RavenHandler($this->_sentryClient, Logger::ERROR);
-                $handler->setFormatter(new LineFormatter('%message% %context% %extra%\n'));
-
-                $this->addHandler('sentry', $handler);
-
-                $handler = new \Raven_Breadcrumbs_MonologHandler($this->_sentryClient, Logger::ERROR);
-                $this->addHandler('sentry_breadcrumbs', $handler);
-            }
         }
     }
 
@@ -283,10 +248,16 @@ class LoggingManager extends \Monolog\Logger
         if (empty($level)) {
             $level = $this->_monologLevelForRun;
         }
+        $context = null;
+
+        if(isDebug()) {
+            $context = $this->getDebugContext($extras, $ex, $log_topic);
+        }
 
         $monologLevel = Logger::toMonologLevel($level);
-        $context = $this->getDebugContext($extras, $ex, $log_topic);
-
+        if($context == null) {
+            $context = array();
+        }
         if ($this->log($monologLevel, $message, $context) === false) {
             print($message . PHP_EOL . PHP_EOL);
         }
@@ -465,20 +436,6 @@ class LoggingManager extends \Monolog\Logger
             //		$context['exception_trace'] = join('|', preg_split('/$/', encodeJson($thrownExc->getTrace())));
         }
 
-
-
-        // If we are also connected to Sentry, make sure we've set similar context
-        // values for those logged entries as well
-        //
-        if (!empty($this->_sentryClient)) {
-            $this->_sentryClient = new \Raven_Client();
-
-            if (!empty($context)) {
-                $sentryContext = array_copy($context);
-                $sentryContext['exception'] = $thrownExc;
-                $this->_sentryClient->context = $sentryContext;
-            }
-        }
 
         return $context;
     }
