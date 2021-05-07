@@ -77,12 +77,6 @@
       "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
-      "JobSiteName": "dcprep",
-      "SiteReferenceKey": "dcprep",
-      "SourceURL": "https://www.dcprep.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
-    },
-    {
       "JobSiteName": "generalassembly",
       "SiteReferenceKey": "generalassembly",
       "SourceURL": "https://generalassemb.ly/careers#openings",
