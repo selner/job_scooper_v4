@@ -276,6 +276,27 @@ class ConfigInitializer
                     1 => 'vendor',
                 ),
         );
+        if(array_key_exists('dsn', $dbconfig) && $dbconfig['dsn'] != null) {
+            $pattern = "/[:;]/";
+            $params = preg_split($pattern, $dbconfig['dsn'], -1, PREG_SPLIT_NO_EMPTY);
+            array_shift($params);
+            foreach($params as $p) {
+                $valpat = "/=/";
+                $vals = preg_split($valpat, $p, -1, PREG_SPLIT_NO_EMPTY);
+                if($vals != null) {
+                    if (count($vals) == 2) {
+                        $dbconfig[$vals[0]] = $vals[1];
+                    }
+                    else {
+                        // assume host port param is the only one without equals
+                        $dbconfig['port'] = $p;
+                    }
+                }
+
+
+            }
+        }
+
         Settings::setValue("db_config", $dbconfig);
         $manager->setConfiguration($dbconfig);
         $manager->setName($connKey);

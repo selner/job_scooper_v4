@@ -161,28 +161,47 @@ class Settings extends \Adbar\Dot
      * @throws \Exception
      */
     public static function get_db_dsn() {
-    	$cfg = self::getValue('db_config');
-    	if(is_empty_value($cfg)) {
-    		throw new \Exception('Could not find database configuration to use.');
-    	}
-    	$dsn = "";
-    	foreach($cfg as $k=>$v) {
-    		if(!is_array($v)) {
-    			if(in_array($k, ["classname"])) {
+        $cfg = self::getValue('db_config');
+        if(is_empty_value($cfg)) {
+            throw new \Exception('Could not find database configuration to use.');
+        }
+        $dsn = "";
+        foreach($cfg as $k=>$v) {
+            if(!is_array($v)) {
+                if(in_array($k, ["classname"])) {
                     continue;
-    			}
-    			elseif ($k === "dsn") {
-    				$dsn .= "{$v};";
-    			}
-    			else
+                }
+                elseif ($k === "dsn") {
+                    $dsn .= "{$v};";
+                }
+                else
                 {
-    			    $dsn .= "{$k}={$v};";
-    			}
-    			
-    		}
-    	}
+                    $dsn .= "{$k}={$v};";
+                }
 
-    	return $dsn;
-    	
+            }
+        }
+
+        return $dsn;
+
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public static function get_db_cli_params() {
+        $dbparams = array();
+        $cfg = self::getValue('db_config');
+        if(is_empty_value($cfg)) {
+            throw new \Exception('Could not find database configuration to use.');
+        }
+        $cliparams = array_subset_keys($cfg, ['user', 'host', 'password', 'port', 'dbname']);
+        if(array_key_exists('dbname', $cliparams) && $cliparams['dbname'] != null) {
+            $cliparams['database'] = $cliparams['dbname'];
+            unset($cliparams['dbname']);
+        }
+        return $cliparams ;
+
     }
 }
