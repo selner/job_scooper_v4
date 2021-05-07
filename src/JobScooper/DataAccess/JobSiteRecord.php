@@ -173,7 +173,7 @@ class JobSiteRecord extends BaseJobSiteRecord
         $searchPairs = $user->getActiveUserSearchPairs();
 
         foreach($searchPairs as $pair) {
-            $pairCC = $pair->getCountryCode();
+            $pairCC = strtoupper($pair->getCountryCode());
             $pairId = $pair->getUserSearchPairId();
 
             if (!is_empty_value($pairCC) && in_array($pairCC, $siteCCs)) {
