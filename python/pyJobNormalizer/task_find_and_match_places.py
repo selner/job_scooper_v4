@@ -260,7 +260,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                             f'... place matched: location={place_details["formatted_address"]}')
 
                     #   insert GeoLocation into DB
-                    geolocfacts = {PLACE_DETAIL_GEOCODE_MAPPING[pkey]: str(place_details[pkey]) for pkey in
+                    geolocfacts = {PLACE_DETAIL_GEOCODE_MAPPING[pkey]: str(place_details[pkey])[:99] for pkey in
                                    place_details.keys() if pkey in PLACE_DETAIL_GEOCODE_MAPPING.keys() and
                                    place_details[pkey] is not None
                                    }
