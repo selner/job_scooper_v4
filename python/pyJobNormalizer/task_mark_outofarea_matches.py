@@ -64,7 +64,7 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
 
     def mark_out_area(self):
         radius = 20
-        if not self.self._userid:
+        if not self._userid:
             raise Exception("Missing required user_id value.")
 
         geolocids = self.get_user_search_geolocation_ids(self._userid)
