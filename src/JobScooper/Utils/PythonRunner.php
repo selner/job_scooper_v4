@@ -26,15 +26,17 @@ namespace JobScooper\Utils;
 class PythonRunner {
 
     static function getPythonExec() {
-        $pythonExec = 'python ';
+        $pythonExec = '/python ';
         $venvDir = __ROOT__ . '/python/.venv/bin';
-        if(is_dir($venvDir)) {
-            $pythonExec = preg_replace("/python /", "source {$venvDir}/activate; python ", $pythonExec);
-        } else {
+        if(!is_dir($venvDir)) {
             $venvDir = __ROOT__ . '/python/venv/bin';
-            if (is_dir($venvDir)) {
-                $pythonExec = preg_replace("/python /", "source {$venvDir}/activate; python ", $pythonExec);
+            if (!is_dir($venvDir)) {
+                $venvDir = null;
             }
+        }
+
+        if($venvDir !== null) {
+            $pythonExec = "{$venvDir}/python ";
         }
         return $pythonExec;
     }
@@ -59,7 +61,7 @@ class PythonRunner {
 
             $pythonScriptPath = realpath($scriptPath);
             if(is_empty_value($pythonScriptPath) || $pythonScriptPath === false) {
-                throw new \Exception("Python script file '{$scriptPath} could not be found.");
+                throw new \Exception("Python script file '$scriptPath' could not be found.");
             }
             LogMessage(PHP_EOL . "    ~~~~~~ Running command: {$exec} {$pythonScriptPath} {$cmdLine}  ~~~~~~~" . PHP_EOL);
 
@@ -67,6 +69,7 @@ class PythonRunner {
         } catch (\Exception $ex) {
             handleException($ex);
         }
+        LogMessage(PHP_EOL . "    >>>>> command completed with result {$resultcode} >>>>>>" . PHP_EOL);
         return $resultcode;
         
 	}
