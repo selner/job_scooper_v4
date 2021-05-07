@@ -1,100 +1,111 @@
 {
-    "jobsite_plugins": [
+  "jobsite_plugins": [
+    {
+      "PhpClassName": "PluginDice",
+      "BaseURL": "http://www.dice.com/",
+      "SourceURL": "https://www.dice.com/jobs?q=***KEYWORDS***&location=***LOCATION:{Place}, {RegionCode} {CountryCode}***&countryCode=US&radius=30&radiusUnit=mi&page=1&pageSize=100&filters.postedDate=SEVEN&language=en",
+      "CountryCodes": [
+        "US"
+      ],
+      "AdditionalFlags": [
+        "C__JOB_USE_SELENIUM"
+      ],
+      "Collections": [
         {
-            "PhpClassName": "AbstractDice",
-            "PluginExtendsClassName": "AbstractBaseDice",
-            "AdditionalFlags": [
-                "C__JOB_KEYWORD_SUPPORTS_QUOTED_KEYWORDS",
-                "C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER"
-            ],
-            "Collections": [
-                {
-                    "Name": "PageFields",
-                    "Fields": [
-                        {
-                            "Name": "NoPostsFound",
-                            "Selector": "h1.h1",
-                            "Index": 0,
-                            "Callback": "matchesNoResultsPattern",
-                            "CallbackParameter": "No jobs found",
-                            "Attribute": "text",
-                            "Type": "CSS"
-                        },
-                        {
-                            "Name": "TotalPostCount",
-                            "Selector": "span#posiCountId",
-                            "Type": "CSS"
-                        },
-                        {
-                            "Name": "JobPostItem",
-                            "Selector": "div.complete-serp-result-div",
-                            "Attribute": "collection",
-                            "Type": "CSS"
-                        }
-                    ]
-                },
-                {
-                    "Name": "ItemFields",
-                    "Fields": [
-                        {
-                            "Name": "Title",
-                            "Selector": "h3 a.dice-btn-link",
-                            "Attribute": "title",
-                            "Type": "CSS"
-                        },
-                        {
-                            "Name": "Url",
-                            "Selector": "h3 a.dice-btn-link",
-                            "Attribute": "href",
-                            "Index": 0,
-                            "Type": "CSS"
-                        },
-                        {
-                            "Name": "JobSitePostId",
-                            "Selector": "h3 a.dice-btn-link",
-                            "Attribute": "value"
-                        },
-                        {
-                            "Name": "Location",
-                            "Selector": "span.jobLoc",
-                            "Index": 0,
-                            "Attribute": "text",
-                            "Type": "CSS"
-                        },
-                        {
-                            "Name": "Company",
-                            "Selector": "span.compName",
-                            "Index": 0,
-                            "Attribute": "text",
-                            "Type": "CSS"
-                        },
-                        {
-                            "Name": "PostedAt",
-                            "Selector": "span[itemprop=datePosted]",
-                            "Index": 0,
-                            "IncludeHidden" : 1,
-                            "Attribute": "text",
-                            "Type": "CSS"
-                        }
-                    ]
-                }
-            ],
-            "Pagination": {
-                "PageLimit": 100,
-                "Type": "NEXT-BUTTON",
-                "Selector": "a[title='Go to next page']",
-                "Index" : 0,
-                "PageDelaySeconds": 5
+          "Name": "PageFields",
+          "Fields": [
+            {
+              "Name": "NoPostsFound",
+              "Selector": "p.font-headline.no-jobs-message",
+              "Index": 0,
+              "Callback": "matchesNoResultsPattern",
+              "CallbackParameter": "unable to find any",
+              "Attribute": "text",
+              "Type": "CSS"
+            },
+            {
+              "Name": "TotalPostCount",
+              "Selector": "span#totalJobCount",
+              "Type": "CSS"
+            },
+            {
+              "Name": "JobPostItem",
+              "Selector": "dhi-search-card",
+              "Attribute": "collection",
+              "Type": "CSS"
             }
+          ]
         },
         {
-            "JobSiteName": "Dice",
-            "BaseURL": "http://www.dice.com/",
-            "SourceURL": "https://www.dice.com/jobs/advancedResult.html?for_one=&for_all=***KEYWORDS***&for_exact=&for_none=&for_jt=&for_com=&for_loc=***LOCATION:{Place},{RegionCode}***&sort=date&limit=100&radius=50&postedDate=3",
-            "CountryCodes": [
-                "US"
-            ],
-            "PluginExtendsClassName": "AbstractDice"
+          "Name": "ItemFields",
+          "Fields": [
+            {
+              "Name": "Title",
+              "Selector": "dhi-search-card h5 a",
+              "Attribute": "text",
+              "Type": "CSS"
+            },
+            {
+              "Name": "Url",
+              "Selector": "dhi-search-card h5 a",
+              "Attribute": "href",
+              "Index": 0,
+              "Type": "CSS"
+            },
+            {
+              "Name": "JobSitePostId",
+              "Selector": "dhi-search-card h5 a",
+              "Attribute": "href",
+              "Index": 0,
+              "Type": "CSS"
+            },
+            {
+              "Name": "Location",
+              "Selector": "div.card-company span",
+              "Index": 0,
+              "Attribute": "text",
+              "Type": "CSS"
+            },
+            {
+              "Name": "Company",
+              "Selector": "div.card-company a",
+              "Index": 0,
+              "Attribute": "text",
+              "Type": "CSS"
+            },
+            {
+              "Name": "Brief",
+              "Selector": "div.card-description",
+              "Index": 0,
+              "Attribute": "text",
+              "Type": "CSS"
+            },
+            {
+              "Name": "EmploymentType",
+              "Selector": "span[itemprop=search-result-employment-type]",
+              "Index": 0,
+              "IncludeHidden": 1,
+              "Attribute": "text",
+              "Type": "CSS"
+            },
+            {
+              "Name": "PostedAt",
+              "Selector": "span.posted-date",
+              "Index": 0,
+              "IncludeHidden": 1,
+              "Attribute": "text",
+              "Type": "CSS"
+            }
+          ]
         }
-    ]
+      ],
+      "Pagination": {
+        "PageLimit": 100,
+        "Type": "NEXT-BUTTON",
+        "Selector": "li.pagination-next a",
+        "Index": 0,
+        "PageDelaySeconds": 5
+      }
+    }
+  ]
 }
