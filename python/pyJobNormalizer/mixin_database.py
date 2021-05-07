@@ -61,12 +61,12 @@ class DatabaseMixin:
             **kwargs:
         """
         import re
-        values = None
-        if 'dsn' in kwargs:
+        if 'dsn' in kwargs and kwargs['dsn']:
             driver, rest = kwargs['dsn'].split(':', 1)
             values = dict(re.findall('([\w\.]+)=([\w\.]+)', rest), driver=driver)
             self._dbparams.update(values)
-        elif 'connecturi' in kwargs:
+
+        if 'connecturi' in kwargs and kwargs['connecturi']:
             parsed = urllib.parse.urlparse(kwargs['connecturi'])
 
             if parsed.hostname:
@@ -82,12 +82,19 @@ class DatabaseMixin:
                 for a in args:
                     self._dbparams[a] = args[a]
 
+        for param in ['host', 'user', 'password', 'port', 'database']:
+            if param in kwargs and kwargs[param]:
+                self._dbparams[param] = kwargs[param]
+
         self._dbparams['cursorclass'] = OrderedDictCursor
         if 'use_unicode' not in self._dbparams:
             self._dbparams['use_unicode'] = True
+
         self._dbparams['charset'] = "utf8mb4"
+
         if 'dbname' in self._dbparams:
             self._dbparams['database'] = self._dbparams.pop('dbname')
+
         if 'port' in self._dbparams:
             self._dbparams['port'] = int(self._dbparams.pop('port'))
 

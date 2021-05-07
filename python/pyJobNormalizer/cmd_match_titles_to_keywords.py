@@ -24,7 +24,7 @@ from util_log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_match_titles_to_keywords.py -i <file> -o <file> (-c <dbstring> | --dsn <dbstring>) 
+  cmd_match_titles_to_keywords.py -i <file> -o <file> (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
   cmd_match_titles_to_keywords.py --version
 
 Options:

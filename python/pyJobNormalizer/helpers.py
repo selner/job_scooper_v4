@@ -30,6 +30,11 @@ COMMON_OPTIONS = """
   --dsn <dbstring>                          DSN connection string for database     
   -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
   --log <logdir>                            output directory for logging
+  --user <userstring>                       DB user for connection
+  --password <userpass>                         DB user password for connection
+  --host <hostname>                         DB server host for connection
+  --port <portid>                           DB server port for connection
+  --database <dbstring>                     DB server database for connection      
   -h --help                                 show this help message and exit
   --version                                 show version and exit
   -v --verbose                              print status messages

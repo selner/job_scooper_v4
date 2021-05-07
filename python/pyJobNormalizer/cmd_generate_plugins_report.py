@@ -21,10 +21,9 @@ from helpers import docopt_ext, COMMON_OPTIONS
 from task_generate_broken_plugins_data import TaskGenerateBrokenPluginReportData
 
 from util_log import logmsg
-
 cli_usage = """
 Usage:
-  {} (-c <dbstring> | --dsn <dbstring>) -o <outputfile>
+  {} (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>) -o <outputfile>
   {} --version
 
 Options:

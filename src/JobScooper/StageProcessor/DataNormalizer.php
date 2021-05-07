@@ -78,12 +78,9 @@ class DataNormalizer
         try {
             startLogSection('Calling python to set the title tokens for new job postings...');
             $runFile = 'pyJobNormalizer/cmd_set_title_tokens.py';
-            $params = [
-                '--dsn' => Settings::get_db_dsn()
-            ];
 
-            $resultcode = PythonRunner::execScript($runFile, $params);
-            LogMessage('Python command call finished.');
+            $resultcode = PythonRunner::execScript($runFile, null, true);
+            LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
 
         } catch (\Exception $ex) {
             handleException($ex, null, false);
@@ -99,12 +96,9 @@ class DataNormalizer
         try {
             startLogSection('Calling python to dedupe new job postings...');
             $runFile = 'pyJobNormalizer/cmd_mark_duplicates.py';
-            $params = [
-                '--dsn' => Settings::get_db_dsn()
-            ];
 
-            $resultcode = PythonRunner::execScript($runFile, $params);
-            LogMessage('Python command call finished.');
+            $resultcode = PythonRunner::execScript($runFile, null, true);
+            LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
 
         } catch (\Exception $ex) {
             handleException($ex, null, false);
@@ -125,12 +119,11 @@ class DataNormalizer
             startLogSection('Calling python to find & map missing locations...');
             $runFile = 'pyJobNormalizer/cmd_set_geolocations.py';
             $params = [
-                '--dsn' => Settings::get_db_dsn(),
                 '--server' => Settings::getValue('geocodeapi_server'),
             ];
 
-            $resultcode = PythonRunner::execScript($runFile, $params);
-            LogMessage('Python command call finished.');
+            $resultcode = PythonRunner::execScript($runFile, $params, true);
+            LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
 
         } catch (\Exception $ex) {
             handleException($ex, null, false);

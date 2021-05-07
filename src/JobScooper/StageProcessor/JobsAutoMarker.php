@@ -187,9 +187,9 @@ class JobsAutoMarker
 
         try {
             $runFile = "pyJobNormalizer" . DIRECTORY_SEPARATOR . "{$filename}";
-            $params = array_merge(array( '--dsn' => Settings::get_db_dsn()), $extraParams);
 
-            $resultcode = PythonRunner::execScript($runFile, $params);
+            $resultcode = PythonRunner::execScript($runFile, $extraParams, true);
+            LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
 
         } catch (Exception $ex) {
             handleException($ex, "ERROR:  Failed {$descr}");

@@ -23,7 +23,7 @@ from task_tokenize_jobtitles import TaskAddTitleTokens
 
 cli_usage = """
 Usage:
-  cmd_update_title_tokens.py (-c <dbstring> | --dsn <dbstring>)
+  cmd_update_title_tokens.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
   cmd_update_title_tokens.py --version
 
 Options:

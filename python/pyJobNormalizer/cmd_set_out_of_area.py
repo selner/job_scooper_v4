@@ -23,7 +23,7 @@ from util_log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_set_out_of_area.py (-c <dbstring> | --dsn <dbstring>) -u user
+  cmd_set_out_of_area.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>) -u user
   cmd_set_out_of_area.py --version
   
 Options:

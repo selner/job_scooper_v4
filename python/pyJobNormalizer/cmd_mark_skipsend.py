@@ -23,7 +23,7 @@ from util_log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_mark_skipsend.py (-c <dbstring> | --dsn <dbstring>)
+  cmd_mark_skipsend.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
   cmd_mark_skipsend.py --version
   
 Options:

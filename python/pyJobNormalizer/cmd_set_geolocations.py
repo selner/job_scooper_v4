@@ -23,7 +23,7 @@ from util_log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_set_geolocations.py  (-c <dbstring> | --dsn <dbstring>)  -s <server>
+  cmd_set_geolocations.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>) -s <server>
   cmd_set_geolocations.py --version
   
 Options:

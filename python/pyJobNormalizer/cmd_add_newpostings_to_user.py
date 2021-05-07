@@ -23,7 +23,7 @@ from util_log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_add_newpostings_to_user.py (-c <dbstring> | --dsn <dbstring>) -u <userid> -j <jobsite>
+  cmd_add_newpostings_to_user.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>) -u <userid> -j <jobsite>
   cmd_add_newpostings_to_user.py --version
   
 Options:

@@ -48,15 +48,27 @@ class PythonRunner {
      *
 	 * @throws \Exception
 	*/
-	static function execScript($scriptFile, $script_params=array()) {
+	static function execScript($scriptFile, $script_params=array(), $includeDBParams=false) {
 
         try {
             $exec = PythonRunner::getPythonExec();
-
-            $scriptPath = __ROOT__ . "/python/{$scriptFile}";
+            $scriptPath = __ROOT__ . "/python/$scriptFile";
             $cmdLine = "";
+
+            if($script_params == null) {
+                $script_params = array();
+            }
+
+            if ($includeDBParams == true) {
+                $dbParams = Settings::get_db_cli_params();
+                $script_params = array_merge($script_params, $dbParams);
+            }
+
             foreach($script_params as $key => $value) {
-            	$cmdLine .= " {$key} " . escapeshellarg($value);
+            	if($key[0] != "-") {
+            	    $key = "--{$key}";
+                }
+                $cmdLine .= " {$key} " . escapeshellarg($value);
             }
 
             $pythonScriptPath = realpath($scriptPath);

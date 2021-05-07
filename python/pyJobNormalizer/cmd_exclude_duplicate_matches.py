@@ -24,7 +24,7 @@ from util_log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_exclude_duplicate_matches.py (-c <dbstring> | --dsn <dbstring>)
+  cmd_exclude_duplicate_matches.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
   cmd_exclude_duplicate_matches.py --version
   
 Options:

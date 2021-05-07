@@ -206,12 +206,11 @@ class StageManager
 
                                     $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
                                     $params = [
-                                        '--dsn' => Settings::get_db_dsn(),
                                         '--userid' => $userFacts['UserId'],
                                         '--jobsite' => $jobsiteKey
                                     ];
 
-                                    $resultcode = PythonRunner::execScript($runFile, $params);
+                                    $resultcode = PythonRunner::execScript($runFile, $params, true);
                                 }
 
                             } catch (\Exception $ex) {
