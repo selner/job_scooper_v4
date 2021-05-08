@@ -177,15 +177,17 @@ class SitePluginFactory
                 if(array_key_exists('child_jobsites', $jsonPlugin) && $jsonPlugin['child_jobsites'] != null &&
                     count($jsonPlugin['child_jobsites']) > 0) {
                     LogDebug(sprintf("Loading %s child jobsite plugin configurations for %s...", \count($jsonPlugin['child_jobsites']), $jsonPlugin['PhpClassName']), null, $log_topic='plugins');
+                    $extendsClass = $jsonPlugin['PhpClassName'];
+                    $thisPlugin = null;
 
                     foreach($jsonPlugin['child_jobsites'] as $childsitekey) {
                         $childConfig = array(
                             "JobSiteName" => $childsitekey,
-                            "PluginExtendsClassName" => $jsonPlugin["PhpClassName"]
+                            "PluginExtendsClassName" => $extendsClass
                         );
 
-                        $jsonPlugin = $this->_parsePluginConfig_($childConfig);
-                        $this->_jsonPluginSetups[$jsonPlugin['PhpClassName']] = $jsonPlugin;
+                        $thisPlugin = $this->_parsePluginConfig_($childConfig);
+                        $this->_jsonPluginSetups[$thisPlugin['PhpClassName']] = $thisPlugin;
                     }
                 }
             }
@@ -228,7 +230,7 @@ class SitePluginFactory
         if (empty($pluginData['JobSiteName'])) {
             $pluginData['JobSiteName'] = preg_replace('/^Plugin/', '', $arrConfigData['PhpClassName']);
         }
-        $jobsitekey = strtolower($pluginData['JobSiteName']);
+        $pluginData['JobSiteKey'] = strtolower($pluginData['JobSiteName']);
 
 
         $listingTagBucket = 'arrListingTagSetup';

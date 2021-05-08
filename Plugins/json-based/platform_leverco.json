@@ -17,7 +17,8 @@
             ],
             "AdditionalFlags": [
                 "C__JOB_PAGECOUNT_NOTAPPLICABLE",
-                "C__JOB_USE_SITENAME_AS_COMPANY"
+                "C__JOB_USE_SITENAME_AS_COMPANY",
+                "C__JOB_URL_USE_DISPLAYNAME"
             ],
             "Collections": [
                 {
@@ -101,7 +102,7 @@
                  optiv-2",
                 */
                 "palantir",
-                "refractionai",
+                "RefractionAi",  // capitalization matters for this one
                 "stardog",
                 "streetlightdata",
                 "territoryfoods",

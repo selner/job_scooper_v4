@@ -319,6 +319,9 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
 
                     case "JOBSITEKEY":
                         $replaceVal = $this->jobsite_key;
+                        if($this->isBitFlagSet(C__JOB_URL_USE_DISPLAYNAME)) {
+                            $replaceVal = $this->getJobSiteFromUSSR()->getDisplayName();
+                        }
                         break;
 
                     case "ITEM_NUMBER":
