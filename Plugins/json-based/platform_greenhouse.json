@@ -35,13 +35,13 @@
       "JobSiteName": "Vimeo",
       "SiteReferenceKey": "vimeo",
       "SourceURL": "https://vimeo.com/jobs#positions",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "Docusign",
       "SiteReferenceKey": "docusign",
       "SourceURL": "https://www.docusign.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     /*    {
           "JobSiteName": "AirBnB",
@@ -64,127 +64,127 @@
             "AU"
           ],
           "SourceURL": "https://www.airbnb.com/careers",
-          "PluginExtendsClassName": "ATSGreenhouse"
+          "PluginExtendsClassName": "AbstractATSGreenhouse"
         },  */
     {
       "JobSiteName": "thoughtworks",
       "SiteReferenceKey": "thoughtworks",
       "SourceURL": "https://www.thoughtworks.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "coursehero",
       "SiteReferenceKey": "coursehero",
       "SourceURL": "https://www.coursehero.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "generalassembly",
       "SiteReferenceKey": "generalassembly",
       "SourceURL": "https://generalassemb.ly/careers#openings",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "magoosh",
       "SiteReferenceKey": "magoosh",
       "SourceURL": "https://www.magoosh.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "practicefusion",
       "SiteReferenceKey": "practicefusion",
       "SourceURL": "https://www.practicefusion.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "squarespace",
       "SiteReferenceKey": "squarespace",
       "SourceURL": "https://www.squarespace.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "thumbtack",
       "SiteReferenceKey": "thumbtack",
       "SourceURL": "https://www.thumbtack.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "twilio",
       "SiteReferenceKey": "twilio",
       "SourceURL": "https://www.twilio.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "zenefits",
       "SiteReferenceKey": "zenefits",
       "SourceURL": "https://www.zenefits.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "tumblr",
       "SiteReferenceKey": "tumblr",
       "SourceURL": "https://www.tumblr.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "evernote",
       "SiteReferenceKey": "evernote",
       "SourceURL": "https://www.evernote.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "bigcommerce",
       "SiteReferenceKey": "bigcommerce",
       "SourceURL": "https://www.bigcommerce.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "blockstream",
       "SiteReferenceKey": "blockstream",
       "SourceURL": "https://www.blockstream.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "betterment",
       "SiteReferenceKey": "betterment",
       "SourceURL": "https://www.betterment.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "nerdwallet",
       "SiteReferenceKey": "nerdwallet",
       "SourceURL": "https://www.nerdwallet.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "buzzfeed",
       "SiteReferenceKey": "buzzfeed",
       "SourceURL": "https://www.buzzfeed.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "birchbox",
       "SiteReferenceKey": "birchbox",
       "SourceURL": "https://www.birchbox.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "harrys",
       "SiteReferenceKey": "harrys",
       "SourceURL": "https://www.harrys.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "casper",
       "SiteReferenceKey": "casper",
       "SourceURL": "https://www.casper.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     },
     {
       "JobSiteName": "warbyparker",
       "SiteReferenceKey": "warbyparker",
       "SourceURL": "https://www.warbyparker.com/careers",
-      "PluginExtendsClassName": "ATSGreenhouse"
+      "PluginExtendsClassName": "AbstractATSGreenhouse"
     }
   ]
 }
