@@ -15,10 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
+abstract class AbstractATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     private $gh_api_fmt = "https://api.greenhouse.io/v1/boards/%s/embed/jobs";
     private $gh_hostpage_fmt = "https://boards.greenhouse.io/%s";
+
     private $searchJsonUrlFmt = null;
     private $currentJsonSearchDetails = null;
     private $lastResponseData = null;
@@ -82,6 +83,37 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
                 'Location' => $job->location->name,
                 'PostedAt' => $job->updated_at
             );
+
+            if(!is_empty_value($job->metadata) && count($job->metadata) >= 1) {
+                foreach($job->metadata as $metadatum) {
+                    switch($metadatum->name) {
+                        case "Legal Entity":
+                            $item['Company'] = $metadatum->value;
+                            break;
+
+                        case "Country":
+                            if($item['Location'] != null) {
+                                if (strtolower($metadatum->value) != strtolower($item['Location'])) {
+                                    $item['Location'] .= $metadatum->value;
+                                }
+                            }
+                            else {
+                                $item['Location'] = $metadatum->value;
+                            }
+                            break;
+
+                        case str_contains($metadatum->name, "Function"):
+                        case str_contains($metadatum->name, "Dept Mapping"):
+                            $item['Department'] = $metadatum->value;
+                            break;
+
+                        case str_contains($metadatum->name, "Employment Status"):
+                        case str_contains($metadatum->name, "Employment Type"):
+                            $item['EmploymentType'] = $metadatum->value;
+                            break;
+                    }
+                }
+            }
 
             if(!is_empty_value($job->metadata) && count($job->metadata) >= 1 && !is_empty_value($job->metadata[0]->value)) {
                 $item['Department'] = $job->metadata[0]->value;

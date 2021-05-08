@@ -1,7 +1,7 @@
 {
     "jobsite_plugins": [
         {
-            "PhpClassName": "AbstractLeverCo",
+            "PhpClassName": "AbstractATSLeverCo",
             /*
                Lever does have a location parameter, but it is limited to an arbitrary set of location names
                defined by the specific company, including items like "Remote" or "Remote--China".   This means

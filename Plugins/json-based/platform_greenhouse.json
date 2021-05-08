@@ -1,8 +1,8 @@
 {
   "jobsite_plugins": [
     {
-      "PhpClassName": "AbstractJSONATSGreenhouse",
-      "PluginExtendsClassName": "ATSGreenhouse",
+      "PhpClassName": "AbstractATSGreenhouse",
+      "PluginExtendsClassName": "AbstractBaseATSGreenhouse",
       "SourceURL": "https://api.greenhouse.io/v1/boards/***JOBSITEKEY***/embed/jobs",
       "ChildJobSites": [
         "airbnb",
