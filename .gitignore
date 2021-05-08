@@ -28,3 +28,4 @@ config.php
 output
 python/venv
 Plugins/__needResurrection
+Data/exported_datadumps
