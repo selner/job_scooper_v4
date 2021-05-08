@@ -317,7 +317,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         // Restructure locations like "US-VA-Richmond" to be "Richmond, VA"
         //
         $arrMatches = preg_split("/[\-]/", $v);
-        if (count($v) == 3) {
+        if (count($arrMatches) == 3) {
             $v = sprintf("%s %s %s", $arrMatches[2], $arrMatches[1], $arrMatches[0]);
         }
 
