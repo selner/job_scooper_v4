@@ -144,15 +144,26 @@ class JobSiteRecord extends BaseJobSiteRecord
      */
     public function servicesCountryCode($countryCode)
     {
+        // if we don't have a country code to check against,
+        // just return True since we can't say otherwise.
     	if(is_empty_value($countryCode)) {
-    		return false;
+    		return true;
         }
+
+        $countryCode = strtoupper($countryCode);
 
         if(is_array($countryCode) && \count($countryCode) >= 1) {
     		$countryCode = array_pop($countryCode);
         }
 
+        // if the job site hasn't specfied which countries
+        // it specfically covers, then return true since
+        // we can say for sure yes or no on coverage.
         $ccSite = $this->getSupportedCountryCodes();
+        if($ccSite == null || is_empty_value($ccSite) || count($ccSite) < 1) {
+            return true;
+        }
+
         $ccMatches = array_intersect(array($countryCode), $ccSite);
         return (!is_empty_value($ccMatches));
     }
