@@ -294,6 +294,7 @@ abstract class SitePlugin implements IJobSitePlugin
      * @throws Exception
      */
     private function _handleException($ex, $fmtLogMsg= null, $raise=true, $extraData=null) {
+        $this->log(($this->JobSiteKey . " threw an exception" . $fmtLogMsg != null ? $fmtLogMsg : ""), Logger::ERROR, $extras=$extraData, $ex=$toThrow);
         handleException($ex, $fmtLogMsg, $raise, $extraData, $log_topic = "plugin", $exceptClass = JobSitePluginException::class);
     }
  
