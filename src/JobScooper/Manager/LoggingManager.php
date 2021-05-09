@@ -277,7 +277,7 @@ class LoggingManager extends \Monolog\Logger
      */
     public function startLogSection($headerText)
     {
-        return $this->_logSectionHeader($headerText, LoggingManager::C__LOG_SECTION_BEGIN);
+        $this->_logSectionHeader($headerText, LoggingManager::C__LOG_SECTION_BEGIN);
     }
 
     /**
@@ -285,7 +285,7 @@ class LoggingManager extends \Monolog\Logger
      */
     public function endLogSection($headerText)
     {
-        return $this->_logSectionHeader($headerText, LoggingManager::C__LOG_SECTION_END);
+        $this->_logSectionHeader($headerText, LoggingManager::C__LOG_SECTION_END);
     }
 
 
