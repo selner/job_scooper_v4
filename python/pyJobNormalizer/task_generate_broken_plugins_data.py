@@ -106,10 +106,33 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
 
         try:
             broken_jobsites = self.fetch_all_from_query(querysql.format(NUMBER_DAYS_BACK))
+
+            successquerysql = """
+                        SELECT 
+                            js.jobsite_key,
+                            max(date_ended) as `most_recent_completed_date`
+                        FROM
+                            job_site js
+                            LEFT JOIN user_search_site_run ussr on ussr.jobsite_key = js.jobsite_key
+                        WHERE
+                            ussr.date_started > CURDATE() - {}
+                        AND ussr.run_result_code = 4
+                        GROUP BY 
+                            js.jobsite_key
+                        ORDER BY 
+                            jobsite_key, 
+                            `most_recent_completed_date` DESC                    """
+
+            lastsuccesful_jobsites = self.fetch_all_from_query(successquerysql.format(NUMBER_DAYS_BACK))
             broken_sites_by_key = {}
+            sites_to_include_by_key = {}
 
+            for site in broken_jobsites:
+                successful = { row['jobsite_key']: row['most_recent_completed_date'] for row in lastsuccesful_jobsites }
+                if site['jobsite_key'] not in successful.keys() or successful[site['jobsite_key']] < site['most_recent_completed_date']:
+                    sites_to_include_by_key[site['jobsite_key']] = site
 
-            for site_error in broken_jobsites:
+            for site_error in sites_to_include_by_key.values():
                 key = site_error['jobsite_key']
                 pluralize = ""
                 if site_error['count_search_pairs'] > 1:
@@ -121,7 +144,7 @@ class TaskGenerateBrokenPluginReportData(DatabaseMixin):
                     'last_search': f'last run attempt: {site_error["most_recent_start_date"]}'
                 }
 
-            self.log(f'Found error reports for {len(broken_jobsites)} broken job sites.')
+            self.log(f'Found error reports for {len(sites_to_include_by_key)} broken job sites.  Skipped {len(broken_jobsites)-len(sites_to_include_by_key)} job sites who have since ran successfully.')
 
             import os
             templpath = os.path.join(os.path.dirname(__file__), "templates", "layouts", "email_broken_plugins_section.html")

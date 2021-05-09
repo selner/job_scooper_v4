@@ -18,6 +18,7 @@
 namespace JobScooper\StageProcessor;
 
 use JobScooper\DataAccess\JobSiteManager;
+use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\Utils\JobsMailSender;
 use JobScooper\Utils\PythonRunner;
@@ -114,7 +115,7 @@ class NotifierDevAlerts extends JobsMailSender
             ->addAsColumn('CountFailedRuns', 'count(*)')
             ->addAsColumn('LastRunId', 'max(user_search_site_run_id)')
             ->groupBy($errFields)
-            ->filterByRunResultCode("failed", Criteria::EQUAL)
+            ->filterByRunResultCode(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE_FAILED, Criteria::EQUAL)
             ->filterByEndedAt($dateDaysAgo, Criteria::GREATER_EQUAL)
             ->having('CountFailedRuns >= ?', 3, \PDO::PARAM_INT)
             ->find()
@@ -124,7 +125,7 @@ class NotifierDevAlerts extends JobsMailSender
             ->select($errFields)
             ->addAsColumn('LastCompletedAt', 'max(date_ended)')
             ->groupBy($errFields)
-            ->filterByRunResultCode("successful", Criteria::EQUAL)
+            ->filterByRunResultCode(UserSearchSiteRunTableMap::COL_RUN_RESULT_CODE_SUCCESSFUL, Criteria::EQUAL)
             ->filterByEndedAt($dateDaysAgo, Criteria::GREATER_EQUAL)
             ->find()
             ->toArray("JobSiteKey");
