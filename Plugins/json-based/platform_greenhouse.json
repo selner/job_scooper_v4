@@ -1,8 +1,8 @@
 {
   "jobsite_plugins": [
     {
-      "PhpClassName": "AbstractATSGreenhouse",
-      "PluginExtendsClassName": "AbstractBaseATSGreenhouse",
+      "PhpClassName": "AbstractJSONATSGreenhouse",
+      "PluginExtendsClassName": "ATSGreenhouse",
       "SourceURL": "https://api.greenhouse.io/v1/boards/***JOBSITEKEY***/embed/jobs",
       "ChildJobSites": [
         "airbnb",
@@ -35,13 +35,13 @@
       "JobSiteName": "Vimeo",
       "SiteReferenceKey": "vimeo",
       "SourceURL": "https://vimeo.com/jobs#positions",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "Docusign",
       "SiteReferenceKey": "docusign",
       "SourceURL": "https://www.docusign.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     /*    {
           "JobSiteName": "AirBnB",
@@ -64,127 +64,127 @@
             "AU"
           ],
           "SourceURL": "https://www.airbnb.com/careers",
-          "PluginExtendsClassName": "AbstractATSGreenhouse"
+          "PluginExtendsClassName": "ATSGreenhouse"
         },  */
     {
       "JobSiteName": "thoughtworks",
       "SiteReferenceKey": "thoughtworks",
       "SourceURL": "https://www.thoughtworks.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "coursehero",
       "SiteReferenceKey": "coursehero",
       "SourceURL": "https://www.coursehero.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "generalassembly",
       "SiteReferenceKey": "generalassembly",
       "SourceURL": "https://generalassemb.ly/careers#openings",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "magoosh",
       "SiteReferenceKey": "magoosh",
       "SourceURL": "https://www.magoosh.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "practicefusion",
       "SiteReferenceKey": "practicefusion",
       "SourceURL": "https://www.practicefusion.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "squarespace",
       "SiteReferenceKey": "squarespace",
       "SourceURL": "https://www.squarespace.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "thumbtack",
       "SiteReferenceKey": "thumbtack",
       "SourceURL": "https://www.thumbtack.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "twilio",
       "SiteReferenceKey": "twilio",
       "SourceURL": "https://www.twilio.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "zenefits",
       "SiteReferenceKey": "zenefits",
       "SourceURL": "https://www.zenefits.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "tumblr",
       "SiteReferenceKey": "tumblr",
       "SourceURL": "https://www.tumblr.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "evernote",
       "SiteReferenceKey": "evernote",
       "SourceURL": "https://www.evernote.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "bigcommerce",
       "SiteReferenceKey": "bigcommerce",
       "SourceURL": "https://www.bigcommerce.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "blockstream",
       "SiteReferenceKey": "blockstream",
       "SourceURL": "https://www.blockstream.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "betterment",
       "SiteReferenceKey": "betterment",
       "SourceURL": "https://www.betterment.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "nerdwallet",
       "SiteReferenceKey": "nerdwallet",
       "SourceURL": "https://www.nerdwallet.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "buzzfeed",
       "SiteReferenceKey": "buzzfeed",
       "SourceURL": "https://www.buzzfeed.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "birchbox",
       "SiteReferenceKey": "birchbox",
       "SourceURL": "https://www.birchbox.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "harrys",
       "SiteReferenceKey": "harrys",
       "SourceURL": "https://www.harrys.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "casper",
       "SiteReferenceKey": "casper",
       "SourceURL": "https://www.casper.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     },
     {
       "JobSiteName": "warbyparker",
       "SiteReferenceKey": "warbyparker",
       "SourceURL": "https://www.warbyparker.com/careers",
-      "PluginExtendsClassName": "AbstractATSGreenhouse"
+      "PluginExtendsClassName": "ATSGreenhouse"
     }
   ]
 }
