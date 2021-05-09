@@ -16,6 +16,16 @@
  */
 
 
+function getExternalIP() {
+    $response = Requests::get("https://checkip.amazonaws.com");
+    $response->throw_for_status(true);
+
+    if($response->status_code === 200) {
+        $body = $response->body;
+        return $body;
+    }
+    return null;
+}
 /**
  * @param $v
  *
