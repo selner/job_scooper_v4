@@ -21,7 +21,6 @@ use LightnCandy\LightnCandy;
 /**
  * @param $path
  *
- * @return false|\LightnCandy\Closure
  * @throws \Exception
  */
 function loadTemplate($path)
@@ -33,59 +32,41 @@ function loadTemplate($path)
     $partialsDir = $tmplDir . DIRECTORY_SEPARATOR . "partials/";
     $template = file_get_contents($tmplFile);
 
-    LogDebug("Compiling Mustache template ({$tmplFile}...");
+    LogDebug("Compiling Mustache template ($tmplFile...");
     $tmpl = LightnCandy::compile(
         $template,
         array(
             'flags' => LightnCandy::FLAG_RENDER_DEBUG | LightnCandy::FLAG_ERROR_LOG | LightnCandy::FLAG_ERROR_EXCEPTION | LightnCandy::FLAG_HANDLEBARSJS_FULL | LightnCandy::FLAG_THIS | LightnCandy::FLAG_PROPERTY | LightnCandy::FLAG_JSOBJECT| LightnCandy::FLAG_ELSE,
             'partialresolver' => function ($cx, $name) use ($partialsDir) {
-                $partialpath = "$partialsDir/$name.tmpl";
-                if (file_exists($partialpath)) {
-                    return file_get_contents($partialpath);
+                $tmplpath = "$partialsDir/$name.tmpl";
+                if (file_exists($tmplpath)) {
+                    return file_get_contents($tmplpath);
                 }
-                return "[partial (file:$partialpath) not found]";
+                return "[partial (file:$tmplpath) not found]";
             },
-            'Utils' => array(
-                'getEvenOdd' => function ($arg1) {
-                    if (((float) $arg1 % 2) == 0) {
-                        return "even";
-                    } else {
-                        return "odd";
-                    }
-                },
-                "isequal" => function ($arg1, $arg2) {
-                    return ($arg1 === $arg2) ? 'Yes' : 'No';
-                }
-
-            ),
             'prepartial' => function ($context, $template, $name) {
                 return "<!-- partial start: $name -->$template<!-- partial end: $name -->";
             }
-
-
         )
     );  // set compiled PHP code into $phpStr
 
-    if (isDebug()) {
-        // Save the compiled PHP code into a php file
-        $renderFile = generateOutputFileName(basename($path) . '-render', $ext = "php", $includeRunID = true);
+    // Save the compiled PHP code into a php file
+    $renderFile = generateOutputFileName(basename($path) . '-render', $ext = "php", $includeRunID = true);
 
-        file_put_contents($renderFile, '<?php ' . $tmpl . '?>');
-    }
-
-    LogDebug("Preparing template renderer...");
-    $renderer = LightnCandy::prepare($tmpl);
+    file_put_contents($renderFile, '<?php ' . $tmpl . '?>');
 
     // Get the render function from the php file
-//    $renderer = assets($renderFile);
-    // Get the render function
-//    $renderer = LightnCandy::prepare($phpStr);
-    if ($renderer == false) {
-        throw new Exception("Error: unable to compile template '$tmplFile'");
+    try {
+        $renderer = include $renderFile;
+        if ($renderer == false) {
+            throw new Exception("Error: unable to compile template '$tmplFile'");
+        }
+        return $renderer;
     }
-
-
-    return $renderer;
+    catch (Throwable $t)
+    {
+        handleThrowable($t, fmtLogMsg: "Unable to get renderer for template $tmpl");
+    }
 }
 
 function renderTemplate($renderer, $data)
