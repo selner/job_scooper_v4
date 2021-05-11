@@ -209,7 +209,6 @@ class JobPostingTableMap extends TableMap
      * @var string[]
      */
     protected $normalizedColumnNameMap = [
-
         'JobPostingId' => 'JOBPOSTING_ID',
         'JobPosting.JobPostingId' => 'JOBPOSTING_ID',
         'jobPostingId' => 'JOBPOSTING_ID',
@@ -240,7 +239,6 @@ class JobPostingTableMap extends TableMap
         'jobPosting.title' => 'TITLE',
         'JobPostingTableMap::COL_TITLE' => 'TITLE',
         'COL_TITLE' => 'TITLE',
-        'title' => 'TITLE',
         'jobposting.title' => 'TITLE',
         'Url' => 'URL',
         'JobPosting.Url' => 'URL',
@@ -248,7 +246,6 @@ class JobPostingTableMap extends TableMap
         'jobPosting.url' => 'URL',
         'JobPostingTableMap::COL_URL' => 'URL',
         'COL_URL' => 'URL',
-        'url' => 'URL',
         'jobposting.url' => 'URL',
         'EmploymentType' => 'EMPLOYMENT_TYPE',
         'JobPosting.EmploymentType' => 'EMPLOYMENT_TYPE',
@@ -272,7 +269,6 @@ class JobPostingTableMap extends TableMap
         'jobPosting.location' => 'LOCATION',
         'JobPostingTableMap::COL_LOCATION' => 'LOCATION',
         'COL_LOCATION' => 'LOCATION',
-        'location' => 'LOCATION',
         'jobposting.location' => 'LOCATION',
         'Company' => 'COMPANY',
         'JobPosting.Company' => 'COMPANY',
@@ -280,7 +276,6 @@ class JobPostingTableMap extends TableMap
         'jobPosting.company' => 'COMPANY',
         'JobPostingTableMap::COL_COMPANY' => 'COMPANY',
         'COL_COMPANY' => 'COMPANY',
-        'company' => 'COMPANY',
         'jobposting.company' => 'COMPANY',
         'Department' => 'DEPARTMENT',
         'JobPosting.Department' => 'DEPARTMENT',
@@ -288,7 +283,6 @@ class JobPostingTableMap extends TableMap
         'jobPosting.department' => 'DEPARTMENT',
         'JobPostingTableMap::COL_DEPARTMENT' => 'DEPARTMENT',
         'COL_DEPARTMENT' => 'DEPARTMENT',
-        'department' => 'DEPARTMENT',
         'jobposting.department' => 'DEPARTMENT',
         'Category' => 'CATEGORY',
         'JobPosting.Category' => 'CATEGORY',
@@ -296,7 +290,6 @@ class JobPostingTableMap extends TableMap
         'jobPosting.category' => 'CATEGORY',
         'JobPostingTableMap::COL_CATEGORY' => 'CATEGORY',
         'COL_CATEGORY' => 'CATEGORY',
-        'category' => 'CATEGORY',
         'jobposting.category' => 'CATEGORY',
         'UpdatedAt' => 'LAST_UPDATED_AT',
         'JobPosting.UpdatedAt' => 'LAST_UPDATED_AT',

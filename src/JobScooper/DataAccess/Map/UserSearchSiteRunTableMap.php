@@ -171,7 +171,6 @@ class UserSearchSiteRunTableMap extends TableMap
      * @var string[]
      */
     protected $normalizedColumnNameMap = [
-
         'UserSearchSiteRunId' => 'USER_SEARCH_SITE_RUN_ID',
         'UserSearchSiteRun.UserSearchSiteRunId' => 'USER_SEARCH_SITE_RUN_ID',
         'userSearchSiteRunId' => 'USER_SEARCH_SITE_RUN_ID',

@@ -140,7 +140,6 @@ class JobSiteRecordTableMap extends TableMap
      * @var string[]
      */
     protected $normalizedColumnNameMap = [
-
         'JobSiteKey' => 'JOBSITE_KEY',
         'JobSiteRecord.JobSiteKey' => 'JOBSITE_KEY',
         'jobSiteKey' => 'JOBSITE_KEY',
@@ -167,7 +166,6 @@ class JobSiteRecordTableMap extends TableMap
         'job_site.display_name' => 'DISPLAY_NAME',
         'isDisabled' => 'IS_DISABLED',
         'JobSiteRecord.isDisabled' => 'IS_DISABLED',
-        'isDisabled' => 'IS_DISABLED',
         'jobSiteRecord.isDisabled' => 'IS_DISABLED',
         'JobSiteRecordTableMap::COL_IS_DISABLED' => 'IS_DISABLED',
         'COL_IS_DISABLED' => 'IS_DISABLED',

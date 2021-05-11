@@ -565,7 +565,36 @@ abstract class UserSearchPairQuery extends ModelCriteria
 
         return $this;
     }
+    /**
+     * Use the UserFromUS relation to the User table for an EXISTS query.
+     *
+     * @see \Propel\Runtime\ActiveQuery\ModelCriteria::useExistsQuery()
+     *
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string $typeOfExists Either ExistsCriterion::TYPE_EXISTS or ExistsCriterion::TYPE_NOT_EXISTS
+     *
+     * @return \JobScooper\DataAccess\UserQuery The inner query object of the EXISTS statement
+     */
+    public function useUserFromUSExistsQuery($modelAlias = null, $queryClass = null, $typeOfExists = 'EXISTS')
+    {
+        return $this->useExistsQuery('UserFromUS', $modelAlias, $queryClass, $typeOfExists);
+    }
 
+    /**
+     * Use the UserFromUS relation to the User table for a NOT EXISTS query.
+     *
+     * @see useUserFromUSExistsQuery()
+     *
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     *
+     * @return \JobScooper\DataAccess\UserQuery The inner query object of the NOT EXISTS statement
+     */
+    public function useUserFromUSNotExistsQuery($modelAlias = null, $queryClass = null)
+    {
+        return $this->useExistsQuery('UserFromUS', $modelAlias, $queryClass, 'NOT EXISTS');
+    }
     /**
      * Filter the query by a related \JobScooper\DataAccess\GeoLocation object
      *
@@ -668,7 +697,36 @@ abstract class UserSearchPairQuery extends ModelCriteria
 
         return $this;
     }
+    /**
+     * Use the GeoLocationFromUS relation to the GeoLocation table for an EXISTS query.
+     *
+     * @see \Propel\Runtime\ActiveQuery\ModelCriteria::useExistsQuery()
+     *
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string $typeOfExists Either ExistsCriterion::TYPE_EXISTS or ExistsCriterion::TYPE_NOT_EXISTS
+     *
+     * @return \JobScooper\DataAccess\GeoLocationQuery The inner query object of the EXISTS statement
+     */
+    public function useGeoLocationFromUSExistsQuery($modelAlias = null, $queryClass = null, $typeOfExists = 'EXISTS')
+    {
+        return $this->useExistsQuery('GeoLocationFromUS', $modelAlias, $queryClass, $typeOfExists);
+    }
 
+    /**
+     * Use the GeoLocationFromUS relation to the GeoLocation table for a NOT EXISTS query.
+     *
+     * @see useGeoLocationFromUSExistsQuery()
+     *
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     *
+     * @return \JobScooper\DataAccess\GeoLocationQuery The inner query object of the NOT EXISTS statement
+     */
+    public function useGeoLocationFromUSNotExistsQuery($modelAlias = null, $queryClass = null)
+    {
+        return $this->useExistsQuery('GeoLocationFromUS', $modelAlias, $queryClass, 'NOT EXISTS');
+    }
     /**
      * Filter the query by a related \JobScooper\DataAccess\UserSearchSiteRun object
      *
@@ -767,7 +825,36 @@ abstract class UserSearchPairQuery extends ModelCriteria
 
         return $this;
     }
+    /**
+     * Use the relation to UserSearchSiteRun table for an EXISTS query.
+     *
+     * @see \Propel\Runtime\ActiveQuery\ModelCriteria::useExistsQuery()
+     *
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string $typeOfExists Either ExistsCriterion::TYPE_EXISTS or ExistsCriterion::TYPE_NOT_EXISTS
+     *
+     * @return \JobScooper\DataAccess\UserSearchSiteRunQuery The inner query object of the EXISTS statement
+     */
+    public function useUserSearchSiteRunExistsQuery($modelAlias = null, $queryClass = null, $typeOfExists = 'EXISTS')
+    {
+        return $this->useExistsQuery('UserSearchSiteRun', $modelAlias, $queryClass, $typeOfExists);
+    }
 
+    /**
+     * Use the relation to UserSearchSiteRun table for a NOT EXISTS query.
+     *
+     * @see useUserSearchSiteRunExistsQuery()
+     *
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     *
+     * @return \JobScooper\DataAccess\UserSearchSiteRunQuery The inner query object of the NOT EXISTS statement
+     */
+    public function useUserSearchSiteRunNotExistsQuery($modelAlias = null, $queryClass = null)
+    {
+        return $this->useExistsQuery('UserSearchSiteRun', $modelAlias, $queryClass, 'NOT EXISTS');
+    }
     /**
      * Exclude object from result
      *

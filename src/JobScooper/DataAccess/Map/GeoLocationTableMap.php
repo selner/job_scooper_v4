@@ -181,7 +181,6 @@ class GeoLocationTableMap extends TableMap
      * @var string[]
      */
     protected $normalizedColumnNameMap = [
-
         'GeoLocationId' => 'GEOLOCATION_ID',
         'GeoLocation.GeoLocationId' => 'GEOLOCATION_ID',
         'geoLocationId' => 'GEOLOCATION_ID',
@@ -212,7 +211,6 @@ class GeoLocationTableMap extends TableMap
         'geoLocation.place' => 'PLACE',
         'GeoLocationTableMap::COL_PLACE' => 'PLACE',
         'COL_PLACE' => 'PLACE',
-        'place' => 'PLACE',
         'geolocation.place' => 'PLACE',
         'County' => 'COUNTY',
         'GeoLocation.County' => 'COUNTY',
@@ -220,7 +218,6 @@ class GeoLocationTableMap extends TableMap
         'geoLocation.county' => 'COUNTY',
         'GeoLocationTableMap::COL_COUNTY' => 'COUNTY',
         'COL_COUNTY' => 'COUNTY',
-        'county' => 'COUNTY',
         'geolocation.county' => 'COUNTY',
         'Region' => 'REGION',
         'GeoLocation.Region' => 'REGION',
@@ -228,7 +225,6 @@ class GeoLocationTableMap extends TableMap
         'geoLocation.region' => 'REGION',
         'GeoLocationTableMap::COL_REGION' => 'REGION',
         'COL_REGION' => 'REGION',
-        'region' => 'REGION',
         'geolocation.region' => 'REGION',
         'RegionCode' => 'REGIONCODE',
         'GeoLocation.RegionCode' => 'REGIONCODE',
@@ -244,7 +240,6 @@ class GeoLocationTableMap extends TableMap
         'geoLocation.country' => 'COUNTRY',
         'GeoLocationTableMap::COL_COUNTRY' => 'COUNTRY',
         'COL_COUNTRY' => 'COUNTRY',
-        'country' => 'COUNTRY',
         'geolocation.country' => 'COUNTRY',
         'CountryCode' => 'COUNTRYCODE',
         'GeoLocation.CountryCode' => 'COUNTRYCODE',
@@ -260,7 +255,6 @@ class GeoLocationTableMap extends TableMap
         'geoLocation.latitude' => 'LATITUDE',
         'GeoLocationTableMap::COL_LATITUDE' => 'LATITUDE',
         'COL_LATITUDE' => 'LATITUDE',
-        'latitude' => 'LATITUDE',
         'geolocation.latitude' => 'LATITUDE',
         'Longitude' => 'LONGITUDE',
         'GeoLocation.Longitude' => 'LONGITUDE',
@@ -268,7 +262,6 @@ class GeoLocationTableMap extends TableMap
         'geoLocation.longitude' => 'LONGITUDE',
         'GeoLocationTableMap::COL_LONGITUDE' => 'LONGITUDE',
         'COL_LONGITUDE' => 'LONGITUDE',
-        'longitude' => 'LONGITUDE',
         'geolocation.longitude' => 'LONGITUDE',
     ];
 

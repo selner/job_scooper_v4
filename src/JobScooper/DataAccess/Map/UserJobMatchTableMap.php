@@ -176,7 +176,6 @@ class UserJobMatchTableMap extends TableMap
      * @var string[]
      */
     protected $normalizedColumnNameMap = [
-
         'UserJobMatchId' => 'USER_JOB_MATCH_ID',
         'UserJobMatch.UserJobMatchId' => 'USER_JOB_MATCH_ID',
         'userJobMatchId' => 'USER_JOB_MATCH_ID',

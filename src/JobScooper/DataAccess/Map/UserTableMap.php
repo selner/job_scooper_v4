@@ -154,7 +154,6 @@ class UserTableMap extends TableMap
      * @var string[]
      */
     protected $normalizedColumnNameMap = [
-
         'UserId' => 'USER_ID',
         'User.UserId' => 'USER_ID',
         'userId' => 'USER_ID',
@@ -185,8 +184,6 @@ class UserTableMap extends TableMap
         'user.name' => 'NAME',
         'UserTableMap::COL_NAME' => 'NAME',
         'COL_NAME' => 'NAME',
-        'name' => 'NAME',
-        'user.name' => 'NAME',
         'SearchKeywords' => 'SEARCH_KEYWORDS',
         'User.SearchKeywords' => 'SEARCH_KEYWORDS',
         'searchKeywords' => 'SEARCH_KEYWORDS',

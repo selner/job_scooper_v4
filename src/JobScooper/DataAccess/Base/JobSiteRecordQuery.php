@@ -507,7 +507,36 @@ abstract class JobSiteRecordQuery extends ModelCriteria
 
         return $this;
     }
+    /**
+     * Use the relation to JobPosting table for an EXISTS query.
+     *
+     * @see \Propel\Runtime\ActiveQuery\ModelCriteria::useExistsQuery()
+     *
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string $typeOfExists Either ExistsCriterion::TYPE_EXISTS or ExistsCriterion::TYPE_NOT_EXISTS
+     *
+     * @return \JobScooper\DataAccess\JobPostingQuery The inner query object of the EXISTS statement
+     */
+    public function useJobPostingExistsQuery($modelAlias = null, $queryClass = null, $typeOfExists = 'EXISTS')
+    {
+        return $this->useExistsQuery('JobPosting', $modelAlias, $queryClass, $typeOfExists);
+    }
 
+    /**
+     * Use the relation to JobPosting table for a NOT EXISTS query.
+     *
+     * @see useJobPostingExistsQuery()
+     *
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     *
+     * @return \JobScooper\DataAccess\JobPostingQuery The inner query object of the NOT EXISTS statement
+     */
+    public function useJobPostingNotExistsQuery($modelAlias = null, $queryClass = null)
+    {
+        return $this->useExistsQuery('JobPosting', $modelAlias, $queryClass, 'NOT EXISTS');
+    }
     /**
      * Filter the query by a related \JobScooper\DataAccess\UserSearchSiteRun object
      *
@@ -606,7 +635,36 @@ abstract class JobSiteRecordQuery extends ModelCriteria
 
         return $this;
     }
+    /**
+     * Use the relation to UserSearchSiteRun table for an EXISTS query.
+     *
+     * @see \Propel\Runtime\ActiveQuery\ModelCriteria::useExistsQuery()
+     *
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string $typeOfExists Either ExistsCriterion::TYPE_EXISTS or ExistsCriterion::TYPE_NOT_EXISTS
+     *
+     * @return \JobScooper\DataAccess\UserSearchSiteRunQuery The inner query object of the EXISTS statement
+     */
+    public function useUserSearchSiteRunExistsQuery($modelAlias = null, $queryClass = null, $typeOfExists = 'EXISTS')
+    {
+        return $this->useExistsQuery('UserSearchSiteRun', $modelAlias, $queryClass, $typeOfExists);
+    }
 
+    /**
+     * Use the relation to UserSearchSiteRun table for a NOT EXISTS query.
+     *
+     * @see useUserSearchSiteRunExistsQuery()
+     *
+     * @param string|null $modelAlias sets an alias for the nested query
+     * @param string|null $queryClass Allows to use a custom query class for the exists query, like ExtendedBookQuery::class
+     *
+     * @return \JobScooper\DataAccess\UserSearchSiteRunQuery The inner query object of the NOT EXISTS statement
+     */
+    public function useUserSearchSiteRunNotExistsQuery($modelAlias = null, $queryClass = null)
+    {
+        return $this->useExistsQuery('UserSearchSiteRun', $modelAlias, $queryClass, 'NOT EXISTS');
+    }
     /**
      * Exclude object from result
      *

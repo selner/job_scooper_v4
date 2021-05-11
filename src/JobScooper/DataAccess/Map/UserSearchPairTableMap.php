@@ -134,7 +134,6 @@ class UserSearchPairTableMap extends TableMap
      * @var string[]
      */
     protected $normalizedColumnNameMap = [
-
         'UserSearchPairId' => 'USER_SEARCH_PAIR_ID',
         'UserSearchPair.UserSearchPairId' => 'USER_SEARCH_PAIR_ID',
         'userSearchPairId' => 'USER_SEARCH_PAIR_ID',
