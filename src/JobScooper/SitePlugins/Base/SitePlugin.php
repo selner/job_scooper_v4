@@ -23,6 +23,7 @@ use JobScooper\SitePlugins\JobSitePluginException;
 use JobScooper\Utils\CurlWrapper;
 use JobScooper\Utils\PythonRunner;
 use JobScooper\Utils\Settings;
+use Monolog\Logger;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Propel;
@@ -42,6 +43,7 @@ use JobScooper\SitePlugins\SitePluginFactory;
 use JobScooper\Utils\SimpleHtml\DomItemParser;
 use JobScooper\Utils\SimpleHtml\SimpleHTMLHelper;
 use JobScooper\Utils\SimpleHtml\ExtendedDiDomElement;
+use Throwable;
 
 const BASE_URL_TAG_LOCATION = '***LOCATION***';
 const BASE_URL_TAG_KEYWORDS = '***KEYWORDS***';
@@ -294,7 +296,7 @@ abstract class SitePlugin implements IJobSitePlugin
      * @throws Exception
      */
     private function _handleException($ex, $fmtLogMsg= null, $raise=true, $extraData=null) {
-        $this->log(($this->JobSiteKey . " threw an exception" . $fmtLogMsg != null ? $fmtLogMsg : ""), Logger::ERROR, $extras=$extraData, $ex=$ex);
+        $this->log(($this->JobSiteKey . " threw an exception" . $fmtLogMsg != null ? $fmtLogMsg : ""), Logger::ERROR, $extras=$extraData, ex: $ex);
         handleException($ex, $fmtLogMsg, $raise, $extraData, $log_topic = "plugin", $exceptClass = JobSitePluginException::class);
     }
  
@@ -1219,9 +1221,10 @@ JSCODE;
             } else {
                 throw new \ErrorException('Class ' . get_class($this) . ' does not have a valid setting for parser.  Cannot continue.');
             }
-        } catch (Exception $ex) {
+            $this->_setSearchResult_($searchDetails, true);
+        } catch (\Throwable $t) {
             $strError = 'Failed to download jobs from ' . $this->JobSiteName . ' jobs for search ' . $searchDetails->getUserSearchSiteRunKey() . '[URL=' . $searchDetails->getSearchStartUrl() . ']. Exception Details: ';
-            $this->_setSearchResult_($searchDetails, false, new Exception($strError . (string) $ex));
+            $this->_setSearchResult_($searchDetails, false, new Exception($strError . $t));
             $this->_handleException($ex, null, false);
         } finally {
             endLogSection('Finished data pull for ' . $this->JobSiteName . '[' . $searchDetails->getUserSearchSiteRunKey() . ']');
@@ -2225,7 +2228,7 @@ JSCODE;
             }
 
             $this->log($this->JobSiteName . '[' . $searchDetails->getUserSearchSiteRunKey() . ']' . ': ' . $nJobsFound . ' jobs found.' . PHP_EOL);
-        } catch (Exception $ex) {
+        } catch (JobSitePluginException | Exception $ex) {
             $this->_setSearchResult_($searchDetails, false, $ex, false, $objSimpleHTML);
             $msg = 'Failed to download new job postings for search run ' . $searchDetails->getUserSearchSiteRunKey() . '.  Error details: %s';
             $this->_handleException($ex, $msg, true, $extraData=$searchDetails->toLoggedContext());

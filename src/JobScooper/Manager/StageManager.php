@@ -211,11 +211,11 @@ class StageManager
                                     $resultcode = PythonRunner::execScript($runFile, $params, true);
                                     LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
                                 }
-
-                            } catch (\Exception $ex) {
-                                handleException($ex, 'ERROR:  Failed to tag job matches as out of area for user:  %s');
+                            } catch (\Throwable $t)
+                            {
+                                handleException($t, "ERROR:  Failed to tag job matches as out of area for user:  $t");
                             } finally {
-                                endLogSection("End cloning {$jobsiteKey} jobpostings to other users.");
+                                endLogSection("End cloning $jobsiteKey jobpostings to other users.");
                             }
                         }
 
