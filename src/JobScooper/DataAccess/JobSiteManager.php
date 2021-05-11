@@ -258,33 +258,38 @@ class JobSiteManager
 
         $allDBJobSitesByKey = JobSiteRecordQuery::create()
             ->find()
-            ->toArray('JobSiteKey');
+            ->toKeyIndex('JobSiteKey');
+
         if(is_empty_value($allDBJobSitesByKey)) {
 			$allDBJobSitesByKey = array();
         }
 
         ksort($allDBJobSitesByKey);
         foreach($allDBJobSitesByKey as $jobSiteKey => $jobSiteFacts) {
-			$objJobSite = self::getJobSiteByKey($jobSiteKey);
-            if(null === $objJobSite)
-                throw new \Exception("{$jobSiteKey} database object could not be instantiated.");
+            if(!array_key_exists($jobSiteKey, $allDBJobSitesByKey)) {
+                throwException("$jobSiteKey record was not found in list of all jobsite records.");
+            }
+            $objJobSite = $allDBJobSitesByKey[$jobSiteKey];
+//			$objJobSite = self::getJobSiteByKey($jobSiteKey);
+//            if(null === $objJobSite)
+//                throw new \Exception("{$jobSiteKey} database object could not be instantiated.");
 
             if($objJobSite->getisDisabled() === true) {
                 LogWarning("{$jobSiteKey}: is currently marked disabled in the database.  Skipping {$jobSiteKey}.");
             }
             else {
-
-
+                assert ($objJobSite->getisDisabled() === false);
                 if (!array_key_exists($jobSiteKey, $declaredPluginsBySiteKey)) {
-                    if ($objJobSite->getisDisabled() === false) {
                         LogWarning("{$jobSiteKey}: plugin class was not found; disabling job site.");
-                    }
                     $objJobSite->setisDisabled(true);
-                } else if (!array_key_exists('PhpClassName', $jobSiteFacts) || is_empty_value($jobSiteFacts['PhpClassName'])) {
-                    $objJobSite->setisDisabled(false);
-                    $objJobSite->setPluginClassName($declaredPluginsBySiteKey[$jobSiteKey]);
+                } else {
+                    if (is_empty_value($jobSiteFacts->getPluginClassName())) {
+                        $objJobSite->setisDisabled(false);
+                        $objJobSite->setPluginClassName($declaredPluginsBySiteKey[$jobSiteKey]);
+                    }
                 }
                 $objJobSite->save();
+                $allDBJobSitesByKey[$jobSiteKey] = $objJobSite->copy();
             }
             $objJobSite = null;
         }
@@ -301,12 +306,17 @@ class JobSiteManager
                 $dbrec->setisDisabled(false);
                 $dbrec->setDisplayName(str_replace('Plugin', '', $pluginClass));
                 $dbrec->save();
+                $allDBJobSitesByKey[$jobSiteKey] = $dbrec->copy();
                 $dbrec = null;
         }
 
-        $allEnabledJobSites = JobSiteRecordQuery::create()
-            ->findByisDisabled(false)
-            ->toArray('JobSiteKey');
+        $allEnabledJobSites = array_filter($allDBJobSitesByKey, function($v) {
+            return $v->isDisabled() == false;
+        });
+
+//        $allEnabledJobSites = JobSiteRecordQuery::create()
+//            ->findByisDisabled(false)
+//            ->toArray('JobSiteKey');
         if(is_empty_value($allEnabledJobSites)) {
 			throw new \Exception("Error:  all JobSites are disabled due to plugin installation issues.  Cannot continue.");
         }
