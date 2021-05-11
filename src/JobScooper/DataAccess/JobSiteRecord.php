@@ -239,6 +239,7 @@ class JobSiteRecord extends BaseJobSiteRecord
     {
         $totalRuns = 0;
         $totalSkipped = 0;
+        $jsKey = $this->getJobSiteKey();
 
         if(!is_empty_value($this->_searchRunsForUsers)) {
             return $this->_searchRunsForUsers;
@@ -305,13 +306,19 @@ class JobSiteRecord extends BaseJobSiteRecord
                 }
             }
         }
-        LogMessage("{$totalRuns} search runs configured for {$this->getJobSiteKey()}; {$totalSkipped} searches were skipped.");
+        if(is_empty_value($this->_searchRunsForUsers)) {
+            LogMessage("No search runs were set across all users for $jsKey.");
+        } else {
+            $nSearchesToRun = $totalRuns-$totalSkipped;
+            LogMessage("$nSearchesToRun search runs configured across all users for $jsKey.");
+        }
 
         $searchPairs = null;
         $sites = null;
 
         return $this->_searchRunsForUsers;
     }
+    
 
 
 }

@@ -163,6 +163,7 @@ class UserSearchSiteRunManager {
      */
     public static function filterRecentlyRunUserSearchRuns(&$searchRuns)
     {
+        $totalRuns = count($searchRuns);
     	$ignoreRecent = boolval(Settings::getValue('command_line_args.ignore_recent'));
     	if(null !== $ignoreRecent && $ignoreRecent === true) {
     		LogMessage('--ignore_recent set.  Not filtering out recently run searches.');
@@ -239,7 +240,14 @@ class UserSearchSiteRunManager {
                 unset($searchRuns[$runKey]);
 			}
 
-            LogMessage('Skipping ' . \count(array_keys($skippedSearchRuns)) . ' searches because they have run since ' . $dtSiteWaitPrevRunCutOff->format('Y-m-d H:i') . ': ' . implode(', ', array_keys($skippedSearchRuns)));
+        	$totalSkipped = count($skippedSearchRuns);
+        	$remainingRuns = $totalRuns - $totalSkipped;
+        	if ($remainingRuns > 0) {
+                LogMessage("$remainingRuns search runs configred. Skipped $totalSkipped of $totalRuns searches because they have run since " . $dtSiteWaitPrevRunCutOff->format('Y-m-d H:i') . ': ' . implode(', ', array_keys($skippedSearchRuns)));
+            }
+        	else {
+                LogMessage("Skipped all searches ($totalSkipped of $totalRuns) because they have run since " . $dtSiteWaitPrevRunCutOff->format('Y-m-d H:i') . ': ' . implode(', ', array_keys($skippedSearchRuns)));
+            }
         }
 
     }
