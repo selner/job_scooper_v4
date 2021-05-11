@@ -131,16 +131,12 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
     public function setRunResultCode($val)
     {
         switch ($val) {
-            case "failed":
-                break;
-
             case 'successful':
                 $this->removeRunErrorDetail(array());
                 break;
 
             case "skipped":
-                break;
-
+            case "failed":
             case "not-run":
             case "excluded":
             default:

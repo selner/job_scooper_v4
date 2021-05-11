@@ -257,7 +257,6 @@ class JobsMailSender
      *
      * @return string
      * @throws \Exception
-     * @throws \TijsVerkoyen\CssToInlineStyles\Exception
      */
     public function addMailCssToHTML($strHTML)
     {
@@ -277,8 +276,6 @@ class JobsMailSender
         $css = renderTemplate($renderer, $cssData);
 
         $cssToInlineStyles = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
-        $cssToInlineStyles->setHTML($strHTML);
-        $cssToInlineStyles->setCSS($css);
-        return $cssToInlineStyles->convert();
+        return $cssToInlineStyles->convert($strHTML, $css);
     }
 }

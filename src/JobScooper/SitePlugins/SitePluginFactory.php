@@ -55,9 +55,6 @@ class SitePluginFactory
 
 
 
-    /**
-     * @var false|\LightnCandy\Closure|null
-     */
     protected $_renderer = null;
     protected $_dirPluginsRoot = null;
     protected $_dirJsonConfigs = null;

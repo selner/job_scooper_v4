@@ -242,9 +242,11 @@ class ConfigInitializer
         }
 
         $dbConnSettings = null;
+        $connKey = null;
         foreach ($cfgDBConns as $connKey => $setting) {
             if (strtoupper($connKey) === 'DEFAULT') {
                 $dbConnSettings = $setting;
+                $dbConnKey = $connKey;
             }
         }
         if (empty($dbConnSettings)) {
@@ -502,6 +504,7 @@ class ConfigInitializer
         $currentUser = null;
         $cmd_line_user_to_run = Settings::getValue('command_line_args.user');
 
+        $config_users = null;
         try {
             $config_users = $this->getConfigUsers();
         } catch (\Exception $e) {

@@ -262,6 +262,7 @@ class JobsAutoMarker
      */
     private function _exportJobMatchesToJson($basefile, &$collJobList)
     {
+        $outfile = generateOutputFileName($basefile, 'json', true, 'debug');
 		try {
 			$arrJobItems = collectionToArray($collJobList, ['UserJobMatchId', 'JobPostingId', 'Title', 'GoodJobTitleKeywordMatches', 'BadJobTitleKeywordMatches'] );
             $arrJobItems = array_column($arrJobItems, null, 'UserJobMatchId');
@@ -283,7 +284,6 @@ class JobsAutoMarker
 	            'negative_title_keywords' => $neg_kwds
 	        );
 	
-	        $outfile = generateOutputFileName($basefile, 'json', true, 'debug');
 	        writeJson($jsonObj, $outfile);
 
 	    } catch (\Exception $ex) {

@@ -301,6 +301,7 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
      */
     private function _determinePageLayout(\JobScooper\DataAccess\UserSearchSiteRun $searchDetails)
     {
+        $template = null;
         $urlParts = parse_url($this->SearchUrlFormat);
         $urlParts['query'] = "";
         $urlParts['fragment'] = "";

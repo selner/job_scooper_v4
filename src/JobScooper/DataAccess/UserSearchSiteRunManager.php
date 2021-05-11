@@ -76,16 +76,12 @@ class UserSearchSiteRunManager {
         $searchRun = self::getSearchRunObjFromFacts($searchRunFacts);
 
         switch ($code) {
-            case 'failed':
-                break;
-
             case 'successful':
                 $searchRun->removeRunErrorDetail(array());
                 break;
 
             case 'skipped':
-                break;
-
+            case 'failed':
             case 'not-run':
             case 'excluded':
             default:

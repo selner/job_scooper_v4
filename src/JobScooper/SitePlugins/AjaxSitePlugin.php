@@ -22,12 +22,13 @@ use JobScooper\SitePlugins\Base\SitePlugin;
 
 abstract class AjaxSitePlugin extends SitePlugin
 {
+
     public function __construct($strBaseDir = null)
     {
         $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__;
         $this->additionalBitFlags[] = C__JOB_USE_SELENIUM;
         try {
-            $this->_selenium = new SeleniumManager();
+            $this->selenium = new SeleniumManager();
         } catch (\Throwable $ex) {
             handleThrowable($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
         }

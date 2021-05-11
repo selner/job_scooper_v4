@@ -133,7 +133,7 @@ class User extends BaseUser
      *
      * @return bool|void
      * @throws \Exception
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \Propel\Runtime\Exception\PropelException
      */
     public function postSave(ConnectionInterface $con = null)
     {
@@ -304,7 +304,6 @@ class User extends BaseUser
     /**
      * @throws \Propel\Runtime\Exception\PropelException
      * @throws \Exception
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     private function _updateUserSearchPairs()
     {

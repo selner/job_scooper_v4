@@ -27,7 +27,6 @@ function loadTemplate($path)
 {
     LogDebug("Loading Mustache template file {$path}...");
     $tmplFile = realpath($path);
-    $tmplFileName = pathinfo($tmplFile, PATHINFO_FILENAME);
     $tmplDir = dirname($tmplFile);
     $partialsDir = $tmplDir . DIRECTORY_SEPARATOR . "partials/";
     $template = file_get_contents($tmplFile);

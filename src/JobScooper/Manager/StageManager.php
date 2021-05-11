@@ -19,7 +19,7 @@ namespace JobScooper\Manager;
 
 use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
-use JobScooper\SitePlugins\JobSitePluginException;
+use JobScooper\Exceptions\JobSitePluginException;
 use JobScooper\StageProcessor\DataNormalizer;
 use JobScooper\StageProcessor\JobsAutoMarker;
 use JobScooper\StageProcessor\NotifierDevAlerts;

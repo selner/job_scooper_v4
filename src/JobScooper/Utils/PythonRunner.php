@@ -80,13 +80,15 @@ class PythonRunner {
             LogMessage(PHP_EOL . "    ~~~~~~ Running command: {$exec} {$pythonScriptPath} {$cmdLine}  ~~~~~~~" . PHP_EOL);
 
             $resultcode  = doExec("{$exec} {$pythonScriptPath} {$cmdLine}");
+            LogMessage(PHP_EOL . "    >>>>> command completed with result {$resultcode} >>>>>>" . PHP_EOL);
+            endLogSection(" Finished Python Script call:  $scriptFile");
+            return $resultcode;
+
         } catch (\Exception $ex) {
             handleThrowable($ex);
         }
-        LogMessage(PHP_EOL . "    >>>>> command completed with result {$resultcode} >>>>>>" . PHP_EOL);
-        endLogSection(" Finished Python Script call:  $scriptFile");
-        return $resultcode;
 
+        return null;
 
     }
 }

@@ -626,9 +626,6 @@ JSCODE;
 
                             case 'name':
                             case 'title':
-                                $item['Title'] = combineTextAllChildren($node);
-                                break;
-
                             case 'identifier':
                                 $item['Title'] = combineTextAllChildren($node);
                                 break;
@@ -986,37 +983,6 @@ JSCODE;
         return true;
     }
 
-    /**
-     * @param $var
-     *
-     * @return string|null
-     * @throws \Exception
-     */
-    public static function splitValue($var)
-    {
-        if (count($var) < 2) {
-            throw new \Exception('splitValue was not passed enough callback parameters to continue. ' . getArrayDebugOutput($var));
-        }
-
-        $val = $var[0];
-
-        if (empty($val)) {
-            return null;
-        }
-
-        if (is_array($var[1]) && \count($var[1]) >= 2) {
-            $delim = $var[1][0];
-            $index = $var[1][1];
-            $parts = preg_split('/{$delim}/', $val, -1, PREG_SPLIT_NO_EMPTY);
-            if (count($parts) >= $index) {
-                return $parts[$index];
-            }
-        }
-
-        return null;
-    }
-
-
     //************************************************************************
     //
     //
@@ -1334,7 +1300,7 @@ JSCODE;
                     $this->_curlWrapper->setDebug(true);
                 }
 
-                $retObj = $this->_curlWrapper->cURL($strURL, $json = null, $action = 'GET', $content_type = null, $pagenum = null, $onbehalf = null, $fileUpload = null, $secsTimeout = $optTimeout, $cookies = $cookies, $referrer = $referrer);
+                $retObj = $this->_curlWrapper->cURL($strURL, json: null, action: 'GET', content_type: null, pagenum: null, onbehalf: null, fileUpload: null, secsTimeout: $optTimeout, cookies: $cookies, referrer: $referrer);
                 if (null !== $retObj && array_key_exists('output', $retObj) && strlen($retObj['output']) > 0) {
                     $objSimpleHTML = new SimpleHtmlHelper($retObj['output']);
                     $objSimpleHTML->setSource($strURL);
@@ -1546,7 +1512,7 @@ JSCODE;
         if (method_exists($this, 'remapJobItems') && !is_empty_value($arrJobList)) {
             $arrJobList = $this->remapJobItems($arrJobList);
         }
-
+        $arrSavedJobList = array();
 
         foreach ($arrJobList as $k => $item) {
             unset($arrJobList[$k]);
@@ -1690,7 +1656,8 @@ JSCODE;
 	                $this->_handleThrowable($t, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
 	            }
 	        }
-	
+            $response = null;
+
 	        try {
 	            $driver = $this->getActiveWebdriver();
 	            if(null === $hostPageUri) {
@@ -1781,9 +1748,9 @@ JSCODE;
 	        } catch (Throwable $t) {
 				$msg = "Failed to download JSON data from API call {$apiUri}.";
 	            if(null !== $response && null !== $response->error) {
-	                $msg = "{$msg} {$response->error}";
+	                $msg = "$msg $response->error";
 	            }
-	            $this->_handleThrowable($t, "{$msg} Error:  ", true);
+	            $this->_handleThrowable($t, "$msg  Error:  ", true);
             }
 		}
 
@@ -1829,7 +1796,7 @@ JSCODE;
                 $this->getActiveWebdriver()->get($url);
             }
 
-            $this->log("... sleeping {$this->additionalLoadDelaySeconds} seconds while the page results load for {$this->JobSiteName}");
+            $this->log("... sleeping $this->additionalLoadDelaySeconds seconds while the page results load for $this->JobSiteName");
             sleep($this->additionalLoadDelaySeconds);
 
             $html = $this->getActiveWebdriver()->getPageSource();

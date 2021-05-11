@@ -224,9 +224,6 @@ class JobSiteManager
         return $cmdLineSites;
     }
 
-    /**
-     * @var false|\LightnCandy\Closure|null
-     */
     protected $_renderer = null;
     protected $_dirPluginsRoot = null;
     protected $_dirJsonConfigs = null;

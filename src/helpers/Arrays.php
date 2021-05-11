@@ -82,7 +82,7 @@ function getArrayDebugOutput($arr)
     try {
         $dbg = encodeJson($arr);
     } catch (\Exception $ex) {
-        $dbg = var_dump($arr, true);
+        $dbg = var_export($arr, true);
     }
     return $dbg;
 }

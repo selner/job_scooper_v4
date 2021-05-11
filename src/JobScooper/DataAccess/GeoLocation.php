@@ -449,10 +449,6 @@ class GeoLocation extends BaseGeoLocation
                 $locFormatString = '%L, %R';
                 break;
 
-            case 'location-city-comma-state-country':
-                $locFormatString = '%L, %R, %C';
-                break;
-
             case 'location-city-comma-state-country-no-commas':
                 $locFormatString = '%L %R %C';
                 break;
