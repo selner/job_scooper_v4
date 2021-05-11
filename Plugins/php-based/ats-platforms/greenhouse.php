@@ -110,16 +110,11 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
                         case str_contains($metadatum->name, "Employment Type"):
                             $item['EmploymentType'] = $metadatum->value;
                             break;
+
+                        default:
+                            break;
                     }
                 }
-            }
-
-            if(!is_empty_value($job->metadata) && count($job->metadata) >= 1 && !is_empty_value($job->metadata[0]->value)) {
-                $item['Department'] = $job->metadata[0]->value;
-            }
-
-            if(!is_empty_value($job->metadata) && count($job->metadata) >= 2 && !is_empty_value($job->metadata[1]->value)) {
-                $item['ExperienceType'] = $job->metadata[1]->value;
             }
 
             $arrJobFacts = json_decode(json_encode($job), $assoc=true);
@@ -167,7 +162,7 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
             $data = $this->getJsonResultsPage("jobs", "meta->total");
             if (!empty($data) && !empty($data['jobs']) && \count($data['jobs']) > 0) {
                 $jobs = $data['jobs'];
-                ;
+
                 $nTotal = $data['count'];
                 while (!empty($jobs)) {
                     $curPageJobs = $this->_parseJsonJobs($jobs);
