@@ -20,10 +20,10 @@ use JobApis\Jobs\Client\Queries\UsajobsQuery;
 use JobApis\Jobs\Client\Providers\UsajobsProvider;
 use \JobScooper\SitePlugins\ApiPlugin;
 
-class PluginUSAJobs extends ApiPlugin
+class PluginUSAJobs extends \JobScooper\SitePlugins\Base\SitePlugin
 {
     protected $JobPostingBaseUrl = 'http://search.digitalgov.gov/developer/jobs.html';
-    protected $SearchUrlFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***';
+    protected $SearchUrlFormat = 'https://api.usa.gov/jobs/search.json?query=in+***LOCATION***&keyword=***KEYWORDS***';
     protected $JobSiteName = 'USAJobs';
     protected $JobListingsPerPage = 500;
     protected $LocationType = 'location-city-comma-state';
@@ -36,6 +36,15 @@ class PluginUSAJobs extends ApiPlugin
         'locationName' => 'Location'
     );
 
+    public function __construct($strBaseDir = null)
+    {
+
+        $this->pluginResultsType = C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__;
+        $this->additionalBitFlags = [!C__JOB_LOCATION_REQUIRES_LOWERCASE];
+
+        parent::__construct($strBaseDir);
+
+    }
 
     /**
      * @param     $searchDetails
@@ -51,6 +60,7 @@ class PluginUSAJobs extends ApiPlugin
             'AuthorizationKey' => $this->_otherPluginSettings['authorization_key'],
             'LocationName' => $searchDetails->getGeoLocationURLValue("{Place} {Region}"),
             'SortField' => 'opendate',
+            'Keyword' => $searchDetails->getKeywordURLValue(),
             'ResultsPerPage' => $this->JobListingsPerPage
         ];
 
@@ -66,8 +76,9 @@ class PluginUSAJobs extends ApiPlugin
 
             $qopts = array_copy($options);
             $qopts['Page'] = $nPage;
+            $nPage = $nPage + 1;
 
-            $query = new UsajobsQuery($options);
+            $query = new UsajobsQuery($qopts);
 
             $client = new UsajobsProvider($query);
             LogMessage("Getting jobs from " . $query->getUrl() . "[". $searchDetails->getUserSearchSiteRunKey());
@@ -81,7 +92,6 @@ class PluginUSAJobs extends ApiPlugin
                 handleException($ex);
             }
 
-            $nPage += 1;
         }
 
         return $retJobs;
