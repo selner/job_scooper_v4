@@ -43,8 +43,7 @@
         "php-webdriver/webdriver": "^1.10",
         "femtopixel/monolog-csvhandler": "dev-master",
         "adhocore/json-comment": "dev-main",
-        "rmccue/requests": "1.8.0",
-        "ext-http": "*"
+        "rmccue/requests": "1.8.0"
     },
     "autoload": {
         "psr-4": {
