@@ -53,7 +53,7 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         try {
             return parent::save($con);
         } catch (PropelException $ex) {
-            handleException($ex, "Failed to save JobPosting: %s", true);
+            handleThrowable($ex, "Failed to save JobPosting: %s", true);
         }
     }
 

@@ -226,7 +226,7 @@ class NotifierJobAlerts extends JobsMailSender
 		        file_put_text($jsonText, $pathJsonMatches);
 			}
 			catch (Exception $ex) {
-	            handleException($ex, null, false);
+	            handleThrowable($ex, null, false);
 			}
 			finally {
 		        unset($jsonText);
@@ -265,7 +265,7 @@ class NotifierJobAlerts extends JobsMailSender
 	        $this->_sendResultsNotification($matches, $subject, $userFacts, $geoLocationId);
 		}
 		catch (Exception $ex) {
-    		handleException($ex);
+    		handleThrowable($ex);
 		}
 		finally {
 	        unset($matches);
@@ -304,7 +304,7 @@ class NotifierJobAlerts extends JobsMailSender
            $arrFilesToAttach[] = $pathExcelResults;
 
         } catch (\Exception $ex) {
-            handleException($ex);
+            handleThrowable($ex);
         } finally {
             unset($ss);
             endLogSection('Excel file generated.');
@@ -349,7 +349,7 @@ class NotifierJobAlerts extends JobsMailSender
                 }
             }
         } catch (Exception $ex) {
-            handleException($ex);
+            handleThrowable($ex);
         } finally {
             endLogSection('Email generation and send finished.');
             $sendToUser = null;
@@ -407,7 +407,7 @@ class NotifierJobAlerts extends JobsMailSender
 		    }
 	    }
 	    catch (Exception $ex) {
-			handleException($ex);
+			handleThrowable($ex);
 	    }
 	}
 
@@ -512,7 +512,7 @@ class NotifierJobAlerts extends JobsMailSender
 
             return $html;
         } catch (Exception $ex) {
-            handleException($ex);
+            handleThrowable($ex);
         } finally {
             unset($renderer);
         }

@@ -81,7 +81,7 @@ class PythonRunner {
 
             $resultcode  = doExec("{$exec} {$pythonScriptPath} {$cmdLine}");
         } catch (\Exception $ex) {
-            handleException($ex);
+            handleThrowable($ex);
         }
         LogMessage(PHP_EOL . "    >>>>> command completed with result {$resultcode} >>>>>>" . PHP_EOL);
         endLogSection(" Finished Python Script call:  $scriptFile");

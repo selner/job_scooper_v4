@@ -99,9 +99,9 @@ class LocationLookup {
 
             return  $this->_callApi($args);
 		}
-		catch (\Exception $ex) {
+		catch (\Throwable $ex) {
 			$this->_nFailures += 1;
-			handleException($ex);
+			handleThrowable($ex);
 		}
 		finally {
             $msg = "Unknown geoloc state for {$scrubbed}";
@@ -195,9 +195,9 @@ class LocationLookup {
 				throw new \HttpRequestException("GeocodeAPI failed to return a valid response: [HTTP code {$response['http_code']} / {$response['body']}");
             }
 		}
-		catch (\Exception $ex) {
+		catch (\Throwable $ex) {
 			$this->logger->error("GeocodeAPI returned an error: {$ex->getMessage()}.");
-			handleException($ex);
+			handleThrowable($ex);
 		}
 		finally {
 			LogDebug('Geocode API called',  $extras= [ 'API' => $url, 'http_code' => $response['http_code']]);

@@ -136,14 +136,14 @@ function LogPlainText($msg, $logLevel=Logger::INFO, $extras = array(), $log_topi
  *
  * @throws \Exception
  */
-function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraData=null, $log_topic=null, $exceptClass = null)
+function handleThrowable(Throwable $t, $fmtLogMsg= null, $raise=true, $extraData=null, $log_topic=null, $exceptClass = null)
 {
     if(!is_empty_value($extraData) && array_key_exists('JobSiteKey', $extraData)) {
         $log_topic = 'plugins';
     }
 
 
-	if(is_a($ex, PDOException::class))
+	if(is_a($t, PDOException::class))
 	{
 	    $conmgr = Propel\Runtime\Propel::getConnectionManager(\JobScooper\DataAccess\Map\JobPostingTableMap::DATABASE_NAME);
 	    $conmgr->closeConnections();
@@ -151,33 +151,33 @@ function handleException(Exception $ex, $fmtLogMsg= null, $raise=true, $extraDat
 	}
 
     $msg = $fmtLogMsg;
-    if (null !== $ex && null !== $fmtLogMsg && null !== $ex && strlen($fmtLogMsg) > 0) {
+    if (null !== $t && null !== $fmtLogMsg && null !==  $t && strlen($fmtLogMsg) > 0) {
         if (false !== stripos($fmtLogMsg, '%s')) {
-            $msg = sprintf($fmtLogMsg, $ex->getMessage());
+            $msg = sprintf($fmtLogMsg,  $t->getMessage());
         } else {
-            $msg = $fmtLogMsg . PHP_EOL . ' ~ ' . $ex->getMessage();
+            $msg = $fmtLogMsg . PHP_EOL . ' ~ ' .  $t->getMessage();
         }
-    } elseif (null !== $ex) {
-        $msg = $ex->getMessage();
+    } elseif (null !==  $t) {
+        $msg =  $t->getMessage();
     }
 
-    $toThrow = $ex;
+    $toThrow =  $t;
     if (null === $toThrow) {
         if(!is_empty_value($exceptClass)) {
             try {
-                $toThrow = new $exceptClass($msg, $previous=$ex);
+                $toThrow = new $exceptClass($msg, previous: $t);
             }
             catch (Exception $ex) {
-                $toThrow = new \Exception($msg, $previous = $ex);
+                $toThrow = new \Exception($msg, previous: $ex);
             }
         }
         else {
-            $toThrow = new \Exception($msg, $previous = $ex);
+            $toThrow = new \Exception($msg, previous: $t);
         }
     }
 
 
-    LogMessage($msg, Logger::ERROR, $extras=$extraData, $ex=$toThrow, $log_topic);
+    LogMessage($msg, logLevel: Logger::ERROR, extras:$extraData, ex:$toThrow, log_topic:$log_topic);
 
     if ($raise == true) {
         throw $toThrow;
@@ -189,5 +189,5 @@ function throwException($fmtLogMsg= null, Exception $ex=null, $raise=true, $extr
     if (is_null($ex)) {
         $ex = new Exception($fmtLogMsg);
     }
-    handleException($ex, $fmtLogMsg, $raise, $extraData, $log_topic, $exceptClass);
+    handleThrowable($ex, $fmtLogMsg, $raise, $extraData, $log_topic, $exceptClass);
 }

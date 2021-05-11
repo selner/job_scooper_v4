@@ -81,8 +81,8 @@ class SeleniumManager extends PropertyObject
             $src = $driver->getPageSource();
 
             return $src;
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
+        } catch (\Throwable $ex) {
+            handleThrowable($ex, null, true);
         }
     }
 
@@ -103,7 +103,7 @@ class SeleniumManager extends PropertyObject
                 sleep(2 + $this->additionalLoadDelaySeconds);
             }
         } catch (Exception $ex) {
-            handleException($ex, "Error retrieving Selenium page at {$url}", false);
+            handleThrowable($ex, "Error retrieving Selenium page at {$url}", false);
         }
     }
 
@@ -174,7 +174,7 @@ class SeleniumManager extends PropertyObject
                 $this->remoteWebDriver->quit();
             }
         } catch (Exception $ex) {
-            handleException($ex, 'Failed to quit Webdriver: ', false);
+            handleThrowable($ex, 'Failed to quit Webdriver: ', false);
         } finally {
             $driver = null;
             $this->remoteWebDriver = null;
@@ -287,7 +287,7 @@ class SeleniumManager extends PropertyObject
 
             return $this->remoteWebDriver;
         } catch (Exception $ex) {
-            handleException($ex, "Failed to get webdriver from {$hubUrl}: ", true);
+            handleThrowable($ex, "Failed to get webdriver from {$hubUrl}: ", true);
         }
         return null;
     }

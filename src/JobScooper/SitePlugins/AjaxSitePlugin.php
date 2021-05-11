@@ -28,8 +28,8 @@ abstract class AjaxSitePlugin extends SitePlugin
         $this->additionalBitFlags[] = C__JOB_USE_SELENIUM;
         try {
             $this->_selenium = new SeleniumManager();
-        } catch (\Exception $ex) {
-            handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+        } catch (\Throwable $ex) {
+            handleThrowable($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
         }
 
         parent::__construct();

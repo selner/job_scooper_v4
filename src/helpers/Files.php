@@ -284,7 +284,7 @@ function writeJson(&$data, $filepath): string
         $jsonData = encodeJson($data);
         return file_put_text($jsonData, $filepath);
     }
-    catch(Exception $ex) {
+    catch(Throwable $ex) {
         LogError("Unable to encode JSON to file '{$filepath}': %s", null, $ex);
     }
 }

@@ -33,7 +33,7 @@ class JobsExceptionHandler extends ErrorHandler
      *
      * @throws \Exception
      */
-    public function handleException($e)
+    public function handleThrowable($e)
     {
         if (is_a($e, \Error::class)) {
             $e = new \ErrorException($e->getMessage(), $e->getCode(), $severity = 1, $e->getFile(), $e->getLine(), $e->getPrevious());
@@ -55,11 +55,11 @@ class JobsExceptionHandler extends ErrorHandler
 				$msg .= " [Last Executed Query: {$lastq}.";
         	}
 
-	        handleException($e, 'Uncaught Propel Exception: %s ' . $msg, false);
+	        handleThrowable($e, 'Uncaught Propel Exception: %s ' . $msg, false);
 
 			throw $e;
         }
         
-        handleException($e, 'Uncaught Exception: %s', false);
+        handleThrowable($e, 'Uncaught Exception: %s', false);
     }
 }

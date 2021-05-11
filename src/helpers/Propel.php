@@ -61,7 +61,7 @@ function loadSqlite3MathExtensions()
         $stmt->execute();
         return true;
     } catch (Exception $ex) {
-        handleException($ex, "FAILED to load math functions extension for SQLite with call: {$sql2}.   ERROR DETAILS: %s", true);
+        handleThrowable($ex, "FAILED to load math functions extension for SQLite with call: {$sql2}.   ERROR DETAILS: %s", true);
     }
 
     return false;
@@ -110,7 +110,7 @@ function updateOrCreateJobPosting($arrJobItem, \JobScooper\DataAccess\GeoLocatio
         $jobRecord->save();
         return $jobRecord;
     } catch (Exception $ex) {
-        handleException($ex);
+        handleThrowable($ex);
     }
 
     return null;
@@ -141,7 +141,9 @@ function getAllUserNotificationMatchesQuery($userNotificationState, $arrGeoLocId
     $query->filterByUserNotificationStatus($userNotificationState);
     $query->filterByUserId($userFacts['UserId']);
 //    $query->filterByDaysAgo($nNumDaysBack);
-    $query->filterByGeoLocationIds($arrGeoLocIds);
+    if(!empty($arrGeoLocIds)) {
+        $query->filterByGeoLocationIds($arrGeoLocIds);
+    }
 
     if(is_empty_value($orderByCols)) {
         $query->useJobPostingFromUJMQuery()
@@ -306,7 +308,7 @@ function doCallbackForAllMatches($callback, $userNotificationState, $arrGeoIds=n
         }
         catch (Exception $ex)
         {
-            handleException($ex);
+            handleThrowable($ex);
         }
         finally {
             unset($resultsPager);

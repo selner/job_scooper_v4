@@ -142,8 +142,8 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
             }
             $this->nTotalJobs = $retData['count'];
             return $this->nTotalJobs;
-        } catch (Exception $ex) {
-            handleException($ex);
+        } catch (Throwable $t) {
+            handleThrowable($t);
         }
         return null;
     }
@@ -178,8 +178,8 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
             }
 
             return $ret;
-        } catch (Exception $ex) {
-            handleException($ex);
+        } catch (Throwable $t) {
+            handleThrowable($t);
         }
     }
 
@@ -219,8 +219,8 @@ abstract class ATSGreenhouse extends \JobScooper\SitePlugins\AjaxSitePlugin
                 } elseif (!is_empty_value($ret['jobs'])) {
                     $ret['count'] = \count($ret['jobs']);
                 }
-            } catch (Exception $ex) {
-                throw new Exception($respdata->error);
+            } catch (Throwable $t) {
+                handleThrowable($t);
             }
         }
 

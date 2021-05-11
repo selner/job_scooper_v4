@@ -242,9 +242,9 @@ class LoggingManager extends \Monolog\Logger
      * @param       $level
      * @param       $message
      * @param array $extras
-     * @param null $ex
+     * @param null $t
      */
-    public function logRecord($level, $message, $extras = array(), $ex = null, $log_topic = null)
+    public function logRecord($level, $message, $extras = array(), $t = null, $log_topic = null)
     {
         if (empty($level)) {
             $level = $this->_monologLevelForRun;
@@ -252,7 +252,7 @@ class LoggingManager extends \Monolog\Logger
         $context = null;
 
         if(isDebug()) {
-            $context = $this->getDebugContext($extras, $ex, $log_topic);
+            $context = $this->getDebugContext($extras, $t, $log_topic);
         }
 
         $monologLevel = Logger::toMonologLevel($level);
@@ -333,7 +333,7 @@ class LoggingManager extends \Monolog\Logger
      *
      * @return array
      */
-    public function getDebugContext($context = array(), \Exception $thrownExc = null, $log_topic=null)
+    public function getDebugContext($context = array(), \Throwable $thrown = null, $log_topic=null)
     {
 
         $blankContext = $this->_getEmptyLogContext();
@@ -367,7 +367,7 @@ class LoggingManager extends \Monolog\Logger
             $context = $baseContext;
         }
 
-        if (null !== $thrownExc) {
+        if (null !== $thrown) {
             $errContext = $this->_getEmptyLogContext();
 
             $context = array_merge($errContext, $context);
@@ -391,7 +391,7 @@ class LoggingManager extends \Monolog\Logger
             $class = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
             while ($i < \count($dbg) - 1) {
                 if (!empty($dbg[$i]['class']) && stripos($dbg[$i]['class'], 'LoggingManager') === false &&
-                    (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array('getDebugContent', 'handleException')))) {
+                    (empty($dbg[$i]['function']) || !in_array($dbg[$i]['function'], array('getDebugContent', 'handleThrowable')))) {
                     $class = $dbg[$i]['class'] . '->' . $dbg[$i]['function'] . '()';
                     if (!empty($dbg[$i]['object'])) {
                         $objclass = get_class($dbg[$i]['object']);
@@ -402,7 +402,7 @@ class LoggingManager extends \Monolog\Logger
                                     if (is_object($dbg[$i]['object']) && method_exists($dbg[$i]['object'], 'getName')) {
                                         $jobsiteKey = $dbg[$i]['object']->getName();
                                     }
-                                } catch (Exception $ex) {
+                                } catch (\Throwable $t) {
 
                                 }
                             }
@@ -431,9 +431,9 @@ class LoggingManager extends \Monolog\Logger
             }
             $context['jobsitekey'] = $jobsiteKey;
 
-            $context['exception_message'] = $thrownExc->getMessage();
-            $context['exception_file'] = $thrownExc->getFile();
-            $context['exception_line'] = $thrownExc->getLine();
+            $context['exception_message'] = $thrown->getMessage();
+            $context['exception_file'] = $thrown->getFile();
+            $context['exception_line'] = $thrown->getLine();
             //		$context['exception_trace'] = join('|', preg_split('/$/', encodeJson($thrownExc->getTrace())));
         }
 

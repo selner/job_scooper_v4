@@ -143,7 +143,7 @@ class User extends BaseUser
             try {
                 $this->_updateUserSearchPairs();
             } catch (PropelException $ex) {
-                handleException($ex);
+                handleThrowable($ex);
             }
         }
     }
@@ -375,9 +375,9 @@ class User extends BaseUser
 			$con = null;
             LogMessage("Marked {$oldPairUpdate} previous user search pairs as inactive.");
         } catch (PropelException $ex) {
-            handleException($ex, null, true);
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
+            handleThrowable($ex, null, true);
+        } catch (\Throwable $ex) {
+            handleThrowable($ex, null, true);
         }
 
         if (empty($userSearchPairs)) {

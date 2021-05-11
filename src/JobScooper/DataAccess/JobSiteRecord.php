@@ -71,7 +71,7 @@ class JobSiteRecord extends BaseJobSiteRecord
                     $this->setResultsFilterType($type);
                 }
             }
-            catch (\Exception $ex ) { }
+            catch (\Throwable $ex ) { }
             finally {
                 $plugin = null;
             }
@@ -99,7 +99,7 @@ class JobSiteRecord extends BaseJobSiteRecord
 	            }
             }
             $this->_pluginObject = new $class();
-        } catch (\Exception $ex) {
+        } catch (\Throwable $ex) {
             LogError("Error instantiating jobsite {$this->getJobSiteKey()} plugin object by class [{$class}]:  {$ex->getMessage()}");
             $this->_pluginObject = null;
             unset($this->_pluginObject);

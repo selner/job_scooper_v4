@@ -136,7 +136,7 @@ class SitePluginFactory
                         }
                     }
                 } catch (\Exception $ex) {
-                    handleException($ex);
+                    handleThrowable($ex);
                 }
             }
 

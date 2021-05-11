@@ -15,7 +15,7 @@
  * under the License.
  */
 
-namespace JobScooper\SitePlugins;
+namespace JobScooper\Exceptions;
 
 
 class JobSitePluginException extends \Exception implements \Throwable
@@ -33,8 +33,8 @@ class JobSitePluginException extends \Exception implements \Throwable
     {
         $this->_pluginName = $plugin;
         if(!is_empty_value($this->_pluginName)) {
-            $message .= PHP_EOL . "Plugin:  {$this->_pluginName}";
+            $message .= PHP_EOL . "Plugin:  $this->_pluginName";
         }
-        parent::__construct($message = $message, $previous = $previous);
+        parent::__construct(message: $message, code:$code, previous: $previous);
     }
 }

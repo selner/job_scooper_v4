@@ -60,11 +60,11 @@ class DataNormalizer
             // as part of the determination of whether we have that same listing already.
             //
             $this->_markDuplicatesViaPython();
-        } catch (Exception $ex) {
-            LogError($ex->getMessage(), null, $ex);
+        } catch (\Throwable $t) {
+            LogError($t->getMessage(), null, ex:$t);
         } finally {
             $endMem = getPhpMemoryUsage();
-	        LogMessage("Memory in use on entry:  {$startMem} vs. exit {$endMem}.");
+	        LogMessage("Memory in use on entry:  $startMem vs. exit $endMem.");
 
         }
 
@@ -83,7 +83,7 @@ class DataNormalizer
             LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
 
         } catch (\Exception $ex) {
-            handleException($ex, null, false);
+            handleThrowable($ex, null, false);
         } finally {
             EndLogSection('Completed setting title tokens dedupe.');
         }
@@ -101,7 +101,7 @@ class DataNormalizer
             LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
 
         } catch (\Exception $ex) {
-            handleException($ex, null, false);
+            handleThrowable($ex, null, false);
         } finally {
             EndLogSection('Completed new job posting dedupe.');
         }
@@ -126,7 +126,7 @@ class DataNormalizer
             LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
 
         } catch (\Exception $ex) {
-            handleException($ex, null, false);
+            handleThrowable($ex, null, false);
         } finally {
             EndLogSection('Completed finding and matching missing locations.');
         }

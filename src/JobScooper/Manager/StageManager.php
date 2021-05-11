@@ -86,8 +86,8 @@ class StageManager
                     $stageFunc = "doStage{$stage}";
                     try {
                         call_user_func([$this, $stageFunc]);
-                    } catch (\Exception $ex) {
-                        throw new \Exception("Error:  failed to call method \$this->{$stageFunc}() for {$stage} from option --StageProcessor " . implode(",", $arrRunStages) . ".  Error: {$ex}");
+                    } catch (\Throwable $t) {
+                        throw new \Exception("Error:  failed to call method \$this->{$stageFunc}() for {$stage} from option --StageProcessor " . implode(",", $arrRunStages), previous: $t);
                     }
                 }
             } else {
@@ -100,13 +100,13 @@ class StageManager
                 $this->doStage4();
             }
 
-        } catch (\Exception $ex) {
-            handleException($ex, null, true);
+        } catch (\Throwable $t) {
+            handleThrowable($t, null, true);
         } finally {
             try {
                 $this->doFinalStage();
-            } catch (\Exception $ex) {
-                handleException($ex, null, true);
+            } catch (\Throwable $t) {
+                handleThrowable($t, null, true);
             }
         }
     }
@@ -165,9 +165,9 @@ class StageManager
                                 $sitePlugin->setSearches($searchRuns);
                             }
                         } catch (JobSitePluginException $classError) {
-                            handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", false);
-                        } catch (\Exception $classError) {
-                            handleException($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", true);
+                            handleThrowable($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", false);
+                        } catch (\Throwable $classError) {
+                            handleThrowable($classError, "Unable to add searches to {$jobsiteKey} plugin: %s", true);
                         } finally {
                             $totalSearches = \count($searchRuns);
                             endLogSection(" {$totalSearches} {$jobsiteKey} searches were initialized.");
@@ -185,8 +185,8 @@ class StageManager
                             }
                             $didRunSearches = true;
                             endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
-                        } catch (\Exception $classError) {
-                            handleException($classError, "{$jobsiteKey} failed to get latest job postings: %s", false);
+                        } catch (\Throwable $classError) {
+                            handleThrowable($classError, "{$jobsiteKey} failed to get latest job postings: %s", false);
                             $didRunSearches = false;
                             endLogSection("Failed to get latest jobs from {$jobsiteKey} ");
                         }
@@ -213,7 +213,7 @@ class StageManager
                                 }
                             } catch (\Throwable $t)
                             {
-                                handleException($t, "ERROR:  Failed to tag job matches as out of area for user:  $t");
+                                handleThrowable($t, "ERROR:  Failed to tag job matches as out of area for user:  $t");
                             } finally {
                                 endLogSection("End cloning $jobsiteKey jobpostings to other users.");
                             }
@@ -223,8 +223,8 @@ class StageManager
                         LogWarning('No users have been set to be run.');
                     }
 
-                } catch (\Exception $ex) {
-                    $msg = "Skipping remaining $jobsiteKey searches due to plugin failure: $ex";
+                } catch (\JobScooper\Exceptions\JobSitePluginException | \Throwable | \JobScooper\Exceptions\JobSitePluginException $t) {
+                    $msg = "Skipping remaining $jobsiteKey searches due to plugin failure: $t";
                     LogWarning($msg);
                 } finally {
                     $sitePlugin = null;
@@ -242,17 +242,17 @@ class StageManager
                     endLogSection("Completed getting new job postings for {$jobsiteKey}.");
                 }
             }
-        } catch (\Exception $ex) {
+        } catch (\Throwable $t) {
             $msg = "Stage 1 failed to run due to error: %s";
-            handleException($ex, $msg, false);
+            handleThrowable($t, $msg, false);
         }
         endLogSection("End Stage 1: Finished downloading new jobs.");
         if($didRunSearches === true) {
             try {
                 $pluginAlerts = new NotifierDevAlerts();
                 $pluginAlerts->processPluginErrorAlert();
-            } catch (\Exception $ex) {
-                handleException($ex, "Failed to send Plugin Errors email alert", false);
+            } catch (\Throwable $t) {
+                handleThrowable($t, "Failed to send Plugin Errors email alert", false);
             }
         }
     }
@@ -270,9 +270,9 @@ class StageManager
             $normer = new DataNormalizer();
             $normer->normalizeJobs();
             endLogSection('End of stage 2 (job posting normalization).');
-        } catch (\Exception $ex) {
+        } catch (\Throwable $t) {
             endLogSection('FAILED stage 2:  Failed to normalize job posting details due to an error.');
-            handleException($ex, "FAILED stage 2:  Failed to normalize job posting details due to an exception", true);
+            handleThrowable($t, "FAILED stage 2:  Failed to normalize job posting details due to an exception", true);
         } finally {
             $normer = null;
         }
@@ -297,8 +297,8 @@ class StageManager
 
             $marker->markJobMatches($usersForRun);
             endLogSection("Stage 3: Completed auto-marking job matches.");
-        } catch (\Exception $ex) {
-            handleException($ex, "Failed to auto-marking job matches due to an exception", true);
+        } catch (\Throwable $t) {
+            handleThrowable($t, "Failed to auto-marking job matches due to an exception", true);
             endLogSection("FAILED Stage 3: failed to auto-marking job matches due to an error.");
         } finally {
             $marker = null;
@@ -328,8 +328,8 @@ class StageManager
                 endLogSection("End of stage 4 (notifying {$userFacts['UserSlug']})");
             }
             endLogSection('End of stage 4: user notifications');
-        } catch (\Exception $ex) {
-            handleException($ex, "Failed to notify users due to an exception", true);
+        } catch (\Throwable $t) {
+            handleThrowable($t, "Failed to notify users due to an exception", true);
             endLogSection("FAILED Stage 4: failed user results notification.");
         } finally {
             $notifier = null;

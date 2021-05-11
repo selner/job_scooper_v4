@@ -106,7 +106,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
             try {
                 $filepath = $objPageHtml->debug_dump_to_file();
                 $this->setRunErrorPageHtml($filepath);
-            } catch (\Exception $ex) {
+            } catch (\Throwable $ex) {
                 LogWarning("Failed to save HTML for page that generated the error.");
             }
         }

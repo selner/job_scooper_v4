@@ -112,8 +112,8 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
             try {
                 $ret['count'] = $respdata->Total;
                 $ret['jobs'] = $respdata->Jobs;
-            } catch (Exception $ex) {
-                throw new Exception($respdata->error);
+            } catch (Throwable $t) {
+                throw new \JobScooper\Exceptions\JobSitePluginException($respdata->error, previous: $t);
             }
         }
 
@@ -182,7 +182,7 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
             $retData = $this->getJsonResultsPage($jsonUrl, $hostPage);
             $this->nTotalJobs = $retData->Total;
             $this->lastResponseData = $retData;
-        } catch (Exception $ex) {
+        } catch (Throwable $t) {
             //
         }
 
@@ -286,8 +286,8 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
                 }
 
                 return $ret;
-            } catch (Exception $ex) {
-                LogWarning("Failed to download " . $this->JobSiteKey . " listings via JSON.  Reverting to HTML.  " . $ex->getMessage());
+            } catch (Throwable $t) {
+                LogWarning("Failed to download " . $this->JobSiteKey . " listings via JSON.  Reverting to HTML.  " . $t->getMessage());
 
                 return parent::parseJobsListForPage($objSimpHTML);
             }
@@ -310,8 +310,8 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
         if (null === $this->selenium) {
             try {
                 $this->selenium = new \JobScooper\Manager\SeleniumManager();
-            } catch (Exception $ex) {
-                handleException($ex, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+            } catch (Throwable $t) {
+                handleThrowable($t, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
             }
         }
 
@@ -340,7 +340,7 @@ class PluginCareerCast extends \JobScooper\SitePlugins\AjaxSitePlugin
                         }
                     }
                 }
-            } catch (Exception $ex) {
+            } catch (Throwable $t) {
             } finally {
                 $this->selenium->done();
                 unset($this->selenium);

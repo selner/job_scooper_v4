@@ -271,7 +271,7 @@ class GeoLocation extends BaseGeoLocation
         try {
             return parent::save($con);
         } catch (PropelException $ex) {
-            handleException($ex, 'Failed to save GeoLocation ' . $this->getDisplayName() . '.  Error: %s', true);
+            handleThrowable($ex, 'Failed to save GeoLocation ' . $this->getDisplayName() . '.  Error: %s', true);
         }
 
         return false;

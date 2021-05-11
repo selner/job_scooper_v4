@@ -121,7 +121,7 @@ class UserQuery extends BaseUserQuery
             $retUser->save();
 
             return $retUser;
-        } catch (\Exception $ex) {
+        } catch (\Throwable $ex) {
             // No user found
             return null;
         }

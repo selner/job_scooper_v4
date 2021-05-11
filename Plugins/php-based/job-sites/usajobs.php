@@ -89,7 +89,7 @@ class PluginUSAJobs extends \JobScooper\SitePlugins\Base\SitePlugin
                 $retJobs = array_replace($retJobs, $apiJobs->all());
 
             } catch (Exception $ex) {
-                handleException($ex);
+                handleThrowable($ex);
             }
 
         }

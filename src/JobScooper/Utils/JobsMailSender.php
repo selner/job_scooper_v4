@@ -233,7 +233,7 @@ class JobsMailSender
 
             return $ret;
         } catch (Exception $ex) {
-            handleException($ex, 'Failed to send notification email with error = %s', true);
+            handleThrowable($ex, 'Failed to send notification email with error = %s', true);
         } finally {
             unset($this->phpmailer);
             return $ret;

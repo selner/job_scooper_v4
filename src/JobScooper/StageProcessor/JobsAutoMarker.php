@@ -84,7 +84,7 @@ class JobsAutoMarker
             }
             catch (Exception $ex)
             {
-                handleException($ex);
+                handleThrowable($ex);
             }
 
             //
@@ -105,11 +105,11 @@ class JobsAutoMarker
                     $addlData
                 );
             } catch (PropelException $ex) {
-                handleException($ex, null, true);
+                handleThrowable($ex, null, true);
             } catch (\PDOException $ex) {
-                handleException($ex, null, true);
+                handleThrowable($ex, null, true);
             } catch (Exception $ex) {
-                handleException($ex, null, true);
+                handleThrowable($ex, null, true);
             }
             finally {
                 endLogSection("{$userFacts['UserSlug']}: Finished title match / exclusion marking.");
@@ -124,7 +124,7 @@ class JobsAutoMarker
         }
         catch (Exception $ex)
         {
-            handleException($ex);
+            handleThrowable($ex);
         }
 
         try {
@@ -135,7 +135,7 @@ class JobsAutoMarker
         }
         catch (Exception $ex)
         {
-            handleException($ex);
+            handleThrowable($ex);
         }
 
     }
@@ -150,13 +150,13 @@ class JobsAutoMarker
         try {
             $this->_markJobsList_SetAutoExcludedCompaniesFromRegex_($results);
         } catch (Exception $ex) {
-            handleException($ex, "Failed to mark job postings from excluded companies: %s", true);
+            handleThrowable($ex, "Failed to mark job postings from excluded companies: %s", true);
         }
 
         try {
             $this->_markJobsList_KeywordMatches_($results);
         } catch (Exception $ex) {
-            handleException($ex, "Failed to mark job postings matches to user keywords: %s", true);
+            handleThrowable($ex, "Failed to mark job postings matches to user keywords: %s", true);
         }
 
         //
@@ -171,7 +171,7 @@ class JobsAutoMarker
                 );
             LogMessage("... set {$rowsSetAsMarked} user job matches to the 'marked' user notification state.");
         } catch (Exception $ex) {
-            handleException($ex, "Failed to move job postings to 'marked' state: %s", true);
+            handleThrowable($ex, "Failed to move job postings to 'marked' state: %s", true);
         }
     }
 
@@ -192,7 +192,7 @@ class JobsAutoMarker
             LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
 
         } catch (Exception $ex) {
-            handleException($ex, "ERROR:  Failed {$descr}");
+            handleThrowable($ex, "ERROR:  Failed {$descr}");
         } finally {
             endLogSection($descr);
         }
@@ -246,7 +246,7 @@ class JobsAutoMarker
 
             LogMessage('Jobs marked with unwanted company name matches: '.$nJobsMarkedAutoExcluded . '/' . countAssociativeArrayValues($arrJobsList) .' marked as excluded; not marked '. $nJobsNotMarked . '/' . countAssociativeArrayValues($arrJobsList));
         } catch (Exception $ex) {
-            handleException($ex, 'Error in _markJobsList_SetAutoExcludedCompaniesFromRegex_: %s', true);
+            handleThrowable($ex, 'Error in _markJobsList_SetAutoExcludedCompaniesFromRegex_: %s', true);
         } finally {
             endLogSection('Finished marking jobs in excluded companies...');
         }
@@ -287,7 +287,7 @@ class JobsAutoMarker
 	        writeJson($jsonObj, $outfile);
 
 	    } catch (\Exception $ex) {
-	        handleException($ex, null, false);
+	        handleThrowable($ex, null, false);
 	    } finally {
 	        $arrJobItems = null;
 	        $jsonObj = null;
@@ -421,9 +421,9 @@ class JobsAutoMarker
             $resultsfile = generateOutputFileName("{$basefile}_results", 'json', true, 'debug');
 
             $this->_callPythonCmd(
-                $filename = "cmd_match_titles_to_keywords.py",
-                $descr = "matching job titles for user",
-                $extraParams = [
+                filename: "cmd_match_titles_to_keywords.py",
+                descr: "matching job titles for user",
+                extraParams: [
                     '-i' => $sourcefile,
                     '-o' => $resultsfile
                 ]
@@ -432,7 +432,7 @@ class JobsAutoMarker
             $this->_updateUserJobMatchesFromJson($resultsfile, $collJobsList);
 
         } catch (Exception $ex) {
-            handleException($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s');
+            handleThrowable($ex, 'ERROR:  Failed to verify titles against keywords due to error: %s');
         } finally {
             endLogSection('Finished: search keyword/job title matching.');
         }

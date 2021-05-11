@@ -195,7 +195,7 @@ class ConfigInitializer
         try {
             $this->parseUserConfigs();
         } catch (\Exception $e) {
-            handleException($e, "Could not load user configurations: ");
+            handleThrowable($e, "Could not load user configurations: ");
         }
 
         $this->parseAlertReceipients();
@@ -505,7 +505,7 @@ class ConfigInitializer
         try {
             $config_users = $this->getConfigUsers();
         } catch (\Exception $e) {
-            handleException($e, "Could not find user list in config settings.");
+            handleThrowable($e, "Could not find user list in config settings.");
         }
         $user_recs = array();
         if (is_empty_value($config_users)) {

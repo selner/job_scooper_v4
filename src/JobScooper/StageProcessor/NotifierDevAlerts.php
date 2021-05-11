@@ -214,7 +214,7 @@ class NotifierDevAlerts extends JobsMailSender
                     $mailer = new JobsMailSender(true);
                     $ret = $mailer->sendEmail("", $html, [], $subject, "errors");
                 } catch (\Exception $ex) {
-                    handleException($ex);
+                    handleThrowable($ex);
                 } finally {
                     if ($ret !== true || isDebug())
                     {
@@ -228,7 +228,7 @@ class NotifierDevAlerts extends JobsMailSender
 
 
             } catch (\Exception $ex) {
-                handleException($ex, 'ERROR:  Failed to generate broken plugins report');
+                handleThrowable($ex, 'ERROR:  Failed to generate broken plugins report');
             } finally {
                 endLogSection("Finished sending broken plugins error alert");
             }
