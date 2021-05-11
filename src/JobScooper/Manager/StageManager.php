@@ -85,7 +85,7 @@ class StageManager
                 foreach ($arrRunStages as $stage) {
                     $stageFunc = "doStage{$stage}";
                     try {
-                        $this->$stageFunc();
+                        call_user_func([$this, $stageFunc]);
                     } catch (\Exception $ex) {
                         throw new \Exception("Error:  failed to call method \$this->{$stageFunc}() for {$stage} from option --StageProcessor " . implode(",", $arrRunStages) . ".  Error: {$ex}");
                     }
@@ -194,9 +194,9 @@ class StageManager
 
                         $filterType = $site->getResultsFilterType();
 
-                        if ((!is_empty_value($searchRuns)) &&
-                            $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
-                            $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY) {
+                        if ((($totalSearches != 0) && !is_empty_value($searchRuns)) &&
+                            ($filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
+                            $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY)) {
 
                             try {
                                 startLogSection("Cloning new jobpostings to other users for {$jobsiteKey}");
@@ -245,18 +245,16 @@ class StageManager
         } catch (\Exception $ex) {
             $msg = "Stage 1 failed to run due to error: %s";
             handleException($ex, $msg, false);
-        } finally {
-            endLogSection("End Stage 1: Finished downloading new jobs.");
-            if($didRunSearches === true) {
-                try {
-                    $pluginAlerts = new NotifierDevAlerts();
-                    $pluginAlerts->processPluginErrorAlert();
-                } catch (\Exception $ex) {
-                    handleException($ex, "Failed to send Plugin Errors email alert", false);
-                }
+        }
+        endLogSection("End Stage 1: Finished downloading new jobs.");
+        if($didRunSearches === true) {
+            try {
+                $pluginAlerts = new NotifierDevAlerts();
+                $pluginAlerts->processPluginErrorAlert();
+            } catch (\Exception $ex) {
+                handleException($ex, "Failed to send Plugin Errors email alert", false);
             }
         }
-
     }
 
     /**
