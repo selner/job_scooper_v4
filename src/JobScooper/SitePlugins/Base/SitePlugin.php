@@ -779,6 +779,30 @@ JSCODE;
     }
 
     /**
+     * parseChildSiteNotFoundTag
+     *
+     * @param $objSimpHTML
+     * @return string|null
+     * @throws \Exception
+     */
+    public function matchChildSiteNotFoundTag(SimpleHTMLHelper $objSimpHTML) {
+
+        if (array_key_exists('ChildSiteNotFound', $this->arrListingTagSetup) && null !== $this->arrListingTagSetup['ChildSiteNotFound'] && \count($this->arrListingTagSetup['ChildSiteNotFound']) > 0) {
+            try {
+                $noResultsVal = DomItemParser::getTagValue($objSimpHTML, $this->arrListingTagSetup['ChildSiteNotFound'], null, $this);
+                if (null !== $noResultsVal) {
+                    $this->log("Search returned { $noResultsVal } and matched expected 'ChildSiteNotFound' tag for { $this->JobSiteName }");
+                    return true;
+                }
+            } catch (\Exception $ex) {
+                $this->log("Warning: Did not find matched expected 'ChildSiteNotFound' tag for { $this->JobSiteName }.  Error:" . $ex->getMessage(), LogLevel::WARNING);
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * parseTotalResultsCount
      *
      * If the site does not show the total number of results
@@ -1875,6 +1899,12 @@ JSCODE;
             if (!$objSimpleHTML) {
                 throw new \ErrorException('Error:  unable to get SimpleHTML object for ' . $searchDetails->getSearchStartUrl());
             }
+
+            $noSiteExists = $this->matchChildSiteNotFoundTag($objSimpleHTML);
+            if($noSiteExists == true) {
+                throwException(new JobSitePluginException("$this->JobSiteKey was not found on the ATS platform as expected."));
+            }
+
 
             $totalPagesCount = C__TOTAL_ITEMS_UNKNOWN__;
             $nTotalListings = C__TOTAL_ITEMS_UNKNOWN__; // placeholder because we don't know how many are on the page

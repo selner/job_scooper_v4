@@ -38,7 +38,17 @@
                             "CallbackParameter": "no job",
                             "Attribute": "text",
                             "Type": "CSS"
+                        },
+                        {
+                            "Name": "ChildSiteNotFound",
+                            "Selector": "div.error-message",
+                            "Index" : 0,
+                            "Callback" : "matchesNoResultsPattern",
+                            "CallbackParameter": "we couldn't find",
+                            "Attribute": "text",
+                            "Type": "CSS"
                         }
+
                     ]
                 },
                 {
@@ -109,7 +119,7 @@
                 "vow",
                 "windfalldata",
                 "yelp",
-                "zoom"
+                "zeus"
             ]
         }
     ]
