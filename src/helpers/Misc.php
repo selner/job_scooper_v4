@@ -264,7 +264,7 @@ function doExec($cmd)
     $cmdStrOutput = implode(PHP_EOL, $cmdArrOutput);
 
     foreach ($cmdArrOutput as $resultLine) {
-        LogMessage($resultLine);
+        LogDebug($resultLine);
         $lastResultLine = $resultLine;
     }
 
@@ -273,9 +273,10 @@ function doExec($cmd)
     }
 
     LogMessage("Command '{$cmd}' returned code={$cmdRet}");
- 
+    LogDebug("Python script output: " . cleanupTextValue($cmdStrOutput));
+
     if ($cmdRet !== 0) {
-        throw new Exception("Command '{$cmd}' returned non-zero result code.  Output: " . cleanupTextValue($cmdStrOutput));
+        throw new Exception("Command '{$cmd}' returned non-zero result code.");
     }
 
     return $cmdRet;
