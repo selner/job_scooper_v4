@@ -41,6 +41,7 @@ use JobScooper\Traits\Singleton;
 /****************************************************************************************************************/
 
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    LogError($errstr, ['file' => $errfile, 'lineno' => $errline, 'errornumber' => $errno]);
     throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
 });
 
