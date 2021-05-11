@@ -37,23 +37,29 @@
 class PluginAmazon extends \JobScooper\SitePlugins\AjaxSitePlugin
 {
     protected $JobSiteName = 'Amazon';
-    protected $JobListingsPerPage = 10;
+    protected $JobListingsPerPage = 200;
     protected $JobPostingBaseUrl = 'http://www.amazon.jobs';
 //    protected $SearchUrlFormat = "https://www.amazon.jobs/en/search?base_query=***KEYWORDS***&loc_query=***LOCATION***&sort=recent&cache";
     protected $SearchUrlFormat = "https://www.amazon.jobs/en/search?base_query=&loc_query=***LOCATION***&sort=recent&cache";
-//    protected $SearchUrlFormat = "https://www.amazon.jobs/en/search?offset=0&result_limit=10&sort=recent&cities[]=London&distanceType=Mi&radius=24km&latitude=&longitude=&loc_group_id=&loc_query=***LOCATION***&base_query=director&city=&country=&region=&county=&query_options=&"
+//    protected $SearchUrlFormat = "https://www.amazon.jobs/en/search?offset=0&result_limit=200&sort=recent&cities[]=London&distanceType=Mi&radius=24km&latitude=&longitude=&loc_group_id=&loc_query=***LOCATION***&base_query=director&city=&country=&region=&county=&query_options=&"
     protected $PaginationType = C__PAGINATION_PAGE_VIA_NEXTBUTTON;
     protected $LocationType = 'location-city-comma-statecode-comma-country';
     protected $nMaxJobsToReturn = 5000; // Amazon maxes out at 2000 jobs in the list
     protected $additionalLoadDelaySeconds = 1;
     protected $CountryCodes = array("US", "UK");
-    protected $additionalBitFlags = [C__JOB_RESULTS_SHOWN_IN_DATE_DESCENDING_ORDER];
 
     protected $selectorMoreListings = "button[data-label='right']";
     protected $searchStartActualURL = null;
     protected $searchJsonUrlFmt = null;
     protected $lastResponseData = null;
     private $nTotalJobs = null;
+
+    public function __construct($strBaseDir = null)
+    {
+        parent::__construct($strBaseDir);
+
+    }
+
 
     /**
      * @param \JobScooper\DataAccess\GeoLocation|null $location
@@ -120,7 +126,7 @@ JSCODE;
         $html = $this->getActiveWebdriver()->getPageSource();
 
         $this->searchStartActualURL = $this->getActiveWebdriver()->getCurrentURL();
-        $this->searchJsonUrlFmt = str_ireplace("/search?", "/search.json?", $this->searchStartActualURL) . "&result_limit=1000";
+        $this->searchJsonUrlFmt = str_ireplace("/search?", "/search.json?", $this->searchStartActualURL) . "&result_limit=$this->JobListingsPerPage";
 
         return $html;
     }
@@ -162,7 +168,7 @@ JSCODE;
     {
         $ret = array();
         foreach ($jobs as $job) {
-            $ret[$job->id] = array(
+            $ret[$job->id_icims] = array(
                 'JobSiteKey' => "amazon",
                 'JobSitePostId' => $job->id_icims,
                 'Company' => $job->company_name,
