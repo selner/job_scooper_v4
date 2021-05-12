@@ -331,7 +331,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                         break;
                 }
 
-                $strURL = str_ireplace($replaceStr, urlencode($replaceVal), $strURL);
+                $strURL = str_ireplace($replaceStr, $replaceVal, $strURL);
             }
         }
 
@@ -410,7 +410,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
         if(is_empty_value($param))
             return '';
 
-        return $param;
+        return urlencode($param);
     }
 
 
@@ -460,6 +460,12 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
         if (!isValueURLEncoded($strLocationValue)) {
             $strLocationValue = urlencode($strLocationValue);
         }
+
+        if ($this->isBitFlagSet(C__JOB_LOCATION_PARAMETER_SPACES_AS_PLUSES)) {
+            $strLocationValue = str_replace("%20", "+", $strLocationValue);
+            $strLocationValue = str_replace(" ", "+", $strLocationValue);
+        }
+
 
         return $strLocationValue;
     }

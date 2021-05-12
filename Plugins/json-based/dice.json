@@ -3,12 +3,13 @@
     {
       "PhpClassName": "PluginDice",
       "BaseURL": "http://www.dice.com/",
-      "SourceURL": "https://www.dice.com/jobs?q=***KEYWORDS***&location=***LOCATION:{Place}, {RegionCode} {CountryCode}***&countryCode=US&radius=30&radiusUnit=mi&page=1&pageSize=100&filters.postedDate=SEVEN&language=en",
+      "SourceURL": "https://www.dice.com/jobs?q=***KEYWORDS***&location=***LOCATION:{Place} {RegionCode}***&countryCode=US&radius=30&radiusUnit=mi&page=1&pageSize=100&filters.postedDate=SEVEN&language=en",
       "CountryCodes": [
         "US"
       ],
       "AdditionalFlags": [
-        "C__JOB_USE_SELENIUM"
+        "C__JOB_USE_SELENIUM",
+        "C__JOB_LOCATION_PARAMETER_SPACES_AS_PLUSES"
       ],
       "Collections": [
         {
@@ -55,7 +56,7 @@
             {
               "Name": "JobSitePostId",
               "Selector": "dhi-search-card h5 a",
-              "Attribute": "href",
+              "Attribute": "id",
               "Index": 0,
               "Type": "CSS"
             },
