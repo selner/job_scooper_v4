@@ -172,54 +172,57 @@ class StageManager
                             endLogSection(" {$totalSearches} {$jobsiteKey} searches were initialized.");
                         }
 
-                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        //
-                        // Download all the job listings for all the users searches for this plugin
-                        //
-                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        try {
-                            startLogSection("Getting latest jobs {$jobsiteKey} from the web for {$totalSearches} potential search(es)...");
-                            if (!is_empty_value($searchRuns) && \count($searchRuns) > 0) {
-                                $sitePlugin->downloadLatestJobsForAllSearches();
-                            }
-                            $didRunSearches = true;
-                            endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
-                        } catch (\Throwable $classError) {
-                            handleThrowable($classError, "{$jobsiteKey} failed to get latest job postings: %s", false);
-                            $didRunSearches = false;
-                            endLogSection("Failed to get latest jobs from {$jobsiteKey} ");
-                        }
-
-
-                        $filterType = $site->getResultsFilterType();
-
-                        if ((($totalSearches != 0) && !is_empty_value($searchRuns)) &&
-                            ($filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
-                            $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY)) {
-
+                        if ($totalSearches > 0) {
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            //
+                            // Download all the job listings for all the users searches for this plugin
+                            //
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             try {
-                                startLogSection("Cloning new jobpostings to other users for {$jobsiteKey}");
-                                foreach ($usersForRun as $userFacts) {
-
-                                    $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
-                                    $params = [
-                                        '--jobuserid' => $userFacts['UserId'],
-                                        '--jobsite' => $jobsiteKey
-                                    ];
-
-                                    $resultcode = PythonRunner::execScript($runFile, $params, true);
-                                    LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
+                                startLogSection("Getting latest jobs {$jobsiteKey} from the web for {$totalSearches} potential search(es)...");
+                                if (!is_empty_value($searchRuns) && \count($searchRuns) > 0) {
+                                    $sitePlugin->downloadLatestJobsForAllSearches();
                                 }
-                            } catch (\Throwable $t)
-                            {
-                                handleThrowable($t, "ERROR:  Failed to tag job matches as out of area for user:  $t");
-                            } finally {
-                                endLogSection("End cloning $jobsiteKey jobpostings to other users.");
+                                $didRunSearches = true;
+                                endLogSection("Finished getting latest jobs from {$jobsiteKey}  ");
+                            } catch (\Throwable $classError) {
+                                handleThrowable($classError, "{$jobsiteKey} failed to get latest job postings: %s", false);
+                                $didRunSearches = false;
+                                endLogSection("Failed to get latest jobs from {$jobsiteKey} ");
                             }
-                        }
 
+
+                            $filterType = $site->getResultsFilterType();
+
+                            if ((($totalSearches != 0) && !is_empty_value($searchRuns)) &&
+                                ($filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ||
+                                    $filterType === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY)) {
+
+                                try {
+                                    startLogSection("Cloning new jobpostings to other users for {$jobsiteKey}");
+                                    foreach ($usersForRun as $userFacts) {
+
+                                        $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
+                                        $params = [
+                                            '--jobuserid' => $userFacts['UserId'],
+                                            '--jobsite' => $jobsiteKey
+                                        ];
+
+                                        $resultcode = PythonRunner::execScript($runFile, $params, true);
+                                        LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
+                                    }
+                                } catch (\Throwable $t) {
+                                    handleThrowable($t, "ERROR:  Failed to tag job matches as out of area for user:  $t");
+                                } finally {
+                                    endLogSection("End cloning $jobsiteKey jobpostings to other users.");
+                                }
+                            }
+
+                        } else {
+                            LogWarning("No searches have been set to be run for $jobsiteKey.");
+                        }
                     } else {
-                        LogWarning('No users have been set to be run.');
+                        LogWarning("No users have been set to be for $jobsiteKey.");
                     }
 
                 } catch (\JobScooper\Exceptions\JobSitePluginException | \Throwable | \JobScooper\Exceptions\JobSitePluginException $t) {
