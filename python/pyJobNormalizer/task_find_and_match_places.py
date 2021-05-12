@@ -359,7 +359,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                             FROM geolocation
                             WHERE geolocation_key like '%s'
                             ORDER by geolocation.geolocation_id
-                        """ % (geolocfacts['location_slug'])
+                        """ % (geolocfacts['geolocation_key'])
 
 
                         existingGeo = self.fetch_one_from_query(query)
