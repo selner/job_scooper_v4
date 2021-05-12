@@ -276,7 +276,10 @@ function doExec($cmd)
     LogDebug("Python script output: " . cleanupTextValue($cmdStrOutput));
 
     if ($cmdRet !== 0) {
-        throw new Exception("Command '{$cmd}' returned non-zero result code.");
+
+        $lastmsgs = array_slice($cmdArrOutput, count($cmdArrOutput)-25, 25);
+        $err = "Command '{$cmd}' returned non-zero result code.   Last 25 messages:  " . implode(PHP_EOL, $cmdArrOutput);
+        throw new Exception($err);
     }
 
     return $cmdRet;
