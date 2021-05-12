@@ -223,30 +223,32 @@ class GeoLocation extends BaseGeoLocation
         $dispVal = '';
         $keyVal = '';
 
-        if (!empty($this->getPlace())) {
-            $dispVal = '%L';
-            $keyVal = '%L';
+
+        if (!empty($this->getCounty())) {
+            $dispVal = $dispVal . ' %A2';
+            $keyVal = $keyVal . '-%A2';
         }
-        elseif (!empty($this->getCounty())) {
-            $dispVal = '%A2';
-            $keyVal = '%A2';
+
+        if (!empty($this->getPlace())) {
+            $dispVal =  '%L ' . $dispVal;
+            $keyVal = $keyVal . '-%L';
         }
 
         if ($this->getCountryCode() === 'US') {
             if (!empty($this->getRegionCode())) {
                 $dispVal .= ' %r %c';
-	            $keyVal = '%c_%r_' . $keyVal;
+	            $keyVal = '%c__%r' . $keyVal;
             } else {
                 $dispVal .= ' %c';
-	            $keyVal = '%c_%R_' . $keyVal;
+	            $keyVal = '%c__%R' . $keyVal;
             }
         } else {
             if (!empty($this->getRegion())) {
                 $dispVal .= ' %R %c';
-	            $keyVal = '%c_%R_' . $keyVal;
+	            $keyVal = '%c__%R' . $keyVal;
             } else {
                 $dispVal .= ' %c';
-	            $keyVal = '%c_' . $keyVal;
+	            $keyVal = '%c__' . $keyVal;
             }
         }
 
@@ -284,6 +286,9 @@ class GeoLocation extends BaseGeoLocation
 
     public function setGeoLocationKey($v)
     {
+        // Strip the word county from any location keys before slugifying
+        $v = str_replace([" County", " county"], "", $v);
+
         $v = cleanupSlugPart($v);
         return parent::setGeoLocationKey($v);
     }

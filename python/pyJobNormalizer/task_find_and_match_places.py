@@ -14,6 +14,8 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
+from collections import OrderedDict
+
 from mixin_database import DatabaseMixin
 import requests
 from util_tokenize import STATES, STATECODES
@@ -330,13 +332,12 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
                 if place_details and len(place_details) > 0:  # if found place:
 
-                    msgPlaceMatch = " place_id=None "
                     if 'place_id' in place_details and place_details['place_id']:
                         self.log(
-                            f'... place matched: {place_details["place_id"]}, location={place_details["formatted_address"]}')
+                            f'... place matched: {place_details["place_id"]}, location={place_details["location_slug"]}')
                     else:
                         self.log(
-                            f'... place matched: location={place_details["formatted_address"]}')
+                            f'... place matched: location={place_details["location_slug"]}')
 
                     #   insert GeoLocation into DB
                     geolocfacts = {PLACE_DETAIL_GEOCODE_MAPPING[pkey]: str(place_details[pkey])[:99] for pkey in
@@ -349,7 +350,28 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                         if 'location_slug' in geolocfacts and len(geolocfacts['location_slug']) > 100:
                             geolocfacts['location_slug'] = geolocfacts['location_slug'][0:100]
 
-                        if 'display_name' in geolocfacts and len(geolocfacts['display_name']) > 100:
+                        if 'display_name' not in geolocfacts:
+                            factparts = OrderedDict()
+
+                            if 'place' in geolocfacts and geolocfacts['place']:
+                                factparts['place'] = geolocfacts['place']
+
+                            if 'county' in geolocfacts and geolocfacts['county']:
+                                factparts['county'] = geolocfacts['county']
+
+                            if 'region' in geolocfacts and  geolocfacts['region']:
+                                factparts['region'] = geolocfacts['region']
+                            elif 'regioncode' in geolocfacts and geolocfacts['regioncode']:
+                                factparts['regioncode'] = geolocfacts['regioncode']
+
+                            if 'country' in geolocfacts and  geolocfacts['country']:
+                                factparts['country'] = geolocfacts['country']
+                            elif 'countrycode' in geolocfacts and geolocfacts['countrycode']:
+                                factparts['countrycode'] = geolocfacts['countrycode']
+
+                            geolocfacts['display_name'] = " ".join(factparts.values())
+
+                        if len(geolocfacts['display_name']) > 100:
                             geolocfacts['display_name'] = geolocfacts['display_name'][0:100]
 
                         query = """ 
