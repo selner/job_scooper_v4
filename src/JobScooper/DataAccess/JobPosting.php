@@ -547,7 +547,13 @@ class JobPosting extends BaseJobPosting implements \ArrayAccess
         parent::__construct();
         if (!is_empty_value($arrJobFacts) && \count($arrJobFacts) > 1) {
             foreach (array_keys($arrJobFacts) as $key) {
-                $this->set($key, $arrJobFacts[$key]);
+                $method = "set$key";
+                if(method_exists($this, $method)) {
+                    call_user_func([$this, $method], $arrJobFacts[$key]);
+                }
+                else {
+                    throwException("Failed to set unknown job fact $key ");
+                }
             }
             $this->save();
         }
