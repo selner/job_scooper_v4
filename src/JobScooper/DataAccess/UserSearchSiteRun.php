@@ -17,8 +17,9 @@
 
 namespace JobScooper\DataAccess;
 
-use JBZoo\Utils\Url;use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
+use JobScooper\DataAccess\Base\UserSearchSiteRun as BaseUserSearchSiteRun;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
+use JobScooper\Manager\JobSiteManager;
 use JobScooper\Utils\SimpleHtml\SimpleHTMLHelper;
 use Propel\Runtime\Map\TableMap;
 use JobScooper\SitePlugins\Base\SitePlugin;

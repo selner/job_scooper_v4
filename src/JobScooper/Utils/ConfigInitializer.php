@@ -18,7 +18,7 @@ namespace JobScooper\Utils;
 
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserQuery;
-use JobScooper\DataAccess\JobSiteManager;
+use JobScooper\Manager\JobSiteManager;
 use JobScooper\Manager\LoggingManager;
 use Propel\Common\Config\ConfigurationManager;
 use Propel\Runtime\Exception\InvalidArgumentException;

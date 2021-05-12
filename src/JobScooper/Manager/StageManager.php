@@ -17,7 +17,6 @@
 
 namespace JobScooper\Manager;
 
-use JobScooper\DataAccess\JobSiteManager;
 use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
 use JobScooper\Exceptions\JobSitePluginException;
 use JobScooper\StageProcessor\DataNormalizer;
@@ -83,7 +82,7 @@ class StageManager
                 $arrRunStages = Settings::getValue('command_line_args.stages');
 
                 foreach ($arrRunStages as $stage) {
-                    $stageFunc = "doStage{$stage}";
+                    $stageFunc = "doStage$stage";
                     try {
                         call_user_func([$this, $stageFunc]);
                     } catch (\Throwable $t) {
@@ -129,7 +128,7 @@ class StageManager
         $usersForRun = Settings::getValue('users_for_run');
         $didRunSearches = false;
 
-        startLogSection("Stage 1:  Downloading new jobs for " . \count($jobsiteKeys) . ' job sites and ' . \count($usersForRun) . ' users.');
+        startLogSection("Stage 1:  Checking for new jobs on " . \count($jobsiteKeys) . ' job sites for ' . \count($usersForRun) . ' users.');
 
         try {
             if (is_empty_value($jobsiteKeys)) {
@@ -145,7 +144,7 @@ class StageManager
                 $searchRuns = array();
 
                 try {
-                    startLogSection("Downloading new jobs from {$jobsiteKey} for " . \count($usersForRun) . ' users.');
+                    startLogSection("Checking for new jobs on {$jobsiteKey} for " . \count($usersForRun) . ' users.');
                     $site = JobSiteManager::getJobSiteByKey($jobsiteKey);
                     assert(!is_empty_value($site));
 
@@ -239,7 +238,7 @@ class StageManager
                         }
                     }
                     $searchRuns = null;
-                    endLogSection("Completed getting new job postings for {$jobsiteKey}.");
+                    endLogSection("Completed checking new job postings for {$jobsiteKey}.");
                 }
             }
         } catch (\Throwable $t) {

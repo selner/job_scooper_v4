@@ -15,11 +15,13 @@
  * under the License.
  */
 
-namespace JobScooper\SitePlugins;
+namespace JobScooper\Manager;
 
 use Exception;
 use JobScooper\DataAccess\JobSiteRecordQuery;
+use JobScooper\SitePlugins\AjaxSitePlugin;
 use JobScooper\SitePlugins\Base\SitePlugin;
+use JobScooper\SitePlugins\IJobSitePlugin;
 use JobScooper\Utils\Settings;
 
 class SitePluginFactory
@@ -51,6 +53,8 @@ class SitePluginFactory
 
             return new $className();
     	}
+
+    	return null;
     }
 
 

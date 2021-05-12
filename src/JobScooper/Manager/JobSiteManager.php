@@ -15,9 +15,9 @@
  * under the License.
  */
 
-namespace JobScooper\DataAccess;
+namespace JobScooper\Manager;
 
-use JobScooper\SitePlugins\SitePluginFactory;
+use JobScooper\DataAccess\JobSiteRecordQuery;
 use JobScooper\Utils\Settings;
 use Propel\Runtime\ActiveQuery\Criteria;
 

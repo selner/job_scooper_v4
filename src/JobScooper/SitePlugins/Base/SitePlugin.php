@@ -19,7 +19,7 @@ namespace JobScooper\SitePlugins\Base;
 
 require_once(__ROOT__ . '/src/helpers/Constants.php');
 use Exception;
-use JobScooper\DataAccess\JobSiteManager;
+use JobScooper\Manager\JobSiteManager;
 use JobScooper\Exceptions\JobSitePluginException;
 use JobScooper\Exceptions\JobSiteNotFoundException;
 use JobScooper\Utils\CurlWrapper;
@@ -40,7 +40,7 @@ use JobScooper\DataAccess\Map\UserJobMatchTableMap;
 use JobScooper\DataAccess\User;
 use JobScooper\DataAccess\UserJobMatchQuery;
 use JobScooper\Manager\SeleniumManager;
-use JobScooper\SitePlugins\SitePluginFactory;
+use JobScooper\Manager\SitePluginFactory;
 use JobScooper\Utils\SimpleHtml\DomItemParser;
 use JobScooper\Utils\SimpleHtml\SimpleHTMLHelper;
 use JobScooper\Utils\SimpleHtml\ExtendedDiDomElement;

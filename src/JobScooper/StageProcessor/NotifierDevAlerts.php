@@ -17,7 +17,7 @@
 
 namespace JobScooper\StageProcessor;
 
-use JobScooper\DataAccess\JobSiteManager;
+use JobScooper\Manager\JobSiteManager;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
 use JobScooper\DataAccess\UserSearchSiteRunQuery;
 use JobScooper\Utils\JobsMailSender;

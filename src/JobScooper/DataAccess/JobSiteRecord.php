@@ -20,7 +20,7 @@ namespace JobScooper\DataAccess;
 use JobScooper\DataAccess\Base\JobSiteRecord as BaseJobSiteRecord;
 use JobScooper\DataAccess\Map\JobSiteRecordTableMap;
 use JobScooper\DataAccess\Map\UserSearchSiteRunTableMap;
-use JobScooper\SitePlugins\SitePluginFactory;
+use JobScooper\Manager\SitePluginFactory;
 use JobScooper\Utils\Settings;
 use Propel\Runtime\Connection\ConnectionInterface;
 
