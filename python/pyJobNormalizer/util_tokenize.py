@@ -29,7 +29,7 @@ import re
 from collections import OrderedDict
 from util_log import logmsg
 
-states = {
+STATES = {
     'AK': 'Alaska',
     'AL': 'Alabama',
     'AR': 'Arkansas',
@@ -89,6 +89,7 @@ states = {
     'WY': 'Wyoming'
 }
 
+STATECODES = { STATES[k]: k for k in STATES}
 
 # NOTE:  Need to run the download once per machine to get the dictionaries
 # nltk.download()
