@@ -195,11 +195,14 @@ class UserSearchSiteRunManager {
         //
         if (!empty($runsToSkip)) {
         	$resultsFilterEnums = JobSiteRecordTableMap::getValueSet(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE);
-	        foreach($runsToSkip as $skip) {
-	        	foreach($searchRuns as $runKey => $run) {
+            foreach($searchRuns as $runKey => $run) {
+                foreach($runsToSkip as $skip) {
 					if($skip['JobSiteKey'] === $run['JobSiteKey']) {
-						if($resultsFilterEnums[$skip['JobSiteFromUSSR.ResultsFilterType']] === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION &&
-							(int)$skip['UserSearchPairFromUSSR.GeoLocationId'] === (int)$run['GeoLocationId'])
+                        if ($resultsFilterEnums[$skip['JobSiteFromUSSR.ResultsFilterType']] === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY ) {
+                            $skippedSearchRuns[$runKey] = $run;
+                        }
+					    elseif($resultsFilterEnums[$skip['JobSiteFromUSSR.ResultsFilterType']] === JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION &&
+                                (int)$skip['UserSearchPairFromUSSR.GeoLocationId'] === (int)$run['GeoLocationId'])
 					    {
 							$skippedSearchRuns[$runKey] = $run;
 						} elseif((int)$skip['UserSearchPairId'] === (int)$run['UserSearchPairId']) {
