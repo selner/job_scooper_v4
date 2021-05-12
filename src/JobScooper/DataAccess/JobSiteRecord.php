@@ -42,7 +42,7 @@ class JobSiteRecord extends BaseJobSiteRecord
     /**
      * @var \JobScooper\SitePlugins\Base\SitePlugin
      */
-    private $_pluginObject = null;
+    protected $_pluginObject = null;
 
     /**
 	 * @return \JobScooper\SitePlugins\Base\SitePlugin
@@ -263,16 +263,19 @@ class JobSiteRecord extends BaseJobSiteRecord
             if($plugin->isBitFlagSet(C__JOB_KEYWORD_URL_PARAMETER_NOT_SUPPORTED)) {
                 if ($plugin->isBitFlagSet(C__JOB_LOCATION_URL_PARAMETER_NOT_SUPPORTED)) {
                     $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY);
+                    $siteResultsType = JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_ONLY;
                     $this->save();
                 }
                 else
                 {
                     $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION);
+                    $siteResultsType = JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_ALL_BY_LOCATION;
                     $this->save();
                 }
             }
             else {
                 $this->setResultsFilterType(JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_USER_FILTERED);
+                $siteResultsType = JobSiteRecordTableMap::COL_RESULTS_FILTER_TYPE_USER_FILTERED;
                 $this->save();
             }
         }
