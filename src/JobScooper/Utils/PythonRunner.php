@@ -25,35 +25,50 @@ namespace JobScooper\Utils;
  */
 class PythonRunner {
 
-    static function getPythonExec() {
+    static function getPythonExec($scriptFile) {
         $pythonExec = '/python ';
-        $venvDir = __ROOT__ . '/python/.venv/bin';
-        if(!is_dir($venvDir)) {
-            $venvDir = __ROOT__ . '/python/venv/bin';
-            if (!is_dir($venvDir)) {
-                $venvDir = null;
+        $pythondir = __ROOT__ . "/python";
+
+        $venvdirs = ["/venv/bin", "/.venv/bin"];
+        $trydirs = [$pythondir];
+
+        $scriptDirs = preg_split("/\//", $scriptFile);
+        if($scriptDirs != null && count($scriptDirs) > 0) {
+            $lastDir = $pythondir;
+            foreach($scriptDirs as $dir) {
+                $lastDir = $lastDir . "/" . $dir;
+                if(is_dir($lastDir)) {
+                    $trydirs[] = $lastDir;
+                }
+            }
+        }
+        foreach($trydirs as $subdir) {
+            foreach($venvdirs as $venv) {
+                $testdir = $subdir . $venv;
+                if(is_dir($testdir)) {
+                    if(is_link("$testdir/python") || is_file("$testdir/python")) {
+                        return "$testdir/python";
+                    }
+                }
             }
         }
 
-        if($venvDir !== null) {
-            $pythonExec = "{$venvDir}/python ";
-        }
         return $pythonExec;
     }
 
-	/**
-	 * @param string $scriptFile
-	 * @param string[] $script_params
-	 * @return null|string|integer
+    /**
+     * @param string $scriptFile
+     * @param string[] $script_params
+     * @return null|string|integer
      *
-	 * @throws \Exception
-	*/
-	static function execScript($scriptFile, $script_params=array(), $includeDBParams=false) {
+     * @throws \Exception
+     */
+    static function execScript($scriptFile, $script_params=array(), $includeDBParams=false) {
 
         startLogSection("Calling Python Script:  $scriptFile");
 
         try {
-            $exec = PythonRunner::getPythonExec();
+            $exec = PythonRunner::getPythonExec($scriptFile);
             $scriptPath = __ROOT__ . "/python/$scriptFile";
             $cmdLine = "";
 
@@ -67,8 +82,8 @@ class PythonRunner {
             }
 
             foreach($script_params as $key => $value) {
-            	if($key[0] != "-") {
-            	    $key = "--{$key}";
+                if($key[0] != "-") {
+                    $key = "--{$key}";
                 }
                 $cmdLine .= " {$key} " . escapeshellarg($value);
             }
