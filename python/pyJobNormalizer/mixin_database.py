@@ -182,7 +182,11 @@ class DatabaseMixin:
 
                 while batch_counter < total_num_batches:
                     curidx = batch_counter * batch_size
-                    self.log(f'... processing records {curidx} - {curidx+batch_size} through callback {str(callback)}')
+                    batchlast = curidx + batch_size
+                    if total_rows < batch_size:
+                        batchlast = total_rows
+
+                    self.log(f'... processing records {curidx} - {batchlast} through callback {str(callback)}')
 
                     rows = cursor.fetchmany(batch_size)
                     if not rows or len(rows) == 0:
