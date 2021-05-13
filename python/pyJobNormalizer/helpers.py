@@ -22,7 +22,7 @@ import json
 import csv
 
 import docopt
-from util_log import logmsg
+from util_log import logmsg, logdebug
 
 docopt_func = getattr(docopt, 'docopt')
 
@@ -85,6 +85,18 @@ def strip_control_chars(val):
     stripped = lambda s: "".join(i for i in val if 31 < ord(i) < 127)
     return stripped
 
+
+def clean_text_for_matching(val):
+
+    from string import punctuation
+    # using exclist from above
+    ret = ''.join(x for x in val if x not in punctuation)
+
+    ret = ret.replace("  ", " ")
+    ret = ret.strip()
+
+    return ret
+
 def simpleuni(val):
     """
         unidecode(u'ko\u017eu\u0161\u010dek')
@@ -117,63 +129,13 @@ def write_json(filepath, data):
         data:
     """
     outf = codecs.open(filepath, 'w')
-
+    logdebug(f'Writing to json file {filepath}')
     json.dump(data, outf, indent=4, cls=SetEncoder)
     outf.close()
 
 def dump_var_to_json(data):
     return json.dumps(data, indent=4, cls=SetEncoder)
 
-
-def load_ucsv(filepath, fieldnames=None, delimiter=",", quotechar="\"", keyfield=None):
-    """
-    Args:
-        filepath:
-        fieldnames:
-        delimiter:
-        quotechar:
-        keyfield:
-    """
-    ret = {}
-
-    fp = codecs.open(filepath, mode='r')
-
-    dialect = csv.Sniffer().sniff(fp.read(1024))
-    fp.seek(0)
-
-    has_header = csv.Sniffer().has_header(fp.read(1024))
-    fp.seek(0)
-
-    if has_header is True and fieldnames is None:
-        header_line = fp.readline()
-        fp.seek(0)
-        fieldnames = header_line.split(dialect.delimiter)
-
-    csv_reader = csv.DictReader(fp, dialect=dialect, delimiter=delimiter, quotechar=quotechar,
-                                       fieldnames=fieldnames)
-
-    if fieldnames is None:
-        fieldnames = []
-        ncount = 0
-        for n in csv_reader.unicode_fieldnames:
-            fieldnames.append(f'Field_{ncount}')
-            ncount = ncount + 1
-
-        csv_reader.unicode_fieldnames = fieldnames
-
-    # skip the header row
-    if has_header is True:
-        next(fp)
-
-    nrow = 0
-    for row in csv_reader:
-        if keyfield:
-            ret[row[keyfield]] = row
-        else:
-            ret[nrow] = row
-        nrow = nrow + 1
-
-    return ret
 
 
 def loadcsv(csvfilename, rowkeyname=None):
@@ -185,7 +147,7 @@ def loadcsv(csvfilename, rowkeyname=None):
     import os
 
 
-    logmsg(f'Loading {csvfilename}...')
+    logdebug(f'Loading {csvfilename}...')
     from io import open
     csv_fp = open(csvfilename, 'r')
     dict_records = {}
@@ -205,9 +167,43 @@ def loadcsv(csvfilename, rowkeyname=None):
         print(err)
         pass
 
-    logmsg(f'Loaded {len(dict_records)} rows from {csvfilename}')
+    logdebug(f'Loaded {len(dict_records)} rows from {csvfilename}')
 
     return {'fieldnames': fields, 'dict': dict_records}
+
+def load_csv_data(csvfilename, fields=None):
+    """
+    Args:
+        csvfilename:
+        rowkeyname:
+    """
+    import os
+
+
+    logmsg(f'Loading {csvfilename}...')
+    from io import open
+    csv_fp = open(csvfilename, 'r')
+    data = []
+
+    csv_reader = None
+    try:
+        with csv_fp:
+            csv_reader = csv.DictReader(csv_fp, fieldnames=fields, delimiter=",", quoting=csv.QUOTE_ALL)
+            fields = csv_reader.fieldnames
+            for row in csv_reader:
+                if list(row.values()) == fields:
+                    continue
+                if len(fields) == 1:
+                    data.append(row[fields[0]])
+                else:
+                    data.append(row)
+
+        logdebug(f'Loaded {len(data)} rows from {csvfilename}')
+        return data
+
+    except Exception as err:
+        print(err)
+        pass
 
 
 def writedicttocsv(csvfilename, data, keys=None):
@@ -217,7 +213,7 @@ def writedicttocsv(csvfilename, data, keys=None):
         data:
         keys:
     """
-    print(f'Writing {len(data)} rows to file {csvfilename}...')
+    logdebug(f'Writing {len(data)} rows to file {csvfilename}...')
 
     if keys is None:
         itemkey = list(data)[0]

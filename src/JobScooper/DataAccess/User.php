@@ -26,6 +26,7 @@ use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Map\TableMap;
 use JobScooper\DataAccess\Map\UserSearchPairTableMap;
 use Propel\Runtime\Propel;
+use function JBZoo\Utils\int;
 
 /**
  * Skeleton subclass for representing a row from the 'user' table.
@@ -252,6 +253,17 @@ class User extends BaseUser
         }
         return $verifiedInputFiles;
 	}
+
+    public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
+    {
+        $arrUser = parent::toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, $includeForeignObjects);
+        if(array_key_exists('InputFilesJson', $arrUser) and strlen($arrUser['InputFilesJson']) > 0) {
+            $arrFiles = json_decode($arrUser['InputFilesJson'], True, flags: JSON_OBJECT_AS_ARRAY);
+            $arrUser['inputfiles'] = $arrFiles;
+        }
+
+        return $arrUser;
+    }
 
     /**
      * @param array $arrUserFacts

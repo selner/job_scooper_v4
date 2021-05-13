@@ -19,3 +19,6 @@ def getLogger():
 def logmsg(msg):
     logurulogger.log("INFO", msg)
 
+def logdebug(msg):
+    logurulogger.debug("INFO", msg)
+

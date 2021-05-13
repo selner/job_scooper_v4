@@ -17,13 +17,17 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from helpers import load_json, write_json
+
+from helpers import load_json, write_json, load_csv_data, clean_text_for_matching
 
 from task_tokenize_jobtitles import Tokenizer
 
-JSON_KEY_JOBMATCHES = u'job_matches'
-JSON_KEY_POS_KEYWORDS = u'SearchKeywords'
-JSON_KEY_NEG_KEYWORDS = u'negative_title_keywords'
+JSON_KEY_JOBMATCHES = 'job_matches'
+JSON_KEY_POS_KEYWORDS = 'SearchKeywords'
+JSON_KEY_NEG_KEYWORDS = 'negative_title_keywords'
+JSON_KEY_NEG_REGEX = 'negative_title_regex'
+FILEKEY_NEG_TITLE_REGEX = 'negative_title_keywords'
+FILEKEY_NEG_TITLE_REGEX_FIELD = 'matches_regex'
 JSON_KEY_USER = u'user'
 
 from mixin_database import DatabaseMixin
@@ -33,6 +37,8 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
     _outputfile = None
     keywords = {}
     negative_keywords = {}
+    negative_regex = {}
+
     jobs = {}
     user_id = None
     df_job_tokens = None
@@ -55,7 +61,32 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
     def input_data(self):
         if not self._input_data:
             self._input_data = load_json(self._inputfile)
+
         return self._input_data
+
+    @property
+    def user(self):
+        if 'user' in self._input_data:
+            return self._input_data['user']
+
+        return None
+
+    @property
+    def userfiles(self):
+        if self.user and 'inputfiles' in self.user:
+            return self.user['inputfiles']
+
+        return None
+
+    def load_user_neg_regex(self):
+        if self.userfiles and FILEKEY_NEG_TITLE_REGEX in self.userfiles:
+            for userfile in self.userfiles[FILEKEY_NEG_TITLE_REGEX].values():
+                negwords = load_csv_data(userfile, [FILEKEY_NEG_TITLE_REGEX_FIELD])
+                negdict = dict(zip(negwords, negwords))
+
+                self.negative_regex.update(negdict)
+
+            self.log(f'Loaded {len(self.negative_regex.keys())} negative title regex values for user.')
 
     @property
     def tokenizer(self):
@@ -100,7 +131,8 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
         return {
             JSON_KEY_JOBMATCHES: self.jobs,
             JSON_KEY_POS_KEYWORDS: self.keywords,
-            JSON_KEY_NEG_KEYWORDS: self.negative_keywords
+            JSON_KEY_NEG_KEYWORDS: self.negative_keywords,
+            JSON_KEY_NEG_REGEX: self.negative_regex
         }
 
     def export_results(self):
@@ -111,16 +143,20 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
 
     def load_jobs(self):
 
-        if self.input_data:
-            if isinstance(self.input_data, dict):
-                if (JSON_KEY_JOBMATCHES in self.input_data and isinstance(self.input_data[JSON_KEY_JOBMATCHES],
-                                                                          dict) and len(
-                        self.input_data[JSON_KEY_JOBMATCHES]) > 0):
-                    self.jobs = self.input_data[JSON_KEY_JOBMATCHES]
-                    self.log(f'Loaded {len(self.input_data[JSON_KEY_JOBMATCHES])} jobs for matching.')
+        if (
+            self.input_data
+            and isinstance(self.input_data, dict)
+            and (
+                JSON_KEY_JOBMATCHES in self.input_data
+                and isinstance(self.input_data[JSON_KEY_JOBMATCHES], dict)
+                and len(self.input_data[JSON_KEY_JOBMATCHES]) > 0
+            )
+        ):
+            self.jobs = self.input_data[JSON_KEY_JOBMATCHES]
+            self.log(f'Loaded {len(self.input_data[JSON_KEY_JOBMATCHES])} jobs for matching.')
 
-                    tokenizer = Tokenizer()
-                    self.jobs = tokenizer.batch_tokenize_strings(self.jobs, u'Title', u'TitleTokens', u'set', maxlength=200)
+            tokenizer = Tokenizer()
+            self.jobs = tokenizer.batch_tokenize_strings(self.jobs, u'Title', u'TitleTokens', u'set', maxlength=200)
 
     @staticmethod
     def get_unique_keywd_set(keywords):
@@ -186,7 +222,9 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
                 self.jobs[jobid][key_result] = matched_toks
                 nmatched += 1
             else:
-                self.jobs[jobid][key_result] = None
+                if key_result in self.jobs[jobid]:
+                    del self.jobs[jobid][key_result]
+
                 nnotmatched += 1
         self.log(f'{key_source} match results:  {nmatched}/{len(self.jobs)} matched, {nnotmatched}/{len(self.jobs)} not matched')
 
@@ -198,9 +236,35 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
     def mark_negative_matches(self):
         self.log(f'Marking jobs that match {len(self.negative_keywords)} negative title keywords...')
         self.set_keyword_matches(self.negative_keywords, "TitleTokens", "BadJobTitleKeywordMatches")
+        if self.negative_regex:
+            self.log(f'Marking jobs that match {len(self.negative_regex)} negative title regex...')
+            matchstring = None
+            for match in self.negative_regex:
+                if matchstring:
+                    matchstring = f'({match})|' + matchstring
+                else:
+                    matchstring = f'({match})'
+            nmatched = 0
+            import re
+            renegkwd = re.compile(matchstring, re.IGNORECASE)
+
+            for jobid in self.jobs:
+                if 'Title' in self.jobs[jobid] and self.jobs[jobid]['Title']:
+                    titleval = clean_text_for_matching(self.jobs[jobid]['Title']).lower()
+
+                    negmatches = renegkwd.findall(titleval)
+                    if negmatches and len(negmatches) > 0:
+                        badmatches = [grp for grp in negmatches[0] if grp]
+                        if badmatches:
+                            self.jobs[jobid]['BadJobTitleRegexMatches'] = badmatches
+                        nmatched += 1
+
+            self.log(f'Found {nmatched} jobs that matched negative title regex strings.')
 
     def load_keywords(self):
         outdata = None
+
+        self.load_user_neg_regex()
 
         if JSON_KEY_USER in self.input_data and 'UserId' in self.input_data[JSON_KEY_USER]:
             self.user_id = self.input_data[JSON_KEY_USER]['UserId']
@@ -217,7 +281,7 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
 
                 self.keywords = outdata
 
-        if JSON_KEY_NEG_KEYWORDS in self.input_data:
+        if JSON_KEY_NEG_KEYWORDS in self.input_data and len(self.input_data[JSON_KEY_NEG_KEYWORDS]) > 0:
             for kwdkey in self.input_data[JSON_KEY_NEG_KEYWORDS]:
                 self.negative_keywords[kwdkey] = {
                     'key': kwdkey,

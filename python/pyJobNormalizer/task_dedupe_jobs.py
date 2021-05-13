@@ -17,12 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-import pandas
-from datetime import *
-from helpers import write_json, load_ucsv, load_json
-from util_tokenize import Tokenizer
 from mixin_database import DatabaseMixin
-from collections import OrderedDict
 
 
 class TaskDedupeJobPosting(DatabaseMixin):

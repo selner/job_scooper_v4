@@ -33,7 +33,7 @@ PLACE_DETAIL_GEOCODE_MAPPING = {
     "latitude": "latitude",
     "longitude": "longitude"
 }
-from helpers import simpleuni
+from helpers import simpleuni, clean_text_for_matching
 
 
 class FindPlacesFromDBLocationsTask(DatabaseMixin):
@@ -140,11 +140,10 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
             """
 
         result = self.fetch_all_from_query(querysql)
-        locs_needing_setting = set(
-            [l["Location"] for l in result if
-             l["Location"] and l["Location"] in self._location_mapping.keys()])
+        locs_needing_setting = {l["Location"] for l in result if
+                 l["Location"] and l["Location"] in self._location_mapping.keys()}
 
-        if len(locs_needing_setting) > 0:
+        if locs_needing_setting:
             self._update_missing_db_known_locs(locs_needing_setting)
 
         locs_needing_lookup = []
@@ -163,17 +162,12 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 else:
                     self.log(f'Skipping invalid location combination value {l["Location"]}')
 
-        if len(locs_needing_lookup) > 0:
+        if locs_needing_lookup:
             self._lookup_unknown_locations(locs_needing_lookup, geocode_server)
 
     def cleanLocationString(self, val):
 
-        from string import punctuation
-
-        # using exclist from above
-        ret = ''.join(x for x in val if x not in punctuation)
-
-        ret = ret.replace("  ", " ")
+        ret = clean_text_for_matching(val)
 
         nonlocwords = {"Remote", "Based"}
         for nlw in nonlocwords:
@@ -181,17 +175,13 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         import re
         words = re.split(r'(\b)', ret)
-        upwords = set([str(l).upper() for l in words])
+        upwords = {str(l).upper() for l in words}
 
         statematches = upwords.intersection(self._upperStates)
         if statematches:
             for upstate in statematches:
                 state = self._upperStates[upstate]
-                if ret == state:
-                    ret = state + " US"
-                else:
-                    ret = ret.replace(state, STATECODES[state])
-
+                ret = state + " US" if ret == state else ret.replace(state, STATECODES[state])
         ret = ret.strip()
 
         return ret

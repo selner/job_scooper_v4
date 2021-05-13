@@ -333,8 +333,19 @@ class JobsAutoMarker
                 {
                 	$jobsToUpdate = array_intersect_key($collJobsList->toKeyIndex('UserJobMatchId'), $arrMatchRecs);
                     foreach ($jobsToUpdate as $jobId => $jobRecord) {
-                        $jobRecord->setGoodJobTitleKeywordMatches($arrMatchRecs[$jobId]['GoodJobTitleKeywordMatches']);
-                        $jobRecord->setBadJobTitleKeywordMatches($arrMatchRecs[$jobId]['BadJobTitleKeywordMatches']);
+                        $badkwds = array();
+                        if(array_key_exists('GoodJobTitleKeywordMatches', $arrMatchRecs[$jobId]) &&  !is_empty_value($arrMatchRecs[$jobId]['GoodJobTitleKeywordMatches'])) {
+                            $jobRecord->setGoodJobTitleKeywordMatches($arrMatchRecs[$jobId]['GoodJobTitleKeywordMatches']);
+                        }
+                        if(array_key_exists('BadJobTitleRegexMatches', $arrMatchRecs[$jobId]) &&  !is_empty_value($arrMatchRecs[$jobId]['BadJobTitleRegexMatches'])) {
+                            $badkwds =  array_merge($badkwds, $arrMatchRecs[$jobId]['BadJobTitleRegexMatches']);
+                        }
+                        if(array_key_exists('BadJobTitleKeywordMatches', $arrMatchRecs[$jobId]) && !is_empty_value($arrMatchRecs[$jobId]['BadJobTitleKeywordMatches'])) {
+                            $badkwds = array_merge($badkwds, $arrMatchRecs[$jobId]['BadJobTitleKeywordMatches']);
+                        }
+                        if (!is_empty_value($badkwds)) {
+                            $jobRecord->setBadJobTitleKeywordMatches($badkwds);
+                        }
 
                         $jobRecord->save();
                         $retUJMIds[] = $jobId;
