@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-2021 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,13 +13,14 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-###########################################################################
+#
+############################################################################
 import urllib.parse
 import pymysql
 
 from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
-from util_log import getLogger
+from .log import getLogger
 
 ARRAY_JOIN_TOKEN = "_||_"
 from logging import INFO, DEBUG, WARNING, ERROR, CRITICAL
@@ -48,7 +46,7 @@ class DatabaseMixin:
     def log(self, msg, level=INFO):
         self._logger.log(level, msg)
 
-    def handle_error(self, err, msg=None):
+    def handle_error(self, err, msg=""):
         if msg and len(msg) > 0:
             self._logger.error(msg, exc_info=1)
         else:

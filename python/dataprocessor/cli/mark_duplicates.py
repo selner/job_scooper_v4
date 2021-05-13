@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-2021 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,16 +13,17 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-###########################################################################
-from task_dedupe_jobs import TaskDedupeJobPosting
-from helpers import docopt_ext, COMMON_OPTIONS
-from util_log import logmsg
+#
+############################################################################
+from dataprocessor.tasks.dedupe_jobs import TaskDedupeJobPosting
+from dataprocessor.utils.doctoptext import docopt_ext, COMMON_OPTIONS
+from dataprocessor.utils.log  import logmsg
 
 
 cli_usage = """
 Usage:
-  cmd_exclude_duplicate_matches.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
-  cmd_exclude_duplicate_matches.py --version
+  {} (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
+  {} --version
   
 Options:
   -o <file>, --output <file>    output JSON file with ID pairs of duplicate listings 
@@ -33,13 +31,12 @@ Options:
 """ + COMMON_OPTIONS
 
 
-
 if __name__ == '__main__':
     arguments = docopt_ext(cli_usage, version='0.1.1rc', filename=__file__)
 
     try:
         matcher = TaskDedupeJobPosting(**arguments)
-        matcher.update_jobmatch_exclusions()
+        matcher.dedupe_jobs()
     except Exception as ex:
         logmsg(f'Unable to deduplicate job postings: {ex}')
         raise ex

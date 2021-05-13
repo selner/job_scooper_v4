@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-2021 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,9 +13,10 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-###########################################################################
-from mixin_database import DatabaseMixin
-from task_find_nearby_locations import TaskFindNearbyGeolocationsFromDb
+#
+############################################################################
+from dataprocessor.utils.mixin_database import DatabaseMixin
+from dataprocessor.tasks.find_nearby_locations import TaskFindNearbyGeolocationsFromDb
 
 
 class TaskMarkOutOfAreaMatches(DatabaseMixin):
@@ -77,7 +75,7 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
             locid = geolocids.pop()
             geoloc = findtask.get_geolocation(locid)
             where_clause = findtask.get_nearby_locations_query(geoloc, radius, columns=["geolocation_id"])
-        else:
+        elif len(geolocids) > 1:
             for locid in geolocids:
                 geoloc = findtask.get_geolocation(locid)
                 subquery = findtask.get_nearby_locations_query(geoloc, radius, columns=["geolocation_id"])
@@ -116,5 +114,5 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         #
         #  print out a last summary line with the results for logging by the original calling process
         #
-        self.log(f'{count_in_area} user job matches marked in {self._userid}\'s search areas; {count_out_area} matches marked out of area.')
+        self.log(f'{count_in_area} user job matches marked in userid {self._userid}\'s search areas; {count_out_area} matches marked out of area.')
 

@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-2021 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,15 +13,16 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-###########################################################################
-from task_skip_nontitle_matches import TaskMarkNonMatchesAsSkipSend
-from helpers import docopt_ext, COMMON_OPTIONS
-from util_log import logmsg
+#
+############################################################################
+from dataprocessor.tasks.skip_nontitle_matches import TaskMarkNonMatchesAsSkipSend
+from dataprocessor.utils.doctoptext import docopt_ext, COMMON_OPTIONS
+from dataprocessor.utils.log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_mark_skipsend.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
-  cmd_mark_skipsend.py --version
+  {} (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
+  {} --version
   
 Options:
 """ + COMMON_OPTIONS

@@ -77,7 +77,7 @@ class JobsAutoMarker
 
             try {
                 $this->_callPythonCmd(
-                    $filename = "cmd_set_out_of_area.py",
+                    $filename = "set_out_of_area.py",
                     $descr = "{$userFacts['UserSlug']}:  Marking in/out of search areas...",
                     $extraParams = array( '--jobuserid' => $userFacts['UserId'])
                 );
@@ -118,7 +118,7 @@ class JobsAutoMarker
 
         try {
             $this->_callPythonCmd(
-                $filename = "cmd_exclude_duplicate_matches.py",
+                $filename = "exclude_duplicate_matches.py",
                 $descr = "excluding duplicate job posts"
             );
         }
@@ -129,7 +129,7 @@ class JobsAutoMarker
 
         try {
             $this->_callPythonCmd(
-                $filename = "cmd_mark_skipsend.py",
+                $filename = "mark_skipsend.py",
                 $descr = "marking job matches for user notification"
             );
         }
@@ -186,7 +186,7 @@ class JobsAutoMarker
         startLogSection($descr);
 
         try {
-            $runFile = "pyJobNormalizer" . DIRECTORY_SEPARATOR . "{$filename}";
+            $runFile = "dataprocessor" . DIRECTORY_SEPARATOR . "cli" . DIRECTORY_SEPARATOR . "$filename";
 
             $resultcode = PythonRunner::execScript($runFile, $extraParams, true);
             LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
@@ -421,7 +421,7 @@ class JobsAutoMarker
             $resultsfile = generateOutputFileName("{$basefile}_results", 'json', true, 'debug');
 
             $this->_callPythonCmd(
-                filename: "cmd_match_titles_to_keywords.py",
+                filename: "match_titles_to_keywords.py",
                 descr: "matching job titles for user",
                 extraParams: [
                     '-i' => $sourcefile,

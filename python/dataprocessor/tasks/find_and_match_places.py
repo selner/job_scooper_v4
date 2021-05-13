@@ -1,6 +1,6 @@
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-2021 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -13,12 +13,13 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-###########################################################################
+#
+############################################################################
 from collections import OrderedDict
 
-from mixin_database import DatabaseMixin
+from dataprocessor.utils.mixin_database import DatabaseMixin
 import requests
-from util_tokenize import STATES, STATECODES
+from dataprocessor.utils.usstates import STATES, STATECODES
 
 MAX_RETRIES = 0
 PLACE_DETAIL_GEOCODE_MAPPING = {
@@ -33,7 +34,7 @@ PLACE_DETAIL_GEOCODE_MAPPING = {
     "latitude": "latitude",
     "longitude": "longitude"
 }
-from helpers import simpleuni
+from dataprocessor.utils.data import simpleuni
 
 
 class FindPlacesFromDBLocationsTask(DatabaseMixin):

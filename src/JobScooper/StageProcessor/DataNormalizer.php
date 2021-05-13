@@ -77,7 +77,7 @@ class DataNormalizer
     {
         try {
             startLogSection('Calling python to set the title tokens for new job postings...');
-            $runFile = 'pyJobNormalizer/cmd_set_title_tokens.py';
+            $runFile = 'dataprocessor/cli/set_title_tokens.py';
 
             $resultcode = PythonRunner::execScript($runFile, null, true);
             LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
@@ -95,7 +95,7 @@ class DataNormalizer
     {
         try {
             startLogSection('Calling python to dedupe new job postings...');
-            $runFile = 'pyJobNormalizer/cmd_mark_duplicates.py';
+            $runFile = 'dataprocessor/cli/mark_duplicates.py';
 
             $resultcode = PythonRunner::execScript($runFile, null, true);
             LogMessage("Python command call '$runFile' finished with result: '$resultcode'");
@@ -117,7 +117,7 @@ class DataNormalizer
     {
         try {
             startLogSection('Calling python to find & map missing locations...');
-            $runFile = 'pyJobNormalizer/cmd_set_geolocations.py';
+            $runFile = 'dataprocessor/cli/set_geolocations.py';
             $params = [
                 '--server' => Settings::getValue('geocodeapi_server'),
             ];

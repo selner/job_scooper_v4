@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-2021 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,17 +13,9 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-###########################################################################
-import base64
-import os
+#
+############################################################################
 
 
-def generate_base64_for_image(filepath):
-
-    fpath = os.path.abspath(filepath)
-    data = base64.b64encode(open(fpath, 'rb').read())
-    return "data:image/png;base64,%s" % data.decode()
-
-
-
+__all__ = ['templates']
 

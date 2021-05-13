@@ -202,7 +202,7 @@ class StageManager
                                     startLogSection("Cloning new jobpostings to other users for {$jobsiteKey}");
                                     foreach ($usersForRun as $userFacts) {
 
-                                        $runFile = 'pyJobNormalizer/cmd_add_newpostings_to_user.py';
+                                        $runFile = 'dataprocessor/cli/add_newpostings_to_user.py';
                                         $params = [
                                             '--jobuserid' => $userFacts['UserId'],
                                             '--jobsite' => $jobsiteKey

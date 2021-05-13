@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-2021 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,17 +13,18 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-###########################################################################
-from helpers import load_json, write_json
+#
+############################################################################
+from dataprocessor.utils.data import load_json, write_json
 
-from task_tokenize_jobtitles import Tokenizer
+from dataprocessor.utils.tokenizer import Tokenizer
 
 JSON_KEY_JOBMATCHES = u'job_matches'
 JSON_KEY_POS_KEYWORDS = u'SearchKeywords'
 JSON_KEY_NEG_KEYWORDS = u'negative_title_keywords'
 JSON_KEY_USER = u'user'
 
-from mixin_database import DatabaseMixin
+from dataprocessor.utils.mixin_database import DatabaseMixin
 
 class TaskMatchJobsToKeywords(DatabaseMixin):
     _inputfile = None
@@ -228,67 +226,3 @@ class TaskMatchJobsToKeywords(DatabaseMixin):
             self.negative_keywords = data
 
         self.log(f'Loaded {len(self.keywords)} positive keywords and {len(self.negative_keywords)} negative keywords for matching.')
-
-# class TaskMatchJobTitlesFromDB(TaskMatchJobsToKeywords, DatabaseMixin)
-#
-#     def __init__(self, **kwargs):
-#         self.init_connection(**kwargs)
-#         TaskMatchJobsToKeywords.__init__(**kwargs)
-#
-#         if '_inputfile' in kwargs:
-#             self._inputfile = kwargs['inputfile']
-#         else:
-#             raise Exception("No input file specified for processing.")
-#
-#         print("Loading job list to match...")
-#         self.load_jobs()
-#
-#         self.mark_title_matches()
-#
-#     def load_jobs(self):
-#         backwardsdate = datetime.now() - timedelta(days=3)
-#
-#         querysql = """
-#                 SELECT
-#                     user_job_match.user_job_match_id,
-#                     user_job_match.jobposting_id,
-#                     user_job_match.is_job_match,
-#                     user_job_match.is_excluded,
-#                     user_job_match.out_of_user_area,
-#                     user_job_match.matched_user_keywords,
-#                     user_job_match.matched_negative_title_keywords,
-#                     user_job_match.matched_negative_company_keywords,
-#                     user_job_match.user_notification_state,
-#                     user_job_match.first_matched_at,
-#                     jobposting.jobposting_id,
-#                     jobposting.title,
-#                     jobposting.location,
-#                     jobposting.last_updated_at,
-#                     jobposting.job_posted_date,
-#                     jobposting.first_seen_at,
-#                     jobposting.location_display_value,
-#                     jobposting.geolocation_id,
-#                     jobposting.duplicates_posting_id,
-#                 FROM user_job_match
-#                 INNER JOIN jobposting ON (user_job_match.jobposting_id=jobposting.jobposting_id)
-#                 WHERE user_job_match.user_notification_state={}
-#                     AND jobposting.duplicates_posting_id is NULL
-#                     AND user_job_match.first_matched_at >= {}
-#                 AND user_job_match.user_id={}
-#
-#                   SELECT
-#                      jobposting_id as `JobPostingId`,
-#                      key_company_and_title as `KeyCompanyTitle`,
-#                      title as `Title`,
-#                      company as `Company`,
-#                      geolocation_id as `GeoLocationId`,
-#                      duplicates_posting_id as `isDuplicateOf`
-#                  FROM jobposting
-#                  WHERE job_posted_date >= '{}' """.format(backwardsdate.strftime("%Y-%m-%d"))
-#
-#         result = self.fetch_all_from_query(querysql)
-#         jobsdata = {val['JobPostingId']: val for val in result}
-#
-#         self.prepare_data(jobsdata)
-#
-#     def update_database(self):

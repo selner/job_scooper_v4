@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-2021 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,28 +13,28 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-###########################################################################
-from helpers import docopt_ext, COMMON_OPTIONS
-from task_match_titles import TaskMatchJobsToKeywords
-from util_log import logmsg
+#
+############################################################################
+from dataprocessor.tasks.add_newposts_to_user import TaskAddNewMatchesToUser
+from dataprocessor.utils.doctoptext import docopt_ext, COMMON_OPTIONS
 
+from dataprocessor.utils.log import logmsg
 
 cli_usage = """
 Usage:
-  cmd_match_titles_to_keywords.py -i <file> -o <file> (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
-  cmd_match_titles_to_keywords.py --version
-
+  {} (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>) --jobuserid <userid> --jobsite <jobsite>
+  {} --version
+  
 Options:
-  -o <file>, --output <file> output file with job match results 
-  -i <file>, --input <file> input JSON data file with jobs and keywords
+  --jobuserid <userid>     user_id for user to add new matches
+  -j <jobsite> --jobsite <jobsite>   jobsitekey for site to add listings from
 """ + COMMON_OPTIONS
 
 if __name__ == '__main__':
     args = docopt_ext(cli_usage, version='0.1.1rc', filename=__file__)
 
     try:
-        matcher = TaskMatchJobsToKeywords(**args)
-        matcher.export_results()
+        matcher = TaskAddNewMatchesToUser(**args)
     except Exception as ex:
-        logmsg(f'Unable to match title keywords: {ex}')
+        logmsg(f'Unable to add job matches to user: {ex}')
         raise ex

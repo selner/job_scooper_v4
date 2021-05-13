@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-2021 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,15 +13,20 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-###########################################################################
-from util_log import logmsg
-from helpers import docopt_ext, COMMON_OPTIONS
-from task_tokenize_jobtitles import TaskAddTitleTokens
+#
+############################################################################
+print(f'modules: {dir()}')
+
+from dataprocessor.utils.doctoptext import docopt_ext, COMMON_OPTIONS
+from dataprocessor.tasks.tokenize_jobtitles import TaskAddTitleTokens
+from dataprocessor.utils.log import logmsg
+
+print(f'modules: {dir()}')
 
 cli_usage = """
 Usage:
-  cmd_update_title_tokens.py (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
-  cmd_update_title_tokens.py --version
+  {} (-c <dbstring> | --dsn <dbstring> | --host <hostname> --port <portid> --database <dbstring> --user <userstring> --password <userpass>)
+  {} --version
 
 Options:
 """ + COMMON_OPTIONS
