@@ -257,8 +257,9 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         except requests.exceptions.Timeout as t:
             if retries < MAX_RETRIES:
-                self.log(
+                self._logger.warning(
                     f'Warning:  API request {url} timed out on retry #.   Retrying {MAX_RETRIES - retries} more times...')
+
                 retries += 1
                 kwargs['retry_count'] = retries
                 return self.call_geocode_api(**kwargs)
