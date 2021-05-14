@@ -306,7 +306,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                             if ($nPage === 1 && $this->isBitFlagSet(C__JOB_PAGECOUNT_OMIT_ON_FIRST_PAGE)) {
                                 $replaceVal = '';
                             } else {
-                                $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], $values['page_index']);
+                                $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], ['page_index'=>$values['page_index']]);
                             }
                         } catch (\Throwable $t) {
                             $this->log("Failed to translate ***PAGE_NUMBER*** to a value. Reason:  $t");
@@ -326,12 +326,12 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                         break;
 
                     case "ITEM_NUMBER":
-                        $ret = $this->_callPluginMethodIfExists("getItemURLValue", $nItem);
+                        $ret = $this->_callPluginMethodIfExists("getItemURLValue", ['item_index'=>$values['item_index']]);
                         if ($ret !== false) {
                             $replaceVal = $ret;
                         }
                         else {
-                            $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], $values['item_index']);
+                            $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], ['item_index'=>$values['item_index']]);
                         }
                         break;
                 }
@@ -415,7 +415,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
         if(is_empty_value($param))
             return '';
 
-        return urlencode($param);
+        return $param;
     }
 
 
@@ -469,6 +469,11 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
         if ($this->isBitFlagSet(C__JOB_LOCATION_PARAMETER_SPACES_AS_PLUSES)) {
             $strLocationValue = str_replace("%20", "+", $strLocationValue);
             $strLocationValue = str_replace(" ", "+", $strLocationValue);
+        }
+
+        if ($this->isBitFlagSet(C__JOB_LOCATION_PARAMETER_SPACES_AS_DASHES)) {
+            $strLocationValue = str_replace("%20", "-", $strLocationValue);
+            $strLocationValue = str_replace(" ", "-", $strLocationValue);
         }
 
 

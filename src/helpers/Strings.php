@@ -346,7 +346,7 @@ function replaceTokensInString($formatString, $arrVariables)
     foreach ($arrVariables as $key => $value) {
         $strval = (string)$value;
         $needles = [ '{'.$key.'}', '{'.strtoupper($key).'}', '{'.strtolower($key).'}'];
-        $ret = str_replace($needles, $strval, $ret);
+        $ret = str_replace($needles, urlencode($strval), $ret);
     }
 
     return $ret;

@@ -938,7 +938,7 @@ JSCODE;
         }
 
         if (is_empty_value($item['JobSiteKey'])) {
-            $item['JobSiteKey'] = $this->JobSiteName;
+            $item['JobSiteKey'] = $this->JobSiteKey;
         }
 
         return $item;
