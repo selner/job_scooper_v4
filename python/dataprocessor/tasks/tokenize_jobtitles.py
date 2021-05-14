@@ -80,7 +80,7 @@ class TaskAddTitleTokens(DatabaseMixin):
                 if not ('title_tokens' in updated_jobs[key] and
                         updated_jobs[key]['title_tokens'] and
                         len(updated_jobs[key]['title_tokens']) > 0):
-                    self.log(f'Warning:  job {key} did not successfully generate the needed title tokens for title {updated_jobs[key]["title"]}')
+                    self._logger.warning(f'Job {key} did not successfully generate the needed title tokens for title {updated_jobs[key]["title"]}')
                 else:
                     row_refkey_titleval = "_".join(updated_jobs[key]['title_tokens'])
 
