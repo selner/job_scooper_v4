@@ -297,13 +297,13 @@ abstract class SitePlugin implements IJobSitePlugin
      * @throws Exception
      */
     private function _handleThrowable($t, $fmtLogMsg= null, $raise=true, $extraData=null) {
-        if($extraData == null) {
+        if ($extraData == null) {
             $extraData = array();
         }
         $this->log(($this->JobSiteKey . " threw an error or exception" . $fmtLogMsg != null ? $fmtLogMsg : ""), logLevel: Logger::ERROR, extras: $extraData, t: $t);
-        handleThrowable($t, $fmtLogMsg, raise: $raise, extraData: $extraData, log_topic:"plugin", exceptClass: JobSitePluginException::class);
+        handleThrowable($t, $fmtLogMsg, raise: $raise, extraData: $extraData, log_topic: "plugin", exceptClass: JobSitePluginException::class);
     }
- 
+
 
     /**
      * @throws \Exception
@@ -351,8 +351,8 @@ abstract class SitePlugin implements IJobSitePlugin
              *  but the user is currently missing from their potential job matches.
              */
             if ((strcasecmp($this->resultsFilterType, 'all-only') == 0) || (strcasecmp($this->resultsFilterType, 'all-by-location') == 0)) {
-            	try {
-            		$userFacts = User::getUserFactsById($search->getUserId());
+                try {
+                    $userFacts = User::getUserFactsById($search->getUserId());
 
                     $this->log("Checking for missing {$this->JobSiteKey} jobs for user {$userFacts['UserSlug']}.");
                     $dataExistingUserJobMatchIds = UserJobMatchQuery::create()
@@ -435,6 +435,7 @@ abstract class SitePlugin implements IJobSitePlugin
 
     protected $nMaxJobsToReturn = C_JOB_MAX_RESULTS_PER_SEARCH;
     protected $arrSearchReturnedJobs = array();
+    protected $InitialSearchFormPageUrl = null;
     protected $SearchUrlFormat = null;
     protected $JobPostingBaseUrl = null;
     protected $LocationType = null;
@@ -478,7 +479,7 @@ abstract class SitePlugin implements IJobSitePlugin
     {
     	if(null === $this->CountryCodes)
         {
-        	$this->CountryCodes = ['US']; // default all plugins to US if not specified
+            $this->CountryCodes = ['US']; // default all plugins to US if not specified
         }
 
         if (null !== $this->CountryCodes) {
@@ -594,12 +595,12 @@ JSCODE;
      * getJobFactsFromMicrodata
      *
      * @param SimpleHTMLHelper $objSimpHTML
-     * @param array            $item
+     * @param array $item
      *
      * @return array
      * @throws \Exception
      */
-    public function getJobFactsFromMicrodata($objSimpHTML, $item=array())
+    public function getJobFactsFromMicrodata($objSimpHTML, $item = array())
     {
         if (null === $objSimpHTML || !method_exists($objSimpHTML, 'find')) {
             return $item;
@@ -953,7 +954,7 @@ JSCODE;
         if ($secs <= 0) {
             $secs = 1000;
         }
-        
+
         $jsEscSelector = swapDoubleSingleQuotes($this->selectorMoreListings);
 
         $this->log("Clicking button [ {$jsEscSelector} ] to go to the next page of results...");
@@ -1002,7 +1003,7 @@ JSCODE;
      */
     private function addSearch($searchFacts)
     {
-    	$search = UserSearchSiteRunManager::getSearchRunObjFromFacts($searchFacts);
+        $search = UserSearchSiteRunManager::getSearchRunObjFromFacts($searchFacts);
 
         $search->setStartingUrlForSearch();
 
@@ -1026,7 +1027,7 @@ JSCODE;
 
 
     /**
-     * @param array $var  Array['current_value', 'parameter']   Paramter can be either a plain string or a regex pattern
+     * @param array $var Array['current_value', 'parameter']   Paramter can be either a plain string or a regex pattern
      *
      * @return int|null  Returns 0 for count if it matches; otherwise returns null for no match
      * @throws \Exception
@@ -1040,21 +1041,21 @@ JSCODE;
             throw new \InvalidArgumentException("Plugin {$this->JobSiteName} definition missing pattern match value for matchesNoResultsPattern callback.");
         }
 
-        if(is_empty_value($current_value) || !is_string($current_value)) {
-                return null;
+        if (is_empty_value($current_value) || !is_string($current_value)) {
+            return null;
         }
-        
-        if($match_string[0] !== '/' && $match_string[strlen($match_string)-1] !== '/' ) {
-        	$match_string = "/{$match_string}/";
+
+        if ($match_string[0] !== '/' && $match_string[strlen($match_string) - 1] !== '/') {
+            $match_string = "/{$match_string}/";
         }
 
         $match = preg_match(strtolower($match_string), strtolower($current_value));
         if ($match === 1) {
-	        return 0;
-	    }
-		if($match === false) {
-        	throw new Exception("Error matching no results string:  " . preg_last_error());
-		}
+            return 0;
+        }
+        if ($match === false) {
+            throw new Exception("Error matching no results string:  " . preg_last_error());
+        }
         return null;
     }
 
@@ -1066,8 +1067,8 @@ JSCODE;
      */
     public function hashValue($var)
     {
-        if(is_empty_value($var) || !is_string($var)) {
-                return null;
+        if (is_empty_value($var) || !is_string($var)) {
+            return null;
         }
 
         return md5($var);
@@ -1125,9 +1126,9 @@ JSCODE;
      */
     public function parseOneOrMoreLocations($var)
     {
-    	$current_val = $var['current_value'];
-    	$param = $var['parameter'];
-    	
+        $current_val = $var['current_value'];
+        $param = $var['parameter'];
+
         $reDelim = "[&,;\|~]|(\s+-+)";
         //		$reDelim = "[[:punct:]]+";
         if (!empty($param) && is_array($param)) {
@@ -1163,16 +1164,16 @@ JSCODE;
         $t = null;
 
         try {
-        	
-        	$searchpair = $searchDetails->getUserSearchPairFromUSSR();
-		    
-        	$loc = $searchpair->getGeoLocationFromUS();
-		    if (!is_empty_value($loc)) {
-		        Settings::setValue('active_search_location', $loc->toArray());
-		    }
 
-        	unset($searchpair);
-        	unset($loc);
+            $searchpair = $searchDetails->getUserSearchPairFromUSSR();
+
+            $loc = $searchpair->getGeoLocationFromUS();
+            if (!is_empty_value($loc)) {
+                Settings::setValue('active_search_location', $loc->toArray());
+            }
+
+            unset($searchpair);
+            unset($loc);
 
             // get the url for the first page/items in the results
             if ($this->_checkInvalidURL_($searchDetails, $searchDetails->getSearchStartUrl()) == self::VALUE_NOT_SUPPORTED) {
@@ -1184,7 +1185,7 @@ JSCODE;
                 $this->_getMyJobsForSearchFromRestAPI_($searchDetails);
             }
             elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_JOBSAPI__) {
-                    $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
+                $this->_getMyJobsForSearchFromJobsAPI_($searchDetails);
             } elseif ($this->pluginResultsType == C__JOB_SEARCH_RESULTS_TYPE_WEBPAGE__) {
                 $this->_getMyJobsForSearchFromWebpage_($searchDetails);
             } else {
@@ -1222,10 +1223,10 @@ JSCODE;
 
     /**
      * @param \JobScooper\DataAccess\UserSearchSiteRun $searchDetails
-     * @param null                                     $success
-     * @param null                                     $except
-     * @param bool                                     $runWasSkipped
-     * @param SimpleHTMLHelper                         $objPageHtml
+     * @param null $success
+     * @param null $except
+     * @param bool $runWasSkipped
+     * @param SimpleHTMLHelper $objPageHtml
      *
      * @throws \Propel\Runtime\Exception\PropelException
      * @throws \Exception
@@ -1253,9 +1254,9 @@ JSCODE;
      * @param UserSearchSiteRun &$searchDetails
      * @param string $filePath
      * @param string $strURL
-     * @param null   $optTimeout
-     * @param null   $referrer
-     * @param null   $cookies
+     * @param null $optTimeout
+     * @param null $referrer
+     * @param null $cookies
      *
      * @return \JobScooper\Utils\SimpleHtml\SimpleHTMLHelper|null
      * @throws \Exception
@@ -1387,7 +1388,7 @@ JSCODE;
                 }
                 $item['Url'] = $job->url;
 
-                $strCurrentJobIndex = cleanupSlugPart($this->JobSiteName) . cleanupSlugPart($item['JobSitePostId'], $replacement="_", $doNotLowercase=true);
+                $strCurrentJobIndex = cleanupSlugPart($this->JobSiteName) . cleanupSlugPart($item['JobSitePostId'], $replacement = "_", $doNotLowercase = true);
                 $arrPageJobsList[$strCurrentJobIndex] = $item;
                 $nItemCount += 1;
             }
@@ -1404,7 +1405,7 @@ JSCODE;
 
     /**
      * @param string $jscript
-     * @param bool   $wrap_in_func
+     * @param bool $wrap_in_func
      *
      * @return mixed
      * @throws \Exception
@@ -1500,7 +1501,7 @@ JSCODE;
     /**
      * @param                   $arrJobList
      * @param UserSearchSiteRun $searchDetails
-     * @param int               $nCountNewJobs Returns number of jobs that were new database records.
+     * @param int $nCountNewJobs Returns number of jobs that were new database records.
      *
      * @throws \Exception
      */
@@ -1530,24 +1531,24 @@ JSCODE;
             $jobSiteKey = $searchDetails->getJobSiteKey();
 
             foreach ($arrJobList as $k => $v) {
-				try {
-					$jp = JobPostingQuery::create()
-						->filterByJobSiteKey($jobSiteKey)
-						->filterByJobSitePostId($v['JobSitePostId'])
-						->findOneOrCreate();
+                try {
+                    $jp = JobPostingQuery::create()
+                        ->filterByJobSiteKey($jobSiteKey)
+                        ->filterByJobSitePostId($v['JobSitePostId'])
+                        ->findOneOrCreate();
 
-					$jp->fromArray($v);
-					$jp->save();
-					$arrSavedJobList[$k] = $jp->toArray();
-				} catch (Throwable $t) {
-					$this->_handleThrowable($t, "Failed to save JobPosting: %s", false);
-					unset($arrJobList[$k]);
-				}
-		    }
-		    $arrSavedJobCols = array_child_columns($arrSavedJobList, ['JobPostingId', 'JobSitePostId', 'FirstSeenAt'], 'JobSitePostId');
-	        
+                    $jp->fromArray($v);
+                    $jp->save();
+                    $arrSavedJobList[$k] = $jp->toArray();
+                } catch (Throwable $t) {
+                    $this->_handleThrowable($t, "Failed to save JobPosting: %s", false);
+                    unset($arrJobList[$k]);
+                }
+            }
+            $arrSavedJobCols = array_child_columns($arrSavedJobList, ['JobPostingId', 'JobSitePostId', 'FirstSeenAt'], 'JobSitePostId');
+
             $this->arrSearchReturnedJobs[$siteRunKey] = array_merge($this->arrSearchReturnedJobs[$siteRunKey], $arrSavedJobCols);
-    
+
             $nCountNewJobs = \count($arrJobsToAdd);
         } catch (Throwable $t) {
             $this->_handleThrowable($t, 'Unable to save job search results to database.');
@@ -1569,40 +1570,40 @@ JSCODE;
         $conWrite = null;
         $arrUserMatches = null;
         $bulkUpsert = null;
-        
+
         try {
-	        $alreadyMatched = UserJobMatchQuery::create()
-	            ->filterByUserId($userId)
-	            ->filterByJobPostingId($arrJobIds, Criteria::IN)
-	            ->find()
-	            ->toKeyIndex('JobPostingId');
-	
-	        $arrTemp = array_combine($arrJobIds, $arrJobIds);
-	        if (!is_empty_value($alreadyMatched)) {
-	            $arrIdsToAdd = array_diff($arrJobIds, array_keys($alreadyMatched));
-	            $arrTemp = array_combine($arrIdsToAdd, $arrIdsToAdd);
-	        }
-	
-	        if (!is_empty_value($arrTemp)) {
-	            $arrUserMatches = array_map(function ($value) use ($userId) {
-	                return array('JobPostingId' => $value, 'UserId' => $userId);
-	            }, $arrTemp);
-	            $conWrite = Propel::getServiceContainer()->getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
-	
-	            $bulkUpsert = new ObjectCollection();
-	            $bulkUpsert->setModel(UserJobMatch::class);
-	            $bulkUpsert->fromArray($arrUserMatches);
-	            $bulkUpsert->save($conWrite);
-	        }
+            $alreadyMatched = UserJobMatchQuery::create()
+                ->filterByUserId($userId)
+                ->filterByJobPostingId($arrJobIds, Criteria::IN)
+                ->find()
+                ->toKeyIndex('JobPostingId');
+
+            $arrTemp = array_combine($arrJobIds, $arrJobIds);
+            if (!is_empty_value($alreadyMatched)) {
+                $arrIdsToAdd = array_diff($arrJobIds, array_keys($alreadyMatched));
+                $arrTemp = array_combine($arrIdsToAdd, $arrIdsToAdd);
+            }
+
+            if (!is_empty_value($arrTemp)) {
+                $arrUserMatches = array_map(function ($value) use ($userId) {
+                    return array('JobPostingId' => $value, 'UserId' => $userId);
+                }, $arrTemp);
+                $conWrite = Propel::getServiceContainer()->getWriteConnection(UserJobMatchTableMap::DATABASE_NAME);
+
+                $bulkUpsert = new ObjectCollection();
+                $bulkUpsert->setModel(UserJobMatch::class);
+                $bulkUpsert->fromArray($arrUserMatches);
+                $bulkUpsert->save($conWrite);
+            }
         }
         catch (Throwable $t) {
-        	$this->_handleThrowable($t);
+            $this->_handleThrowable($t);
         }
         finally {
             $alreadyMatched = null;
-		    $conWrite = null;
-		    $arrUserMatches = null;
-		    $bulkUpsert = null;
+            $conWrite = null;
+            $arrUserMatches = null;
+            $bulkUpsert = null;
         }
     }
 
@@ -1615,7 +1616,7 @@ JSCODE;
     private function _addJobMatchesToUser(UserSearchSiteRun $searchDetails)
     {
         if (array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs) && null !== $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()] && is_array($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()])) {
-        	$arrNewJobIds = array_column($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()], null, 'JobPostingId');
+            $arrNewJobIds = array_column($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()], null, 'JobPostingId');
 
             $this->_addJobMatchIdsToUser(array_keys($arrNewJobIds), $searchDetails);
         }
@@ -1631,44 +1632,44 @@ JSCODE;
      * @return mixed|null
      * @throws \Exception
      */
-    protected function getAjaxWebPageCallResult($apiUri, $searchDetails, $hostPageUri=null, $useCurl = false)
+    protected function getAjaxWebPageCallResult($apiUri, $searchDetails, $hostPageUri = null, $useCurl = false)
     {
         $data = null;
-    	if($useCurl == true) {
-		    $this->log("Downloading JSON data from {$apiUri} using curl ...");
-	        try {
-	            $curl = new CurlWrapper();
-	            $response = $curl->cURL($apiUri);
-	            if($response['http_code'] < 300 && array_key_exists('body',$response)) {
-	                $response = $response['body'];
-    	        }
+        if ($useCurl == true) {
+            $this->log("Downloading JSON data from {$apiUri} using curl ...");
+            try {
+                $curl = new CurlWrapper();
+                $response = $curl->cURL($apiUri);
+                if ($response['http_code'] < 300 && array_key_exists('body', $response)) {
+                    $response = $response['body'];
+                }
             } catch (Throwable $t) {
                 $this->_handleThrowable($t, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
             }
         }
     	else
         {
-    			
-	        if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && null === $this->selenium) {
-	            try {
-	                $this->selenium = new SeleniumManager();
-	            } catch (Throwable $t) {
-	                $this->_handleThrowable($t, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
-	            }
-	        }
+
+            if ($this->isBitFlagSet(C__JOB_USE_SELENIUM) && null === $this->selenium) {
+                try {
+                    $this->selenium = new SeleniumManager();
+                } catch (Throwable $t) {
+                    $this->_handleThrowable($t, "Unable to start Selenium to get jobs for plugin '" . $this->JobSiteName . "'", true);
+                }
+            }
             $response = null;
 
-	        try {
-	            $driver = $this->getActiveWebdriver();
-	            if(null === $hostPageUri) {
-	                $hostPageUri = $searchDetails->getSearchStartUrl();
-	            }
-	            $this->log("Getting host page for JSON query {$hostPageUri}");
-	            $driver->get($hostPageUri);
-	            $apiNodeId = 'jobs_api_data';
-	
-	            $this->log("Downloading JSON data from {$apiUri} using page at {$hostPageUri} ...");
-	
+            try {
+                $driver = $this->getActiveWebdriver();
+                if (null === $hostPageUri) {
+                    $hostPageUri = $searchDetails->getSearchStartUrl();
+                }
+                $this->log("Getting host page for JSON query {$hostPageUri}");
+                $driver->get($hostPageUri);
+                $apiNodeId = 'jobs_api_data';
+
+                $this->log("Downloading JSON data from {$apiUri} using page at {$hostPageUri} ...");
+
 	            $jsCode = /** @lang javascript */ <<<JSCODE
 				window.JSCOOP_API_RETURN = null;
 				var callback = null;
@@ -1732,31 +1733,31 @@ JSCODE;
 				nIntervalId = window.setInterval( checkDone, 150 ); // start polling
 
 JSCODE;
-	
-	            $this->log("Executing JavaScript: ".PHP_EOL ." {$jsCode}");
-	            //			$driver->manage()->timeouts()->setScriptTimeout(30);
-	            $driver->executeScript($jsCode);
-	
-	            $response = $driver->executeScript('return window.JSCOOP_API_RETURN;');
-	            if (is_empty_value($response)) {
-	                $simpHtml = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
-	                $node = $simpHtml->find("script#{$apiNodeId}");
-	                if (!empty($node)) {
-	                    $response = $node[0]->text();
-	                }
-	            }
-	        } catch (Throwable $t) {
-				$msg = "Failed to download JSON data from API call {$apiUri}.";
-	            if(null !== $response && null !== $response->error) {
-	                $msg = "$msg $response->error";
-	            }
-	            $this->_handleThrowable($t, "$msg  Error:  ", true);
-            }
-		}
 
-		try {
-            if(!is_empty_value($response)) {
-            	$data= json_decode($response);
+                $this->log("Executing JavaScript: " . PHP_EOL . " {$jsCode}");
+                //			$driver->manage()->timeouts()->setScriptTimeout(30);
+                $driver->executeScript($jsCode);
+
+                $response = $driver->executeScript('return window.JSCOOP_API_RETURN;');
+                if (is_empty_value($response)) {
+                    $simpHtml = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
+                    $node = $simpHtml->find("script#{$apiNodeId}");
+                    if (!empty($node)) {
+                        $response = $node[0]->text();
+                    }
+                }
+            } catch (Throwable $t) {
+                $msg = "Failed to download JSON data from API call {$apiUri}.";
+                if (null !== $response && null !== $response->error) {
+                    $msg = "$msg $response->error";
+                }
+                $this->_handleThrowable($t, "$msg  Error:  ", true);
+            }
+        }
+
+        try {
+            if (!is_empty_value($response)) {
+                $data = json_decode($response);
             }
         } catch (\Throwable $t) {
             $data = $response;
@@ -1770,14 +1771,14 @@ JSCODE;
      * @param array|null $extras
      * @param Throwable $t
      */
-    public function log($msg, $logLevel=\Monolog\Logger::INFO, array $extras=[], $t=null)
+    public function log($msg, $logLevel = \Monolog\Logger::INFO, array $extras = [], $t = null)
     {
-        if(is_null($extras) || !is_array($extras)) {
+        if (is_null($extras) || !is_array($extras)) {
             $extras = array();
         }
 
         $extras['jobsitekey'] = $this->JobSiteKey;
-        LogMessage($msg, $logLevel, $extras, $t, $log_topic='plugins');
+        LogMessage($msg, $logLevel, $extras, $t, $log_topic = 'plugins');
     }
 
 
@@ -1787,7 +1788,7 @@ JSCODE;
      * @throws \Exception
      * @return SimpleHTMLHelper
      */
-    protected function getSimpleHtmlDomFromSeleniumPage(UserSearchSiteRun $searchDetails, $url=null)
+    protected function getSimpleHtmlDomFromSeleniumPage(UserSearchSiteRun $searchDetails, $url = null)
     {
         $objSimpleHTML = null;
         try {
@@ -1799,22 +1800,29 @@ JSCODE;
             $this->log("... sleeping $this->additionalLoadDelaySeconds seconds while the page results load for $this->JobSiteName");
             sleep($this->additionalLoadDelaySeconds);
 
-            $html = $this->getActiveWebdriver()->getPageSource();
-            $objSimpleHTML = new SimpleHtmlHelper($html);
-            $objSimpleHTML->setSource($this->getActiveWebdriver()->getCurrentURL());
-            
+            $objSimpleHTML = $this->getSimpleHtmlDomForCurrentSeleniumPage();
             /*
-               Often we will have a different starting URL from the URL that the results were returned on.  That URL
-               can even change schemes from http to https and then fail future JSON and other calls.  So we update
-                the searchDetails object to use the page we ended up on rather than what we were told to start with.
+              Often we will have a different starting URL from the URL that the results were returned on.  That URL
+              can even change schemes from http to https and then fail future JSON and other calls.  So we update
+               the searchDetails object to use the page we ended up on rather than what we were told to start with.
             */
-            if($this->getActiveWebdriver()->getCurrentURL() !== $url) {
-            	$searchDetails->searchResultsPageUrl = $this->getActiveWebdriver()->getCurrentURL();
+            if ($this->getActiveWebdriver()->getCurrentURL() !== $url) {
+                $searchDetails->searchResultsPageUrl = $this->getActiveWebdriver()->getCurrentURL();
             }
         } catch (Throwable $t) {
             $strError = 'Failed to get dynamic HTML via Selenium due to error:  ' . $t->getMessage();
             $this->_handleThrowable(new Exception($strError), null, true);
         }
+        return $objSimpleHTML;
+    }
+
+    protected function getSimpleHtmlDomForCurrentSeleniumPage()
+    {
+
+        $html = $this->getActiveWebdriver()->getPageSource();
+        $objSimpleHTML = new SimpleHtmlHelper($html);
+        $objSimpleHTML->setSource($this->getActiveWebdriver()->getCurrentURL());
+
         return $objSimpleHTML;
     }
 
@@ -1844,28 +1852,29 @@ JSCODE;
                         $this->selenium->done();
                     }
 
-                    // First load the home page of the search site.  This allows us to get any cookies set we may need
-                    $parsed = parse_url($searchDetails->getSearchStartUrl());
-                    $parsed['path'] = null;
-                    $parsed['query'] = null;
-                    $parsed['fragment'] = null;
-                    $homePageUrl = glue_url($parsed);
-                    $html = null;
-
-                    $this->log("Browsing to {$homePageUrl} home page...");
-                    $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $homePageUrl);
-
-
-                    if (method_exists($this, 'doFirstPageLoad') && $nPageCount == 1) {
-                        $html = $this->doFirstPageLoad($searchDetails);
+                    // First load a landing page of some type on the job site.  This allows us to get any cookies set we may need.
+                    // Can be either a specific page (usually the one prior to the results page in the flow) or the home page
+                    //
+                    $initialPageUrl = null;
+                    if ($this->InitialSearchFormPageUrl != null && strlen($this->InitialSearchFormPageUrl) > 0) {
+                        $initialPageUrl = $this->InitialSearchFormPageUrl;
+                    } else {
+                        $parsed = parse_url($searchDetails->getSearchStartUrl());
+                        $parsed['path'] = null;
+                        $parsed['query'] = null;
+                        $parsed['fragment'] = null;
+                        $initialPageUrl = glue_url($parsed);
                     }
-                    if(is_empty_value($html)) {
+                    $this->log("Browsing to initial page {$initialPageUrl} on site...");
+                    $this->getSimpleHtmlDomFromSeleniumPage($searchDetails, $initialPageUrl);
+
+                    if (is_empty_value($objSimpleHTML)) {
                         $this->getActiveWebdriver()->get($searchDetails->getSearchStartUrl());
                         $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
                     }
                 } catch (Throwable $t) {
                     $strError = 'Failed to get dynamic HTML via Selenium due to error:  ' . $t->getMessage();
-                    $this->_handleThrowable(new Exception($strError), null, true, $extraData=$searchDetails->toLoggedContext());
+                    $this->_handleThrowable(new Exception($strError), null, true, $extraData = $searchDetails->toLoggedContext());
                 }
             } else {
                 $objSimpleHTML = $this->getSimpleObjFromPathOrURL($searchDetails, null, $searchDetails->getSearchStartUrl(), $this->secsPageTimeout, $referrer = $this->prevURL, $cookies = $this->prevCookies);
@@ -1874,8 +1883,12 @@ JSCODE;
                 throw new \ErrorException('Error:  unable to get SimpleHTML object for ' . $searchDetails->getSearchStartUrl());
             }
 
+            if (method_exists($this, 'onResultsPageLoad')) {
+                $objSimpleHTML = $this->onResultsPageLoad($searchDetails, $objSimpleHTML, $nPageCount);
+            }
+
             $noSiteExists = $this->matchChildSiteNotFoundTag($objSimpleHTML);
-            if($noSiteExists == true) {
+            if ($noSiteExists == true) {
                 LogWarning("$this->JobSiteKey child site was not found; disabling job site $this->JobSiteKey.");
                 $jobsiteRecord = JobSiteManager::getJobSiteByKey($this->JobSiteKey);
                 $jobsiteRecord->setisDisabled(true);
@@ -1915,7 +1928,7 @@ JSCODE;
             else if(!$this->isBitFlagSet(C__JOB_ITEMCOUNT_NOTAPPLICABLE) || !$this->isBitFlagSet(C__JOB_PAGECOUNT_NOTAPPLICABLE)) {
                 $this->log('Getting count of ' . $this->JobSiteName . ' jobs for search ' . $searchDetails->getUserSearchSiteRunKey() . ': ' . $searchDetails->getSearchStartUrl());
                 $strTotalResults = $this->parseTotalResultsCount($objSimpleHTML);
-                $nTotalListings = (int) str_replace(',', '', $strTotalResults);
+                $nTotalListings = (int)str_replace(',', '', $strTotalResults);
                 if ($nTotalListings == 0) {
                     $totalPagesCount = 0;
                 } elseif ($nTotalListings != C__TOTAL_ITEMS_UNKNOWN__) {
@@ -2005,7 +2018,7 @@ JSCODE;
 
                             $objSimpleHTML = $this->getSimpleHtmlDomFromSeleniumPage($searchDetails);
                         } catch (Throwable $t) {
-                            $this->_handleThrowable($t, 'Failed to get dynamic HTML via Selenium due to error:  %s', true, $extraData=$searchDetails->toLoggedContext());
+                            $this->_handleThrowable($t, 'Failed to get dynamic HTML via Selenium due to error:  %s', true, $extraData = $searchDetails->toLoggedContext());
                         }
                     } else {
                         $strURL = $this->setResultPageUrl($searchDetails, $nPageCount, $nItemCount);
@@ -2017,6 +2030,11 @@ JSCODE;
                     }
                     if (!$objSimpleHTML) {
                         throw new \ErrorException("Error:  unable to get SimpleHTML object for {$strURL}");
+                    }
+
+
+                    if (method_exists($this, 'onResultsPageLoad')) {
+                        $objSimpleHTML = $this->onResultsPageLoad($searchDetails, $objSimpleHTML, $nPageCount);
                     }
 
                     $this->log("Getting jobs page # {$nPageCount} of {$totalPagesCount} from {$strURL}.  Total listings loaded:  " . ($nItemCount == 1 ? 0 : $nItemCount) . "/{$nTotalListings}.");
@@ -2045,7 +2063,7 @@ JSCODE;
                                 unset($arrJsonLDJobs);
                             }
 
-                            if(array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs)) {
+                            if (array_key_exists($searchDetails->getUserSearchSiteRunKey(), $this->arrSearchReturnedJobs)) {
                                 $arrPreviouslyLoadedJobs = $this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()];
                                 if (!is_empty_value($arrPreviouslyLoadedJobs)) {
                                     $arrPreviouslyLoadedJobSiteIds = array_column($arrPreviouslyLoadedJobs, 'JobSitePostId');
@@ -2073,7 +2091,7 @@ JSCODE;
                             // if we did not get the max number of job listings from the last page.  Basically, if we couldn't
                             // fill up a page with our search, then they must not be that many listings avaialble.
                             //
-                            if ($totalPagesCount > 1 && $nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && $cntPageJobsReturned  < $this->JobListingsPerPage) {
+                            if ($totalPagesCount > 1 && $nTotalListings == C__TOTAL_ITEMS_UNKNOWN__ && $cntPageJobsReturned < $this->JobListingsPerPage) {
                                 $totalPagesCount = $nPageCount;
                                 $nTotalListings = countAssociativeArrayValues($this->arrSearchReturnedJobs[$searchDetails->getUserSearchSiteRunKey()]);
                             }
@@ -2134,7 +2152,7 @@ JSCODE;
                         } else {
                             $err = 'Error: ' . $err . '  Aborting job site plugin to prevent further errors.';
                             $this->log($err, \Monolog\Logger::ERROR);
-                            $this->_handleThrowable(new Exception($err), null, true, $extraData=$searchDetails->toLoggedContext());
+                            $this->_handleThrowable(new Exception($err), null, true, $extraData = $searchDetails->toLoggedContext());
                         }
                     }
 
@@ -2185,7 +2203,7 @@ JSCODE;
                                             $this->takeNextPageAction();
                                             sleep($this->additionalLoadDelaySeconds + 2);
                                         } catch (Throwable $t) {
-                                            $this->_handleThrowable($t, ('Failed to take nextPageAction on page ' . $nPageCount . '.  Error:  %s'), true, $extraData=$searchDetails->toLoggedContext());
+                                            $this->_handleThrowable($t, ('Failed to take nextPageAction on page ' . $nPageCount . '.  Error:  %s'), true, $extraData = $searchDetails->toLoggedContext());
                                         }
                                     }
                                     $strURL = $this->getActiveWebdriver()->getCurrentURL();
@@ -2194,7 +2212,7 @@ JSCODE;
                             }
                             unset($objSimpleHTML);
                         } catch (Throwable $t) {
-                            $this->_handleThrowable($t, 'Failed to get dynamic HTML via Selenium due to error:  %s', true, $extraData=$searchDetails->toLoggedContext());
+                            $this->_handleThrowable($t, 'Failed to get dynamic HTML via Selenium due to error:  %s', true, $extraData = $searchDetails->toLoggedContext());
                         } finally {
                             unset($arrPageJobsList);
                         }
@@ -2206,7 +2224,7 @@ JSCODE;
         } catch (JobSiteNotFoundException | JobSitePluginException | Exception | Throwable $t) {
             $this->_setSearchResult_($searchDetails, false, $t, false, $objSimpleHTML);
             $msg = 'Failed to download new job postings for search run ' . $searchDetails->getUserSearchSiteRunKey() . '.  Error details: %s';
-            $this->_handleThrowable($t, $msg, true, $extraData=$searchDetails->toLoggedContext());
+            $this->_handleThrowable($t, $msg, true, $extraData = $searchDetails->toLoggedContext());
         } finally {
             unset($objSimpleHTML);
             $arrPageJobsList = null;
@@ -2251,7 +2269,7 @@ JSCODE;
      */
     public function parseJobsFromLdJson($objSimpHTML)
     {
-        $parsedJobs= [];
+        $parsedJobs = [];
 
         if (empty($objSimpHTML) || !method_exists($objSimpHTML, 'find')) {
             return null;

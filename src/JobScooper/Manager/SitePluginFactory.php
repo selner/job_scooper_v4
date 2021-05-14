@@ -255,6 +255,7 @@ class SitePluginFactory
             $pluginData['PluginExtendsClassName'] = str_replace('\\\\', '\\', $pluginData['PluginExtendsClassName']);
         }
 
+        setArrayItem($pluginData, 'InitialSearchFormPageUrl', $arrConfigData, 'SearchFormPageUrl');
         setArrayItem($pluginData, 'JobPostingBaseUrl', $arrConfigData, 'BaseURL');
         setArrayItem($pluginData, 'SearchUrlFormat', $arrConfigData, 'SourceURL');
 //        setArrayItem($pluginData,'CountryCodes', $arrConfigData, 'CountryCodes');

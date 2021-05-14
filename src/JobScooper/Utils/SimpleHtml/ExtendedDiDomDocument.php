@@ -18,6 +18,7 @@
 namespace JobScooper\Utils\SimpleHtml;
 
 use DiDom\Document;
+use DiDom\Element;
 use DiDom\Query;
 
 /**
@@ -72,6 +73,25 @@ class ExtendedDiDomDocument extends Document
     public function findByXpath($xpath)
     {
         return $this->find($xpath, Query::TYPE_XPATH);
+    }
+
+    function first($expression, $type = Query::TYPE_CSS, $wrapNode = true, $contextNode = null)
+    {
+        try {
+            $ret = parent::find($expression, $type, $wrapNode, $contextNode);
+            if($ret != null) {
+                if (count($ret) > 0) {
+                    return $ret[0];
+                }
+                else {
+                    return $ret;
+                }
+            }
+        } catch (\Exception $ex) {
+            $this->debug_dump_to_file();
+            throw $ex;
+        }
+        return null;
     }
 
     /**

@@ -302,17 +302,21 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                         break;
 
                     case "PAGE_NUMBER":
-                        $ret = $this->_callPluginMethodIfExists("getPageURLValue", $nPage);
-                        if ($ret !== false) {
-                            $replaceVal = $ret;
-                        }
-                        else if($nPage === 1 && $this->isBitFlagSet(C__JOB_PAGECOUNT_OMIT_ON_FIRST_PAGE)) {
-                            $replaceVal = '';
-                        }
-                        else {
-                            $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], $values);
+                        try {
+                            if ($nPage === 1 && $this->isBitFlagSet(C__JOB_PAGECOUNT_OMIT_ON_FIRST_PAGE)) {
+                                $replaceVal = '';
+                            } else {
+                                $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], $values['page_index']);
+                            }
+                        } catch (\Throwable $t) {
+                            $this->log("Failed to translate ***PAGE_NUMBER*** to a value. Reason:  $t");
+                            $ret = $this->_callPluginMethodIfExists("getPageURLValue", $nPage);
+                            if ($ret !== false) {
+                                $replaceVal = $ret;
+                            }
                         }
                         break;
+
 
                     case "JOBSITEKEY":
                         $replaceVal = $this->jobsite_key;
@@ -327,7 +331,7 @@ class UserSearchSiteRun extends BaseUserSearchSiteRun
                             $replaceVal = $ret;
                         }
                         else {
-                            $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], $values);
+                            $replaceVal = $this->getQueryParameterValue($tokFound['format_value'], $values['item_index']);
                         }
                         break;
                 }
