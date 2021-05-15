@@ -1,0 +1,140 @@
+version: "3.2"
+
+services:
+  selenium:
+    container_name: selenium
+    env_file: .env
+    image: selenium/standalone-firefox:latest
+    ports:
+      - 4448:4448
+      - 5900:5900
+    shm_size: 2g
+    restart: unless-stopped
+    environment:
+      - JAVA_OPTS=-Xmx512m -Dwebdriver.enable.native.events=1
+      - JOBSCOOPER_OUTPUT
+      - SE_OPTS=-port 4448
+    networks:
+      container_net:
+        aliases:
+          - selenium.jobscooper.local
+
+  geocodeapi:
+    build:
+      context: ../archive/pyGeocodeApi
+      dockerfile: Dockerfile
+    env_file: ./configs/geocode.env
+    image: selner/geocodeapi
+    environment:
+      - GEOCODE_API_SETTINGS=/config/geocode.env
+      - DEBUG=True
+      - GMAPS_KEY
+      #     - GEOCODE_API_SETTINGS="/code/pyGeocodeApi/.env"
+      - OUTPUTDIR="/output"
+    volumes:
+      - type: bind
+        source: ./configs
+        target: /config
+#      - type: bind
+#        source: /tmp/output/geocode/
+#        target: /output
+    #    - type: bind
+    #      source: ../configs/geocode.env
+    #      target: /private/var/local/geocodeapi/.env
+    ports:
+      - 5555:5000
+    expose:
+      - 5000
+    restart: unless-stopped
+  #   networks:
+  #     container_net:
+  #       aliases:
+  #         - geocodeapi.jobscooper.local
+
+
+  # Uncomment this section if you want to use a mysql instance that
+  # is brought up and torn down alongside the other containers
+  #
+#  mysql:
+#    environment:
+#      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+#      PUID: $DOCKER_USERID
+#      PGID: $DOCKER_GROUPID
+#    env_file: .env
+#    #    image: mariadb
+#    image: mysql
+#    container_name: js4mysql
+#    user: 1034:100
+#    restart: always
+#    volumes:
+#      - type: bind
+#        source: ./configs
+#        target: /config
+#      - type: bind
+#        source: ./mysql
+#        target: /var/lib/mysql
+#    #      - mariadbdata:/var/lib/mysql
+#    #      - ./mysql:/var/lib/mysql
+#    ports:
+#      - 5556:3306
+##    networks:
+#      container_net:
+#        aliases:
+#          - mysql.jobscooper.local
+
+  app:
+    environment:
+      - JOBSCOOPER_OUTPUT
+      - JOBSCOOPER_CONFIG
+      - JOBSCOOPER_STAGES
+      - JOBSCOOPER_JOBSITE
+      - JOBSCOOPER_USER
+      - JOBSCOOPER_DEBUG
+      - NLTK_DATA
+      - JOBSCOOPER_GEOCODEAPI_SERVER="http://jobscooperv4_geocodeapi:5000"
+    env_file: .env
+
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+      - SSHKEY_DIR=./configs/sshkeys
+#      - BRANCH=$BRANCH
+#      - CACHEBUST=$CACHEBUST
+    image: selner/jobscooper
+    container_name: jobscooper
+    volumes:
+      - type: bind
+        source: "$JOBSCOOPER_HOST_HOSTDIR"
+        target: /var/local/jobs_scooper
+      - type: bind
+        source: "$JOBSCOOPER_HOST_HOSTDIR"
+        target: /private/var/local/jobs_scooper
+      - type: bind
+        source: "$JOBSCOOPER_CONFIG_HOSTDIR"
+        target: /var/local/jobscooper/config
+
+    # Uncomment & set this value if you are using a MySql instance external to
+    # the Docker config
+    extra_hosts:
+      - "flamingo.rvelo.in:192.168.50.15"
+    links:
+      - "selenium"
+      - "geocodeapi"
+##     - "mysql"   # Uncomment this line if also instantiating mysql container in the early section
+    depends_on:
+      - "selenium"
+      - "geocodeapi"
+#      - "js4mysql"   # Uncomment this line if also instantiating mysql container in the early section
+    networks:
+      container_net:
+        aliases:
+          - app.jobscooper.local
+
+networks:
+  container_net:
+    driver: bridge
+
+#volumes:
+#  mariadbdata:
+#  mysqldata:
