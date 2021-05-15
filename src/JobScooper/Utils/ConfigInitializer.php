@@ -43,8 +43,15 @@ class ConfigInitializer
      */
     public function __construct($iniFile = null)
     {
-        if (null === $iniFile) {
+        if (is_empty_value($iniFile)) {
             $iniFile = Settings::getValue('command_line_args.config');
+        }
+
+        if (is_empty_value($iniFile)) {
+            $envini = getenv('JOBSCOOPER_CONFIG_INI');
+            if($envini != false && !is_empty_value($envini)) {
+                $iniFile = $envini;
+            }
         }
 
         if (is_empty_value($iniFile)) {
@@ -54,26 +61,25 @@ class ConfigInitializer
         $this->_iniFile = $iniFile;
 
         $envDirOut = getenv('JOBSCOOPER_OUTPUT');
-        if (!is_empty_value($envDirOut)) {
+        if ($envDirOut != false && !is_empty_value($envDirOut)) {
             Settings::setValue('output_directories.root', $envDirOut);
         }
 
-        $envGeocode = getenv('JOBSCOOPER_GEOCODEAPI_SERVER');
-        if (!is_empty_value($envGeocode)) {
-            Settings::setValue('geocodeapi_server', $envGeocode);
-        }
-
+        /* Load the actual config ini file */
         $configData = Settings::loadConfig($iniFile);
         Settings::setValue('config_file', $iniFile);
         Settings::setValue('config_file_settings', $configData);
-        $outdir = Settings::getValue('config_file_settings.output_directory');
-        if (is_empty_value(Settings::getValue('output_directories.root')) && !is_empty_value($outdir)) {
+
+        LogMessage("Loaded configuration details from $this->_iniFile");
+
+        $outdir = Settings::getValue('config_file_settings.output.root');
+        if (is_empty_value(Settings::getValue('output.root')) && !is_empty_value($outdir)) {
             Settings::setValue('output_directories.root', $outdir);
         }
     }
 
     protected $nNumDaysToSearch = -1;
-    public $arrConfigFileDetails = array('output' => null, 'output_subfolder' => null, 'config_ini' => null);
+
     protected $allConfigFileSettings = null;
     private $_iniFile = null;
 
@@ -83,6 +89,28 @@ class ConfigInitializer
      */
     public function initialize()
     {
+        Settings::moveValue('command_line_args.debug', 'debug');
+        
+        LogMessage('Setting up configuration... ');
+
+        $now = new \DateTime();
+        Settings::setValue('app_run_id', $now->format('Ymd_His_') .__APP_VERSION__);
+        
+        $rootOutputPath = Settings::getValue('output_directories.root');
+        if (empty($rootOutputPath)) {
+            throw new \Exception('Missing JOBSCOOPER_OUPUT environment variable value.');
+        }
+        $rootOutputDir = parsePathDetailsFromString($rootOutputPath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
+        if ($rootOutputDir->isDir() !== true) {
+            if (!mkdir($rootOutputDir, 0777, true)) {
+                throwException("Failed to create root output folder '$rootOutputDir'");
+            }
+            Settings::setValue('output_directories.root', $rootOutputDir->getPathname());
+        }
+        
+        $this->parseCommandLineOverrides();
+
+
         if(empty($_SERVER['REMOTE_HOST'])) {
             $_SERVER['REMOTE_HOST'] = 'localhost';
         }
@@ -95,38 +123,14 @@ class ConfigInitializer
             $_SERVER['HTTP_CLIENT_IP'] = '127.0.0.1';
         }
 
-        Settings::moveValue('command_line_args.debug', 'debug');
-        
-        LogMessage('Setting up configuration... ');
-
-        $now = new \DateTime();
-        Settings::setValue('app_run_id', $now->format('Ymd_His_') .__APP_VERSION__);
-        
-        $file_name = Settings::getValue('command_line_args.configfile');
-        $this->arrConfigFileDetails = new SplFileInfo($file_name);
-
-        $rootOutputPath = Settings::getValue('output_directories.root');
-        if (empty($rootOutputPath)) {
-            throw new \Exception('Missing JOBSCOOPER_OUPUT environment variable value.');
-        }
-        $rootOutputDir = parsePathDetailsFromString($rootOutputPath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-        if ($rootOutputDir->isDir() !== true) {
-            $outputpath = sprintf('%s%s%s', $this->arrConfigFileDetails->getPathname(), DIRECTORY_SEPARATOR, 'output');
-            $rootOutputDir = parsePathDetailsFromString($outputpath, C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED);
-            Settings::setValue('output_directories.root', $rootOutputDir->getPathname());
-        }
-        
-        $this->parseCommandLineOverrides();
-
         $this->setupPropelForRun();
 
         // Now setup all the output folders
         $this->setupOutputFolders();
 
-        $strOutfileArrString = getArrayValuesAsString(Settings::getValue('output_directories'));
-        LogMessage('Output folders configured: ' . $strOutfileArrString);
+        $this->setupLogging();
 
-        LogMessage("Loaded configuration details from {$this->_iniFile}");
+        $this->setGeocodeApiServer();
 
         LogMessage('Configuring specific settings for this run... ');
         $this->setupRunnerFromConfig();
@@ -142,7 +146,18 @@ class ConfigInitializer
         LogMessage('Runner configured.');
         
     }
+    
+    private function setGeocodeApiServer() {
+        Settings::copyValue("config_file_settings.geocodeapi.server", 'geocodeapi.server');
 
+        $envGeocode = getenv('JOBSCOOPER_GEOCODEAPI_SERVER');
+        if ($envGeocode !== false && !is_empty_value($envGeocode)) {
+            Settings::setValue('geocodeapi.server', $envGeocode);
+        }
+        $srvval = Settings::getValue('geocodeapi.server');
+        LogMessage("Geocode API server set to $srvval");
+    }
+    
     /**
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
@@ -164,6 +179,12 @@ class ConfigInitializer
 
         Settings::setValue('output_directories', $arrOututDirs);
 
+        $strOutfileArrString = getArrayValuesAsString(Settings::getValue('output_directories'));
+        LogMessage('Output folders configured: ' . $strOutfileArrString);
+    }
+
+    private function setupLogging()
+    {
         Settings::setValue('logging', $this->getSetting('logging'));
 
         if (!isset($GLOBALS['logger'])) {

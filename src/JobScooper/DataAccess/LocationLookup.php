@@ -38,7 +38,7 @@ class LocationLookup {
 
 		$this->_initializeLogger();
 
-	    $this->_geoapi_srvr = Settings::getValue('geocodeapi_server');
+	    $this->_geoapi_srvr = Settings::getValue('geocodeapi.server');
 
 	    if(is_null($this->_geoapi_srvr)) {
 	        throwException("No geocodeapi_server specified in settings.  Aborting.");

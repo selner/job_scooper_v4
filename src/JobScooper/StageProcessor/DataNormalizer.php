@@ -119,7 +119,7 @@ class DataNormalizer
             startLogSection('Calling python to find & map missing locations...');
             $runFile = 'pyJobNormalizer/cmd_set_geolocations.py';
             $params = [
-                '--server' => Settings::getValue('geocodeapi_server'),
+                '--server' => Settings::getValue('geocodeapi.server'),
             ];
 
             $resultcode = PythonRunner::execScript($runFile, $params, true);
