@@ -27,7 +27,7 @@ class Settings extends \Adbar\Dot
      * @return array|null
      * @throws EmptyDirectoryException
      */
-    public static function loadConfig($file)
+    public static function loadConfig($file): ?array
     {
         $config = self::loadFile($file);
         return $config->all();
@@ -106,6 +106,19 @@ class Settings extends \Adbar\Dot
         $GLOBALS[self::JSCOOP_GLOBALS] = $this;
     }
 
+
+
+    /**
+     * @param $oldKey
+     * @param $newKey
+     */
+    public static function copyValue($oldKey, $newKey)
+    {
+        $settings = new Settings();
+
+        $settings->set($newKey, self::getValue($oldKey));
+    }
+
     /**
      * @param $oldKey
      * @param $newKey
@@ -114,10 +127,9 @@ class Settings extends \Adbar\Dot
     {
         $settings = new Settings();
 
-        $settings->set($newKey, self::getValue($oldKey));
+        $settings->copyValue($newKey, self::getValue($oldKey));
         $settings->clear($oldKey);
     }
-
     /**
      * @param array|int|string $keys
      * @param null $value
@@ -127,6 +139,7 @@ class Settings extends \Adbar\Dot
         parent::set($keys, $value);
         $GLOBALS[self::JSCOOP_GLOBALS] = $this;
     }
+
 
     /**
      * @param null $keys
@@ -191,7 +204,7 @@ class Settings extends \Adbar\Dot
      * @throws \Exception
      */
     public static function get_db_cli_params() {
-        $dbparams = array();
+
         $cfg = self::getValue('db_config');
         if(is_empty_value($cfg)) {
             throw new \Exception('Could not find database configuration to use.');
