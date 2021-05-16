@@ -21,6 +21,21 @@ const C__FILEPATH_FILE_MUST_EXIST = 0x1;
 const C__FILEPATH_DIRECTORY_MUST_EXIST = 0x2;
 const C__FILEPATH_CREATE_DIRECTORY_PATH_IF_NEEDED = 0x4;
 
+function get_dir_realpath($target, $parent) {
+    $finalpath = realpath($target);
+    if($finalpath == false) {
+        $parts = explode("/", $target);
+        if ($parts[0] = ".") {
+            array_shift($parts);
+            $relpath = implode("/", $parts);
+            $finalpath = "$parent/$relpath";
+        }
+    }
+
+    return $finalpath;
+}
+
+
 /**
  * @param     $strFilePath
  * @param int $flags

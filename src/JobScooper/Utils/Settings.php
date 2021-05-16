@@ -17,6 +17,7 @@
 
 namespace JobScooper\Utils;
 
+use Adbar\Dot;
 use JBZoo\Utils\Str;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
@@ -25,36 +26,33 @@ class Settings extends \Adbar\Dot
 {
     /**
      * @param $file
-     * @return array|null
+     * @return Dot|array|null
      * @throws EmptyDirectoryException
      */
-    public static function loadConfig($file): ?array
+    public static function loadConfig($file)
     {
         $config = self::loadFile($file);
-        return $config->all();
+        return new Dot($config->all());
     }
 
     /**
      * @param $file
      * @return Config
-     * @throws \Noodlehaus\Exception\EmptyDirectoryException
      */
-    public static function loadFile($file)
+    public static function loadFile($file, $parentdir=null)
     {
-        $baseCfgDir = dirname(realpath($file));
+        if($parentdir == null) {
+            $parentdir = dirname(realpath($file));
+        }
+
         $config = new Config($file);
         $imports = $config->get("imports", array());
         while (!empty($imports)) {
             $import = array_pop($imports);
-            $pathimp = realpath($import);
-            if($pathimp == false) {
-                $parts = explode("/", $import);
-                array_shift($parts);
-                $relpath = implode("/", $parts);
-                $pathimp = "$baseCfgDir/$relpath";
-            }
+            $pathimp = get_dir_realpath($import, $parentdir);
+
             LogMessage("Loading config settings from file $pathimp");
-            $subConfig = Settings::loadFile($pathimp);
+            $subConfig = Settings::loadFile($pathimp, $parentdir);
             $config->merge($subConfig);
         }
         unset($config["imports"]);

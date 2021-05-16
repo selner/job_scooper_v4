@@ -79,7 +79,7 @@ class ConfigInitializer
         /* Load the actual config ini file */
         $configData = Settings::loadConfig($iniFile);
         Settings::setValue('config_file', $iniFile);
-        Settings::setValue('config_file_settings', $configData);
+        Settings::setValue('config_file_settings', $configData->all());
 
         LogMessage("Loaded configuration details from $this->_iniFile");
 
