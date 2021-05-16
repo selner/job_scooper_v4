@@ -17,6 +17,7 @@
 
 namespace JobScooper\Utils;
 
+use JBZoo\Utils\Str;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 
@@ -89,6 +90,16 @@ class Settings extends \Adbar\Dot
     {
         $set = new Settings();
         return $set->all();
+    }
+
+    /**
+     * @return string
+     */
+    public static function exportAll()
+    {
+        $set = new Settings();
+        $all = $set->all();
+        return var_export($all, true);
     }
 
     /**

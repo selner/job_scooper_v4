@@ -49,13 +49,24 @@ class ConfigInitializer
 
         if (is_empty_value($iniFile)) {
             $envini = getenv('JOBSCOOPER_CONFIG_INI');
-            if($envini != false && !is_empty_value($envini)) {
+            if ($envini != false && !is_empty_value($envini)) {
                 $iniFile = $envini;
             }
         }
 
+        if (is_empty_value($iniFile) && is_file("/var/local/jobscooper/config/jobscooper.ini"))
+        {
+            $iniFile = "/var/local/jobscooper/config/jobscooper.ini";
+        }
+
+        if (is_empty_value($iniFile) && is_file("./config/jobscooper.ini"))
+        {
+            $iniFile = "/var/local/jobscooper/config/jobscooper.ini";
+        }
+
         if (is_empty_value($iniFile)) {
-            throwException("", new \InvalidArgumentException('Missing user configuration settings file definition.  You must specify the configuration file on the command line.  Aborting.'));
+            $settings = Settings::exportAll();
+            throwException("", new \InvalidArgumentException("Missing user configuration settings file definition.  You must specify the configuration file on the command line.  Settings:  $settings"));
         }
 
         $this->_iniFile = $iniFile;
