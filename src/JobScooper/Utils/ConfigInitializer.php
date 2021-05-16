@@ -571,10 +571,10 @@ class ConfigInitializer
 					$user_recs[$key_user] = $user_recs[$key_user]->toArray();
                 	$userDiff = array_diff_assoc_recursive($config_user, $user_recs[$key_user]);
                 	if(!is_empty_value($userDiff)){
-	                    LogMessage("Updating user {$key_user} facts in database:  " . getArrayValuesAsString($userDiff));
+	                    LogMessage("Updating user $key_user facts in database:  " . getArrayValuesAsString($userDiff));
     	                $updatedUser = UserQuery::findOrCreateUserByUserSlug(cleanupSlugPart($key_user), $config_user, $overwriteFacts = true);
 		                if (null === $updatedUser) {
-		                    throwException('Failed to create or update user based on config section users.{$key_user}.');
+		                    throwException("Failed to create or update user '$key_user' based on config section users");
 		                }
 		                $user_recs[$key_user] = $updatedUser->toArray();
 		                $updatedUser = null;

@@ -240,7 +240,7 @@ class User extends BaseUser
                 }
 
                 if (null === $tempFileDetails || $tempFileDetails->isFile() !== true) {
-                    throw new \Exception("Specified input file '{$path}' was not found.  Aborting.");
+                    throw new \Exception("Specified input file '$path' was not found.  Aborting.");
                 }
 
                 $key = $fileinfo->getBasename('.csv');
