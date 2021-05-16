@@ -55,7 +55,7 @@ RUN apt-get install -y \
 # Add PHP Sources
 #
 # @see https://www.noobunbox.net/serveur/auto-hebergement/installer-php-7-1-sous-debian-et-ubuntu
-##
+#
 RUN wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
     echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
     apt-get update
@@ -74,29 +74,15 @@ RUN  apt-get -y install \
 #
 
 RUN apt-get -y install \
-#  php8.0-bcmath    \
-#  php8.0-bz2       \
   php8.0-curl 		\
   php8.0-dev 		\
   php8.0-gd 		\
-#  php8.0-dom		\
-#  php8.0-imap      \
   php8.0-intl 		\
-#  php8.0-ldap 		\
   php8.0-mbstring	\
   php8.0-mcrypt     \
-#  php8.0-mysql		\
-#  php8.0-oauth		\
-#  php8.0-odbc		\
-#  php8.0-xml		\
   php8.0-xsl		\
   php8.0-yaml		\
   php8.0-zip		\
-#  php8.0-solr		\
-#  php8.0-apcu		\
-#  php8.0-opcache	\
-#  php8.0-redis		\
-#  php8.0-memcache 	\
   php8.0-xdebug		\
   libapache2-mod-php8.0
 
@@ -159,7 +145,8 @@ RUN ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
 ### mapped to the local hard drive of the actual PC
 ###
 ########################################################
-VOLUME "/var/local/jobs_scooper"
+
+VOLUME "/var/local/job_scooper"
 VOLUME "/root/nltk_data"
 
 
@@ -170,20 +157,11 @@ VOLUME "/root/nltk_data"
 ###
 ########################################################
 
-
-WORKDIR /app/jobs_scooper
+WORKDIR /app/job_scooper
 ARG BRANCH=2021_resurrection
 RUN echo "Using ${BRANCH} branch of job_scooper_v4"
 ARG CACHEBUST=1
-RUN git clone https://github.com/selner/job_scooper_v4.git /app/jobs_scooper -b ${BRANCH}
-
-# ADD . /opt/jobs_scooper
-# RUN rm /opt/jobs_scooper/src/*.lock
-# RUN rm -Rf /opt/jobs_scooper/src/vendor/*.lock
-# ADD ./scoop_docker.sh .
-
-#RUN chmod +x /opt/jobs_scooper/*.sh
-RUN ls -al /app/jobs_scooper
+RUN git clone https://github.com/selner/job_scooper_v4.git /app/job_scooper -b ${BRANCH}
 
 
 #########################################################
@@ -191,14 +169,16 @@ RUN ls -al /app/jobs_scooper
 ### Install JobScooper's PHP dependencies
 ###
 #########################################################
-WORKDIR /app/jobs_scooper
+WORKDIR /app/job_scooper
 RUN composer install --no-interaction -vv
 
 
+#########################################################
 ####
 #### Install JobScooper's python dependencies
 ####
-RUN pip install --no-cache-dir -v -r /app/jobs_scooper/python/pyJobNormalizer/requirements.txt
+#########################################################
+RUN pip install --no-cache-dir -v -r /app/job_scooper/python/pyJobNormalizer/requirements.txt
 
 
 #########################################################
@@ -206,7 +186,7 @@ RUN pip install --no-cache-dir -v -r /app/jobs_scooper/python/pyJobNormalizer/re
 #   Run job_scooper app
 #
 #########################################################
-WORKDIR /app/jobs_scooper
+WORKDIR /app/job_scooper
 
-#
-#CMD bash -C '/app/jobs_scooper/run_job_scooper --config "$JOBSCOOPER_CONFIG_INI"';'bash'
+CMD [ "php", "./run_job_scooper.php" ]
+

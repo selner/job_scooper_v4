@@ -83,17 +83,16 @@ services:
 #          - mysql.jobscooper.local
 
   app:
-    environment:
-      - JOBSCOOPER_OUTPUT
-      - JOBSCOOPER_CONFIG
-      - JOBSCOOPER_STAGES
-      - JOBSCOOPER_JOBSITE
-      - JOBSCOOPER_USER
-      - JOBSCOOPER_DEBUG
-      - NLTK_DATA
-      - JOBSCOOPER_GEOCODEAPI_SERVER="http://jobscooperv4_geocodeapi:5000"
     env_file: .env
-
+    environment:
+#      - JOBSCOOPER_CONFIG_INI=$JOBSCOOPER_CONFIG_DIR/jobscooper.ini
+#      - JOBSCOOPER_CONFIG
+#      - JOBSCOOPER_STAGES
+#      - JOBSCOOPER_JOBSITE
+#      - JOBSCOOPER_USER
+#      - JOBSCOOPER_DEBUG
+      - NLTK_DATA
+#      - JOBSCOOPER_GEOCODEAPI_SERVER="http://jobscooperv4_geocodeapi:5000"
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -105,31 +104,22 @@ services:
     container_name: jobscooper
     volumes:
       - type: bind
-        source: "$JOBSCOOPER_HOST_HOSTDIR"
-        target: /var/local/jobs_scooper
-      - type: bind
-        source: "$JOBSCOOPER_HOST_HOSTDIR"
-        target: /private/var/local/jobs_scooper
-      - type: bind
-        source: "$JOBSCOOPER_CONFIG_HOSTDIR"
+        source: "$JOBSCOOPER_CONFIG_DIR"
         target: /var/local/jobscooper/config
-
-    # Uncomment & set this value if you are using a MySql instance external to
-    # the Docker config
-    extra_hosts:
-      - "flamingo.rvelo.in:192.168.50.15"
-    links:
-      - "selenium"
-      - "geocodeapi"
+#    links:
+#      - "selenium"
+#      - "geocodeapi"
 ##     - "mysql"   # Uncomment this line if also instantiating mysql container in the early section
-    depends_on:
-      - "selenium"
-      - "geocodeapi"
+#    depends_on:
+#      - "selenium"
+#      - "geocodeapi"
 #      - "js4mysql"   # Uncomment this line if also instantiating mysql container in the early section
     networks:
       container_net:
         aliases:
           - app.jobscooper.local
+    extra_hosts:                            # Uncomment & set these value if you are using
+      - "flamingo.rvelo.in:192.168.50.15"   # a MySql instance external to Docker
 
 networks:
   container_net:
