@@ -85,7 +85,7 @@ services:
   app:
     env_file: .env
     environment:
-#      - JOBSCOOPER_CONFIG_INI=$JOBSCOOPER_CONFIG_DIR/jobscooper.ini
+       - JOBSCOOPER_CONFIG_INI=/var/local/jobscooper/config/jobscooper.ini
 #      - JOBSCOOPER_CONFIG
 #      - JOBSCOOPER_STAGES
 #      - JOBSCOOPER_JOBSITE
