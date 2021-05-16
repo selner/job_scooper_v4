@@ -41,11 +41,20 @@ class Settings extends \Adbar\Dot
      */
     public static function loadFile($file)
     {
+        $baseCfgDir = dirname(realpath($file));
         $config = new Config($file);
         $imports = $config->get("imports", array());
         while (!empty($imports)) {
             $import = array_pop($imports);
-            $subConfig = Settings::loadFile($import);
+            $pathimp = realpath($import);
+            if($pathimp == false) {
+                $parts = explode("/", $import);
+                array_shift($parts);
+                $relpath = implode("/", $parts);
+                $pathimp = "$baseCfgDir/$relpath";
+            }
+            LogMessage("Loading config settings from file $pathimp");
+            $subConfig = Settings::loadFile($pathimp);
             $config->merge($subConfig);
         }
         unset($config["imports"]);
