@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
   selenium:
-    container_name: selenium
+    container_name: js4selenium
     env_file: .env
     image: selenium/standalone-firefox:latest
     ports:
@@ -25,31 +25,24 @@ services:
       dockerfile: Dockerfile
     env_file: ./configs/geocode.env
     image: selner/geocodeapi
+    container_name: geocodeapi
     environment:
-      - GEOCODE_API_SETTINGS=/config/geocode.env
-      - DEBUG=True
-      - GMAPS_KEY
-      #     - GEOCODE_API_SETTINGS="/code/pyGeocodeApi/.env"
-      - OUTPUTDIR="/output"
+      - GEOCODEAPI_DEBUG
+      - GEOCODEAPI_GMAPSKEY
+      - GEOCODEAPI_CONFIG
     volumes:
       - type: bind
         source: ./configs
         target: /config
-#      - type: bind
-#        source: /tmp/output/geocode/
-#        target: /output
-    #    - type: bind
-    #      source: ../configs/geocode.env
-    #      target: /private/var/local/geocodeapi/.env
     ports:
       - 5555:5000
     expose:
       - 5000
     restart: unless-stopped
-  #   networks:
-  #     container_net:
-  #       aliases:
-  #         - geocodeapi.jobscooper.local
+    networks:
+      container_net:
+        aliases:
+          - geocode.jobscooper.local
 
 
   # Uncomment this section if you want to use a mysql instance that
@@ -86,13 +79,7 @@ services:
     env_file: .env
     environment:
        - JOBSCOOPER_CONFIG_INI=/var/local/jobscooper/config/jobscooper.ini
-#      - JOBSCOOPER_CONFIG
-#      - JOBSCOOPER_STAGES
-#      - JOBSCOOPER_JOBSITE
-#      - JOBSCOOPER_USER
-#      - JOBSCOOPER_DEBUG
-      - NLTK_DATA
-#      - JOBSCOOPER_GEOCODEAPI_SERVER="http://jobscooperv4_geocodeapi:5000"
+       - NLTK_DATA
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -106,25 +93,24 @@ services:
       - type: bind
         source: "$JOBSCOOPER_CONFIG_DIR"
         target: /var/local/jobscooper/config
-#    links:
-#      - "selenium"
-#      - "geocodeapi"
-##     - "mysql"   # Uncomment this line if also instantiating mysql container in the early section
-#    depends_on:
-#      - "selenium"
-#      - "geocodeapi"
-#      - "js4mysql"   # Uncomment this line if also instantiating mysql container in the early section
+ #     - type: bind
+ #       source: /Users/bryan/Dropbox/code/job_scooper_v4/configs
+ #       target: /Users/bryan/Dropbox/code/job_scooper_v4/configs
+    links:
+      - "js4selenium"
+      - "js4geocodeapi"
+     -  "js4mysql"   # Uncomment this line if also instantiating mysql container in the early section
+    depends_on:
+      - "js4selenium"
+      - "js4geocodeapi"
+      - "js4mysql"   # Uncomment this line if also instantiating mysql container in the early section
     networks:
       container_net:
         aliases:
           - app.jobscooper.local
     extra_hosts:                            # Uncomment & set these value if you are using
-      - "flamingo.rvelo.in:192.168.50.15"   # a MySql instance external to Docker
+      - "othersql.jobscooper.local:192.168.50.15"   # a MySql instance external to Docker
 
 networks:
   container_net:
     driver: bridge
-
-#volumes:
-#  mariadbdata:
-#  mysqldata:
