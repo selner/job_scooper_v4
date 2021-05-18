@@ -141,7 +141,14 @@ class ConfigInitializer
 
         $this->setupLogging();
 
-        $this->setGeocodeApiServer();
+        LogMessage('Configuring application servers... ');
+        $this->getServerSettings(Settings::SETTINGS_GEOCODEAPI);
+        $this->getServerSettings(Settings::SETTINGS_JOBNORMALIZER);
+        $this->getServerSettings(Settings::SETTINGS_SELENIUM);
+        $selsvr = Settings::getValue(Settings::SETTINGS_SELENIUM . ".server");
+        if (strcasecmp('localhost', $selsvr) === 0) {
+            throwException('Invalid host or server config value for [selenium]. Localhost is not allowed; named host required.');
+        }
 
         LogMessage('Configuring specific settings for this run... ');
         $this->setupRunnerFromConfig();
@@ -157,18 +164,32 @@ class ConfigInitializer
         LogMessage('Runner configured.');
         
     }
-    
-    private function setGeocodeApiServer() {
-        Settings::copyValue("config_file_settings.geocodeapi.server", 'geocodeapi.server');
 
-        $envGeocode = getenv('JOBSCOOPER_GEOCODEAPI_SERVER');
-        if ($envGeocode !== false && !is_empty_value($envGeocode)) {
-            Settings::setValue('geocodeapi.server', $envGeocode);
+    private function getServerSettings($svrkey) {
+        if ($svrkey == null) {
+            throwException(new \InvalidArgumentException("Cannot get server configuration.  Server key value not passed."));
         }
-        $srvval = Settings::getValue('geocodeapi.server');
-        LogMessage("Geocode API server set to $srvval");
+        $settings = Settings::getValue("config_file_settings.$svrkey");
+
+        if((!array_key_exists('server', $settings) || null == $settings['server']) &&
+            array_key_exists('host', $settings) && array_key_exists('port', $settings)) {
+
+            $settings['server'] = "http://" . $settings['host'];
+            if($settings['port'] != null) {
+                $settings['server'] .= ":" . $settings['port'];
+            }
+        }
+
+        $envServer = getenv('JOBSCOOPER_'.strtoupper($svrkey) . '_SERVER');
+        if ($envServer !== false && !is_empty_value($envServer)) {
+            $settings['server'] = $envServer;
+        }
+
+        Settings::setValue($svrkey, $settings);
+        $srvval = Settings::getValue("$svrkey.server");
+        LogMessage("$svrkey server set to $srvval");
     }
-    
+
     /**
      * @throws \Exception
      * @throws \Propel\Runtime\Exception\PropelException
@@ -240,8 +261,6 @@ class ConfigInitializer
         // initialize the plugin bulder class so that all the plugins get loaded
         //
         new JobSiteManager();
-
-        $this->parseSeleniumParameters();
     }
 
     /**
@@ -457,29 +476,6 @@ class ConfigInitializer
                 }
             }
         }
-    }
-
-    /**
-     * @throws \ErrorException
-     */
-    private function parseSeleniumParameters()
-    {
-        LogDebug('Loading Selenium settings from config file...');
-        $settings = $this->getSetting('selenium');
-
-        if (!array_key_exists('server', $settings)) {
-            throwException('Configuration missing for [selenium] [server] in the config INI files.');
-        } elseif (strcasecmp('localhost', $settings['server']) === 0) {
-            throwException('Invalid server value for [selenium] [server] in the config INI files. You must use named hosts, not localhost.');
-        }
-
-        if (!array_key_exists('port', $settings)) {
-            $settings['port'] = '80';
-        }
-
-        $settings['host_location'] = 'http://' . $settings['server'] . ':' . $settings['port'];
-
-        Settings::setValue('selenium', $settings);
     }
 
     /**

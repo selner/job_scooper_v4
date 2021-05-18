@@ -24,6 +24,10 @@ use Noodlehaus\Exception\EmptyDirectoryException;
 
 class Settings extends \Adbar\Dot
 {
+    const SETTINGS_GEOCODEAPI = "geocodeapi";
+    const SETTINGS_JOBNORMALIZER = "jobnormalizer";
+    const SETTINGS_SELENIUM = "selenium";
+
     /**
      * @param $file
      * @return Dot|array|null
@@ -221,7 +225,7 @@ class Settings extends \Adbar\Dot
      * @return array
      * @throws \Exception
      */
-    public static function get_db_cli_params() {
+    public static function getDatabaseParams() {
 
         $cfg = self::getValue('db_config');
         if(is_empty_value($cfg)) {
@@ -233,6 +237,5 @@ class Settings extends \Adbar\Dot
             unset($cliparams['dbname']);
         }
         return $cliparams ;
-
     }
 }

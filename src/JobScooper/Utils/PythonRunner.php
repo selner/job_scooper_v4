@@ -77,15 +77,15 @@ class PythonRunner {
             }
 
             if ($includeDBParams == true) {
-                $dbParams = Settings::get_db_cli_params();
+                $dbParams = Settings::getDatabaseParams();
                 $script_params = array_merge($script_params, $dbParams);
             }
 
             foreach($script_params as $key => $value) {
                 if($key[0] != "-") {
-                    $key = "--{$key}";
+                    $key = "--$key";
                 }
-                $cmdLine .= " {$key} " . escapeshellarg($value);
+                $cmdLine .= " $key " . escapeshellarg($value);
             }
 
             $pythonScriptPath = realpath($scriptPath);
