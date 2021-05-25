@@ -278,7 +278,7 @@ function doExec($cmd)
     if ($cmdRet !== 0) {
 
         $lastmsgs = array_slice($cmdArrOutput, count($cmdArrOutput)-25, 25);
-        $err = "Command '{$cmd}' returned non-zero result code.   Last 25 messages:  " . implode(PHP_EOL, $cmdArrOutput);
+        $err = "Command '{$cmd}' returned non-zero result code.   Last 25 messages:  " . implode(PHP_EOL, $lastmsgs);
         throw new Exception($err);
     }
 

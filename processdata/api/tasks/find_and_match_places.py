@@ -15,10 +15,11 @@
 #  under the License.
 ###########################################################################
 from collections import OrderedDict
-
-from mixin_database import DatabaseMixin
 import requests
-from util_tokenize import STATES, STATECODES
+
+from api.utils.dbmixin import DatabaseMixin
+from api.utils.tokenize import STATES, STATECODES
+from api.utils.files import simpleuni, clean_text_for_matching
 
 MAX_RETRIES = 0
 PLACE_DETAIL_GEOCODE_MAPPING = {
@@ -33,7 +34,6 @@ PLACE_DETAIL_GEOCODE_MAPPING = {
     "latitude": "latitude",
     "longitude": "longitude"
 }
-from helpers import simpleuni, clean_text_for_matching
 
 
 class FindPlacesFromDBLocationsTask(DatabaseMixin):
@@ -65,7 +65,10 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
         self.load_known_locations()
         self.load_unknown_locations()
 
-        self.update_job_posting_locations(kwargs["server"])
+        if not str(kwargs["server"]).startswith("http"):
+            kwargs["server"] = f'http://{kwargs["server"]}'
+
+        return self.update_job_posting_locations(kwargs["server"])
 
     def load_unknown_locations(self):
         querysql = """
@@ -148,6 +151,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
 
         locs_needing_lookup = []
 
+        nskipped = 0
         for l in result:
             if l["Location"] in self._unknownlocs.keys():
                 self.log(f'Skipping location "{l["Location"]}" which failed geolocation in a prior run.')
@@ -161,9 +165,13 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                     locs_needing_lookup.append(l["Location"])
                 else:
                     self.log(f'Skipping invalid location combination value {l["Location"]}')
+                    nskipped += 1
+
 
         if locs_needing_lookup:
-            self._lookup_unknown_locations(locs_needing_lookup, geocode_server)
+            ret = self._lookup_unknown_locations(locs_needing_lookup, geocode_server)
+            return ret.update({'rows_updated': {'skipped': nskipped}})
+        return {'rows_updated': 0}
 
     def cleanLocationString(self, val):
 
@@ -268,7 +276,6 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                 msg = f'ERROR:  API request "{url}" timed out and has exceeded max retry count.'
                 self.handle_error(Exception(msg))
 
-            pass
         except Exception as ex:
             msg = f'ERROR:  API request "{url}" failed: {ex}'
             self.handle_error(ex, msg)
@@ -335,7 +342,7 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                                    place_details.keys() if pkey in PLACE_DETAIL_GEOCODE_MAPPING.keys() and
                                    place_details[pkey] is not None
                                    }
-                    if geolocfacts and len(geolocfacts) > 0:
+                    if geolocfacts:
                         # self.log("... inserting new geolocation = {}".format(dump_var_to_json(geolocfacts)))
 
                         if 'location_slug' in geolocfacts and len(geolocfacts['location_slug']) > 100:
@@ -401,12 +408,14 @@ class FindPlacesFromDBLocationsTask(DatabaseMixin):
                             f'... place_id {place_details["place_id"]} found for {str(loc)} but could not be geocoded.')
                         # print("... TODO -- store zero results lookups like '{}' to skip future searches".format(loc))
                         total_loc_notfound += 1
-                    # if not found place:
-                    #   add to failed lookups dataset
+                                # if not found place:
+                                #   add to failed lookups dataset
                 else:
                     self.log(f'... place for {str(loc)} not found via API')
                     # print("... TODO -- store failed lookups like '{}' to skip future failures".format(loc))
                     total_loc_notfound += 1
+
+            return { 'rows_updated' : { 'geocoded' : total_loc_found, 'not_found': len(locs) - total_loc_found, 'processed': total_loc_notfound, 'jobs_updated': total_jp_updated }}
 
         except Exception as e:
             self.handle_error(e)

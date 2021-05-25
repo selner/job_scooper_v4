@@ -12,3 +12,8 @@ future
 jinja2
 loguru
 cryptography
+
+
+
+flask
+webargs

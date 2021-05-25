@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from mixin_database import DatabaseMixin
+from api.utils.dbmixin import DatabaseMixin
 
 
 class TaskDedupeJobPosting(DatabaseMixin):
@@ -44,9 +44,12 @@ class TaskDedupeJobPosting(DatabaseMixin):
 
         self.get_recent_duplicate_posts()
 
-        self.update_database()
+        ret = self.update_database()
 
-        self.update_jobmatch_exclusions()
+        matchret = self.update_jobmatch_exclusions()
+
+        ret['rows_updated']['updated_jobmatches'] = matchret['rows_updated']
+        return ret
 
     def get_recent_duplicate_posts(self):
         self.log("Getting groups of duplicate job postings...")
@@ -94,6 +97,7 @@ class TaskDedupeJobPosting(DatabaseMixin):
                     nupdated += self.run_command(statement, close_connection=False)
 
             self.log(f'Processed {total_dupe_posts} duplicate job postings over the past 14 days; marked {nupdated} newly as duplicate.')
+            return {'rows_updated': {'duplicates': nupdated, 'total_processed': len(self._dupe_job_groups)}}
 
         except Exception as e:
             self.log(f'Exception occurred:{e}')
@@ -126,7 +130,7 @@ class TaskDedupeJobPosting(DatabaseMixin):
 
             rows_updated = self.run_command(statement, close_connection=False)
             self.log(f'Updated {rows_updated} user_job_matches marked excluded because they map to duplicate job postings.')
-            return rows_updated
+            return { 'rows_updated' : rows_updated }
 
         except Exception as e:
             self.handle_error(e)

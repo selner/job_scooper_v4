@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from mixin_database import DatabaseMixin
+from api.utils.dbmixin import DatabaseMixin
 
 class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
 
@@ -29,11 +29,16 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
 
         DatabaseMixin.__init__(self, **kwargs)
 
-        self.update_job_nonmatches()
-        self.update_job_matches()
+    def update_job_matches(self):
+        nonmatched = self.update_nonmatched_jobs()
+        matched = self.update_matched_jobs()
+        return { 'rows_updated': {
+                 'nonmatched': nonmatched,
+                'matched': matched
+            }
+        }
 
-
-    def update_job_nonmatches(self):
+    def update_nonmatched_jobs(self):
 
         self.log("Marking user_job_matches that did not match job titles to skip-send...")
 
@@ -51,11 +56,12 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
         try:
             rows_updated = self.run_command(querysql)
             self.log(f'Marked {rows_updated} user job matches as skip-send because they failed to match a user\'s job title.')
+            return rows_updated
 
         except Exception as e:
             self.handle_error(e)
 
-    def update_job_matches(self):
+    def update_matched_jobs(self):
 
         self.log("Marking user_job_matches that match job titles to ready-to-send...")
 
@@ -73,6 +79,7 @@ class TaskMarkNonMatchesAsSkipSend(DatabaseMixin):
         try:
             rows_updated = self.run_command(querysql)
             self.log(f'Marked {rows_updated} user job matches as ready-to-send because they matched a user\'s job title.')
+            return rows_updated
 
         except Exception as e:
             self.handle_error(e)

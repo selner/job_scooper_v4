@@ -41,6 +41,7 @@ $cmdline = new \JobScooper\Utils\DocOptions(__FILE__);
 $arguments = $cmdline->getAll();
 
 \JobScooper\Utils\Settings::setValue('command_line_args', $arguments);
+\JobScooper\Utils\Settings::setValue('source_root_directory', dirname(__FILE__));
 
 try {
     $config = new \JobScooper\Utils\ConfigInitializer($arguments['config']);

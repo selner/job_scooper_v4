@@ -19,13 +19,43 @@ services:
         aliases:
           - selenium.jobscooper.local
 
+  # Uncomment this section if you want to use a mysql instance that
+  # is brought up and torn down alongside the other containers
+  #
+  #  mysql:
+  #    environment:
+  #      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+  #      PUID: $DOCKER_USERID
+  #      PGID: $DOCKER_GROUPID
+  #    env_file: .env
+  #    #    image: mariadb
+  #    image: mysql
+  #    container_name: js4mysql
+  #    user: 1034:100
+  #    restart: always
+  #    volumes:
+  #      - type: bind
+  #        source: ./configs
+  #        target: /config
+  #      - type: bind
+  #        source: ./mysql
+  #        target: /var/lib/mysql
+  #    #      - mariadbdata:/var/lib/mysql
+  #    #      - ./mysql:/var/lib/mysql
+  #    ports:
+  #      - 5556:3306
+  ##    networks:
+  #      container_net:
+  #        aliases:
+  #          - mysql.jobscooper.local
+
   geocodeapi:
     build:
       context: ../archive/pyGeocodeApi
       dockerfile: Dockerfile
     env_file: ./configs/geocode.env
     image: selner/geocodeapi
-    container_name: geocodeapi
+    container_name: js4geocodeapi
     environment:
       - GEOCODEAPI_DEBUG
       - GEOCODEAPI_GMAPSKEY
@@ -44,71 +74,65 @@ services:
         aliases:
           - geocode.jobscooper.local
 
+  dataprocess:
+    build:
+      context: ./processdata/api
+      dockerfile: Dockerfile
+    image: selner/dataprocess
+    container_name: js4dataprocess
+    ports:
+      - 5557:5000
+    expose:
+      - 5557
+    restart: unless-stopped
+    links:
+      #      - "mysql"   # Uncomment this line if also instantiating mysql container in the early section
+      - "geocodeapi"
+    depends_on:
+      - "geocodeapi"
+      #      - "mysql"   # Uncomment this line if also instantiating mysql container in the early section
+    networks:
+      container_net:
+        aliases:
+          - jobnormalizer.jobscooper.local
 
-  # Uncomment this section if you want to use a mysql instance that
-  # is brought up and torn down alongside the other containers
-  #
-#  mysql:
-#    environment:
-#      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
-#      PUID: $DOCKER_USERID
-#      PGID: $DOCKER_GROUPID
-#    env_file: .env
-#    #    image: mariadb
-#    image: mysql
-#    container_name: js4mysql
-#    user: 1034:100
-#    restart: always
-#    volumes:
-#      - type: bind
-#        source: ./configs
-#        target: /config
-#      - type: bind
-#        source: ./mysql
-#        target: /var/lib/mysql
-#    #      - mariadbdata:/var/lib/mysql
-#    #      - ./mysql:/var/lib/mysql
-#    ports:
-#      - 5556:3306
-##    networks:
-#      container_net:
-#        aliases:
-#          - mysql.jobscooper.local
 
   app:
     env_file: .env
     environment:
-       - JOBSCOOPER_CONFIG_INI=/var/local/jobscooper/config/jobscooper.ini
-       - NLTK_DATA
+      - JOBSCOOPER_CONFIG_INI=/var/local/jobscooper/config/jobscooper.ini
+      - NLTK_DATA
     build:
       context: .
       dockerfile: ./Dockerfile
       args:
-      - SSHKEY_DIR=./configs/sshkeys
-#      - BRANCH=$BRANCH
-#      - CACHEBUST=$CACHEBUST
+        - SSHKEY_DIR=./configs/sshkeys
+    #      - BRANCH=$BRANCH
+    #      - CACHEBUST=$CACHEBUST
     image: selner/jobscooper
-    container_name: jobscooper
+    container_name: js4app
     volumes:
       - type: bind
         source: "$JOBSCOOPER_CONFIG_DIR"
         target: /var/local/jobscooper/config
- #     - type: bind
- #       source: /Users/bryan/Dropbox/code/job_scooper_v4/configs
- #       target: /Users/bryan/Dropbox/code/job_scooper_v4/configs
+    #     - type: bind
+    #       source: /Users/bryan/Dropbox/code/job_scooper_v4/configs
+    #       target: /Users/bryan/Dropbox/code/job_scooper_v4/configs
     links:
-      - "js4selenium"
-      - "js4geocodeapi"
-     -  "js4mysql"   # Uncomment this line if also instantiating mysql container in the early section
+      - "selenium"
+      - "geocodeapi"
+#      - "mysql"   # Uncomment this line if also instantiating mysql container in the early section
+      - "dataprocess"
     depends_on:
-      - "js4selenium"
-      - "js4geocodeapi"
-      - "js4mysql"   # Uncomment this line if also instantiating mysql container in the early section
+      - "selenium"
+      - "geocodeapi"
+#      - "mysql"   # Uncomment this line if also instantiating mysql container in the early section
+      - "dataprocess"
     networks:
       container_net:
         aliases:
           - app.jobscooper.local
-    extra_hosts:                            # Uncomment & set these value if you are using
+    extra_hosts: # Uncomment & set these value if you are using
       - "othersql.jobscooper.local:192.168.50.15"   # a MySql instance external to Docker
 
 networks:

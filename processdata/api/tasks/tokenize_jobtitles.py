@@ -3,7 +3,7 @@
 #
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-21 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,9 +16,11 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
+#
 ###########################################################################
-from util_tokenize import Tokenizer
-from mixin_database import DatabaseMixin
+from api.utils.tokenize import Tokenizer
+from api.utils.dbmixin import DatabaseMixin
+
 
 class TaskAddTitleTokens(DatabaseMixin):
     _tokenizer = None
@@ -54,13 +56,14 @@ class TaskAddTitleTokens(DatabaseMixin):
                company,
                 title
         '''
-        total_rows = self.fetch_many_with_callback(query, self.tokenize_job_rows)
-        self.log(f'Completed update of title tokens for {total_rows} jobposting rows.')
+        return self.fetch_many_with_callback(query, self.tokenize_job_rows)
+        # self.log(f'Completed update of title tokens for {total_rows} jobposting rows.')
+
 
     def tokenize_job_rows(self, dbrows):
         jobs_to_process = {}
 
-        upd_query = '''
+        upd_query: str = '''
             UPDATE jobposting 
             SET 
                 title_tokens = %s,
@@ -74,15 +77,17 @@ class TaskAddTitleTokens(DatabaseMixin):
                 key = r['jobposting_id']
                 jobs_to_process[key] = r
 
-        db_updates = []
-
-        if len(jobs_to_process) > 0:
+        if jobs_to_process:
             updated_jobs = self._tokenizer.batch_tokenize_strings(jobs_to_process, u'title', u'title_tokens', u'dict', maxlength=200)
+            db_updates = []
+            nfailed = 0
+
             for key in updated_jobs.keys():
                 if not ('title_tokens' in updated_jobs[key] and
                         updated_jobs[key]['title_tokens'] and
                         len(updated_jobs[key]['title_tokens']) > 0):
                     self._logger.warning(f'job {key} did not successfully generate the needed title tokens for title {updated_jobs[key]["title"]}')
+                    nfailed += 1
                 else:
                     row_refkey_titleval = "_".join(updated_jobs[key]['title_tokens'])
 
@@ -102,41 +107,8 @@ class TaskAddTitleTokens(DatabaseMixin):
                         key
                     ])
 
-            rowcount = self.update_many(upd_query, db_updates)
-            # print("Updated title tokens for {} jobposting records".format(rowcount))
+            ret = self.update_many(upd_query, db_updates)
 
-    #
-    # def tokenize_job_rows(self, dbrows):
-    #     jobs_to_process = {}
-    #
-    #     for r in dbrows:
-    #         if 'jobposting_id' in r:
-    #             key = r['jobposting_id']
-    #             jobs_to_process[key] = r
-    #
-    #     if len(jobs_to_process) > 0:
-    #         updated_jobs = self._tokenizer.batch_tokenize_strings(jobs_to_process, u'title', u'title_tokens', u'dict')
-    #         for key in updated_jobs.keys():
-    #             row_refkey_titleval = "_".join(updated_jobs[key]['title_tokens'])
-    #             company = updated_jobs[key]['company']
-    #             if len(company) > 0:
-    #                 company = company.lower().replace(" ", "")
-    #             rowvals = {
-    #                 'jobposting_id' : key,
-    #                 'titletokens_val' : self.convert_array_to_column_value(updated_jobs[key]['title_tokens']),
-    #                 'row_refkey_titleval' : row_refkey_titleval,
-    #                 'row_comptitle_keyval' : "{}{}".format(company, "".join(updated_jobs[key]['title_tokens']))
-    #             }
-    #
-    #             upd_query = '''
-    #                 UPDATE jobposting
-    #                 SET
-    #                     title_tokens = '%(titletokens_val)s',
-    #                     job_reference_key = '%(row_refkey_titleval)s',
-    #                     key_company_and_title = '%(row_comptitle_keyval)s'
-    #                 WHERE
-    #                     jobposting_id = %(jobposting_id)s''' % rowvals
-    #
-    #             self.run_command(upd_query)
-
-
+            print(ret)
+            return ret
+            return {'rows_updated': {'updated': ret, 'failed': nfailed}}

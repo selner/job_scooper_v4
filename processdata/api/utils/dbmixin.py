@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-21 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,16 +13,17 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
+#
 ###########################################################################
 import urllib.parse
 import pymysql
 
 from collections import OrderedDict
 from pymysql.cursors import DictCursorMixin, Cursor
-from util_log import getLogger
+from api.utils.logger import getLogger
 
 ARRAY_JOIN_TOKEN = "_||_"
-from logging import INFO, DEBUG, WARNING, ERROR, CRITICAL
+from logging import INFO, DEBUG
 
 
 
@@ -38,7 +36,7 @@ class DatabaseMixin:
     _dbparams = {}
     _connection = None
     _logger = None
-    
+
     def __init__(self, **kwargs):
         self._logger = getLogger()
 
@@ -48,12 +46,12 @@ class DatabaseMixin:
     def log(self, msg, level=INFO):
         self._logger.log(level, msg)
 
-    def handle_error(self, err, msg=None):
+    def handle_error(self, ex, msg=None):
         if msg and len(msg) > 0:
-            self._logger.error(msg, exc_info=1)
+            self._logger.error(msg, ex=ex, exc_info=1)
         else:
-            self._logger.error(f'Exception occurred: {err}', exc_info=1)
-        raise(err)
+            self._logger.error(f'Exception occurred: {ex}', ex=ex, exc_info=1)
+        raise ex
 
     def _parse_arguments(self, **kwargs):
         """
@@ -100,7 +98,7 @@ class DatabaseMixin:
 
         if 'debug' in self._dbparams:
             self._debug = self._dbparams['debug']
-            
+
     @property
     def connect_params(self):
         return {k: self._dbparams[k] for k in self._dbparams if
@@ -248,7 +246,8 @@ class DatabaseMixin:
             self.log(f'executing SQL: {querysql}', DEBUG)
 
             with self.connection.cursor() as cursor:
-                return cursor.execute(querysql, values)
+                ret = cursor.execute(querysql, values)
+                return ret
 
         except Exception as ex:
             self.handle_error(ex)
@@ -320,6 +319,21 @@ class DatabaseMixin:
     def convert_array_to_column_value(arr):
         if arr and len(arr) > 0:
             return ARRAY_JOIN_TOKEN.join(arr)
+
+    def get_col_val_from_array(self, arr, table=None, field=None):
+        maxlength = None
+
+        if field and table:
+            tableinfo = self.get_table_column_info(table)
+            if field in tableinfo and 'size' in tableinfo[field]:
+                maxlength = tableinfo[field]['size']
+
+        val = self.convert_array_to_column_value(arr)
+        if maxlength and val:
+            while(len(val) > maxlength):
+                last = val.rfind(ARRAY_JOIN_TOKEN)
+                val = val[0:last]
+            return val
 
     def get_table_column_info(self, tablename):
         """

@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-21 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,17 +13,20 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
+#
 ###########################################################################
-import base64
-import os
+from loguru import logger as logurulogger
 
+def getLogger():
+    return logurulogger
 
-def generate_base64_for_image(filepath):
+def logmsg(msg):
+    logurulogger.log("INFO", msg)
 
-    fpath = os.path.abspath(filepath)
-    data = base64.b64encode(open(fpath, 'rb').read())
-    return "data:image/png;base64,%s" % data.decode()
+def logdebug(msg):
+    logurulogger.debug(msg)
 
-
+from functools import wraps
+from flask import request
 
 

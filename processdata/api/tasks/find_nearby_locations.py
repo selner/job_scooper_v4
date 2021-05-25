@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from mixin_database import DatabaseMixin
+from api.utils.dbmixin import DatabaseMixin
 
 
 class TaskFindNearbyGeolocationsFromDb(DatabaseMixin):

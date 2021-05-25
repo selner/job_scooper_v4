@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-21 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,67 +13,39 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
+#
 ###########################################################################
+from api.utils.logger import logmsg, logdebug
+
 import codecs
 import json
 import csv
+import datetime
+import uuid
 
-import docopt
-from util_log import logmsg, logdebug
-
-docopt_func = getattr(docopt, 'docopt')
-
-COMMON_OPTIONS = """
-  --dsn <dbstring>                          DSN connection string for database     
-  -c <dbstring>, --connecturi <dbstring>    connection string uri or dsn for a database to use    
-  --log <logdir>                            output directory for logging
-  -u <userstring> --user <userstring>                       DB user for connection
-  -P <userpass> --password <userpass>                         DB user password for connection
-  -h <hostname> --host <hostname>                         DB server host for connection
-  -p <portid> --port <portid>                           DB server port for connection
-  --database <dbstring>                     DB server database for connection      
-  -h --help                                 show this help message and exit
-  --version                                 show version and exit
-  -v --verbose                              print status messages
-"""
-
-def docopt_ext(doc, argv=None, help=True, version=None, options_first=False, filename=None):
-
-    if filename:
-        from util_log import logurulogger
-        import os
-        logfile = f'pyJobNormalizer-{os.path.basename(filename)[:-3]}'
-        logurulogger.add(f'/tmp/{logfile}.log', format="{time} {level} {message}", level="INFO")
-
-    vals = docopt_func(doc, argv, help, version, options_first)
-    if vals and len(vals) > 0:
-        retvals = {}
-        for k in vals.keys():
-            key = k
-            if k.startswith("--"):
-                key = k[2:]
-
-            v = vals[k]
-
-            if v and isinstance(v, str) and v.startswith("'") and v.endswith("'"):
-                v = v[1:-1]
-
-            retvals[key] = v
-
-        return retvals
-
-    return vals
-
-
-class SetEncoder(json.JSONEncoder):
-    def default(self, obj):
+class ExtJsonEncoder(json.JSONEncoder):
+    def default(self, o):
         """
         Args:
             obj:
         """
-        if isinstance(obj, set):
-            return list(obj)
-        return json.JSONEncoder.default(self, obj)
+        if isinstance(o, datetime.date):
+            return o.isoformat()
+        elif isinstance(o, uuid.UUID):
+            return str(o)
+        elif isinstance(o, datetime.timedelta):
+            return o.__str__()
+        elif isinstance(o, set):
+            return list(o)
+        else:
+            try:
+                iterable = iter(o)
+            except TypeError:
+                pass
+            else:
+                return list(iterable)
+        return json.JSONEncoder.default(self, o)
+
 
 
 xstr = lambda s: str(s) or ""

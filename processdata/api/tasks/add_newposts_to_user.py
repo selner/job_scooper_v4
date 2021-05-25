@@ -17,7 +17,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from mixin_database import DatabaseMixin
+from api.utils.dbmixin import DatabaseMixin
 
 class TaskAddNewMatchesToUser(DatabaseMixin):
 
@@ -66,6 +66,6 @@ class TaskAddNewMatchesToUser(DatabaseMixin):
         try:
             rows_updated = self.run_command(querysql.format(user_id, jobsitekey, user_id))
             self.log(f'Added {rows_updated} jobpostings to user for jobsite {jobsitekey}')
-
+            return { 'rows_updated': rows_updated }
         except Exception as e:
             self.handle_error(e)

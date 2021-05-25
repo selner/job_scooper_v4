@@ -22,7 +22,7 @@
         "zordius/lightncandy": ">=1.2",
         "monolog/monolog": ">=1.x-dev",
         "jbzoo/utils": "4.x-dev",
-        "guzzlehttp/guzzle": ">=6.0",
+        "guzzlehttp/guzzle": "~6",
         "willdurand/geocoder": ">=2",
         "nolazybits/propel2-geocodable-behavior": ">=1.2",
         "imangazaliev/didom": ">=1.11",

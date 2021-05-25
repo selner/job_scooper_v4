@@ -29,3 +29,5 @@ output
 python/venv
 Plugins/__needResurrection
 Data/exported_datadumps
+processdata/venv
+python.old

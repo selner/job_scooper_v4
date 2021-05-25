@@ -233,6 +233,10 @@ class User extends BaseUser
                 $type = $split[0];
                 $path = $split[1];
 
+                if(!is_file($path)) {
+                    $relpath = $path;
+
+                }
                 $tempFileDetails = null;
                 $fileinfo = new \SplFileInfo($path);
                 if ($fileinfo->getRealPath() !== false) {

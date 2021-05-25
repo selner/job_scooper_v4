@@ -1,9 +1,6 @@
-#!/bin/python
-#  -*- coding: utf-8 -*-
-#
 ###########################################################################
 #
-#  Copyright 2014-18 Bryan Selner
+#  Copyright 2014-21 Bryan Selner
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,18 +13,18 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
+#
 ###########################################################################
 
-from helpers import loadcsv
-import nltk
-import codecs
+
+import os
 import string
+from collections import OrderedDict
+import nltk
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
-import os
-import re
-from collections import OrderedDict
-from util_log import logmsg
+from api.utils.files import loadcsv
+from api.utils.logger import logmsg
 
 STATES = {
     'AK': 'Alaska',
@@ -99,7 +96,7 @@ STATECODES = { STATES[k]: k for k in STATES}
 #
 #  Load the job title abbreviations into memory from file
 #
-filepath = os.path.dirname(os.path.abspath(__file__))  # /a/b/c/d/e
+filepath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # /a/b/c/d/e
 abbrevfile = os.path.join(filepath, "static", "job-title-abbreviations.csv")
 expanded_words_list = loadcsv(abbrevfile, "abbreviation")['dict']
 
@@ -172,16 +169,14 @@ class Tokenizer:
         Args:
             listwords:
         """
-        retwords = [i for i in listwords if i not in self.stopwrds]
-        return retwords
+        return [i for i in listwords if i not in self.stopwrds]
 
     def get_stemmed_words(self, listwords):
         """
         Args:
             listwords:
         """
-        retwords = [self.snowstemmer.stem(i) for i in listwords]
-        return retwords
+        return [self.snowstemmer.stem(i) for i in listwords]
 
     def replace_punctuation(self, value, replace_with=" "):
         s = ""
@@ -241,7 +236,22 @@ class Tokenizer:
             return ""
         str_noabbrev = self.get_expanded_words(value)
         nostop_tokens = self.remove_stop_words(str_noabbrev)
-        stemmed_tokens = self.get_stemmed_words(nostop_tokens)
 
-        return stemmed_tokens
+        return self.get_stemmed_words(nostop_tokens)
+
+    def get_tokens_from_dbvalue(self, val):
+        """
+        Args:
+            value:
+        """
+        if not val:
+            return []
+
+        dbtokensval = str(val)
+        dbtokens = dbtokensval.split("_||_")
+
+        return dbtokens
+
+    def get_dbcolumn_val_for_tokens(self, tokens):
+        return f'|{"_||_".join(tokens)}|'
 

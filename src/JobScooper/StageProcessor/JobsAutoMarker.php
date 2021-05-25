@@ -76,11 +76,10 @@ class JobsAutoMarker
             $this->_markingUserFacts = $userFacts;
 
             try {
-                $this->_callPythonCmd(
-                    $filename = "cmd_set_out_of_area.py",
-                    $descr = "{$userFacts['UserSlug']}:  Marking in/out of search areas...",
-                    $extraParams = array( '--jobuserid' => $userFacts['UserId'])
-                );
+                startLogSection("{$userFacts['UserSlug']}:  Marking in/out of search areas...");
+                $extraParams = array( 'jobuserid' => $userFacts['UserId']);
+                $this->_callJobNormalizerAPI(PythonRunner::API_DUPES_MATCH, $extraParams);
+                endLogSection("Finished marking in/out of search areas for {$userFacts['UserSlug']}.");
             }
             catch (Exception $ex)
             {
@@ -93,10 +92,21 @@ class JobsAutoMarker
             //
             try {
                 startLogSection("{$userFacts['UserSlug']}:  Marking title matches / exclusions...");
+                try {
+                    startLogSection("{$userFacts['UserSlug']}:  Marking in/out of search areas...");
+                    $extraParams = array( 'jobuserid' => $userFacts['UserId']);
+                    $this->_callJobNormalizerAPI(PythonRunner::API_DUPES_MATCH, $extraParams);
+                    endLogSection("Finished marking in/out of search areas for {$userFacts['UserSlug']}.");
+                }
+                catch (Exception $ex)
+                {
+                    handleThrowable($ex);
+                }
 
                 $addlData = [
                     'user_facts' => $userFacts
                 ];
+                api/match_user_keywords
 
                 doCallbackForAllMatches(
                     array($this, 'markJobsListSubset_KwdsComps'),
@@ -117,10 +127,9 @@ class JobsAutoMarker
         }
 
         try {
-            $this->_callPythonCmd(
-                $filename = "cmd_exclude_duplicate_matches.py",
-                $descr = "excluding duplicate job posts"
-            );
+            startLogSection("Excluding duplicate user job matches...");
+            $this->_callJobNormalizerAPI(PythonRunner::API_DUPES_MATCH);
+            endLogSection("Finished excluding duplicate user job matches.");
         }
         catch (Exception $ex)
         {
@@ -128,10 +137,9 @@ class JobsAutoMarker
         }
 
         try {
-            $this->_callPythonCmd(
-                $filename = "cmd_mark_skipsend.py",
-                $descr = "marking job matches for user notification"
-            );
+            startLogSection("Updating job matches for users");
+            $this->_callJobNormalizerAPI(PythonRunner::API_UPDATE_USER_MATCHES);
+            endLogSection("Finished user job match update.");
         }
         catch (Exception $ex)
         {
@@ -195,6 +203,26 @@ class JobsAutoMarker
             handleThrowable($ex, "ERROR:  Failed {$descr}");
         } finally {
             endLogSection($descr);
+        }
+    }
+
+    /**
+     * @param $api
+     * @param array $extraParams
+     * @throws Exception
+     */
+    private function _callJobNormalizerAPI($api, $extraParams=array(), $fileUpload=null)
+    {
+        startLogSection("Calling JobNormalizer API '$api'...");
+
+        try {
+            $ret = PythonRunner::callJobNormalizerAPI($api, $extraParams, $fileUpload);
+
+            EndLogSection("Finished JobNormalizer API '$api' call.");
+
+            return $ret;
+        } catch (Exception $ex) {
+            handleThrowable($ex, "ERROR:  Failed JobNormalizer API '$api' call");
         }
     }
 
@@ -281,7 +309,8 @@ class JobsAutoMarker
 	            'user' => $this->_markingUserFacts,
 	            'job_matches' => $arrJobItems,
 	            'search_keywords' => $searchKeywords,
-	            'negative_title_keywords' => $neg_kwds
+                'negative_title_keywords' => $neg_kwds,
+	            'db_params' => Settings::getDatabaseParams()
 	        );
 	
 	        writeJson($jsonObj, $outfile);
@@ -430,6 +459,20 @@ class JobsAutoMarker
             LogMessage('Exporting ' . \count($collJobsList) . " user job matches to JSON file '{$basefile}_src.json' for matching...");
             $sourcefile = $this->_exportJobMatchesToJson("{$basefile}_src", $collJobsList);
             $resultsfile = generateOutputFileName("{$basefile}_results", 'json', true, 'debug');
+
+
+            try {
+                LogMessage('Exporting ' . \count($collJobsList) . " user job matches to JSON file '{$basefile}_src.json' for matching...");
+                $extraParams = array('user_id' => $this->_markingUserFacts['UserId']);
+
+                $this->_callJobNormalizerAPI(PythonRunner::API_MATCH_JOB_TOKENS, extraParams: $extraParams);
+                endLogSection("Finished matching user jobs. ");
+            }
+            catch (Exception $ex)
+            {
+                handleThrowable($ex);
+            }
+
 
             $this->_callPythonCmd(
                 filename: "cmd_match_titles_to_keywords.py",

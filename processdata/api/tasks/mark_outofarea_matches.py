@@ -17,32 +17,38 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ###########################################################################
-from mixin_database import DatabaseMixin
-from task_find_nearby_locations import TaskFindNearbyGeolocationsFromDb
+from api.utils.dbmixin import DatabaseMixin
+from api.tasks.find_nearby_locations import TaskFindNearbyGeolocationsFromDb
 
 
 class TaskMarkOutOfAreaMatches(DatabaseMixin):
     _geolocation_id = None
-    jobuserid = None
+    _userid = None
     _findtask = None
     _config = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, user_id, **kwargs):
         """
         Args:
             **kwargs:
         """
+        if isinstance(user_id, str):
+            user_id = int(user_id)
+
+        self._userid = user_id
 
         DatabaseMixin.__init__(self, **kwargs)
 
         if 'geolocation_id' in kwargs:
             self._geolocation_id = kwargs['geolocation_id']
-        if 'jobuserid' in kwargs:
+
+        if not user_id and 'jobuserid' in kwargs:
             self._userid = kwargs['jobuserid']
 
         self._config = kwargs
 
-    def get_user_search_geolocation_ids(self, userkey):
+    @property
+    def get_user_search_geolocation_ids(self):
         """
         Args:
             userkey:
@@ -53,7 +59,7 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         FROM 
             user_search_pair 
         WHERE 
-            user_id = '%s'""" % self._userid)
+            user_id = %i""" % self._userid)
 
         ret = []
         for rec in result:
@@ -67,7 +73,7 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         if not self._userid:
             raise Exception("Missing required user_id value.")
 
-        geolocids = self.get_user_search_geolocation_ids(self._userid)
+        geolocids = self.get_user_search_geolocation_ids
 
         where_clause = ""
 
@@ -118,3 +124,8 @@ class TaskMarkOutOfAreaMatches(DatabaseMixin):
         #
         self.log(f'{count_in_area} user job matches marked in {self._userid}\'s search areas; {count_out_area} matches marked out of area.')
 
+        return { 'rows_updated' : {
+            'in_area' : count_in_area,
+            'out_of_area' : count_out_area
+            }
+        }
